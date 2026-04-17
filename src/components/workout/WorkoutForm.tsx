@@ -1,10 +1,11 @@
-import { useState, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAppContext } from '../../context/AppContext';
 import ExerciseSelect from '../shared/ExerciseSelect';
 import DatePicker from '../shared/DatePicker';
 import EntryCard from './EntryCard';
-import type { Workout, WorkoutEntry, WorkoutSet } from '../../types';
+import SaveGroupModal from './SaveGroupModal';
+import type { Workout, WorkoutEntry, WorkoutGroup, WorkoutSet } from '../../types';
 
 interface WorkoutFormProps {
   existingWorkout?: Workout;
@@ -19,7 +20,7 @@ function todayString(): string {
 }
 
 export default function WorkoutForm({ existingWorkout }: WorkoutFormProps) {
-  const { appData, addWorkout, updateWorkout } = useAppContext();
+  const { appData, addWorkout, updateWorkout, addGroup } = useAppContext();
   const navigate = useNavigate();
   const isEdit = !!existingWorkout;
 
@@ -29,9 +30,11 @@ export default function WorkoutForm({ existingWorkout }: WorkoutFormProps) {
   );
   const [notes, setNotes] = useState(existingWorkout?.notes ?? '');
   const [showExerciseSelect, setShowExerciseSelect] = useState(false);
+  const [showSaveGroup, setShowSaveGroup] = useState(false);
   const [validationError, setValidationError] = useState('');
 
-  // Find the last workout data for a given exercise to pre-fill sets
+  const groups = appData.groups ?? [];
+
   function getLastWorkoutSets(exerciseId: string): WorkoutSet[] | null {
     const sorted = [...appData.workouts].sort(
       (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
@@ -51,7 +54,6 @@ export default function WorkoutForm({ existingWorkout }: WorkoutFormProps) {
   }
 
   function handleSelectExercise(exerciseId: string) {
-    // Pre-fill from last workout if available
     const lastSets = getLastWorkoutSets(exerciseId);
     const sets: WorkoutSet[] = lastSets ?? [{ setNumber: 1, reps: 0, weightKg: 0 }];
 
@@ -72,6 +74,29 @@ export default function WorkoutForm({ existingWorkout }: WorkoutFormProps) {
 
   function handleRemoveEntry(entryIndex: number) {
     setEntries((prev) => prev.filter((_, i) => i !== entryIndex));
+  }
+
+  function handleStartFromGroup(group: WorkoutGroup) {
+    const newEntries: WorkoutEntry[] = group.exerciseIds.map((exerciseId) => {
+      const lastSets = getLastWorkoutSets(exerciseId);
+      return {
+        id: crypto.randomUUID(),
+        exerciseId,
+        sets: lastSets ?? [{ setNumber: 1, reps: 0, weightKg: 0 }],
+      };
+    });
+    setEntries(newEntries);
+  }
+
+  function handleSaveAsGroup(name: string) {
+    const group: WorkoutGroup = {
+      id: crypto.randomUUID(),
+      name,
+      exerciseIds: entries.map((e) => e.exerciseId),
+      createdAt: new Date().toISOString(),
+    };
+    addGroup(group);
+    setShowSaveGroup(false);
   }
 
   function handleSave() {
@@ -117,55 +142,59 @@ export default function WorkoutForm({ existingWorkout }: WorkoutFormProps) {
     navigate(-1);
   }
 
-  // Repeat last workout: find the most recent workout and pre-fill all entries
-  const lastWorkout = useMemo(() => {
-    const sorted = [...appData.workouts].sort(
-      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-    );
-    return sorted[0] ?? null;
-  }, [appData.workouts]);
-
-  function handleRepeatLast() {
-    if (!lastWorkout) return;
-    const newEntries: WorkoutEntry[] = lastWorkout.entries.map((entry) => ({
-      id: crypto.randomUUID(),
-      exerciseId: entry.exerciseId,
-      sets: entry.sets.map((s, i) => ({
-        setNumber: i + 1,
-        reps: s.reps,
-        weightKg: s.weightKg,
-      })),
-    }));
-    setEntries(newEntries);
-  }
-
-  const lastWorkoutLabel = useMemo(() => {
-    if (!lastWorkout) return '';
-    const names = lastWorkout.entries
-      .map((e) => appData.exercises.find((ex) => ex.id === e.exerciseId)?.name)
-      .filter(Boolean);
-    if (names.length <= 2) return names.join(', ');
-    return `${names[0]}, ${names[1]} +${names.length - 2} more`;
-  }, [lastWorkout, appData.exercises]);
+  const showGroupsPicker = !isEdit && entries.length === 0 && groups.length > 0;
+  const canSaveAsGroup = !isEdit && entries.length > 0;
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-4 pb-24">
       {/* Date input */}
       <div className="bg-white rounded-xl p-4 shadow-sm">
         <label className="text-sm text-gray-500 font-medium block mb-1">Date</label>
         <DatePicker value={date} onChange={setDate} />
       </div>
 
-      {/* Repeat last workout shortcut */}
-      {!isEdit && entries.length === 0 && lastWorkout && (
-        <button
-          type="button"
-          onClick={handleRepeatLast}
-          className="bg-blue-50 rounded-xl p-4 text-left border border-blue-100"
-        >
-          <div className="text-sm font-semibold text-blue-700">Repeat last workout</div>
-          <div className="text-xs text-blue-500 mt-0.5">{lastWorkoutLabel}</div>
-        </button>
+      {/* Groups picker */}
+      {showGroupsPicker && (
+        <div className="bg-white rounded-xl p-4 shadow-sm">
+          <div className="flex items-center justify-between mb-2">
+            <h2 className="text-sm font-medium text-gray-500">Start from a group</h2>
+            <Link
+              to="/groups"
+              className="text-xs font-medium text-blue-600 active:text-blue-800"
+            >
+              Manage
+            </Link>
+          </div>
+          <div className="-mx-4 px-4 flex gap-2 overflow-x-auto pb-1">
+            {groups.map((g) => {
+              const exCount = g.exerciseIds.length;
+              const names = g.exerciseIds
+                .slice(0, 2)
+                .map((id) => appData.exercises.find((e) => e.id === id)?.name)
+                .filter(Boolean)
+                .join(', ');
+              return (
+                <button
+                  key={g.id}
+                  type="button"
+                  onClick={() => handleStartFromGroup(g)}
+                  className="shrink-0 min-w-[160px] max-w-[220px] text-left bg-blue-50 border border-blue-100 rounded-xl p-3 active:bg-blue-100"
+                >
+                  <div className="text-sm font-semibold text-blue-700 truncate">{g.name}</div>
+                  <div className="text-xs text-blue-500 mt-0.5 truncate">
+                    {exCount} exercise{exCount === 1 ? '' : 's'}{names ? ` · ${names}` : ''}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {!isEdit && entries.length === 0 && groups.length === 0 && (
+        <p className="text-xs text-gray-400 text-center">
+          Tip: after adding exercises, save them as a group (e.g. "Leg day") to reuse next time.
+        </p>
       )}
 
       {/* Entry cards */}
@@ -187,6 +216,17 @@ export default function WorkoutForm({ existingWorkout }: WorkoutFormProps) {
       >
         + Add Exercise
       </button>
+
+      {/* Save as group */}
+      {canSaveAsGroup && (
+        <button
+          type="button"
+          onClick={() => setShowSaveGroup(true)}
+          className="text-sm font-medium text-blue-600 min-h-[44px]"
+        >
+          Save as group…
+        </button>
+      )}
 
       {/* Exercise select bottom sheet */}
       {showExerciseSelect && (
@@ -261,6 +301,13 @@ export default function WorkoutForm({ existingWorkout }: WorkoutFormProps) {
           {isEdit ? 'Update Workout' : 'Save Workout'}
         </button>
       </div>
+
+      {showSaveGroup && (
+        <SaveGroupModal
+          onSave={handleSaveAsGroup}
+          onClose={() => setShowSaveGroup(false)}
+        />
+      )}
     </div>
   );
 }

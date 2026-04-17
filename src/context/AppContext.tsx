@@ -7,7 +7,7 @@ import {
   useRef,
   type ReactNode,
 } from 'react';
-import type { AppData, Workout, Exercise, UserPreferences } from '../types';
+import type { AppData, Workout, Exercise, UserPreferences, WorkoutGroup } from '../types';
 import { loadAppData, saveAppData, clearLocalAppData, hasLocalAppData } from '../utils/storage';
 import { loadRemoteAppData, saveRemoteAppData } from '../utils/remoteStorage';
 
@@ -20,6 +20,10 @@ interface AppContextValue {
   deleteWorkout: (id: string) => void;
   addExercise: (exercise: Exercise) => void;
   deleteExercise: (id: string) => boolean;
+  addGroup: (group: WorkoutGroup) => void;
+  updateGroup: (group: WorkoutGroup) => void;
+  deleteGroup: (id: string) => void;
+  reorderGroups: (ids: string[]) => void;
   updatePreferences: (preferences: UserPreferences) => void;
   showToast: (message: string) => void;
 }
@@ -160,6 +164,33 @@ export function AppProvider({ children, uid = null, showToast: externalToast }: 
     setAppData((prev) => ({ ...prev, preferences }));
   }, []);
 
+  const addGroup = useCallback((group: WorkoutGroup) => {
+    setAppData((prev) => ({ ...prev, groups: [...(prev.groups ?? []), group] }));
+    showToast('Group saved!');
+  }, [showToast]);
+
+  const updateGroup = useCallback((group: WorkoutGroup) => {
+    setAppData((prev) => ({
+      ...prev,
+      groups: (prev.groups ?? []).map((g) => (g.id === group.id ? group : g)),
+    }));
+  }, []);
+
+  const deleteGroup = useCallback((id: string) => {
+    setAppData((prev) => ({
+      ...prev,
+      groups: (prev.groups ?? []).filter((g) => g.id !== id),
+    }));
+  }, []);
+
+  const reorderGroups = useCallback((ids: string[]) => {
+    setAppData((prev) => {
+      const byId = new Map((prev.groups ?? []).map((g) => [g.id, g]));
+      const ordered = ids.map((id) => byId.get(id)).filter(Boolean) as WorkoutGroup[];
+      return { ...prev, groups: ordered };
+    });
+  }, []);
+
   return (
     <AppContext.Provider
       value={{
@@ -171,6 +202,10 @@ export function AppProvider({ children, uid = null, showToast: externalToast }: 
         deleteWorkout,
         addExercise,
         deleteExercise,
+        addGroup,
+        updateGroup,
+        deleteGroup,
+        reorderGroups,
         updatePreferences,
         showToast,
       }}

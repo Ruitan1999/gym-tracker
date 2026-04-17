@@ -7,6 +7,7 @@ function getDefaultAppData(): AppData {
   return {
     exercises: defaultExercises,
     workouts: [],
+    groups: [],
     preferences: { weightUnit: 'kg' },
     dataVersion: 1,
   };
@@ -29,6 +30,7 @@ export async function loadRemoteAppData(uid: string): Promise<{ data: AppData; e
     data: {
       exercises: raw.exercises ?? defaultExercises,
       workouts: raw.workouts ?? [],
+      groups: raw.groups ?? [],
       preferences: raw.preferences ?? { weightUnit: 'kg' },
       dataVersion: raw.dataVersion ?? 1,
     },

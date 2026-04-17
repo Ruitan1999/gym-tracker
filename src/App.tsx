@@ -11,6 +11,7 @@ import HistoryPage from './pages/HistoryPage';
 import WorkoutDetailPage from './pages/WorkoutDetailPage';
 import ProgressPage from './pages/ProgressPage';
 import ExerciseLibraryPage from './pages/ExerciseLibraryPage';
+import GroupsPage from './pages/GroupsPage';
 import SignInPage from './pages/SignInPage';
 
 function AppRoutes() {
@@ -26,6 +27,7 @@ function AppRoutes() {
         <Route path="/history/:id" element={<WorkoutDetailPage />} />
         <Route path="/progress" element={<ProgressPage />} />
         <Route path="/exercises" element={<ExerciseLibraryPage />} />
+        <Route path="/groups" element={<GroupsPage />} />
       </Routes>
       <BottomNav />
       {isLogPage && <RestTimer />}

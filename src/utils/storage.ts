@@ -7,6 +7,7 @@ function getDefaultAppData(): AppData {
   return {
     exercises: defaultExercises,
     workouts: [],
+    groups: [],
     preferences: { weightUnit: 'kg' },
     dataVersion: 1,
   };
@@ -26,8 +27,14 @@ export function loadAppData(): AppData {
     if (!raw) {
       return getDefaultAppData();
     }
-    const parsed = JSON.parse(raw) as AppData;
-    return parsed;
+    const parsed = JSON.parse(raw) as Partial<AppData>;
+    return {
+      exercises: parsed.exercises ?? defaultExercises,
+      workouts: parsed.workouts ?? [],
+      groups: parsed.groups ?? [],
+      preferences: parsed.preferences ?? { weightUnit: 'kg' },
+      dataVersion: parsed.dataVersion ?? 1,
+    };
   } catch {
     return getDefaultAppData();
   }

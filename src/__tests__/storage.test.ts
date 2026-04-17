@@ -22,6 +22,7 @@ describe('storage', () => {
       const stored: AppData = {
         exercises: [{ id: 'custom-1', name: 'Custom Ex', category: 'push', isCustom: true }],
         workouts: [],
+        groups: [],
         preferences: { weightUnit: 'lb' },
         dataVersion: 1,
       };
@@ -49,6 +50,7 @@ describe('storage', () => {
       const data: AppData = {
         exercises: [],
         workouts: [],
+        groups: [],
         preferences: { weightUnit: 'kg' },
         dataVersion: 1,
       };
@@ -79,6 +81,7 @@ describe('storage', () => {
             createdAt: '2026-04-01T10:00:00Z',
           },
         ],
+        groups: [],
         preferences: { weightUnit: 'lb' },
         dataVersion: 1,
       };
