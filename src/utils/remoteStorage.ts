@@ -35,9 +35,23 @@ export async function loadRemoteAppData(uid: string): Promise<{ data: AppData; e
   };
 }
 
+function stripUndefined<T>(value: T): T {
+  if (Array.isArray(value)) {
+    return value.map(stripUndefined) as unknown as T;
+  }
+  if (value && typeof value === 'object') {
+    const out: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(value as Record<string, unknown>)) {
+      if (v !== undefined) out[k] = stripUndefined(v);
+    }
+    return out as T;
+  }
+  return value;
+}
+
 export async function saveRemoteAppData(uid: string, data: AppData): Promise<boolean> {
   try {
-    await setDoc(userDocRef(uid), data, { merge: false });
+    await setDoc(userDocRef(uid), stripUndefined(data), { merge: false });
     return true;
   } catch (err) {
     console.error('Failed to save to Firestore:', err);

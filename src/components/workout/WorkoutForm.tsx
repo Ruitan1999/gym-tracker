@@ -95,15 +95,16 @@ export default function WorkoutForm({ existingWorkout }: WorkoutFormProps) {
         ...existingWorkout,
         date,
         entries,
-        notes: notes || undefined,
+        ...(notes ? { notes } : {}),
       };
+      if (!notes) delete (updated as Partial<Workout>).notes;
       updateWorkout(updated);
     } else {
       const workout: Workout = {
         id: crypto.randomUUID(),
         date,
         entries,
-        notes: notes || undefined,
+        ...(notes ? { notes } : {}),
         createdAt: new Date().toISOString(),
       };
       addWorkout(workout);

@@ -7,7 +7,7 @@ export default function SaveErrorBanner() {
 
   return (
     <div className="sticky top-0 z-50 bg-red-600 text-white text-sm text-center px-4 py-2 font-medium">
-      Storage full — your latest changes may not be saved.
+      Couldn't save — check your connection and that Firestore is set up. See console for details.
     </div>
   );
 }
