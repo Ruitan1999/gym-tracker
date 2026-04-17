@@ -67,8 +67,8 @@ export default function ExerciseSelect({ onSelect, onClose }: ExerciseSelectProp
       {/* Backdrop */}
       <div className="fixed inset-0 bg-black/40 z-50" onClick={onClose} />
 
-      {/* Bottom sheet */}
-      <div className="fixed inset-x-0 bottom-0 z-50 bg-white rounded-t-2xl max-h-[85vh] flex flex-col animate-[slideUp_0.2s_ease-out]">
+      {/* Bottom sheet — fixed height so it doesn't jump around as results change */}
+      <div className="fixed inset-x-0 bottom-0 z-50 bg-white rounded-t-2xl h-[85dvh] flex flex-col animate-[slideUp_0.2s_ease-out]">
         {/* Handle */}
         <div className="flex justify-center pt-3 pb-1">
           <div className="w-10 h-1 bg-gray-300 rounded-full" />
