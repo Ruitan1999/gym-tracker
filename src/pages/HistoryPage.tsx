@@ -16,9 +16,10 @@ export default function HistoryPage() {
   const { appData } = useAppContext();
 
   const groupedWorkouts = useMemo(() => {
-    const sorted = [...appData.workouts].sort((a, b) =>
-      b.date.localeCompare(a.date)
-    );
+    const sorted = [...appData.workouts].sort((a, b) => {
+      const byCreated = (b.createdAt ?? '').localeCompare(a.createdAt ?? '');
+      return byCreated !== 0 ? byCreated : b.date.localeCompare(a.date);
+    });
 
     const groups: { label: string; workouts: Workout[] }[] = [];
     let currentLabel = '';

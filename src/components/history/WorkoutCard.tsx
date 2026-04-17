@@ -17,6 +17,13 @@ function formatDate(dateStr: string): string {
   });
 }
 
+function formatTime(iso: string | undefined): string | null {
+  if (!iso) return null;
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return null;
+  return d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+}
+
 export default function WorkoutCard({ workout }: WorkoutCardProps) {
   const navigate = useNavigate();
   const { appData } = useAppContext();
@@ -62,9 +69,16 @@ export default function WorkoutCard({ workout }: WorkoutCardProps) {
       className="bg-white rounded-xl p-4 shadow-sm w-full text-left active:bg-gray-50 transition-colors"
     >
       <div className="flex items-center justify-between mb-1">
-        <span className="text-base font-semibold text-gray-900">
-          {formatDate(workout.date)}
-        </span>
+        <div className="flex items-baseline gap-2">
+          <span className="text-base font-semibold text-gray-900">
+            {formatDate(workout.date)}
+          </span>
+          {formatTime(workout.createdAt) && (
+            <span className="text-xs text-gray-400">
+              {formatTime(workout.createdAt)}
+            </span>
+          )}
+        </div>
         <div className="flex items-center gap-2">
           {rating && (
             <span className={`w-6 h-6 rounded-full text-xs font-bold text-white flex items-center justify-center ${
