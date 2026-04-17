@@ -13,7 +13,7 @@ export default function PageShell({ title, rightAction, children, showBack }: Pa
   const navigate = useNavigate();
 
   return (
-    <div className="flex flex-col min-h-screen bg-gray-100">
+    <div className="flex flex-col h-[100dvh] bg-gray-100 overflow-hidden">
       <header className="sticky top-0 z-40 bg-white border-b border-gray-200 flex items-center justify-between px-4 min-h-[48px]">
         <div className="flex items-center gap-2">
           {showBack && (
