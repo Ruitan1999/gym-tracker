@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import PageShell from '../components/layout/PageShell';
 import { useAppContext } from '../context/AppContext';
 import type { ExerciseCategory } from '../types';
@@ -27,6 +27,16 @@ export default function ExerciseLibraryPage() {
   const [newName, setNewName] = useState('');
   const [newCategory, setNewCategory] = useState<ExerciseCategory>('push');
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
+  const nameInputRef = useRef<HTMLInputElement>(null);
+
+  function handleInputFocus() {
+    // iOS Safari shrinks the visual viewport when the keyboard opens; the
+    // sticky header can then cover the focused input. Delay the scroll so it
+    // runs after the browser's own resize, then center the input in view.
+    window.setTimeout(() => {
+      nameInputRef.current?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    }, 300);
+  }
 
   function handleAdd() {
     const trimmed = newName.trim();
@@ -60,11 +70,14 @@ export default function ExerciseLibraryPage() {
           </h2>
           <div className="flex flex-col gap-3">
             <input
+              ref={nameInputRef}
               type="text"
               value={newName}
               onChange={(e) => setNewName(e.target.value)}
+              onFocus={handleInputFocus}
               placeholder="Exercise name"
-              className="min-h-[44px] px-3 py-2 border border-gray-300 rounded-lg text-[16px] text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-blue-600"
+              enterKeyHint="done"
+              className="min-h-[44px] px-3 py-2 border border-gray-300 rounded-lg text-[16px] text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-blue-600 scroll-mt-24"
             />
             <select
               value={newCategory}
