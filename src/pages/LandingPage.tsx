@@ -1,0 +1,434 @@
+import { useNavigate } from 'react-router-dom';
+import Logo from '../components/shared/Logo';
+import SiteHeader from '../components/layout/SiteHeader';
+
+export default function LandingPage() {
+  const navigate = useNavigate();
+  const goSignIn = () => navigate('/login');
+
+  return (
+    <div className="min-h-[100dvh]" style={{ background: 'var(--color-bg)', color: 'var(--color-text)' }}>
+      <SiteHeader />
+
+      <main className="max-w-[1100px] mx-auto px-5 sm:px-8">
+        {/* HERO */}
+        <section className="pt-12 sm:pt-20 pb-14 sm:pb-24 grid sm:grid-cols-12 gap-8 sm:gap-10 items-end">
+          <div className="sm:col-span-7 space-y-6">
+            <div className="caps-tight text-[10px] flex items-center gap-3" style={{ color: 'var(--color-text-faint)' }}>
+              <span
+                className="inline-block w-1.5 h-1.5"
+                style={{ background: 'var(--color-volt)', borderRadius: '999px' }}
+              />
+              EST. 2025 · LIFTGAUGE / 01
+              <span className="h-px flex-1 max-w-[140px]" style={{ background: 'var(--color-line)' }} />
+            </div>
+            <h1
+              className="font-display"
+              style={{
+                fontSize: 'clamp(2.5rem, 7vw, 5.25rem)',
+                fontWeight: 800,
+                letterSpacing: '-0.045em',
+                lineHeight: 0.95,
+                fontVariationSettings: '"wdth" 92',
+              }}
+            >
+              Track every rep.
+              <br />
+              <span style={{ fontFamily: 'var(--font-serif)', fontWeight: 400, fontStyle: 'italic', letterSpacing: '-0.02em' }}>
+                See every gain.
+              </span>
+            </h1>
+            <p
+              className="max-w-[44ch] text-[15px] sm:text-[17px]"
+              style={{ color: 'var(--color-text-muted)', lineHeight: 1.45 }}
+            >
+              The honest training log for lifters who care about the numbers. Log sets in seconds, watch the
+              graph climb, never wonder what you did last Tuesday again.
+            </p>
+            <div className="flex items-center gap-3 flex-wrap pt-2">
+              <button
+                type="button"
+                onClick={goSignIn}
+                className="h-12 px-6 btn-volt press caps-tight text-[11px] inline-flex items-center"
+                style={{ borderRadius: '2px' }}
+              >
+                START TRAINING →
+              </button>
+              <button
+                type="button"
+                onClick={goSignIn}
+                className="h-12 px-5 btn-ghost press caps-tight text-[11px] inline-flex items-center"
+                style={{ borderRadius: '2px' }}
+              >
+                SIGN IN
+              </button>
+              <span className="caps-tight text-[10px]" style={{ color: 'var(--color-text-faint)' }}>
+                NO CARD · FREE FOREVER
+              </span>
+            </div>
+          </div>
+
+          {/* hero stat panel */}
+          <div className="sm:col-span-5">
+            <div
+              className="p-5 sm:p-6 space-y-4"
+              style={{ background: 'var(--color-surface)', border: '1px solid var(--color-line)', borderRadius: '2px' }}
+            >
+              <div className="flex items-center justify-between">
+                <span className="caps-tight text-[10px]" style={{ color: 'var(--color-text-faint)' }}>
+                  THIS WEEK
+                </span>
+                <span className="caps-tight text-[10px]" style={{ color: 'var(--color-volt-ink)' }}>
+                  +12.4%
+                </span>
+              </div>
+              <div className="grid grid-cols-3 gap-3">
+                <Metric value="14" label="SETS" />
+                <Metric value="8.2k" label="VOLUME" />
+                <Metric value="4" label="DAYS" />
+              </div>
+              <div className="h-px" style={{ background: 'var(--color-line)' }} />
+              <div className="space-y-2">
+                <BarRow label="MON" pct={62} />
+                <BarRow label="TUE" pct={0} />
+                <BarRow label="WED" pct={88} active />
+                <BarRow label="THU" pct={45} />
+                <BarRow label="FRI" pct={71} />
+                <BarRow label="SAT" pct={0} />
+                <BarRow label="SUN" pct={0} />
+              </div>
+              <div className="flex items-center justify-between pt-1">
+                <span className="caps-tight text-[10px]" style={{ color: 'var(--color-text-faint)' }}>
+                  STREAK
+                </span>
+                <span className="font-mono text-[12px]" style={{ color: 'var(--color-text)' }}>
+                  4 DAYS
+                </span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* MARQUEE */}
+        <section
+          className="overflow-hidden -mx-5 sm:-mx-8 my-2"
+          style={{ borderTop: '1px solid var(--color-line)', borderBottom: '1px solid var(--color-line)' }}
+        >
+          <div className="marquee flex whitespace-nowrap py-3.5">
+            <MarqueeRow />
+            <MarqueeRow />
+          </div>
+        </section>
+
+        {/* FEATURES */}
+        <section className="pt-16 sm:pt-24 pb-12">
+          <div className="grid sm:grid-cols-12 gap-6 mb-10">
+            <div className="sm:col-span-4">
+              <div className="caps-tight text-[10px]" style={{ color: 'var(--color-text-faint)' }}>
+                CHAPTER 02 · WHAT IT DOES
+              </div>
+            </div>
+            <h2
+              className="sm:col-span-8 font-display"
+              style={{
+                fontSize: 'clamp(1.75rem, 3.5vw, 2.5rem)',
+                fontWeight: 700,
+                letterSpacing: '-0.035em',
+                lineHeight: 1.05,
+                fontVariationSettings: '"wdth" 90',
+              }}
+            >
+              A logbook, a coach, and a memory — all
+              <span style={{ fontFamily: 'var(--font-serif)', fontWeight: 400, fontStyle: 'italic' }}> built for one thumb.</span>
+            </h2>
+          </div>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            <Feature
+              code="01"
+              title="Log Session"
+              desc="Tap, type, done. Last session's numbers prefilled so you only enter what changed."
+            />
+            <Feature
+              code="02"
+              title="Log Book"
+              desc="Every workout, every set, searchable. Edit history without breaking streaks."
+            />
+            <Feature
+              code="03"
+              title="Progress"
+              desc="Per-exercise charts. Volume, top set, estimated 1RM — actual signal, not vanity."
+            />
+            <Feature
+              code="04"
+              title="Library & Groups"
+              desc="Build your exercise library. Group movements into routines you actually run."
+            />
+          </div>
+        </section>
+
+        {/* SPLIT — why */}
+        <section className="py-16 sm:py-24 grid sm:grid-cols-12 gap-10 items-start">
+          <div className="sm:col-span-5">
+            <div className="caps-tight text-[10px] mb-3" style={{ color: 'var(--color-text-faint)' }}>
+              CHAPTER 03 · WHY
+            </div>
+            <h2
+              className="font-display"
+              style={{
+                fontSize: 'clamp(1.75rem, 3.5vw, 2.5rem)',
+                fontWeight: 700,
+                letterSpacing: '-0.035em',
+                lineHeight: 1.05,
+                fontVariationSettings: '"wdth" 90',
+              }}
+            >
+              The other apps want
+              <br />
+              <span style={{ fontFamily: 'var(--font-serif)', fontWeight: 400, fontStyle: 'italic' }}>your attention.</span>
+              <br />
+              We just want your reps.
+            </h2>
+          </div>
+          <div className="sm:col-span-7 space-y-0">
+            <Row k="NO ADS, NO STREAKS-AS-RANSOM" v="EVER" />
+            <Row k="DATA SYNCS, DATA STAYS YOURS" v="EXPORT ANYTIME" />
+            <Row k="WORKS OFFLINE, SAVES ON RECONNECT" v="PWA" />
+            <Row k="DESIGNED FOR ONE-HANDED LOGGING" v="MID-SET" />
+            <Row k="OPEN PRICING" v="FREE" />
+          </div>
+        </section>
+
+        {/* QUOTE */}
+        <section className="py-16 sm:py-24">
+          <div className="grid sm:grid-cols-12 gap-8 items-start">
+            <div className="sm:col-span-2 caps-tight text-[10px]" style={{ color: 'var(--color-text-faint)' }}>
+              FIELD NOTE
+            </div>
+            <blockquote
+              className="sm:col-span-10 font-display"
+              style={{
+                fontSize: 'clamp(1.5rem, 3vw, 2.25rem)',
+                fontWeight: 500,
+                letterSpacing: '-0.025em',
+                lineHeight: 1.15,
+              }}
+            >
+              <span style={{ color: 'var(--color-volt-ink)' }}>“</span>
+              You don't need a smarter app. You need an honest one — that remembers
+              what you lifted last week, and gets out of the way.
+              <span style={{ color: 'var(--color-volt-ink)' }}>”</span>
+              <div className="mt-4 caps-tight text-[10px]" style={{ color: 'var(--color-text-faint)' }}>
+                LIFTGAUGE TEAM
+              </div>
+            </blockquote>
+          </div>
+        </section>
+
+      </main>
+
+      {/* CTA — full width with photo background */}
+      <section
+        className="mt-12 sm:mt-20 relative isolate overflow-hidden"
+        style={{ background: 'var(--color-text)', color: 'var(--color-ink)' }}
+      >
+        <img
+          src="https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=1800&q=80&auto=format&fit=crop"
+          alt=""
+          aria-hidden
+          loading="lazy"
+          className="absolute inset-0 w-full h-full object-cover -z-10"
+          style={{ opacity: 0.5 }}
+        />
+        <div
+          aria-hidden
+          className="absolute inset-0 -z-10"
+          style={{
+            background:
+              'linear-gradient(180deg, rgba(10,10,10,0.85) 0%, rgba(10,10,10,0.6) 50%, rgba(10,10,10,0.9) 100%)',
+          }}
+        />
+
+        <div className="max-w-[1100px] mx-auto px-5 sm:px-8 py-10 sm:py-14 text-center relative">
+          <div className="caps-tight text-[10px] mb-3" style={{ color: 'var(--color-volt-dim)' }}>
+            ENTER THE LOG
+          </div>
+          <h2
+            className="font-display mx-auto"
+            style={{
+              fontSize: 'clamp(1.75rem, 4.5vw, 3rem)',
+              fontWeight: 800,
+              letterSpacing: '-0.04em',
+              lineHeight: 1,
+              maxWidth: '20ch',
+            }}
+          >
+            Your next PR is one
+            <span style={{ fontFamily: 'var(--font-serif)', fontWeight: 400, fontStyle: 'italic' }}> tracked set </span>
+            away.
+          </h2>
+          <p
+            className="mt-3 mx-auto text-[13px] sm:text-[14px]"
+            style={{ color: '#d4d4d4', maxWidth: '52ch', lineHeight: 1.5 }}
+          >
+            Free to start. Sync across devices. Export your data whenever you want it.
+          </p>
+          <div className="mt-5 flex items-center justify-center gap-3 flex-wrap">
+            <button
+              type="button"
+              onClick={goSignIn}
+              className="h-11 px-5 btn-volt press caps-tight text-[11px] inline-flex items-center"
+              style={{ borderRadius: '2px' }}
+            >
+              CREATE ACCOUNT →
+            </button>
+            <button
+              type="button"
+              onClick={goSignIn}
+              className="h-11 px-4 press caps-tight text-[11px] inline-flex items-center"
+              style={{ border: '1px solid rgba(255,255,255,0.35)', color: 'var(--color-ink)', borderRadius: '2px' }}
+            >
+              SIGN IN
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* FOOTER */}
+      <footer
+        className="mt-4"
+        style={{ borderTop: '1px solid var(--color-line)', background: 'var(--color-bg)' }}
+      >
+        <div className="max-w-[1100px] mx-auto px-5 sm:px-8 py-8 flex items-center justify-between flex-wrap gap-4">
+          <div className="flex items-center gap-3">
+            <Logo withWordmark />
+          </div>
+          <div className="caps-tight text-[10px]" style={{ color: 'var(--color-text-faint)' }}>
+            © 2026 LIFTGAUGE · BUILT FOR LIFTERS
+          </div>
+          <button
+            type="button"
+            onClick={goSignIn}
+            className="caps-tight text-[10px] press"
+            style={{ color: 'var(--color-text)' }}
+          >
+            SIGN IN →
+          </button>
+        </div>
+        <div style={{ paddingBottom: 'var(--safe-bottom)' }} />
+      </footer>
+    </div>
+  );
+}
+
+function Metric({ value, label }: { value: string; label: string }) {
+  return (
+    <div>
+      <div
+        className="font-mono"
+        style={{ fontSize: '1.5rem', fontWeight: 600, color: 'var(--color-text)', letterSpacing: '-0.02em' }}
+      >
+        {value}
+      </div>
+      <div className="caps-tight text-[9px]" style={{ color: 'var(--color-text-faint)' }}>
+        {label}
+      </div>
+    </div>
+  );
+}
+
+function BarRow({ label, pct, active }: { label: string; pct: number; active?: boolean }) {
+  return (
+    <div className="flex items-center gap-3">
+      <span
+        className="caps-tight text-[9px] w-7"
+        style={{ color: active ? 'var(--color-text)' : 'var(--color-text-faint)' }}
+      >
+        {label}
+      </span>
+      <div className="flex-1 h-1.5" style={{ background: 'var(--color-elev-2)' }}>
+        <div
+          className="h-full"
+          style={{
+            width: `${pct}%`,
+            background: active ? 'var(--color-volt)' : 'var(--color-line-3)',
+            transition: 'width 600ms cubic-bezier(0.16, 1, 0.3, 1)',
+          }}
+        />
+      </div>
+      <span className="font-mono text-[10px] w-8 text-right" style={{ color: 'var(--color-text-muted)' }}>
+        {pct ? `${pct}%` : '—'}
+      </span>
+    </div>
+  );
+}
+
+function Feature({ code, title, desc }: { code: string; title: string; desc: string }) {
+  return (
+    <div
+      className="p-5 h-full flex flex-col"
+      style={{ background: 'var(--color-surface)', border: '1px solid var(--color-line)', borderRadius: '2px' }}
+    >
+      <div className="caps-tight text-[10px] mb-6" style={{ color: 'var(--color-volt-ink)' }}>
+        {code}
+      </div>
+      <h3
+        className="font-display mb-2"
+        style={{ fontSize: '1.125rem', fontWeight: 700, letterSpacing: '-0.025em', color: 'var(--color-text)' }}
+      >
+        {title}
+      </h3>
+      <p className="text-[13px]" style={{ color: 'var(--color-text-muted)', lineHeight: 1.45 }}>
+        {desc}
+      </p>
+    </div>
+  );
+}
+
+function Row({ k, v }: { k: string; v: string }) {
+  return (
+    <div
+      className="flex items-baseline justify-between gap-4 py-4"
+      style={{ borderTop: '1px solid var(--color-line)' }}
+    >
+      <span className="caps-tight text-[11px]" style={{ color: 'var(--color-text)' }}>
+        {k}
+      </span>
+      <span className="caps-tight text-[10px]" style={{ color: 'var(--color-volt-ink)' }}>
+        {v}
+      </span>
+    </div>
+  );
+}
+
+function MarqueeRow() {
+  const items = [
+    'BENCH PRESS',
+    'BACK SQUAT',
+    'DEADLIFT',
+    'OVERHEAD PRESS',
+    'PULL-UP',
+    'ROW',
+    'FRONT SQUAT',
+    'ROMANIAN DL',
+    'INCLINE BENCH',
+    'DIP',
+    'HIP THRUST',
+    'SPLIT SQUAT',
+  ];
+  return (
+    <div className="flex items-center gap-10 px-6 shrink-0">
+      {items.map((it, i) => (
+        <span key={i} className="flex items-center gap-3">
+          <span
+            className="inline-block w-1 h-1"
+            style={{ background: 'var(--color-volt)', borderRadius: '999px' }}
+          />
+          <span className="caps-tight text-[11px]" style={{ color: 'var(--color-text)' }}>
+            {it}
+          </span>
+        </span>
+      ))}
+    </div>
+  );
+}

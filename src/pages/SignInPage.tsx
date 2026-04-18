@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import { useAuth } from '../context/AuthContext';
-import Logo from '../components/shared/Logo';
+import SiteHeader from '../components/layout/SiteHeader';
 
 export default function SignInPage() {
   const { signInWithGoogle, signInWithEmail, signUpWithEmail, signInAnon, sendPasswordReset, configured } = useAuth();
@@ -64,31 +64,34 @@ export default function SignInPage() {
 
   if (!configured) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-6">
-        <div
-          className="max-w-md w-full p-6 space-y-3"
-          style={{
-            background: 'var(--color-elev)',
-            border: '1px solid var(--color-line-2)',
-            borderRadius: '2px',
-          }}
-        >
-          <div className="caps-tight text-[9px]" style={{ color: 'var(--color-rust)' }}>
-            ERR CONFIG
-          </div>
-          <h1
-            className="font-display"
-            style={{ fontSize: '1.375rem', fontWeight: 700, letterSpacing: '-0.025em', color: 'var(--color-text)' }}
+      <div className="min-h-[100dvh]" style={{ background: 'var(--color-bg)' }}>
+        <SiteHeader />
+        <div className="flex items-center justify-center p-6">
+          <div
+            className="max-w-md w-full p-6 space-y-3 mt-12"
+            style={{
+              background: 'var(--color-elev)',
+              border: '1px solid var(--color-line-2)',
+              borderRadius: '2px',
+            }}
           >
-            Firebase not configured
-          </h1>
-          <p className="text-[13px]" style={{ color: 'var(--color-text-muted)' }}>
-            Copy <code className="font-mono">.env.example</code> to{' '}
-            <code className="font-mono">.env.local</code>, fill in your Firebase config, and reload.
-          </p>
-          <p className="text-[13px]" style={{ color: 'var(--color-text-muted)' }}>
-            See <code className="font-mono">SETUP.md</code> for the walkthrough.
-          </p>
+            <div className="caps-tight text-[9px]" style={{ color: 'var(--color-rust)' }}>
+              ERR CONFIG
+            </div>
+            <h1
+              className="font-display"
+              style={{ fontSize: '1.375rem', fontWeight: 700, letterSpacing: '-0.025em', color: 'var(--color-text)' }}
+            >
+              Firebase not configured
+            </h1>
+            <p className="text-[13px]" style={{ color: 'var(--color-text-muted)' }}>
+              Copy <code className="font-mono">.env.example</code> to{' '}
+              <code className="font-mono">.env.local</code>, fill in your Firebase config, and reload.
+            </p>
+            <p className="text-[13px]" style={{ color: 'var(--color-text-muted)' }}>
+              See <code className="font-mono">SETUP.md</code> for the walkthrough.
+            </p>
+          </div>
         </div>
       </div>
     );
@@ -103,31 +106,35 @@ export default function SignInPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6 relative">
-      {/* ticker strip */}
-      <div
-        className="absolute top-0 inset-x-0 h-[3px]"
-        style={{ background: 'var(--color-volt)' }}
-      />
-      <div className="max-w-md w-full space-y-5">
-        <div className="space-y-3">
-          <Logo withWordmark />
-          <h1
-            className="font-display"
-            style={{
-              fontSize: '2rem',
-              fontWeight: 700,
-              letterSpacing: '-0.035em',
-              lineHeight: 1.05,
-              color: 'var(--color-text)',
-            }}
-          >
-            Sign in to sync<br />your training.
-          </h1>
-          <p className="text-[13px]" style={{ color: 'var(--color-text-muted)' }}>
-            Workouts sync across devices. Data stays yours.
-          </p>
-        </div>
+    <div className="min-h-[100dvh]" style={{ background: 'var(--color-bg)' }}>
+      <SiteHeader />
+      <div className="flex items-start justify-center px-6 pt-10 sm:pt-16 pb-12">
+        <div className="max-w-md w-full space-y-5">
+          <div className="space-y-3">
+            <div className="caps-tight text-[10px] flex items-center gap-3" style={{ color: 'var(--color-text-faint)' }}>
+              <span
+                className="inline-block w-1.5 h-1.5"
+                style={{ background: 'var(--color-volt)', borderRadius: '999px' }}
+              />
+              {mode === 'signin' ? 'ACCOUNT / SIGN IN' : 'ACCOUNT / SIGN UP'}
+              <span className="h-px flex-1 max-w-[80px]" style={{ background: 'var(--color-line)' }} />
+            </div>
+            <h1
+              className="font-display"
+              style={{
+                fontSize: '2rem',
+                fontWeight: 700,
+                letterSpacing: '-0.035em',
+                lineHeight: 1.05,
+                color: 'var(--color-text)',
+              }}
+            >
+              Sign in to sync<br />your training.
+            </h1>
+            <p className="text-[13px]" style={{ color: 'var(--color-text-muted)' }}>
+              Workouts sync across devices. Data stays yours.
+            </p>
+          </div>
 
         <button
           type="button"
@@ -247,6 +254,7 @@ export default function SignInPage() {
             {info}
           </p>
         )}
+        </div>
       </div>
     </div>
   );

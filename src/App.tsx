@@ -1,5 +1,5 @@
 import { useState, useCallback, lazy, Suspense } from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { AppProvider } from './context/AppContext';
 import SaveErrorBanner from './components/layout/SaveErrorBanner';
@@ -8,6 +8,7 @@ import Toast from './components/shared/Toast';
 import SessionSavedBanner, { type SessionSavedStats } from './components/shared/SessionSavedBanner';
 import LogWorkoutPage from './pages/LogWorkoutPage';
 import SignInPage from './pages/SignInPage';
+import LandingPage from './pages/LandingPage';
 
 const HistoryPage = lazy(() => import('./pages/HistoryPage'));
 const WorkoutDetailPage = lazy(() => import('./pages/WorkoutDetailPage'));
@@ -38,6 +39,16 @@ function AppRoutes() {
   );
 }
 
+function PublicRoutes() {
+  return (
+    <Routes>
+      <Route path="/" element={<LandingPage />} />
+      <Route path="/login" element={<SignInPage />} />
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
+  );
+}
+
 function AuthedApp({
   showToast,
   showSessionSaved,
@@ -48,7 +59,11 @@ function AuthedApp({
   const { user, loading, configured } = useAuth();
 
   if (!configured) {
-    return <SignInPage />;
+    return (
+      <BrowserRouter>
+        <PublicRoutes />
+      </BrowserRouter>
+    );
   }
 
   if (loading) {
@@ -60,7 +75,11 @@ function AuthedApp({
   }
 
   if (!user) {
-    return <SignInPage />;
+    return (
+      <BrowserRouter>
+        <PublicRoutes />
+      </BrowserRouter>
+    );
   }
 
   return (
