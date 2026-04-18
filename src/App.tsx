@@ -10,6 +10,7 @@ import LogWorkoutPage from './pages/LogWorkoutPage';
 import HistoryPage from './pages/HistoryPage';
 import WorkoutDetailPage from './pages/WorkoutDetailPage';
 import ProgressPage from './pages/ProgressPage';
+import ExerciseDetailPage from './pages/ExerciseDetailPage';
 import ExerciseLibraryPage from './pages/ExerciseLibraryPage';
 import GroupsPage from './pages/GroupsPage';
 import SignInPage from './pages/SignInPage';
@@ -26,6 +27,7 @@ function AppRoutes() {
         <Route path="/history" element={<HistoryPage />} />
         <Route path="/history/:id" element={<WorkoutDetailPage />} />
         <Route path="/progress" element={<ProgressPage />} />
+        <Route path="/progress/:exerciseId" element={<ExerciseDetailPage />} />
         <Route path="/exercises" element={<ExerciseLibraryPage />} />
         <Route path="/groups" element={<GroupsPage />} />
       </Routes>
