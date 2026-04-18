@@ -25,6 +25,7 @@ export default function ExerciseDetailPage() {
   const { exerciseId } = useParams<{ exerciseId: string }>();
   const { appData } = useAppContext();
   const unit = appData.preferences.weightUnit;
+  const unitUpper = unit.toUpperCase();
 
   const exercise = appData.exercises.find((e) => e.id === exerciseId);
 
@@ -76,14 +77,14 @@ export default function ExerciseDetailPage() {
   if (!exercise) {
     return (
       <PageShell title="Exercise" showBack>
-        <p className="text-gray-500 text-center py-16">Exercise not found</p>
+        <EmptyState message="Exercise not found" />
       </PageShell>
     );
   }
 
   if (maxWeightData.length === 0) {
     return (
-      <PageShell title={exercise.name} showBack>
+      <PageShell title={exercise.name} eyebrow="03 TREND" showBack>
         <EmptyState message="No data logged for this exercise yet" />
       </PageShell>
     );
@@ -95,105 +96,222 @@ export default function ExerciseDetailPage() {
   const sessions = maxWeightData.length;
 
   function fmt(n: number): string {
-    if (n >= 10000) return `${(n / 1000).toFixed(1)}k`;
+    if (n >= 10000) return `${(n / 1000).toFixed(1)}K`;
     return Number.isInteger(n) ? String(n) : n.toFixed(1);
   }
 
   return (
-    <PageShell title={exercise.name} showBack>
-      <div className="flex flex-col gap-4">
+    <PageShell title={exercise.name} eyebrow="03 TREND" showBack>
+      <div className="flex flex-col gap-5">
         {/* Stats grid */}
-        <div className="grid grid-cols-4 gap-2">
-          <div className="bg-white rounded-xl p-3 shadow-sm text-center">
-            <div className="text-lg font-bold text-gray-900">{sessions}</div>
-            <div className="text-[11px] text-gray-500 mt-0.5">Sessions</div>
+        <section className="card">
+          <div className="grid grid-cols-4">
+            <BigStat label="SESSIONS" value={String(sessions).padStart(2, '0')} />
+            <BigStat label={`BEST ${unitUpper}`} value={fmt(bestMax)} divider />
+            <BigStat label={`LATEST ${unitUpper}`} value={fmt(latestMax)} divider accent />
+            <BigStat label={`VOL ${unitUpper}`} value={fmt(totalVolumeAll)} divider />
           </div>
-          <div className="bg-white rounded-xl p-3 shadow-sm text-center">
-            <div className="text-lg font-bold text-gray-900">{fmt(bestMax)}</div>
-            <div className="text-[11px] text-gray-500 mt-0.5">Best {unit}</div>
-          </div>
-          <div className="bg-white rounded-xl p-3 shadow-sm text-center">
-            <div className="text-lg font-bold text-gray-900">{fmt(latestMax)}</div>
-            <div className="text-[11px] text-gray-500 mt-0.5">Latest {unit}</div>
-          </div>
-          <div className="bg-white rounded-xl p-3 shadow-sm text-center">
-            <div className="text-lg font-bold text-gray-900">{fmt(totalVolumeAll)}</div>
-            <div className="text-[11px] text-gray-500 mt-0.5">Vol {unit}</div>
-          </div>
-        </div>
+        </section>
 
         {/* Max Weight chart */}
-        <div className="bg-white rounded-xl p-4 shadow-sm">
-          <h3 className="text-sm font-semibold text-gray-700 mb-3">
-            Max Weight ({unit})
+        <section className="card p-4">
+          <h3
+            className="caps-tight text-[10px] mb-3"
+            style={{ color: 'var(--color-text-muted)' }}
+          >
+            MAX WEIGHT · {unitUpper}
           </h3>
-          <ResponsiveContainer width="100%" height={220}>
-            <LineChart data={maxWeightData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" />
-              <XAxis dataKey="label" tick={{ fontSize: 12 }} tickLine={false} />
-              <YAxis tick={{ fontSize: 12 }} tickLine={false} width={50} />
-              <Tooltip />
+          <ResponsiveContainer width="100%" height={200}>
+            <LineChart data={maxWeightData} margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
+              <CartesianGrid strokeDasharray="2 4" stroke="var(--color-line)" />
+              <XAxis
+                dataKey="label"
+                tick={{ fontSize: 10, fill: 'var(--color-text-faint)', fontFamily: 'var(--font-mono)' }}
+                tickLine={false}
+                axisLine={{ stroke: 'var(--color-line)' }}
+              />
+              <YAxis
+                tick={{ fontSize: 10, fill: 'var(--color-text-faint)', fontFamily: 'var(--font-mono)' }}
+                tickLine={false}
+                axisLine={false}
+                width={32}
+              />
+              <Tooltip
+                contentStyle={{
+                  background: 'var(--color-surface)',
+                  border: '1px solid var(--color-line-2)',
+                  borderRadius: 2,
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: 11,
+                }}
+                labelStyle={{ color: 'var(--color-text-muted)' }}
+              />
               <Line
                 type="monotone"
                 dataKey="value"
-                stroke="#6366F1"
-                strokeWidth={2}
-                dot={{ r: 4 }}
+                stroke="var(--color-volt)"
+                strokeWidth={1.75}
+                dot={{ r: 3, fill: 'var(--color-volt)', stroke: 'var(--color-volt)' }}
+                activeDot={{ r: 4 }}
+                isAnimationActive={false}
                 name={`Weight (${unit})`}
               />
             </LineChart>
           </ResponsiveContainer>
-        </div>
+        </section>
 
         {/* Total Volume chart */}
-        <div className="bg-white rounded-xl p-4 shadow-sm">
-          <h3 className="text-sm font-semibold text-gray-700 mb-3">
-            Total Volume ({unit})
+        <section className="card p-4">
+          <h3
+            className="caps-tight text-[10px] mb-3"
+            style={{ color: 'var(--color-text-muted)' }}
+          >
+            TOTAL VOLUME · {unitUpper}
           </h3>
-          <ResponsiveContainer width="100%" height={220}>
-            <LineChart data={totalVolumeData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" />
-              <XAxis dataKey="label" tick={{ fontSize: 12 }} tickLine={false} />
-              <YAxis tick={{ fontSize: 12 }} tickLine={false} width={50} />
-              <Tooltip />
+          <ResponsiveContainer width="100%" height={200}>
+            <LineChart data={totalVolumeData} margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
+              <CartesianGrid strokeDasharray="2 4" stroke="var(--color-line)" />
+              <XAxis
+                dataKey="label"
+                tick={{ fontSize: 10, fill: 'var(--color-text-faint)', fontFamily: 'var(--font-mono)' }}
+                tickLine={false}
+                axisLine={{ stroke: 'var(--color-line)' }}
+              />
+              <YAxis
+                tick={{ fontSize: 10, fill: 'var(--color-text-faint)', fontFamily: 'var(--font-mono)' }}
+                tickLine={false}
+                axisLine={false}
+                width={32}
+              />
+              <Tooltip
+                contentStyle={{
+                  background: 'var(--color-surface)',
+                  border: '1px solid var(--color-line-2)',
+                  borderRadius: 2,
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: 11,
+                }}
+                labelStyle={{ color: 'var(--color-text-muted)' }}
+              />
               <Line
                 type="monotone"
                 dataKey="value"
-                stroke="#F59E0B"
-                strokeWidth={2}
-                dot={{ r: 4 }}
+                stroke="var(--color-steel)"
+                strokeWidth={1.75}
+                dot={{ r: 3, fill: 'var(--color-steel)', stroke: 'var(--color-steel)' }}
+                activeDot={{ r: 4 }}
+                isAnimationActive={false}
                 name={`Volume (${unit})`}
               />
             </LineChart>
           </ResponsiveContainer>
-        </div>
+        </section>
 
         {/* Recent sessions */}
-        <div className="bg-white rounded-xl p-4 shadow-sm">
-          <h3 className="text-sm font-semibold text-gray-700 mb-3">Recent Sessions</h3>
-          <ul className="flex flex-col divide-y divide-gray-100">
+        <section>
+          <h2
+            className="caps text-[10px] mb-3 flex items-center gap-3"
+            style={{ color: 'var(--color-text-muted)' }}
+          >
+            <span>RECENT SESSIONS</span>
+            <span
+              className="flex-1 h-px"
+              style={{ background: 'var(--color-line)' }}
+            />
+            <span style={{ color: 'var(--color-text-faint)' }}>
+              {String(Math.min(recentSessions.length, 10)).padStart(2, '0')}
+            </span>
+          </h2>
+          <ul className="flex flex-col gap-2">
             {recentSessions.slice(0, 10).map((s, idx) => {
               const topDisplay = unit === 'lb' ? kgToLb(s.topSet) : s.topSet;
               const volDisplay = unit === 'lb' ? kgToLb(s.volume) : s.volume;
               return (
-                <li key={`${s.date}-${idx}`} className="py-2 flex items-center justify-between gap-3">
+                <li
+                  key={`${s.date}-${idx}`}
+                  className="card px-4 py-3 flex items-center justify-between gap-3"
+                >
                   <div className="flex-1 min-w-0">
-                    <div className="text-sm font-medium text-gray-900">
+                    <div
+                      className="font-display leading-tight"
+                      style={{
+                        fontSize: '0.9375rem',
+                        fontWeight: 600,
+                        letterSpacing: '-0.015em',
+                        fontVariationSettings: '"wdth" 95',
+                        color: 'var(--color-text)',
+                      }}
+                    >
                       {formatShortDate(s.date)}
                     </div>
-                    <div className="text-xs text-gray-500 truncate">
-                      {s.sets.length} {s.sets.length === 1 ? 'set' : 'sets'} · vol {fmt(volDisplay)} {unit}
+                    <div
+                      className="caps-tight text-[9px] mt-1"
+                      style={{ color: 'var(--color-text-faint)' }}
+                    >
+                      {String(s.sets.length).padStart(2, '0')} SET{s.sets.length === 1 ? '' : 'S'} · VOL {fmt(volDisplay)} {unitUpper}
                     </div>
                   </div>
-                  <div className="text-sm font-semibold text-gray-900 tabular-nums">
-                    {fmt(topDisplay)} {unit}
+                  <div
+                    className="font-mono leading-none shrink-0"
+                    style={{
+                      fontSize: '1.0625rem',
+                      fontWeight: 500,
+                      color: 'var(--color-text)',
+                      fontVariantNumeric: 'tabular-nums',
+                    }}
+                  >
+                    {fmt(topDisplay)}
+                    <span
+                      className="caps-tight text-[9px] ml-1"
+                      style={{ color: 'var(--color-text-faint)' }}
+                    >
+                      {unitUpper}
+                    </span>
                   </div>
                 </li>
               );
             })}
           </ul>
-        </div>
+        </section>
       </div>
     </PageShell>
+  );
+}
+
+function BigStat({
+  label,
+  value,
+  divider,
+  accent,
+}: {
+  label: string;
+  value: string | number;
+  divider?: boolean;
+  accent?: boolean;
+}) {
+  return (
+    <div
+      className="px-3 py-4"
+      style={divider ? { borderLeft: '1px solid var(--color-line)' } : undefined}
+    >
+      <div
+        className="caps-tight text-[9px] truncate"
+        style={{ color: 'var(--color-text-faint)' }}
+      >
+        {label}
+      </div>
+      <div
+        className="font-mono leading-none mt-1.5"
+        style={{
+          fontSize: '1.25rem',
+          fontWeight: 500,
+          color: accent ? 'var(--color-volt)' : 'var(--color-text)',
+          fontVariantNumeric: 'tabular-nums',
+          letterSpacing: '-0.02em',
+        }}
+      >
+        {value}
+      </div>
+    </div>
   );
 }

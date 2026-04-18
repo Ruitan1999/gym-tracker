@@ -13,7 +13,7 @@ interface ExerciseSummary {
   sessions: number;
   latestMax: number;
   bestMax: number;
-  trend: number; // latest - previous
+  trend: number;
   lastDate: string;
   spark: { value: number }[];
 }
@@ -21,7 +21,7 @@ interface ExerciseSummary {
 type ViewMode = 'all' | 'groups';
 
 export default function ProgressPage() {
-  const { appData, updatePreferences } = useAppContext();
+  const { appData } = useAppContext();
   const navigate = useNavigate();
   const unit = appData.preferences.weightUnit;
   const groups = appData.groups ?? [];
@@ -87,46 +87,19 @@ export default function ProgressPage() {
     return Number.isInteger(v) ? String(v) : v.toFixed(1);
   }
 
-  function handleUnitToggle(newUnit: 'kg' | 'lb') {
-    updatePreferences({ weightUnit: newUnit });
-  }
-
-  const unitToggle = (
-    <div className="flex rounded-lg overflow-hidden border border-gray-300">
-      <button
-        type="button"
-        onClick={() => handleUnitToggle('kg')}
-        className={`px-3 min-h-[36px] text-sm font-medium ${
-          unit === 'kg' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700'
-        }`}
-      >
-        kg
-      </button>
-      <button
-        type="button"
-        onClick={() => handleUnitToggle('lb')}
-        className={`px-3 min-h-[36px] text-sm font-medium ${
-          unit === 'lb' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700'
-        }`}
-      >
-        lb
-      </button>
-    </div>
-  );
-
   function renderRow(s: ExerciseSummary) {
     const trendUp = s.trend > 0.0001;
     const trendDown = s.trend < -0.0001;
     const trendColor = trendUp
-      ? 'text-green-600'
+      ? 'var(--color-volt)'
       : trendDown
-        ? 'text-red-600'
-        : 'text-gray-400';
+        ? 'var(--color-rust)'
+        : 'var(--color-text-faint)';
     const strokeColor = trendUp
-      ? '#16A34A'
+      ? 'var(--color-volt)'
       : trendDown
-        ? '#DC2626'
-        : '#6366F1';
+        ? 'var(--color-rust)'
+        : 'var(--color-line-2)';
     const trendLabel = trendUp
       ? `+${display(s.trend)}`
       : trendDown
@@ -138,18 +111,30 @@ export default function ProgressPage() {
         <button
           type="button"
           onClick={() => navigate(`/progress/${s.exercise.id}`)}
-          className="w-full bg-white rounded-xl shadow-sm px-3 py-2.5 flex items-center gap-3 min-h-[60px] text-left active:bg-gray-50"
+          className="w-full text-left card press flex items-center gap-3 px-4 py-3 min-h-[64px]"
         >
           <div className="flex-1 min-w-0">
-            <div className="text-sm font-semibold text-gray-900 truncate">
+            <p
+              className="font-display truncate leading-tight"
+              style={{
+                fontSize: '1rem',
+                fontWeight: 600,
+                letterSpacing: '-0.015em',
+                fontVariationSettings: '"wdth" 95',
+                color: 'var(--color-text)',
+              }}
+            >
               {s.exercise.name}
-            </div>
-            <div className="text-xs text-gray-500 mt-0.5">
-              {s.sessions} {s.sessions === 1 ? 'session' : 'sessions'} · Best {display(s.bestMax)} {unit}
+            </p>
+            <div
+              className="caps-tight text-[9px] mt-1"
+              style={{ color: 'var(--color-text-faint)' }}
+            >
+              {String(s.sessions).padStart(2, '0')} SESSION{s.sessions === 1 ? '' : 'S'} · BEST {display(s.bestMax)} {unit.toUpperCase()}
             </div>
           </div>
 
-          <div className="w-16 h-8 flex-shrink-0">
+          <div className="w-16 h-8 shrink-0">
             {s.spark.length > 1 ? (
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={s.spark}>
@@ -157,41 +142,51 @@ export default function ProgressPage() {
                     type="monotone"
                     dataKey="value"
                     stroke={strokeColor}
-                    strokeWidth={2}
+                    strokeWidth={1.75}
                     dot={false}
                     isAnimationActive={false}
                   />
                 </LineChart>
               </ResponsiveContainer>
             ) : (
-              <div className="w-full h-full flex items-center justify-center text-gray-300 text-xs">
+              <div
+                className="w-full h-full flex items-center justify-center caps-tight text-[9px]"
+                style={{ color: 'var(--color-text-faint)' }}
+              >
                 —
               </div>
             )}
           </div>
 
-          <div className="flex-shrink-0 text-right min-w-[64px]">
-            <div className="text-sm font-semibold text-gray-900 tabular-nums">
+          <div className="shrink-0 text-right min-w-[64px]">
+            <div
+              className="font-mono leading-none"
+              style={{
+                fontSize: '1.125rem',
+                fontWeight: 500,
+                color: 'var(--color-text)',
+                fontVariantNumeric: 'tabular-nums',
+              }}
+            >
               {display(s.latestMax)}
-              <span className="text-xs text-gray-400 font-normal ml-0.5">{unit}</span>
+              <span
+                className="caps-tight text-[9px] ml-1"
+                style={{ color: 'var(--color-text-faint)' }}
+              >
+                {unit.toUpperCase()}
+              </span>
             </div>
-            <div className={`text-xs font-medium tabular-nums ${trendColor}`}>
+            <div
+              className="font-mono text-[11px] mt-1"
+              style={{
+                color: trendColor,
+                fontVariantNumeric: 'tabular-nums',
+                fontWeight: 500,
+              }}
+            >
               {trendLabel}
             </div>
           </div>
-
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 20 20"
-            fill="currentColor"
-            className="w-4 h-4 text-gray-300 flex-shrink-0"
-          >
-            <path
-              fillRule="evenodd"
-              d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z"
-              clipRule="evenodd"
-            />
-          </svg>
         </button>
       </li>
     );
@@ -199,62 +194,85 @@ export default function ProgressPage() {
 
   const hasGroups = groups.length > 0;
 
-  return (
-    <PageShell title="Progress" rightAction={unitToggle}>
-      {summaries.length === 0 ? (
+  if (summaries.length === 0) {
+    return (
+      <PageShell title="Progress" eyebrow="03 TREND">
         <EmptyState message="Log a workout to start tracking progress" />
-      ) : (
-        <div className="flex flex-col gap-3">
-          {hasGroups && (
-            <div className="flex rounded-lg overflow-hidden border border-gray-300 bg-white self-start">
-              <button
-                type="button"
-                onClick={() => setViewMode('all')}
-                className={`px-4 min-h-[36px] text-sm font-medium ${
-                  viewMode === 'all'
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-white text-gray-700'
-                }`}
-              >
-                All
-              </button>
-              <button
-                type="button"
-                onClick={() => setViewMode('groups')}
-                className={`px-4 min-h-[36px] text-sm font-medium border-l border-gray-300 ${
-                  viewMode === 'groups'
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-white text-gray-700'
-                }`}
-              >
-                Groups
-              </button>
-            </div>
-          )}
+      </PageShell>
+    );
+  }
 
-          {viewMode === 'all' || !hasGroups ? (
-            <ul className="flex flex-col gap-2">
-              {summaries.map(renderRow)}
-            </ul>
-          ) : (
-            <div className="flex flex-col gap-5">
-              {groupedSections.map((section) => (
-                <section key={section.id}>
-                  <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2 px-1">
-                    {section.name}
-                    <span className="ml-2 text-gray-400 normal-case tracking-normal font-normal">
-                      {section.items.length}
-                    </span>
-                  </h2>
-                  <ul className="flex flex-col gap-2">
-                    {section.items.map(renderRow)}
-                  </ul>
-                </section>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
+  return (
+    <PageShell title="Progress" eyebrow="03 TREND">
+      <div className="flex flex-col gap-5">
+        {hasGroups && (
+          <div className="flex self-start" role="tablist" aria-label="View mode">
+            <ToggleBtn
+              active={viewMode === 'all'}
+              onClick={() => setViewMode('all')}
+              label="ALL"
+            />
+            <ToggleBtn
+              active={viewMode === 'groups'}
+              onClick={() => setViewMode('groups')}
+              label="GROUPS"
+            />
+          </div>
+        )}
+
+        {viewMode === 'all' || !hasGroups ? (
+          <ul className="flex flex-col gap-2">{summaries.map(renderRow)}</ul>
+        ) : (
+          <div className="flex flex-col gap-6">
+            {groupedSections.map((section) => (
+              <section key={section.id}>
+                <h2
+                  className="caps text-[10px] mb-3 flex items-center gap-3"
+                  style={{ color: 'var(--color-text-muted)' }}
+                >
+                  <span>{section.name}</span>
+                  <span
+                    className="flex-1 h-px"
+                    style={{ background: 'var(--color-line)' }}
+                  />
+                  <span style={{ color: 'var(--color-text-faint)' }}>
+                    {String(section.items.length).padStart(2, '0')}
+                  </span>
+                </h2>
+                <ul className="flex flex-col gap-2">{section.items.map(renderRow)}</ul>
+              </section>
+            ))}
+          </div>
+        )}
+      </div>
     </PageShell>
+  );
+}
+
+function ToggleBtn({
+  active,
+  onClick,
+  label,
+}: {
+  active: boolean;
+  onClick: () => void;
+  label: string;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      role="tab"
+      aria-selected={active}
+      className="caps-tight text-[10px] px-4 h-9 press"
+      style={{
+        background: active ? 'var(--color-text)' : 'var(--color-surface)',
+        color: active ? '#ffffff' : 'var(--color-text-muted)',
+        border: '1px solid',
+        borderColor: active ? 'var(--color-text)' : 'var(--color-line-2)',
+      }}
+    >
+      {label}
+    </button>
   );
 }
