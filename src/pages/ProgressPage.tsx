@@ -1,52 +1,55 @@
-import { useState, useMemo } from 'react';
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ResponsiveContainer,
-} from 'recharts';
+import { useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { LineChart, Line, ResponsiveContainer } from 'recharts';
 import { useAppContext } from '../context/AppContext';
 import PageShell from '../components/layout/PageShell';
 import EmptyState from '../components/shared/EmptyState';
-import { getMaxWeightData, getTotalVolumeData } from '../utils/chartHelpers';
+import { getMaxWeightData } from '../utils/chartHelpers';
 import { kgToLb } from '../utils/conversions';
+import type { Exercise } from '../types';
+
+interface ExerciseSummary {
+  exercise: Exercise;
+  sessions: number;
+  latestMax: number;
+  bestMax: number;
+  trend: number; // latest - previous
+  lastDate: string;
+  spark: { value: number }[];
+}
 
 export default function ProgressPage() {
   const { appData, updatePreferences } = useAppContext();
+  const navigate = useNavigate();
   const unit = appData.preferences.weightUnit;
 
-  // Find exercises that have logged workout data
-  const exercisesWithData = useMemo(() => {
-    const ids = new Set<string>();
-    for (const workout of appData.workouts) {
-      for (const entry of workout.entries) {
-        ids.add(entry.exerciseId);
-      }
+  const summaries = useMemo<ExerciseSummary[]>(() => {
+    const result: ExerciseSummary[] = [];
+    for (const exercise of appData.exercises) {
+      const points = getMaxWeightData(appData.workouts, exercise.id);
+      if (points.length === 0) continue;
+      const latestMax = points[points.length - 1].value;
+      const prevMax = points.length > 1 ? points[points.length - 2].value : latestMax;
+      const bestMax = points.reduce((m, p) => (p.value > m ? p.value : m), 0);
+      result.push({
+        exercise,
+        sessions: points.length,
+        latestMax,
+        bestMax,
+        trend: latestMax - prevMax,
+        lastDate: points[points.length - 1].date,
+        spark: points.map((p) => ({ value: p.value })),
+      });
     }
-    return appData.exercises.filter((e) => ids.has(e.id));
-  }, [appData.workouts, appData.exercises]);
+    // Sort by most recent activity
+    result.sort((a, b) => b.lastDate.localeCompare(a.lastDate));
+    return result;
+  }, [appData.exercises, appData.workouts]);
 
-  const [selectedExerciseId, setSelectedExerciseId] = useState<string>('');
-
-  const maxWeightData = useMemo(() => {
-    if (!selectedExerciseId) return [];
-    const raw = getMaxWeightData(appData.workouts, selectedExerciseId);
-    if (unit === 'lb') {
-      return raw.map((p) => ({ ...p, value: kgToLb(p.value) }));
-    }
-    return raw;
-  }, [appData.workouts, selectedExerciseId, unit]);
-
-  const totalVolumeData = useMemo(() => {
-    if (!selectedExerciseId) return [];
-    const raw = getTotalVolumeData(appData.workouts, selectedExerciseId);
-    if (unit === 'lb') {
-      return raw.map((p) => ({ ...p, value: kgToLb(p.value) }));
-    }
-    return raw;
-  }, [appData.workouts, selectedExerciseId, unit]);
+  function display(kg: number): string {
+    const v = unit === 'lb' ? kgToLb(kg) : kg;
+    return Number.isInteger(v) ? String(v) : v.toFixed(1);
+  }
 
   function handleUnitToggle(newUnit: 'kg' | 'lb') {
     updatePreferences({ weightUnit: newUnit });
@@ -58,9 +61,7 @@ export default function ProgressPage() {
         type="button"
         onClick={() => handleUnitToggle('kg')}
         className={`px-3 min-h-[36px] text-sm font-medium ${
-          unit === 'kg'
-            ? 'bg-blue-600 text-white'
-            : 'bg-white text-gray-700'
+          unit === 'kg' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700'
         }`}
       >
         kg
@@ -69,9 +70,7 @@ export default function ProgressPage() {
         type="button"
         onClick={() => handleUnitToggle('lb')}
         className={`px-3 min-h-[36px] text-sm font-medium ${
-          unit === 'lb'
-            ? 'bg-blue-600 text-white'
-            : 'bg-white text-gray-700'
+          unit === 'lb' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700'
         }`}
       >
         lb
@@ -81,95 +80,94 @@ export default function ProgressPage() {
 
   return (
     <PageShell title="Progress" rightAction={unitToggle}>
-      <div className="flex flex-col gap-6">
-        {/* Exercise picker */}
-        <div className="bg-white rounded-xl p-4 shadow-sm">
-          <label
-            htmlFor="exercise-picker"
-            className="text-sm text-gray-500 font-medium"
-          >
-            Exercise
-          </label>
-          <select
-            id="exercise-picker"
-            value={selectedExerciseId}
-            onChange={(e) => setSelectedExerciseId(e.target.value)}
-            className="mt-1 w-full min-h-[44px] px-3 py-2 border border-gray-300 rounded-lg text-[16px] text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-blue-600"
-          >
-            <option value="">Select an exercise</option>
-            {exercisesWithData.map((exercise) => (
-              <option key={exercise.id} value={exercise.id}>
-                {exercise.name}
-              </option>
-            ))}
-          </select>
-        </div>
+      {summaries.length === 0 ? (
+        <EmptyState message="Log a workout to start tracking progress" />
+      ) : (
+        <ul className="flex flex-col gap-2">
+          {summaries.map((s) => {
+            const trendUp = s.trend > 0.0001;
+            const trendDown = s.trend < -0.0001;
+            const trendColor = trendUp
+              ? 'text-green-600'
+              : trendDown
+                ? 'text-red-600'
+                : 'text-gray-400';
+            const strokeColor = trendUp
+              ? '#16A34A'
+              : trendDown
+                ? '#DC2626'
+                : '#6366F1';
+            const trendLabel = trendUp
+              ? `+${display(s.trend)}`
+              : trendDown
+                ? display(s.trend)
+                : '—';
 
-        {/* Charts or empty state */}
-        {!selectedExerciseId || maxWeightData.length === 0 ? (
-          <EmptyState
-            message={
-              !selectedExerciseId
-                ? 'Select an exercise to view progress'
-                : 'No data for this exercise'
-            }
-          />
-        ) : (
-          <>
-            {/* Max Weight chart */}
-            <div className="bg-white rounded-xl p-4 shadow-sm">
-              <h3 className="text-sm font-semibold text-gray-700 mb-3">
-                Max Weight ({unit})
-              </h3>
-              <ResponsiveContainer width="100%" height={200}>
-                <LineChart data={maxWeightData}>
-                  <XAxis
-                    dataKey="date"
-                    tick={{ fontSize: 12 }}
-                    tickLine={false}
-                  />
-                  <YAxis tick={{ fontSize: 12 }} tickLine={false} width={50} />
-                  <Tooltip />
-                  <Line
-                    type="monotone"
-                    dataKey="value"
-                    stroke="#6366F1"
-                    strokeWidth={2}
-                    dot={{ r: 4 }}
-                    name={`Weight (${unit})`}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
+            return (
+              <li key={s.exercise.id}>
+                <button
+                  type="button"
+                  onClick={() => navigate(`/progress/${s.exercise.id}`)}
+                  className="w-full bg-white rounded-xl shadow-sm px-3 py-2.5 flex items-center gap-3 min-h-[60px] text-left active:bg-gray-50"
+                >
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm font-semibold text-gray-900 truncate">
+                      {s.exercise.name}
+                    </div>
+                    <div className="text-xs text-gray-500 mt-0.5">
+                      {s.sessions} {s.sessions === 1 ? 'session' : 'sessions'} · Best {display(s.bestMax)} {unit}
+                    </div>
+                  </div>
 
-            {/* Total Volume chart */}
-            <div className="bg-white rounded-xl p-4 shadow-sm">
-              <h3 className="text-sm font-semibold text-gray-700 mb-3">
-                Total Volume ({unit})
-              </h3>
-              <ResponsiveContainer width="100%" height={200}>
-                <LineChart data={totalVolumeData}>
-                  <XAxis
-                    dataKey="date"
-                    tick={{ fontSize: 12 }}
-                    tickLine={false}
-                  />
-                  <YAxis tick={{ fontSize: 12 }} tickLine={false} width={50} />
-                  <Tooltip />
-                  <Line
-                    type="monotone"
-                    dataKey="value"
-                    stroke="#F59E0B"
-                    strokeWidth={2}
-                    dot={{ r: 4 }}
-                    name={`Volume (${unit})`}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-          </>
-        )}
-      </div>
+                  <div className="w-16 h-8 flex-shrink-0">
+                    {s.spark.length > 1 ? (
+                      <ResponsiveContainer width="100%" height="100%">
+                        <LineChart data={s.spark}>
+                          <Line
+                            type="monotone"
+                            dataKey="value"
+                            stroke={strokeColor}
+                            strokeWidth={2}
+                            dot={false}
+                            isAnimationActive={false}
+                          />
+                        </LineChart>
+                      </ResponsiveContainer>
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-gray-300 text-xs">
+                        —
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flex-shrink-0 text-right min-w-[64px]">
+                    <div className="text-sm font-semibold text-gray-900 tabular-nums">
+                      {display(s.latestMax)}
+                      <span className="text-xs text-gray-400 font-normal ml-0.5">{unit}</span>
+                    </div>
+                    <div className={`text-xs font-medium tabular-nums ${trendColor}`}>
+                      {trendLabel}
+                    </div>
+                  </div>
+
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                    className="w-4 h-4 text-gray-300 flex-shrink-0"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      )}
     </PageShell>
   );
 }
