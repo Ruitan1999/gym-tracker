@@ -42,6 +42,8 @@ export default function SettingsPage() {
     try {
       setAccountBusy(true);
       await auth.deleteAccount();
+      window.location.replace('/');
+      return;
     } catch (err) {
       console.error(err);
       const message =

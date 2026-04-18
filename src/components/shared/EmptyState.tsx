@@ -21,12 +21,6 @@ export default function EmptyState({ message, action }: EmptyStateProps) {
           <path d="M4 6h16M4 12h10M4 18h16" />
         </svg>
       </div>
-      <div
-        className="caps-tight text-[9px] mb-2"
-        style={{ color: 'var(--color-text-faint)' }}
-      >
-        EMPTY STATE
-      </div>
       <p
         className="font-display mb-6"
         style={{
