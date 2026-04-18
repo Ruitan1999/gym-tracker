@@ -111,7 +111,7 @@ export default function WorkoutDetailPage() {
           <div className="grid grid-cols-3">
             <Tile label="EXERCISES" value={totalExercises} />
             <Tile label="SETS" value={totalSets} divider />
-            <Tile label="VOL KG" value={volumeStr} divider accent />
+            <Tile label="VOL KG" value={volumeStr} divider />
           </div>
         </section>
 
@@ -337,12 +337,10 @@ function Tile({
   label,
   value,
   divider,
-  accent,
 }: {
   label: string;
   value: string | number;
   divider?: boolean;
-  accent?: boolean;
 }) {
   return (
     <div

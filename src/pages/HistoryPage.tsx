@@ -96,7 +96,7 @@ export default function HistoryPage() {
       <section className="card mb-6">
         <div className="grid grid-cols-3">
           <BigStat label="SESSIONS" value={totalSessions} />
-          <BigStat label="TOTAL KG" value={totalVolume} divider accent />
+          <BigStat label="TOTAL KG" value={totalVolume} divider />
           <BigStat label="STREAK" value={currentStreak} divider />
         </div>
       </section>
@@ -133,12 +133,10 @@ function BigStat({
   label,
   value,
   divider,
-  accent,
 }: {
   label: string;
   value: string | number;
   divider?: boolean;
-  accent?: boolean;
 }) {
   return (
     <div
