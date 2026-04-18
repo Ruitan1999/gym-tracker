@@ -25,19 +25,18 @@ export default function WorkoutForm({ existingWorkout }: WorkoutFormProps) {
   const isEdit = !!existingWorkout;
 
   const [date, setDate] = useState(existingWorkout?.date ?? todayString());
-  const [entries, setEntries] = useState<WorkoutEntry[]>(
-    existingWorkout?.entries ?? []
-  );
+  const [entries, setEntries] = useState<WorkoutEntry[]>(existingWorkout?.entries ?? []);
   const [notes, setNotes] = useState(existingWorkout?.notes ?? '');
   const [showExerciseSelect, setShowExerciseSelect] = useState(false);
   const [showSaveGroup, setShowSaveGroup] = useState(false);
   const [validationError, setValidationError] = useState('');
+  const [collapsedIds, setCollapsedIds] = useState<Set<string>>(new Set());
 
   const groups = appData.groups ?? [];
 
   function getLastWorkoutSets(exerciseId: string): WorkoutSet[] | null {
     const sorted = [...appData.workouts].sort(
-      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
     );
     for (const w of sorted) {
       if (existingWorkout && w.id === existingWorkout.id) continue;
@@ -56,20 +55,27 @@ export default function WorkoutForm({ existingWorkout }: WorkoutFormProps) {
   function handleSelectExercise(exerciseId: string) {
     const lastSets = getLastWorkoutSets(exerciseId);
     const sets: WorkoutSet[] = lastSets ?? [{ setNumber: 1, reps: 0, weightKg: 0 }];
-
     const newEntry: WorkoutEntry = {
       id: crypto.randomUUID(),
       exerciseId,
       sets,
     };
+    setCollapsedIds(new Set(entries.map((e) => e.id)));
     setEntries((prev) => [...prev, newEntry]);
     setShowExerciseSelect(false);
   }
 
+  function toggleCollapsed(entryId: string) {
+    setCollapsedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(entryId)) next.delete(entryId);
+      else next.add(entryId);
+      return next;
+    });
+  }
+
   function handleSetsChange(entryIndex: number, sets: WorkoutSet[]) {
-    setEntries((prev) =>
-      prev.map((entry, i) => (i === entryIndex ? { ...entry, sets } : entry))
-    );
+    setEntries((prev) => prev.map((e, i) => (i === entryIndex ? { ...e, sets } : e)));
   }
 
   function handleRemoveEntry(entryIndex: number) {
@@ -86,6 +92,9 @@ export default function WorkoutForm({ existingWorkout }: WorkoutFormProps) {
       };
     });
     setEntries(newEntries);
+    if (newEntries.length > 1) {
+      setCollapsedIds(new Set(newEntries.slice(0, -1).map((e) => e.id)));
+    }
   }
 
   function handleSaveAsGroup(name: string) {
@@ -101,20 +110,15 @@ export default function WorkoutForm({ existingWorkout }: WorkoutFormProps) {
 
   function handleSave() {
     setValidationError('');
-
     if (entries.length === 0) {
       setValidationError('Add at least one exercise.');
       return;
     }
-
-    const hasValidSet = entries.some((entry) =>
-      entry.sets.some((set) => set.reps > 0)
-    );
+    const hasValidSet = entries.some((entry) => entry.sets.some((s) => s.reps > 0));
     if (!hasValidSet) {
       setValidationError('At least one set must have reps greater than 0.');
       return;
     }
-
     if (isEdit && existingWorkout) {
       const updated: Workout = {
         ...existingWorkout,
@@ -134,101 +138,142 @@ export default function WorkoutForm({ existingWorkout }: WorkoutFormProps) {
       };
       addWorkout(workout);
     }
-
     navigate('/history');
-  }
-
-  function handleCancel() {
-    navigate(-1);
   }
 
   const showGroupsPicker = !isEdit && entries.length === 0 && groups.length > 0;
   const canSaveAsGroup = !isEdit && entries.length > 0;
+  const ratingMatch = notes.match(/^Rating: (\d+)/);
+  const currentRating = ratingMatch ? parseInt(ratingMatch[1], 10) : 0;
+
+  const totalExercises = entries.length;
+  const totalSets = entries.reduce((acc, e) => acc + e.sets.length, 0);
+  const totalReps = entries.reduce(
+    (acc, e) => acc + e.sets.reduce((s, set) => s + (set.reps || 0), 0),
+    0,
+  );
 
   return (
-    <div className="flex flex-col gap-4 pb-24">
-      {/* Date input */}
-      <div className="bg-white rounded-xl p-4 shadow-sm">
-        <label className="text-sm text-gray-500 font-medium block mb-1">Date</label>
-        <DatePicker value={date} onChange={setDate} />
-      </div>
+    <div className="flex flex-col gap-5 pb-8">
+      {!isEdit && entries.length === 0 && groups.length === 0 && (
+        <p className="caps-tight text-[10px] -mt-3" style={{ color: 'var(--color-text-faint)' }}>
+          TIP SAVE MULTIPLE EXERCISES AS A TEMPLATE TO REUSE
+        </p>
+      )}
 
       {/* Groups picker */}
       {showGroupsPicker && (
-        <div className="bg-white rounded-xl p-4 shadow-sm">
+        <section>
           <div className="flex items-center justify-between mb-2">
-            <h2 className="text-sm font-medium text-gray-500">Start from a group</h2>
+            <h2 className="caps text-[10px]" style={{ color: 'var(--color-text-muted)' }}>
+              SAVED TEMPLATES
+            </h2>
             <Link
               to="/groups"
-              className="text-xs font-medium text-blue-600 active:text-blue-800"
+              className="caps text-[10px] press"
+              style={{ color: 'var(--color-text)' }}
             >
-              Manage
+              MANAGE →
             </Link>
           </div>
-          <div className="-mx-4 px-4 flex gap-2 overflow-x-auto pb-1">
+          <div className="flex flex-col gap-2">
             {groups.map((g) => {
               const exCount = g.exerciseIds.length;
               const names = g.exerciseIds
-                .slice(0, 2)
                 .map((id) => appData.exercises.find((e) => e.id === id)?.name)
                 .filter(Boolean)
-                .join(', ');
+                .join(' ');
               return (
                 <button
                   key={g.id}
                   type="button"
                   onClick={() => handleStartFromGroup(g)}
-                  className="shrink-0 min-w-[160px] max-w-[220px] text-left bg-blue-50 border border-blue-100 rounded-xl p-3 active:bg-blue-100"
+                  className="w-full text-left card press p-3"
                 >
-                  <div className="text-sm font-semibold text-blue-700 truncate">{g.name}</div>
-                  <div className="text-xs text-blue-500 mt-0.5 truncate">
-                    {exCount} exercise{exCount === 1 ? '' : 's'}{names ? ` · ${names}` : ''}
+                  <div className="flex items-center justify-between">
+                    <div
+                      className="font-display min-w-0 truncate"
+                      style={{
+                        fontWeight: 700,
+                        fontSize: '1rem',
+                        letterSpacing: '-0.02em',
+                        fontVariationSettings: '"wdth" 95',
+                        color: 'var(--color-text)',
+                      }}
+                    >
+                      {g.name}
+                    </div>
+                    <div className="caps-tight text-[9px] shrink-0 ml-2" style={{ color: 'var(--color-text-faint)' }}>
+                      {exCount} EXERCISE{exCount === 1 ? '' : 'S'}
+                    </div>
                   </div>
+                  {names && (
+                    <div className="text-[12px] mt-1" style={{ color: 'var(--color-text-muted)' }}>
+                      {names}
+                    </div>
+                  )}
                 </button>
               );
             })}
           </div>
+        </section>
+      )}
+
+      {entries.length > 0 && (
+        <div
+          className="flex flex-col gap-4 stagger"
+          style={{ background: 'var(--color-bg)' }}
+        >
+          {entries.map((entry, index) => (
+            <EntryCard
+              key={entry.id}
+              index={index}
+              exerciseId={entry.exerciseId}
+              sets={entry.sets}
+              onSetsChange={(sets) => handleSetsChange(index, sets)}
+              onRemove={() => handleRemoveEntry(index)}
+              collapsed={collapsedIds.has(entry.id)}
+              onToggleCollapsed={() => toggleCollapsed(entry.id)}
+            />
+          ))}
         </div>
       )}
 
-      {!isEdit && entries.length === 0 && groups.length === 0 && (
-        <p className="text-xs text-gray-400 text-center">
-          Tip: after adding exercises, save them as a group (e.g. "Leg day") to reuse next time.
-        </p>
-      )}
-
-      {/* Entry cards */}
-      {entries.map((entry, index) => (
-        <EntryCard
-          key={entry.id}
-          exerciseId={entry.exerciseId}
-          sets={entry.sets}
-          onSetsChange={(sets) => handleSetsChange(index, sets)}
-          onRemove={() => handleRemoveEntry(index)}
-        />
-      ))}
-
-      {/* Add exercise button */}
       <button
         type="button"
         onClick={() => setShowExerciseSelect(true)}
-        className="bg-white rounded-xl p-4 shadow-sm text-blue-600 font-medium text-center min-h-[44px] border-2 border-dashed border-blue-200"
+        className="card-ghost press h-20 flex items-center justify-center gap-3"
+        style={{ color: 'var(--color-text)', background: '#ffffff' }}
       >
-        + Add Exercise
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="square" className="w-5 h-5">
+          <path d="M12 5v14M5 12h14" />
+        </svg>
+        <div className="text-left">
+          <div
+            className="font-display leading-none"
+            style={{
+              fontSize: '1.0625rem',
+              fontWeight: 700,
+              letterSpacing: '-0.02em',
+              fontVariationSettings: '"wdth" 95',
+            }}
+          >
+            Add Exercise
+          </div>
+        </div>
       </button>
 
-      {/* Save as group */}
       {canSaveAsGroup && (
         <button
           type="button"
           onClick={() => setShowSaveGroup(true)}
-          className="text-sm font-medium text-blue-600 min-h-[44px]"
+          className="caps text-[10px] press self-start"
+          style={{ color: 'var(--color-text)', padding: '0.75rem 0' }}
         >
-          Save as group…
+          ＋ SAVE EXERCISES AS TEMPLATE
         </button>
       )}
 
-      {/* Exercise select bottom sheet */}
       {showExerciseSelect && (
         <ExerciseSelect
           onSelect={handleSelectExercise}
@@ -236,78 +281,113 @@ export default function WorkoutForm({ existingWorkout }: WorkoutFormProps) {
         />
       )}
 
-      {/* Feeling & Notes */}
-      <div className="bg-white rounded-xl p-4 shadow-sm">
-        <label className="text-sm text-gray-500 font-medium block mb-2">
-          How did it feel?
-        </label>
-        <div className="flex justify-between gap-1 mb-3">
-          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((n) => {
-            const rating = notes.match(/^Rating: (\d+)/);
-            const currentRating = rating ? parseInt(rating[1]) : 0;
-            const isSelected = currentRating === n;
-            return (
-              <button
-                key={n}
-                type="button"
-                onClick={() => {
-                  const existingNotes = notes.replace(/^Rating: \d+\n?/, '').trim();
-                  setNotes(`Rating: ${n}${existingNotes ? '\n' + existingNotes : ''}`);
-                }}
-                className={`flex-1 h-10 rounded-lg text-sm font-semibold transition-colors ${
-                  isSelected
-                    ? n <= 3 ? 'bg-red-500 text-white'
-                    : n <= 6 ? 'bg-amber-500 text-white'
-                    : 'bg-green-500 text-white'
-                    : 'bg-gray-100 text-gray-600 active:bg-gray-200'
-                }`}
-              >
-                {n}
-              </button>
-            );
-          })}
+      {/* HERO — session header + RPE rating */}
+      <section className="relative card">
+        <div className="relative p-4">
+          <div className="flex items-center justify-between">
+            <div className="caps-tight text-[9px]" style={{ color: 'var(--color-text-faint)' }}>
+              SESSION {isEdit ? 'EDIT' : 'NEW'}
+            </div>
+          </div>
+          <div className="mt-2">
+            <DatePicker value={date} onChange={setDate} />
+          </div>
+          <div
+            className="grid grid-cols-3 mt-4"
+            style={{ borderTop: '1px solid var(--color-line)' }}
+          >
+            <HeroStat label="EXERCISES" value={totalExercises} />
+            <HeroStat label="SETS" value={totalSets} divider />
+            <HeroStat label="REPS" value={totalReps} divider />
+          </div>
+          <div
+            className="mt-4 pt-4"
+            style={{ borderTop: '1px solid var(--color-line)' }}
+          >
+            <div className="caps-tight text-[9px] mb-2" style={{ color: 'var(--color-text-muted)' }}>
+              RPE SESSION RATING
+            </div>
+            <div className="grid grid-cols-10 gap-1">
+              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((n) => {
+                const isSelected = currentRating === n;
+                const color =
+                  n <= 3 ? 'var(--color-steel)' : n <= 6 ? 'var(--color-ember)' : n <= 8 ? 'var(--color-volt)' : 'var(--color-rust)';
+                return (
+                  <button
+                    key={n}
+                    type="button"
+                    onClick={() => {
+                      const existing = notes.replace(/^Rating: \d+\n?/, '').trim();
+                      setNotes(`Rating: ${n}${existing ? '\n' + existing : ''}`);
+                    }}
+                    className="h-10 press font-mono text-[12px]"
+                    style={{
+                      background: isSelected ? color : 'transparent',
+                      color: isSelected ? '#ffffff' : 'var(--color-text-muted)',
+                      border: `1px solid ${isSelected ? color : 'var(--color-line-2)'}`,
+                      fontWeight: 500,
+                      fontVariantNumeric: 'tabular-nums',
+                    }}
+                  >
+                    {n}
+                  </button>
+                );
+              })}
+            </div>
+            <div
+              className="flex justify-between mt-1.5 caps-tight text-[9px]"
+              style={{ color: 'var(--color-text-faint)' }}
+            >
+              <span>EASY</span>
+              <span>MODERATE</span>
+              <span>MAX</span>
+            </div>
+          </div>
         </div>
-        <textarea
-          value={notes.replace(/^Rating: \d+\n?/, '')}
-          onChange={(e) => {
-            const rating = notes.match(/^Rating: \d+/);
-            setNotes(rating ? `${rating[0]}\n${e.target.value}` : e.target.value);
-          }}
-          placeholder="Any notes? (optional)"
-          rows={2}
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-[16px] text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-blue-600 resize-none"
-        />
-      </div>
+      </section>
 
-      {/* Validation error */}
       {validationError && (
-        <p className="text-red-600 text-sm text-center">{validationError}</p>
+        <p className="caps-tight text-[10px] text-center" style={{ color: 'var(--color-rust)' }}>
+          ⚠ {validationError}
+        </p>
       )}
 
-      {/* Actions */}
-      <div className="flex gap-3">
-        <button
-          type="button"
-          onClick={handleCancel}
-          className="flex-1 min-h-[44px] px-4 py-2 border border-gray-300 rounded-lg text-gray-700 font-medium bg-white"
-        >
-          Cancel
-        </button>
-        <button
-          type="button"
-          onClick={handleSave}
-          className="flex-1 min-h-[44px] px-4 py-2 bg-blue-600 text-white rounded-lg font-medium"
-        >
-          {isEdit ? 'Update Workout' : 'Save Workout'}
-        </button>
-      </div>
+      <button
+        type="button"
+        onClick={handleSave}
+        className="w-full h-14 btn-volt press caps-tight text-[11px]"
+        style={{ borderRadius: '2px', letterSpacing: '0.12em' }}
+      >
+        {isEdit ? 'Update Session →' : 'Save Session →'}
+      </button>
 
       {showSaveGroup && (
-        <SaveGroupModal
-          onSave={handleSaveAsGroup}
-          onClose={() => setShowSaveGroup(false)}
-        />
+        <SaveGroupModal onSave={handleSaveAsGroup} onClose={() => setShowSaveGroup(false)} />
       )}
+    </div>
+  );
+}
+
+function HeroStat({ label, value, divider }: { label: string; value: number; divider?: boolean }) {
+  return (
+    <div
+      className="pt-3 px-1"
+      style={divider ? { borderLeft: '1px solid var(--color-line)' } : undefined}
+    >
+      <div className="caps-tight text-[9px]" style={{ color: 'var(--color-text-faint)' }}>
+        {label}
+      </div>
+      <div
+        className="font-mono leading-none mt-1"
+        style={{
+          fontSize: '1.75rem',
+          fontWeight: 500,
+          color: value > 0 ? 'var(--color-text)' : 'var(--color-text-faint)',
+          fontVariantNumeric: 'tabular-nums',
+        }}
+      >
+        {String(value).padStart(2, '0')}
+      </div>
     </div>
   );
 }

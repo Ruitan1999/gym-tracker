@@ -1,20 +1,14 @@
 import { useNavigate } from 'react-router-dom';
 import { useAppContext } from '../../context/AppContext';
-import { kgToLb } from '../../utils/conversions';
 import type { Workout } from '../../types';
 
 interface WorkoutCardProps {
   workout: Workout;
 }
 
-function formatDate(dateStr: string): string {
-  const [year, month, day] = dateStr.split('-').map(Number);
-  const date = new Date(year, month - 1, day);
-  return date.toLocaleDateString('en-US', {
-    weekday: 'short',
-    month: 'short',
-    day: 'numeric',
-  });
+function parseDate(s: string): Date {
+  const [y, m, d] = s.split('-').map(Number);
+  return new Date(y, m - 1, d);
 }
 
 function formatTime(iso: string | undefined): string | null {
@@ -27,76 +21,152 @@ function formatTime(iso: string | undefined): string | null {
 export default function WorkoutCard({ workout }: WorkoutCardProps) {
   const navigate = useNavigate();
   const { appData } = useAppContext();
-  const unit = appData.preferences.weightUnit;
+
+  const d = parseDate(workout.date);
+  const dayNum = d.getDate();
+  const weekday = d.toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase();
 
   const exerciseCount = workout.entries.length;
-  const totalSets = workout.entries.reduce(
-    (sum, entry) => sum + entry.sets.length, 0
-  );
+  const totalSets = workout.entries.reduce((sum, e) => sum + e.sets.length, 0);
   const totalVolumeKg = workout.entries.reduce(
-    (sum, entry) =>
-      sum + entry.sets.reduce((s, set) => s + set.reps * set.weightKg, 0),
-    0
+    (sum, e) => sum + e.sets.reduce((s, set) => s + set.reps * set.weightKg, 0),
+    0,
   );
-  const displayVolume = unit === 'lb' ? kgToLb(totalVolumeKg) : totalVolumeKg;
   const volumeLabel =
-    displayVolume < 10000
-      ? `${Math.round(displayVolume)} ${unit}`
-      : `${(displayVolume / 1000).toFixed(1)}k ${unit}`;
+    totalVolumeKg < 10000
+      ? `${Math.round(totalVolumeKg)}`
+      : `${(totalVolumeKg / 1000).toFixed(1)}K`;
 
   const exerciseNames = workout.entries.map((entry) => {
     const exercise = appData.exercises.find((e) => e.id === entry.exerciseId);
     return exercise?.name ?? 'Unknown';
   });
 
-  let summaryLine = '';
-  if (exerciseNames.length === 0) {
-    summaryLine = 'No exercises';
-  } else if (exerciseNames.length <= 2) {
-    summaryLine = exerciseNames.join(', ');
-  } else {
-    summaryLine = `${exerciseNames[0]}, ${exerciseNames[1]} +${exerciseNames.length - 2} more`;
-  }
+  const summary =
+    exerciseNames.length === 0
+      ? 'No exercises'
+      : exerciseNames.length <= 2
+      ? exerciseNames.join(' ')
+      : `${exerciseNames[0]} ${exerciseNames[1]} +${exerciseNames.length - 2}`;
 
-  // Parse rating
   const ratingMatch = workout.notes?.match(/^Rating: (\d+)/);
-  const rating = ratingMatch ? parseInt(ratingMatch[1]) : null;
+  const rating = ratingMatch ? parseInt(ratingMatch[1], 10) : null;
+  const ratingColor =
+    rating == null
+      ? null
+      : rating <= 3
+      ? 'var(--color-steel)'
+      : rating <= 6
+      ? 'var(--color-ember)'
+      : rating <= 8
+      ? 'var(--color-volt)'
+      : 'var(--color-rust)';
+
+  const time = formatTime(workout.createdAt);
 
   return (
     <button
       type="button"
       onClick={() => navigate(`/history/${workout.id}`)}
-      className="bg-white rounded-xl p-4 shadow-sm w-full text-left active:bg-gray-50 transition-colors"
+      className="w-full text-left card press flex"
     >
-      <div className="flex items-center justify-between mb-1">
-        <div className="flex items-baseline gap-2">
-          <span className="text-base font-semibold text-gray-900">
-            {formatDate(workout.date)}
-          </span>
-          {formatTime(workout.createdAt) && (
-            <span className="text-xs text-gray-400">
-              {formatTime(workout.createdAt)}
-            </span>
-          )}
+      {/* Date stub — like a torn calendar page */}
+      <div
+        className="shrink-0 w-20 flex flex-col items-center justify-center py-4"
+        style={{
+          borderRight: '1px solid var(--color-line)',
+        }}
+      >
+        <div
+          className="caps-tight text-[9px]"
+          style={{ color: 'var(--color-text)' }}
+        >
+          {weekday}
         </div>
-        <div className="flex items-center gap-2">
-          {rating && (
-            <span className={`w-6 h-6 rounded-full text-xs font-bold text-white flex items-center justify-center ${
-              rating <= 3 ? 'bg-red-500' : rating <= 6 ? 'bg-amber-500' : 'bg-green-500'
-            }`}>
-              {rating}
-            </span>
-          )}
+        <div
+          className="font-display leading-none mt-0.5"
+          style={{
+            fontSize: '2.25rem',
+            fontWeight: 700,
+            letterSpacing: '-0.04em',
+            fontVariationSettings: '"wdth" 85',
+            color: 'var(--color-text)',
+          }}
+        >
+          {String(dayNum).padStart(2, '0')}
         </div>
+        {time && (
+          <div
+            className="caps-tight text-[9px] mt-1"
+            style={{ color: 'var(--color-text-faint)' }}
+          >
+            {time.replace(/\s/g, '')}
+          </div>
+        )}
       </div>
-      <p className="text-sm text-gray-600 truncate">{summaryLine}</p>
-      <div className="flex items-center gap-3 mt-2 text-xs text-gray-400">
-        <span>{exerciseCount} exercise{exerciseCount !== 1 ? 's' : ''}</span>
-        <span>&middot;</span>
-        <span>{totalSets} set{totalSets !== 1 ? 's' : ''}</span>
-        <span>&middot;</span>
-        <span>{volumeLabel} vol</span>
+
+      <div className="flex-1 min-w-0 p-4">
+        <div className="flex items-start justify-between gap-2 mb-3">
+          <p
+            className="font-display truncate leading-tight"
+            style={{
+              fontSize: '1rem',
+              fontWeight: 600,
+              letterSpacing: '-0.015em',
+              fontVariationSettings: '"wdth" 95',
+              color: 'var(--color-text)',
+            }}
+          >
+            {summary}
+          </p>
+          {rating && ratingColor && (
+            <span
+              className="font-mono text-[10px] shrink-0 px-1.5 py-0.5"
+              style={{
+                color: ratingColor,
+                border: `1px solid ${ratingColor}`,
+                fontWeight: 500,
+                fontVariantNumeric: 'tabular-nums',
+              }}
+            >
+              RPE {rating}
+            </span>
+          )}
+        </div>
+
+        <div className="grid grid-cols-3 gap-2">
+          <MiniStat label="EXERCISE" value={exerciseCount} />
+          <MiniStat label="SETS" value={totalSets} />
+          <MiniStat label="VOL KG" value={volumeLabel} />
+        </div>
       </div>
     </button>
+  );
+}
+
+function MiniStat({
+  label,
+  value,
+}: {
+  label: string;
+  value: string | number;
+}) {
+  return (
+    <div>
+      <div className="caps-tight text-[8px]" style={{ color: 'var(--color-text-faint)' }}>
+        {label}
+      </div>
+      <div
+        className="font-mono leading-none mt-0.5"
+        style={{
+          fontSize: '0.9375rem',
+          fontWeight: 500,
+          color: 'var(--color-text)',
+          fontVariantNumeric: 'tabular-nums',
+        }}
+      >
+        {value}
+      </div>
+    </div>
   );
 }

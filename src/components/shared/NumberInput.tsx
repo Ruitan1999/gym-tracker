@@ -7,16 +7,24 @@ interface NumberInputProps {
   placeholder?: string;
   min?: number;
   id?: string;
+  variant?: 'default' | 'bare';
 }
 
-export default function NumberInput({ value, onChange, label, placeholder, min, id: externalId }: NumberInputProps) {
+export default function NumberInput({
+  value,
+  onChange,
+  label,
+  placeholder,
+  min,
+  id: externalId,
+  variant = 'default',
+}: NumberInputProps) {
   const generatedId = useId();
   const inputId = externalId ?? generatedId;
 
   const [rawValue, setRawValue] = useState<string>(value === '' ? '' : String(value));
   const isTypingRef = useRef(false);
 
-  // Sync rawValue from external value prop, but only when the change comes from outside (not from typing)
   useEffect(() => {
     if (!isTypingRef.current) {
       setRawValue(value === '' ? '' : String(value));
@@ -49,19 +57,45 @@ export default function NumberInput({ value, onChange, label, placeholder, min, 
 
     const num = parseFloat(rawValue);
     if (isNaN(num) || (min !== undefined && num < min)) {
-      // Revert to the last known good value from props
       setRawValue(value === '' ? '' : String(value));
     } else {
-      // Normalize the display (e.g., "1." becomes "1")
       setRawValue(String(num));
       onChange(num);
     }
   }
 
+  if (variant === 'bare') {
+    return (
+      <input
+        id={inputId}
+        type="text"
+        inputMode="decimal"
+        value={rawValue}
+        onChange={handleChange}
+        onBlur={handleBlur}
+        placeholder={placeholder}
+        className="font-mono w-full h-12 px-3 bg-transparent outline-none"
+        style={{
+          color: 'var(--color-text)',
+          fontSize: '1.25rem',
+          fontWeight: 500,
+          fontVariantNumeric: 'tabular-nums',
+          letterSpacing: '-0.01em',
+        }}
+      />
+    );
+  }
+
   return (
-    <div className="flex flex-col gap-1">
+    <div className="flex flex-col gap-1.5">
       {label && (
-        <label htmlFor={inputId} className="text-sm text-gray-500 font-medium">{label}</label>
+        <label
+          htmlFor={inputId}
+          className="caps-tight text-[9px]"
+          style={{ color: 'var(--color-text-muted)' }}
+        >
+          {label}
+        </label>
       )}
       <input
         id={inputId}
@@ -71,7 +105,15 @@ export default function NumberInput({ value, onChange, label, placeholder, min, 
         onChange={handleChange}
         onBlur={handleBlur}
         placeholder={placeholder}
-        className="min-h-[44px] px-3 py-2 border border-gray-300 rounded-lg text-[16px] text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-blue-600"
+        className="font-mono w-full h-12 px-3 outline-none focus:border-[var(--color-volt)] transition-colors"
+        style={{
+          background: 'var(--color-ink)',
+          color: 'var(--color-text)',
+          border: '1px solid var(--color-line-2)',
+          borderRadius: '2px',
+          fontSize: '1rem',
+          fontVariantNumeric: 'tabular-nums',
+        }}
       />
     </div>
   );

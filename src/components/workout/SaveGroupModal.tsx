@@ -22,12 +22,40 @@ export default function SaveGroupModal({ defaultName = '', onSave, onClose }: Sa
 
   return (
     <>
-      <div className="fixed inset-0 bg-black/40 z-50" onClick={onClose} />
-      <div className="fixed inset-x-4 top-1/2 -translate-y-1/2 z-50 bg-white rounded-xl p-5 shadow-xl max-w-md mx-auto">
-        <h3 className="text-lg font-semibold text-gray-900 mb-1">Save as group</h3>
-        <p className="text-sm text-gray-500 mb-3">
-          Give this workout a name so you can start from it next time.
+      <div
+        className="fixed inset-0 z-50"
+        style={{ background: 'rgba(5,5,5,0.7)', backdropFilter: 'blur(6px)' }}
+        onClick={onClose}
+      />
+      <div
+        className="fixed inset-x-4 top-1/2 -translate-y-1/2 z-50 max-w-md mx-auto p-5"
+        style={{
+          background: 'var(--color-elev)',
+          border: '1px solid var(--color-line-2)',
+          borderRadius: '2px',
+          boxShadow: '0 20px 60px rgba(0,0,0,0.6)',
+        }}
+      >
+        <div className="caps-tight text-[9px] mb-2" style={{ color: 'var(--color-text)' }}>
+          SAVE AS GROUP
+        </div>
+        <h3
+          className="font-display mb-1"
+          style={{
+            fontSize: '1.375rem',
+            fontWeight: 700,
+            letterSpacing: '-0.025em',
+            color: 'var(--color-text)',
+          }}
+        >
+          Name this protocol
+        </h3>
+        <p className="text-[13px] mb-4" style={{ color: 'var(--color-text-muted)' }}>
+          A group lets you start from it next session.
         </p>
+        <div className="caps-tight text-[9px] mb-1.5" style={{ color: 'var(--color-text-faint)' }}>
+          GROUP LABEL
+        </div>
         <input
           ref={inputRef}
           type="text"
@@ -36,24 +64,34 @@ export default function SaveGroupModal({ defaultName = '', onSave, onClose }: Sa
           onKeyDown={(e) => {
             if (e.key === 'Enter') submit();
           }}
-          placeholder="e.g. Leg day, Arm day"
-          className="w-full min-h-[44px] px-3 py-2 border border-gray-300 rounded-lg text-[16px] text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-600"
+          placeholder="e.g. LEG DAY A"
+          className="w-full h-12 px-3 font-display outline-none"
+          style={{
+            background: 'var(--color-ink)',
+            border: '1px solid var(--color-line-2)',
+            borderRadius: '2px',
+            fontSize: '16px',
+            fontWeight: 500,
+            color: 'var(--color-text)',
+          }}
         />
-        <div className="flex gap-3 mt-4">
+        <div className="grid grid-cols-2 gap-2 mt-5">
           <button
             type="button"
             onClick={onClose}
-            className="flex-1 min-h-[44px] px-4 py-2 border border-gray-300 rounded-lg text-gray-700 font-medium"
+            className="h-12 btn-ghost press caps-tight text-[11px]"
+            style={{ borderRadius: '2px' }}
           >
-            Cancel
+            CANCEL
           </button>
           <button
             type="button"
             onClick={submit}
             disabled={!name.trim()}
-            className="flex-1 min-h-[44px] px-4 py-2 bg-blue-600 text-white rounded-lg font-medium disabled:opacity-50"
+            className="h-12 btn-volt press caps-tight text-[11px] disabled:opacity-40"
+            style={{ borderRadius: '2px' }}
           >
-            Save
+            COMMIT →
           </button>
         </div>
       </div>

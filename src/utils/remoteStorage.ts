@@ -1,6 +1,7 @@
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { db } from '../firebase/config';
 import type { AppData } from '../types';
+import { DEFAULT_PREFERENCES } from '../types';
 import { defaultExercises } from '../data/defaultExercises';
 
 function getDefaultAppData(): AppData {
@@ -8,7 +9,7 @@ function getDefaultAppData(): AppData {
     exercises: defaultExercises,
     workouts: [],
     groups: [],
-    preferences: { weightUnit: 'kg' },
+    preferences: { ...DEFAULT_PREFERENCES },
     dataVersion: 1,
   };
 }
@@ -31,7 +32,7 @@ export async function loadRemoteAppData(uid: string): Promise<{ data: AppData; e
       exercises: raw.exercises ?? defaultExercises,
       workouts: raw.workouts ?? [],
       groups: raw.groups ?? [],
-      preferences: raw.preferences ?? { weightUnit: 'kg' },
+      preferences: { ...DEFAULT_PREFERENCES, ...(raw.preferences ?? {}) },
       dataVersion: raw.dataVersion ?? 1,
     },
   };

@@ -23,7 +23,7 @@ describe('storage', () => {
         exercises: [{ id: 'custom-1', name: 'Custom Ex', category: 'push', isCustom: true }],
         workouts: [],
         groups: [],
-        preferences: { weightUnit: 'lb' },
+        preferences: { weightUnit: 'lb', quickReps: [5, 8, 10], weightStepKg: 2.5, weightStepLb: 5 },
         dataVersion: 1,
       };
       localStorage.setItem('gym-tracker-data', JSON.stringify(stored));
@@ -43,6 +43,41 @@ describe('storage', () => {
       expect(data.workouts).toEqual([]);
       expect(data.preferences.weightUnit).toBe('kg');
     });
+
+    it('fills missing preference fields with defaults when older data has only weightUnit', () => {
+      const legacy = {
+        exercises: defaultExercises,
+        workouts: [],
+        groups: [],
+        preferences: { weightUnit: 'lb' },
+        dataVersion: 1,
+      };
+      localStorage.setItem('gym-tracker-data', JSON.stringify(legacy));
+
+      const data = loadAppData();
+
+      expect(data.preferences.weightUnit).toBe('lb');
+      expect(data.preferences.quickReps).toEqual([2, 4, 6, 8, 10]);
+      expect(data.preferences.weightStepKg).toBe(2.5);
+      expect(data.preferences.weightStepLb).toBe(5);
+    });
+
+    it('preserves custom quickReps and step values', () => {
+      const stored: AppData = {
+        exercises: defaultExercises,
+        workouts: [],
+        groups: [],
+        preferences: { weightUnit: 'kg', quickReps: [3, 5, 8], weightStepKg: 1.25, weightStepLb: 2.5 },
+        dataVersion: 1,
+      };
+      localStorage.setItem('gym-tracker-data', JSON.stringify(stored));
+
+      const data = loadAppData();
+
+      expect(data.preferences.quickReps).toEqual([3, 5, 8]);
+      expect(data.preferences.weightStepKg).toBe(1.25);
+      expect(data.preferences.weightStepLb).toBe(2.5);
+    });
   });
 
   describe('saveAppData', () => {
@@ -51,7 +86,7 @@ describe('storage', () => {
         exercises: [],
         workouts: [],
         groups: [],
-        preferences: { weightUnit: 'kg' },
+        preferences: { weightUnit: 'kg', quickReps: [5, 6, 8, 10, 12, 15], weightStepKg: 2.5, weightStepLb: 5 },
         dataVersion: 1,
       };
 
@@ -82,7 +117,7 @@ describe('storage', () => {
           },
         ],
         groups: [],
-        preferences: { weightUnit: 'lb' },
+        preferences: { weightUnit: 'lb', quickReps: [5, 8, 10], weightStepKg: 2.5, weightStepLb: 5 },
         dataVersion: 1,
       };
 

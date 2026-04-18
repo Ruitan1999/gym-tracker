@@ -1,4 +1,5 @@
 import type { AppData } from '../types';
+import { DEFAULT_PREFERENCES } from '../types';
 import { defaultExercises } from '../data/defaultExercises';
 
 const STORAGE_KEY = 'gym-tracker-data';
@@ -8,7 +9,7 @@ function getDefaultAppData(): AppData {
     exercises: defaultExercises,
     workouts: [],
     groups: [],
-    preferences: { weightUnit: 'kg' },
+    preferences: { ...DEFAULT_PREFERENCES },
     dataVersion: 1,
   };
 }
@@ -32,7 +33,7 @@ export function loadAppData(): AppData {
       exercises: parsed.exercises ?? defaultExercises,
       workouts: parsed.workouts ?? [],
       groups: parsed.groups ?? [],
-      preferences: parsed.preferences ?? { weightUnit: 'kg' },
+      preferences: { ...DEFAULT_PREFERENCES, ...(parsed.preferences ?? {}) },
       dataVersion: parsed.dataVersion ?? 1,
     };
   } catch {

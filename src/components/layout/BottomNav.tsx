@@ -1,34 +1,34 @@
 import { useEffect, useState } from 'react';
 import { NavLink } from 'react-router-dom';
+import { Dumbbell, NotebookText, TrendingUp, Settings } from 'lucide-react';
+
+const ICON_SIZE = 22;
+const ICON_STROKE = 1.75;
 
 const tabs = [
   {
     to: '/',
     label: 'Log',
-    icon: (
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6">
-        <path d="M12 5v14M5 12h14" />
-      </svg>
-    ),
+    code: '01',
+    icon: <Dumbbell size={ICON_SIZE} strokeWidth={ICON_STROKE} />,
   },
   {
     to: '/history',
-    label: 'History',
-    icon: (
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6">
-        <circle cx="12" cy="12" r="10" />
-        <polyline points="12 6 12 12 16 14" />
-      </svg>
-    ),
+    label: 'Log Book',
+    code: '02',
+    icon: <NotebookText size={ICON_SIZE} strokeWidth={ICON_STROKE} />,
   },
   {
     to: '/progress',
-    label: 'Progress',
-    icon: (
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6">
-        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
-      </svg>
-    ),
+    label: 'Trend',
+    code: '03',
+    icon: <TrendingUp size={ICON_SIZE} strokeWidth={ICON_STROKE} />,
+  },
+  {
+    to: '/settings',
+    label: 'Settings',
+    code: '04',
+    icon: <Settings size={ICON_SIZE} strokeWidth={ICON_STROKE} />,
   },
 ];
 
@@ -55,24 +55,50 @@ export default function BottomNav() {
   if (keyboardOpen) return null;
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-300 flex justify-around items-center z-50"
-      style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
+    <nav
+      className="fixed bottom-0 left-0 right-0 z-50"
+      style={{
+        paddingBottom: 'var(--safe-bottom)',
+        background: 'var(--color-surface)',
+        borderTop: '1px solid var(--color-line-2)',
+      }}
+      aria-label="Primary"
     >
-      {tabs.map((tab) => (
-        <NavLink
-          key={tab.to}
-          to={tab.to}
-          end={tab.to === '/'}
-          className={({ isActive }) =>
-            `flex flex-col items-center justify-center min-h-[44px] py-2 px-4 text-xs font-medium ${
-              isActive ? 'text-blue-600' : 'text-gray-500'
-            }`
-          }
-        >
-          {tab.icon}
-          <span className="mt-1">{tab.label}</span>
-        </NavLink>
-      ))}
+      <div className="grid grid-cols-4">
+        {tabs.map((tab) => (
+          <NavLink
+            key={tab.to}
+            to={tab.to}
+            end={tab.to === '/'}
+            className={({ isActive }) =>
+              `group relative flex flex-col items-center justify-center gap-1 pt-3 pb-3 min-h-[60px] press ${
+                isActive ? 'text-[var(--color-text)]' : 'text-[var(--color-text-muted)]'
+              }`
+            }
+          >
+            {({ isActive }) => (
+              <>
+                {/* top tick indicator */}
+                <span
+                  aria-hidden
+                  className="absolute top-0 left-1/2 -translate-x-1/2 h-[2px] transition-all duration-300"
+                  style={{
+                    width: isActive ? '38%' : '0%',
+                    background: 'var(--color-volt)',
+                  }}
+                />
+                {tab.icon}
+                <span
+                  className="caps-tight text-[9px]"
+                  style={{ letterSpacing: '0.12em' }}
+                >
+                  {tab.label}
+                </span>
+              </>
+            )}
+          </NavLink>
+        ))}
+      </div>
     </nav>
   );
 }

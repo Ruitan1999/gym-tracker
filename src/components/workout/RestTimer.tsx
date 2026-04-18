@@ -45,29 +45,48 @@ export default function RestTimer() {
   const secs = seconds % 60;
   const progress = targetSeconds > 0 ? ((targetSeconds - seconds) / targetSeconds) * 100 : 0;
 
-  // Floating button when closed, or when timer is running show mini display
   if (!isOpen) {
+    const badgeColor = isRunning
+      ? 'var(--color-volt)'
+      : hasFinished
+      ? 'var(--color-rust)'
+      : 'var(--color-text)';
+
     return (
       <button
         type="button"
         onClick={() => setIsOpen(true)}
-        className={`fixed bottom-20 right-4 z-30 w-14 h-14 rounded-full shadow-lg flex items-center justify-center text-white font-bold transition-all ${
-          isRunning
-            ? 'bg-blue-600 animate-pulse'
-            : hasFinished
-            ? 'bg-green-500'
-            : 'bg-gray-700'
-        }`}
-        style={{ marginBottom: 'env(safe-area-inset-bottom)' }}
+        aria-label="Open rest timer"
+        className="fixed right-4 z-30 h-14 min-w-[56px] px-3 flex items-center justify-center gap-2 press"
+        style={{
+          bottom: 'calc(5rem + var(--safe-bottom))',
+          background: 'var(--color-surface)',
+          border: `1px solid ${isRunning ? 'var(--color-volt)' : 'var(--color-line-3)'}`,
+          boxShadow: '0 6px 18px rgba(20, 20, 20, 0.12)',
+          color: badgeColor,
+          borderRadius: '2px',
+          animation: isRunning ? 'pulse-volt 1.8s ease-in-out infinite' : undefined,
+        }}
       >
         {isRunning ? (
-          <span className="text-sm tabular-nums">{mins}:{String(secs).padStart(2, '0')}</span>
+          <span
+            className="font-mono"
+            style={{ fontSize: '1.125rem', fontWeight: 500, fontVariantNumeric: 'tabular-nums' }}
+          >
+            {mins}:{String(secs).padStart(2, '0')}
+          </span>
         ) : hasFinished ? (
-          <span className="text-xs">GO!</span>
+          <span className="caps-tight text-[11px]" style={{ letterSpacing: '0.14em' }}>
+            GO
+          </span>
         ) : (
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-6 h-6">
-            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm.75-13a.75.75 0 00-1.5 0v5c0 .414.336.75.75.75h4a.75.75 0 000-1.5h-3.25V5z" clipRule="evenodd" />
-          </svg>
+          <>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="square" className="w-4 h-4">
+              <circle cx="12" cy="13" r="8" />
+              <path d="M12 9v4l2.5 2.5M9 3h6" />
+            </svg>
+            <span className="caps-tight text-[10px]">REST</span>
+          </>
         )}
       </button>
     );
@@ -75,66 +94,130 @@ export default function RestTimer() {
 
   return (
     <>
-      <div className="fixed inset-0 bg-black/40 z-40" onClick={() => setIsOpen(false)} />
-      <div className="fixed inset-x-0 bottom-0 z-50 bg-white rounded-t-2xl p-6 animate-[slideUp_0.2s_ease-out]"
-        style={{ paddingBottom: 'calc(1.5rem + env(safe-area-inset-bottom))' }}
+      <div
+        className="fixed inset-0 z-40"
+        style={{ background: 'rgba(5, 5, 5, 0.7)', backdropFilter: 'blur(6px)' }}
+        onClick={() => setIsOpen(false)}
+      />
+      <div
+        className="fixed inset-x-0 bottom-0 z-50 animate-[slideUp_0.22s_ease-out]"
+        style={{
+          background: 'var(--color-elev)',
+          borderTop: '1px solid var(--color-line-2)',
+          paddingBottom: 'calc(1.5rem + var(--safe-bottom))',
+        }}
       >
-        <div className="flex justify-center mb-4">
-          <div className="w-10 h-1 bg-gray-300 rounded-full" />
+        <div className="flex justify-center pt-2 pb-3">
+          <div className="w-10 h-[3px]" style={{ background: 'var(--color-line-3)' }} />
         </div>
 
-        <h3 className="text-lg font-semibold text-gray-900 text-center mb-4">Rest Timer</h3>
-
-        {/* Timer display */}
-        <div className="relative w-32 h-32 mx-auto mb-6">
-          {/* Background circle */}
-          <svg className="w-32 h-32 -rotate-90" viewBox="0 0 100 100">
-            <circle cx="50" cy="50" r="44" fill="none" stroke="#F3F4F6" strokeWidth="6" />
-            <circle
-              cx="50" cy="50" r="44" fill="none"
-              stroke={hasFinished ? '#16A34A' : '#2563EB'}
-              strokeWidth="6"
-              strokeLinecap="round"
-              strokeDasharray={`${2 * Math.PI * 44}`}
-              strokeDashoffset={`${2 * Math.PI * 44 * (1 - progress / 100)}`}
-              className="transition-all duration-1000 ease-linear"
-            />
-          </svg>
-          <div className="absolute inset-0 flex items-center justify-center">
-            <span className={`text-3xl font-bold tabular-nums ${hasFinished ? 'text-green-600' : 'text-gray-900'}`}>
-              {hasFinished ? 'Go!' : `${mins}:${String(secs).padStart(2, '0')}`}
-            </span>
-          </div>
-        </div>
-
-        {/* Presets */}
-        <div className="flex justify-center gap-2 mb-4">
-          {PRESETS.map((p) => (
-            <button
-              key={p}
-              type="button"
-              onClick={() => startTimer(p)}
-              className={`px-3 h-9 rounded-full text-sm font-medium ${
-                targetSeconds === p && isRunning
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-100 text-gray-700 active:bg-gray-200'
-              }`}
+        <div className="px-6">
+          <div className="flex items-center justify-between mb-5">
+            <div className="caps-tight text-[9px]" style={{ color: 'var(--color-text-faint)' }}>
+              REST INTERVAL
+            </div>
+            <div
+              className="caps-tight text-[9px]"
+              style={{ color: isRunning ? 'var(--color-text)' : 'var(--color-text-faint)' }}
             >
-              {p >= 60 ? `${p / 60}m` : `${p}s`}
-            </button>
-          ))}
-        </div>
+              {isRunning ? '● RUNNING' : hasFinished ? '✓ COMPLETE' : '○ STANDBY'}
+            </div>
+          </div>
 
-        {/* Stop button */}
-        {(isRunning || hasFinished) && (
-          <button
-            type="button"
-            onClick={stopTimer}
-            className="w-full min-h-[44px] rounded-lg bg-gray-100 text-gray-700 font-medium"
-          >
-            {hasFinished ? 'Dismiss' : 'Stop'}
-          </button>
-        )}
+          <div className="relative w-40 h-40 mx-auto mb-6">
+            <svg className="w-40 h-40 -rotate-90" viewBox="0 0 100 100">
+              <circle cx="50" cy="50" r="44" fill="none" stroke="var(--color-line)" strokeWidth="1" />
+              <circle
+                cx="50" cy="50" r="44" fill="none"
+                stroke={hasFinished ? 'var(--color-rust)' : 'var(--color-volt)'}
+                strokeWidth="2"
+                strokeLinecap="butt"
+                strokeDasharray={`${2 * Math.PI * 44}`}
+                strokeDashoffset={`${2 * Math.PI * 44 * (1 - progress / 100)}`}
+                className="transition-all duration-1000 ease-linear"
+              />
+              {[...Array(12)].map((_, i) => (
+                <line
+                  key={i}
+                  x1="50"
+                  y1="2"
+                  x2="50"
+                  y2="6"
+                  stroke="var(--color-line-2)"
+                  strokeWidth="0.5"
+                  transform={`rotate(${i * 30} 50 50)`}
+                />
+              ))}
+            </svg>
+            <div className="absolute inset-0 flex flex-col items-center justify-center">
+              {hasFinished ? (
+                <span
+                  className="caps"
+                  style={{
+                    fontSize: '1.5rem',
+                    color: 'var(--color-rust)',
+                    letterSpacing: '0.2em',
+                  }}
+                >
+                  GO
+                </span>
+              ) : (
+                <span
+                  className="font-mono leading-none"
+                  style={{
+                    fontSize: '2.75rem',
+                    fontWeight: 500,
+                    fontVariantNumeric: 'tabular-nums',
+                    color: 'var(--color-text)',
+                    letterSpacing: '-0.02em',
+                  }}
+                >
+                  {mins}:{String(secs).padStart(2, '0')}
+                </span>
+              )}
+              <span
+                className="caps-tight text-[9px] mt-1"
+                style={{ color: 'var(--color-text-faint)' }}
+              >
+                {isRunning ? `OF ${targetSeconds}S` : 'TARGET'}
+              </span>
+            </div>
+          </div>
+
+          <div className="flex justify-between gap-1.5 mb-4">
+            {PRESETS.map((p) => {
+              const active = targetSeconds === p && isRunning;
+              return (
+                <button
+                  key={p}
+                  type="button"
+                  onClick={() => startTimer(p)}
+                  className="flex-1 h-11 press caps-tight text-[10px]"
+                  style={{
+                    background: active ? 'var(--color-volt)' : 'transparent',
+                    color: active ? '#ffffff' : 'var(--color-text)',
+                    border: `1px solid ${active ? 'var(--color-volt)' : 'var(--color-line-2)'}`,
+                    borderRadius: '2px',
+                    fontVariantNumeric: 'tabular-nums',
+                  }}
+                >
+                  {p >= 60 ? `${p / 60}M` : `${p}S`}
+                </button>
+              );
+            })}
+          </div>
+
+          {(isRunning || hasFinished) && (
+            <button
+              type="button"
+              onClick={stopTimer}
+              className="w-full h-12 btn-ghost press caps-tight text-[11px]"
+              style={{ borderRadius: '2px' }}
+            >
+              {hasFinished ? 'DISMISS' : 'STOP'}
+            </button>
+          )}
+        </div>
       </div>
     </>
   );

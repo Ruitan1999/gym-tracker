@@ -13,6 +13,7 @@ import ProgressPage from './pages/ProgressPage';
 import ExerciseDetailPage from './pages/ExerciseDetailPage';
 import ExerciseLibraryPage from './pages/ExerciseLibraryPage';
 import GroupsPage from './pages/GroupsPage';
+import SettingsPage from './pages/SettingsPage';
 import SignInPage from './pages/SignInPage';
 
 function AppRoutes() {
@@ -30,9 +31,10 @@ function AppRoutes() {
         <Route path="/progress/:exerciseId" element={<ExerciseDetailPage />} />
         <Route path="/exercises" element={<ExerciseLibraryPage />} />
         <Route path="/groups" element={<GroupsPage />} />
+        <Route path="/settings" element={<SettingsPage />} />
       </Routes>
       <BottomNav />
-      {isLogPage && <RestTimer />}
+      {false && isLogPage && <RestTimer />}
     </>
   );
 }

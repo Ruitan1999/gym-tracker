@@ -8,19 +8,25 @@ interface ExerciseSelectProps {
 }
 
 const CATEGORY_ORDER: ExerciseCategory[] = ['push', 'pull', 'legs', 'core', 'cardio'];
-const CATEGORY_COLORS: Record<ExerciseCategory, string> = {
-  push: 'bg-blue-100 text-blue-700',
-  pull: 'bg-violet-100 text-violet-700',
-  legs: 'bg-red-100 text-red-700',
-  core: 'bg-amber-100 text-amber-700',
-  cardio: 'bg-green-100 text-green-700',
+const CATEGORY_CODE: Record<ExerciseCategory, string> = {
+  push: 'PSH',
+  pull: 'PLL',
+  legs: 'LEG',
+  core: 'COR',
+  cardio: 'CRD',
+};
+const CATEGORY_ACCENT: Record<ExerciseCategory, string> = {
+  push: 'var(--color-volt)',
+  pull: 'var(--color-ember)',
+  legs: 'var(--color-rust)',
+  core: 'var(--color-volt)',
+  cardio: 'var(--color-ember)',
 };
 
 export default function ExerciseSelect({ onSelect, onClose }: ExerciseSelectProps) {
   const { appData } = useAppContext();
   const [filter, setFilter] = useState('');
 
-  // Recently used exercises (from last 10 workouts)
   const recentExerciseIds = useMemo(() => {
     const seen = new Set<string>();
     const recent: string[] = [];
@@ -64,59 +70,117 @@ export default function ExerciseSelect({ onSelect, onClose }: ExerciseSelectProp
 
   return (
     <>
-      {/* Backdrop */}
-      <div className="fixed inset-0 bg-black/40 z-50" onClick={onClose} />
+      <div
+        className="fixed inset-0 z-50"
+        style={{ background: 'rgba(5,5,5,0.72)', backdropFilter: 'blur(6px)' }}
+        onClick={onClose}
+      />
 
-      {/* Bottom sheet — fixed height so it doesn't jump around as results change */}
-      <div className="fixed inset-x-0 bottom-0 z-50 bg-white rounded-t-2xl h-[85dvh] flex flex-col animate-[slideUp_0.2s_ease-out]">
+      <div
+        className="fixed inset-x-0 bottom-0 z-50 h-[88dvh] flex flex-col animate-[slideUp_0.22s_ease-out]"
+        style={{
+          background: 'var(--color-elev)',
+          borderTop: '1px solid var(--color-line-2)',
+        }}
+      >
         {/* Handle */}
-        <div className="flex justify-center pt-3 pb-1">
-          <div className="w-10 h-1 bg-gray-300 rounded-full" />
+        <div className="flex justify-center pt-2 pb-1.5">
+          <div className="w-10 h-[3px]" style={{ background: 'var(--color-line-3)' }} />
         </div>
 
         {/* Header */}
-        <div className="px-4 pb-3 flex items-center justify-between">
-          <h3 className="text-lg font-semibold text-gray-900">Add Exercise</h3>
+        <div className="px-5 pt-2 pb-3 flex items-end justify-between">
+          <div>
+            <div className="caps-tight text-[9px]" style={{ color: 'var(--color-text)' }}>
+              INDEX EXERCISE
+            </div>
+            <h3
+              className="font-display mt-1"
+              style={{
+                fontSize: '1.5rem',
+                fontWeight: 700,
+                letterSpacing: '-0.03em',
+                color: 'var(--color-text)',
+              }}
+            >
+              Add to session
+            </h3>
+          </div>
           <button
             type="button"
             onClick={onClose}
-            className="text-gray-500 text-sm font-medium min-h-[44px] px-2"
+            className="h-10 px-3 caps-tight text-[10px] press"
+            style={{ color: 'var(--color-text-muted)' }}
           >
-            Cancel
+            CLOSE ✕
           </button>
         </div>
 
         {/* Search */}
-        <div className="px-4 pb-3">
+        <div className="px-5 pb-3">
           <input
             type="text"
-            placeholder="Search exercises..."
+            placeholder="SEARCH TYPE TO FILTER"
             value={filter}
             onChange={(e) => setFilter(e.target.value)}
             autoFocus
-            className="w-full min-h-[44px] px-3 py-2 border border-gray-300 rounded-lg text-[16px] text-gray-900 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:bg-white"
+            className="w-full h-12 px-3 font-mono outline-none"
+            style={{
+              background: 'var(--color-ink)',
+              border: '1px solid var(--color-line-2)',
+              borderRadius: '2px',
+              fontSize: '15px',
+              letterSpacing: '0.02em',
+              color: 'var(--color-text)',
+            }}
           />
         </div>
 
         {/* Scrollable content */}
-        <div className="flex-1 overflow-y-auto px-4 pb-8">
+        <div className="flex-1 overflow-y-auto px-5 pb-8">
           {isSearching ? (
-            /* Search results */
             <div>
               {searchResults.length === 0 ? (
-                <p className="text-gray-400 text-sm text-center py-8">No exercises found</p>
+                <div
+                  className="text-center py-10 caps-tight text-[10px]"
+                  style={{ color: 'var(--color-text-faint)' }}
+                >
+                  NO MATCH
+                </div>
               ) : (
-                <ul className="divide-y divide-gray-100">
-                  {searchResults.map((ex) => (
+                <ul>
+                  {searchResults.map((ex, i) => (
                     <li key={ex.id}>
                       <button
                         type="button"
                         onClick={() => onSelect(ex.id)}
-                        className="w-full text-left px-2 py-3 min-h-[44px] flex items-center gap-3 active:bg-gray-50 rounded-lg"
+                        className="w-full text-left h-14 px-2 flex items-center gap-3 press"
+                        style={{
+                          borderBottom: '1px solid var(--color-line)',
+                          borderTop: i === 0 ? '1px solid var(--color-line)' : undefined,
+                        }}
                       >
-                        <span className="text-[16px] text-gray-900 flex-1">{ex.name}</span>
-                        <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${CATEGORY_COLORS[ex.category]}`}>
-                          {ex.category}
+                        <span
+                          className="font-mono text-[10px] w-8"
+                          style={{ color: 'var(--color-text-faint)' }}
+                        >
+                          {String(i + 1).padStart(2, '0')}
+                        </span>
+                        <span
+                          className="flex-1 text-[15px]"
+                          style={{ color: 'var(--color-text)', fontWeight: 500 }}
+                        >
+                          {ex.name}
+                        </span>
+                        <span
+                          className="caps-tight text-[9px] px-2 py-0.5"
+                          style={{
+                            color: CATEGORY_ACCENT[ex.category],
+                            border: `1px solid ${CATEGORY_ACCENT[ex.category]}`,
+                            borderRadius: '2px',
+                          }}
+                        >
+                          {CATEGORY_CODE[ex.category]}
                         </span>
                       </button>
                     </li>
@@ -125,19 +189,28 @@ export default function ExerciseSelect({ onSelect, onClose }: ExerciseSelectProp
               )}
             </div>
           ) : (
-            /* Default view: recent + categories */
-            <div className="flex flex-col gap-4">
-              {/* Recent */}
+            <div className="flex flex-col gap-6">
               {recentExercises.length > 0 && (
                 <div>
-                  <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Recent</h4>
-                  <div className="flex flex-wrap gap-2">
+                  <div className="caps text-[10px] mb-2.5 flex items-center gap-3">
+                    <span style={{ color: 'var(--color-text)' }}>00</span>
+                    <span style={{ color: 'var(--color-text)' }}>RECENT</span>
+                    <span className="flex-1 h-px" style={{ background: 'var(--color-line)' }} />
+                  </div>
+                  <div className="flex flex-wrap gap-1.5">
                     {recentExercises.map((ex) => ex && (
                       <button
                         key={ex.id}
                         type="button"
                         onClick={() => onSelect(ex.id)}
-                        className="px-3 py-2 bg-blue-50 text-blue-700 text-sm font-medium rounded-full min-h-[36px] active:bg-blue-100"
+                        className="h-10 px-3 text-[13px] press"
+                        style={{
+                          background: 'transparent',
+                          color: 'var(--color-text)',
+                          border: '1px solid var(--color-volt)',
+                          borderRadius: '2px',
+                          fontWeight: 500,
+                        }}
                       >
                         {ex.name}
                       </button>
@@ -146,27 +219,57 @@ export default function ExerciseSelect({ onSelect, onClose }: ExerciseSelectProp
                 </div>
               )}
 
-              {/* Categories */}
-              {CATEGORY_ORDER.map((cat) => (
-                <div key={cat}>
-                  <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">
-                    {cat}
-                  </h4>
-                  <ul className="divide-y divide-gray-100">
-                    {groupedByCategory[cat].map((ex) => (
-                      <li key={ex.id}>
-                        <button
-                          type="button"
-                          onClick={() => onSelect(ex.id)}
-                          className="w-full text-left px-2 py-2.5 min-h-[44px] text-[16px] text-gray-900 active:bg-gray-50 rounded-lg"
-                        >
-                          {ex.name}
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ))}
+              {CATEGORY_ORDER.map((cat, idx) => {
+                const list = groupedByCategory[cat];
+                if (list.length === 0) return null;
+                return (
+                  <div key={cat}>
+                    <div className="caps text-[10px] mb-2 flex items-center gap-3">
+                      <span style={{ color: CATEGORY_ACCENT[cat] }}>
+                        {String(idx + 1).padStart(2, '0')}
+                      </span>
+                      <span style={{ color: 'var(--color-text)' }}>{cat.toUpperCase()}</span>
+                      <span className="flex-1 h-px" style={{ background: 'var(--color-line)' }} />
+                      <span className="font-mono text-[10px]" style={{ color: 'var(--color-text-faint)' }}>
+                        {String(list.length).padStart(2, '0')}
+                      </span>
+                    </div>
+                    <ul>
+                      {list.map((ex, i) => (
+                        <li key={ex.id}>
+                          <button
+                            type="button"
+                            onClick={() => onSelect(ex.id)}
+                            className="w-full text-left h-12 px-2 flex items-center gap-3 press"
+                            style={{
+                              borderBottom: i < list.length - 1 ? '1px solid var(--color-line)' : undefined,
+                            }}
+                          >
+                            <span
+                              className="font-mono text-[10px] w-6"
+                              style={{ color: 'var(--color-text-faint)' }}
+                            >
+                              {String(i + 1).padStart(2, '0')}
+                            </span>
+                            <span
+                              className="flex-1 text-[15px]"
+                              style={{ color: 'var(--color-text)' }}
+                            >
+                              {ex.name}
+                            </span>
+                            <span
+                              className="text-[11px]"
+                              style={{ color: 'var(--color-text-muted)' }}
+                            >
+                              →
+                            </span>
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                );
+              })}
             </div>
           )}
         </div>

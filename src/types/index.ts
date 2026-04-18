@@ -29,7 +29,17 @@ export interface Workout {
 
 export interface UserPreferences {
   weightUnit: 'kg' | 'lb';
+  quickReps: number[];
+  weightStepKg: number;
+  weightStepLb: number;
 }
+
+export const DEFAULT_PREFERENCES: UserPreferences = {
+  weightUnit: 'kg',
+  quickReps: [2, 4, 6, 8, 10],
+  weightStepKg: 2.5,
+  weightStepLb: 5,
+};
 
 export interface WorkoutGroup {
   id: string;

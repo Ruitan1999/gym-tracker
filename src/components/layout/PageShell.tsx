@@ -1,42 +1,105 @@
 import type { ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AccountMenu from './AccountMenu';
+import Logo from '../shared/Logo';
 
 interface PageShellProps {
   title: string;
+  eyebrow?: string;
   rightAction?: ReactNode;
   children: ReactNode;
   showBack?: boolean;
+  topSlot?: ReactNode;
 }
 
-export default function PageShell({ title, rightAction, children, showBack }: PageShellProps) {
+export default function PageShell({ title, eyebrow, rightAction, children, showBack, topSlot }: PageShellProps) {
   const navigate = useNavigate();
 
   return (
-    <div className="flex flex-col h-[100dvh] bg-gray-100 overflow-hidden">
-      <header className="sticky top-0 z-40 bg-white border-b border-gray-200 flex items-center justify-between px-4 min-h-[48px]">
-        <div className="flex items-center gap-2">
-          {showBack && (
-            <button
-              type="button"
-              onClick={() => navigate(-1)}
-              className="w-8 h-8 flex items-center justify-center -ml-1 text-gray-600 rounded-full hover:bg-gray-100"
-              aria-label="Go back"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5">
-                <path fillRule="evenodd" d="M12.79 5.23a.75.75 0 01-.02 1.06L8.832 10l3.938 3.71a.75.75 0 11-1.04 1.08l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 011.06.02z" clipRule="evenodd" />
-              </svg>
-            </button>
-          )}
-          <h1 className="text-lg font-semibold text-gray-900">{title}</h1>
-        </div>
-        <div className="flex items-center gap-2">
-          {rightAction}
-          <AccountMenu />
+    <div className="flex flex-col h-[100dvh] overflow-hidden" style={{ background: 'var(--color-bg)' }}>
+      <header
+        className="sticky top-0 z-40 flex flex-col"
+        style={{
+          background: '#ffffff',
+          borderBottom: '1px solid var(--color-line)',
+          paddingTop: 'var(--safe-top)',
+        }}
+      >
+        <div className="flex items-center justify-between px-4 h-14">
+          <div className="flex items-center gap-3 min-w-0">
+            {showBack && (
+              <button
+                type="button"
+                onClick={() => navigate(-1)}
+                aria-label="Go back"
+                className="w-10 h-10 -ml-2 flex items-center justify-center press"
+                style={{ color: 'var(--color-text)' }}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="square" className="w-5 h-5">
+                  <path d="M15 6l-6 6 6 6" />
+                </svg>
+              </button>
+            )}
+            {showBack ? (
+              <div className="min-w-0">
+                {eyebrow && (
+                  <div className="caps text-[10px] truncate" style={{ color: 'var(--color-text-faint)' }}>
+                    {eyebrow}
+                  </div>
+                )}
+                <h1
+                  className="font-display leading-none truncate"
+                  style={{
+                    fontSize: '1.5rem',
+                    fontWeight: 700,
+                    letterSpacing: '-0.03em',
+                    fontVariationSettings: '"wdth" 90',
+                    color: 'var(--color-text)',
+                  }}
+                >
+                  {title}
+                </h1>
+              </div>
+            ) : (
+              <Logo withWordmark className="shrink-0" />
+            )}
+          </div>
+          <div className="flex items-center gap-1 shrink-0">
+            {rightAction}
+            <AccountMenu />
+          </div>
         </div>
       </header>
-      <main className="flex-1 overflow-y-auto pb-20 px-4 py-4">
-        {children}
+
+      <main
+        className="flex-1 overflow-y-auto"
+        style={{ paddingBottom: 'calc(6rem + var(--safe-bottom))' }}
+      >
+        <div className="px-4 pt-5">
+          {!showBack && topSlot}
+          {!showBack && (
+            <div className="mb-4">
+              {eyebrow && (
+                <div className="caps text-[10px]" style={{ color: 'var(--color-text-faint)' }}>
+                  {eyebrow}
+                </div>
+              )}
+              <h1
+                className="font-display leading-none"
+                style={{
+                  fontSize: '1.375rem',
+                  fontWeight: 700,
+                  letterSpacing: '-0.03em',
+                  fontVariationSettings: '"wdth" 90',
+                  color: 'var(--color-text)',
+                }}
+              >
+                {title}
+              </h1>
+            </div>
+          )}
+          {children}
+        </div>
       </main>
     </div>
   );

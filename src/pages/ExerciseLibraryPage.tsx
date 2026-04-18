@@ -5,20 +5,20 @@ import type { ExerciseCategory } from '../types';
 
 const CATEGORIES: ExerciseCategory[] = ['push', 'pull', 'legs', 'core', 'cardio'];
 
-const CATEGORY_COLORS: Record<ExerciseCategory, string> = {
-  push: 'bg-blue-500',
-  pull: 'bg-violet-500',
-  legs: 'bg-red-500',
-  core: 'bg-amber-500',
-  cardio: 'bg-green-500',
+const CATEGORY_LABELS: Record<ExerciseCategory, string> = {
+  push: 'PUSH',
+  pull: 'PULL',
+  legs: 'LEGS',
+  core: 'CORE',
+  cardio: 'CARDIO',
 };
 
-const CATEGORY_LABELS: Record<ExerciseCategory, string> = {
-  push: 'Push',
-  pull: 'Pull',
-  legs: 'Legs',
-  core: 'Core',
-  cardio: 'Cardio',
+const CATEGORY_ACCENT: Record<ExerciseCategory, string> = {
+  push: 'var(--color-volt)',
+  pull: 'var(--color-ember)',
+  legs: 'var(--color-rust)',
+  core: 'var(--color-volt)',
+  cardio: 'var(--color-ember)',
 };
 
 export default function ExerciseLibraryPage() {
@@ -30,9 +30,6 @@ export default function ExerciseLibraryPage() {
   const nameInputRef = useRef<HTMLInputElement>(null);
 
   function handleInputFocus() {
-    // iOS Safari shrinks the visual viewport when the keyboard opens; the
-    // sticky header can then cover the focused input. Delay the scroll so it
-    // runs after the browser's own resize, then center the input in view.
     window.setTimeout(() => {
       nameInputRef.current?.scrollIntoView({ block: 'center', behavior: 'smooth' });
     }, 300);
@@ -41,7 +38,6 @@ export default function ExerciseLibraryPage() {
   function handleAdd() {
     const trimmed = newName.trim();
     if (!trimmed) return;
-
     addExercise({
       id: crypto.randomUUID(),
       name: trimmed,
@@ -61,14 +57,15 @@ export default function ExerciseLibraryPage() {
   }));
 
   return (
-    <PageShell title="Exercise Library" showBack>
-      <div className="flex flex-col gap-4">
+    <PageShell title="Exercise Index" eyebrow="LIBRARY CATALOG" showBack>
+      <div className="flex flex-col gap-6">
         {/* Add custom exercise form */}
-        <div className="bg-white rounded-xl p-4 shadow-sm">
-          <h2 className="text-sm font-medium text-gray-500 mb-2">
-            Add Custom Exercise
-          </h2>
-          <div className="flex flex-col gap-3">
+        <section className="card p-4">
+          <div className="caps text-[10px] mb-3 flex items-center gap-2">
+            <span style={{ color: 'var(--color-text)' }}>＋</span>
+            <span style={{ color: 'var(--color-text)' }}>ADD CUSTOM</span>
+          </div>
+          <div className="flex flex-col gap-2.5">
             <input
               ref={nameInputRef}
               type="text"
@@ -77,67 +74,98 @@ export default function ExerciseLibraryPage() {
               onFocus={handleInputFocus}
               placeholder="Exercise name"
               enterKeyHint="done"
-              className="min-h-[44px] px-3 py-2 border border-gray-300 rounded-lg text-[16px] text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-blue-600 scroll-mt-24"
+              className="h-12 px-3 outline-none scroll-mt-24"
+              style={{
+                background: 'var(--color-ink)',
+                border: '1px solid var(--color-line-2)',
+                borderRadius: '2px',
+                fontSize: '16px',
+                color: 'var(--color-text)',
+              }}
             />
-            <select
-              value={newCategory}
-              onChange={(e) => setNewCategory(e.target.value as ExerciseCategory)}
-              className="min-h-[44px] px-3 py-2 border border-gray-300 rounded-lg text-[16px] text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-blue-600"
-            >
-              {CATEGORIES.map((cat) => (
-                <option key={cat} value={cat}>
-                  {CATEGORY_LABELS[cat]}
-                </option>
-              ))}
-            </select>
+            <div className="grid grid-cols-5 gap-1">
+              {CATEGORIES.map((cat) => {
+                const active = newCategory === cat;
+                return (
+                  <button
+                    key={cat}
+                    type="button"
+                    onClick={() => setNewCategory(cat)}
+                    className="h-11 caps-tight text-[10px] press"
+                    style={{
+                      background: active ? CATEGORY_ACCENT[cat] : 'transparent',
+                      color: active ? '#ffffff' : 'var(--color-text)',
+                      border: `1px solid ${active ? CATEGORY_ACCENT[cat] : 'var(--color-line-2)'}`,
+                      borderRadius: '2px',
+                      fontWeight: 600,
+                    }}
+                  >
+                    {CATEGORY_LABELS[cat]}
+                  </button>
+                );
+              })}
+            </div>
             <button
               type="button"
               onClick={handleAdd}
-              className="min-h-[44px] px-4 py-2 bg-blue-600 text-white rounded-lg font-medium"
+              disabled={!newName.trim()}
+              className="h-12 btn-volt press caps-tight text-[11px] disabled:opacity-40"
+              style={{ borderRadius: '2px' }}
             >
-              Add
+              ADD TO INDEX →
             </button>
           </div>
-        </div>
+        </section>
 
-        {/* Exercise list grouped by category */}
-        {exercisesByCategory.map(({ category, exercises }) => (
-          <div key={category} className="bg-white rounded-xl shadow-sm overflow-hidden">
+        {/* Exercise list grouped */}
+        {exercisesByCategory.map(({ category, exercises }, idx) => (
+          <section key={category}>
             <button
               type="button"
               onClick={() => toggleCategory(category)}
-              className="w-full flex items-center justify-between p-4 min-h-[44px]"
+              className="w-full flex items-center gap-3 mb-3 press"
             >
-              <div className="flex items-center gap-2">
-                <span
-                  className={`${CATEGORY_COLORS[category]} text-white text-xs font-semibold px-2 py-0.5 rounded-full`}
-                >
-                  {CATEGORY_LABELS[category]}
-                </span>
-                <span className="text-sm text-gray-500">
-                  ({exercises.length})
-                </span>
-              </div>
-              <span className="text-gray-400 text-sm">
-                {collapsed[category] ? '+' : '-'}
+              <span
+                className="caps text-[10px]"
+                style={{ color: CATEGORY_ACCENT[category] }}
+              >
+                {String(idx + 1).padStart(2, '0')}
+              </span>
+              <span className="caps text-[10px]" style={{ color: 'var(--color-text)' }}>
+                {CATEGORY_LABELS[category]}
+              </span>
+              <span className="flex-1 h-px" style={{ background: 'var(--color-line)' }} />
+              <span className="font-mono text-[10px]" style={{ color: 'var(--color-text-faint)' }}>
+                {String(exercises.length).padStart(2, '0')}
+              </span>
+              <span className="caps-tight text-[10px]" style={{ color: 'var(--color-text-faint)' }}>
+                {collapsed[category] ? '▸' : '▾'}
               </span>
             </button>
 
             {!collapsed[category] && exercises.length > 0 && (
-              <ul className="border-t border-gray-100 divide-y divide-gray-100">
-                {exercises.map((exercise) => (
+              <ul>
+                {exercises.map((exercise, i) => (
                   <li
                     key={exercise.id}
-                    className="flex items-center justify-between px-4 py-3 min-h-[44px]"
+                    className="flex items-center h-12"
+                    style={{
+                      borderTop: i === 0 ? '1px solid var(--color-line)' : undefined,
+                      borderBottom: '1px solid var(--color-line)',
+                    }}
                   >
-                    <div>
-                      <span className="text-base text-gray-900">
-                        {exercise.name}
-                      </span>
-                      <span className="ml-2 text-xs text-gray-400">
-                        {CATEGORY_LABELS[exercise.category]}
-                      </span>
-                    </div>
+                    <span
+                      className="font-mono text-[10px] w-8 pl-1"
+                      style={{ color: 'var(--color-text-faint)' }}
+                    >
+                      {String(i + 1).padStart(2, '0')}
+                    </span>
+                    <span
+                      className="flex-1 text-[15px]"
+                      style={{ color: 'var(--color-text)' }}
+                    >
+                      {exercise.name}
+                    </span>
                     {exercise.isCustom && (
                       <button
                         type="button"
@@ -147,9 +175,10 @@ export default function ExerciseLibraryPage() {
                             alert('This exercise is used in existing workouts and cannot be deleted.');
                           }
                         }}
-                        className="text-red-600 text-sm font-medium min-h-[44px] px-2"
+                        className="h-12 px-3 caps-tight text-[10px] press"
+                        style={{ color: 'var(--color-rust)' }}
                       >
-                        Delete
+                        DEL
                       </button>
                     )}
                   </li>
@@ -158,11 +187,14 @@ export default function ExerciseLibraryPage() {
             )}
 
             {!collapsed[category] && exercises.length === 0 && (
-              <p className="px-4 py-3 text-sm text-gray-400 border-t border-gray-100">
-                No exercises in this category
+              <p
+                className="caps-tight text-[10px] py-4"
+                style={{ color: 'var(--color-text-faint)' }}
+              >
+                — EMPTY CATEGORY —
               </p>
             )}
-          </div>
+          </section>
         ))}
       </div>
     </PageShell>

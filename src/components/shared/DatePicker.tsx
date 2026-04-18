@@ -122,16 +122,31 @@ export default function DatePicker({ value, onChange }: DatePickerProps) {
 
   return (
     <div>
-      {/* Trigger button */}
+      {/* Trigger */}
       <button
         type="button"
         onClick={() => setOpen(!open)}
-        className="w-full min-h-[44px] px-3 py-2 border border-gray-300 rounded-lg text-[16px] text-gray-900 bg-white flex items-center justify-between focus:outline-none focus:ring-2 focus:ring-blue-600"
+        className="w-full flex items-end justify-between press text-left"
       >
-        <span>{formatDisplay(value)}</span>
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5 text-gray-400">
-          <path fillRule="evenodd" d="M5.75 2a.75.75 0 01.75.75V4h7V2.75a.75.75 0 011.5 0V4h.25A2.75 2.75 0 0118 6.75v8.5A2.75 2.75 0 0115.25 18H4.75A2.75 2.75 0 012 15.25v-8.5A2.75 2.75 0 014.75 4H5V2.75A.75.75 0 015.75 2zm-1 5.5c-.69 0-1.25.56-1.25 1.25v6.5c0 .69.56 1.25 1.25 1.25h10.5c.69 0 1.25-.56 1.25-1.25v-6.5c0-.69-.56-1.25-1.25-1.25H4.75z" clipRule="evenodd" />
-        </svg>
+        <span
+          className="font-display leading-none"
+          style={{
+            fontSize: '2.75rem',
+            fontWeight: 700,
+            letterSpacing: '-0.04em',
+            fontVariationSettings: '"wdth" 85',
+            color: 'var(--color-text)',
+          }}
+        >
+          {formatDisplay(value)}
+        </span>
+        <span
+          className="font-mono caps-tight text-[10px] pb-2"
+          style={{ color: 'var(--color-text-muted)' }}
+        >
+          {parseDate(value).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }).toUpperCase()}
+          <span style={{ color: 'var(--color-text)' }} className="ml-1">↓</span>
+        </span>
       </button>
 
       {/* Calendar dropdown */}
@@ -141,71 +156,83 @@ export default function DatePicker({ value, onChange }: DatePickerProps) {
           <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
 
           <div className="relative z-50">
-            <div className="absolute left-0 right-0 mt-2 bg-white rounded-xl shadow-lg border border-gray-200 p-4">
-              {/* Quick selects */}
-              <div className="flex gap-2 mb-3">
+            <div
+              className="absolute left-0 right-0 mt-3 p-4 card-elev"
+              style={{ boxShadow: '0 24px 40px rgba(0,0,0,0.5)' }}
+            >
+              <div className="flex gap-2 mb-4">
                 <button
                   type="button"
                   onClick={() => handleQuickSelect(today)}
-                  className={`flex-1 min-h-[40px] rounded-lg text-sm font-medium ${
-                    value === today
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-gray-100 text-gray-700'
-                  }`}
+                  className="flex-1 h-10 caps-tight text-[10px] press"
+                  style={{
+                    background: value === today ? 'var(--color-volt)' : 'transparent',
+                    color: value === today ? '#ffffff' : 'var(--color-text)',
+                    border: `1px solid ${value === today ? 'var(--color-volt)' : 'var(--color-line-2)'}`,
+                    borderRadius: '2px',
+                  }}
                 >
                   Today
                 </button>
                 <button
                   type="button"
                   onClick={() => handleQuickSelect(yesterday)}
-                  className={`flex-1 min-h-[40px] rounded-lg text-sm font-medium ${
-                    value === yesterday
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-gray-100 text-gray-700'
-                  }`}
+                  className="flex-1 h-10 caps-tight text-[10px] press"
+                  style={{
+                    background: value === yesterday ? 'var(--color-volt)' : 'transparent',
+                    color: value === yesterday ? '#ffffff' : 'var(--color-text)',
+                    border: `1px solid ${value === yesterday ? 'var(--color-volt)' : 'var(--color-line-2)'}`,
+                    borderRadius: '2px',
+                  }}
                 >
                   Yesterday
                 </button>
               </div>
 
-              {/* Month/year nav */}
               <div className="flex items-center justify-between mb-3">
                 <button
                   type="button"
                   onClick={prevMonth}
-                  className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-gray-100 text-gray-600"
+                  className="w-9 h-9 flex items-center justify-center press"
+                  style={{ color: 'var(--color-text-muted)' }}
                   aria-label="Previous month"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5">
-                    <path fillRule="evenodd" d="M12.79 5.23a.75.75 0 01-.02 1.06L8.832 10l3.938 3.71a.75.75 0 11-1.04 1.08l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 011.06.02z" clipRule="evenodd" />
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="square" className="w-4 h-4">
+                    <path d="M15 6l-6 6 6 6" />
                   </svg>
                 </button>
-                <span className="text-sm font-semibold text-gray-900">
+                <span
+                  className="caps-tight text-[11px]"
+                  style={{ color: 'var(--color-text)' }}
+                >
                   {MONTHS[viewMonth]} {viewYear}
                 </span>
                 <button
                   type="button"
                   onClick={nextMonth}
-                  className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-gray-100 text-gray-600"
+                  className="w-9 h-9 flex items-center justify-center press"
+                  style={{ color: 'var(--color-text-muted)' }}
                   aria-label="Next month"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5">
-                    <path fillRule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clipRule="evenodd" />
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="square" className="w-4 h-4">
+                    <path d="M9 6l6 6-6 6" />
                   </svg>
                 </button>
               </div>
 
-              {/* Day headers */}
               <div className="grid grid-cols-7 mb-1">
                 {DAYS.map((d) => (
-                  <div key={d} className="text-center text-xs font-medium text-gray-400 py-1">
-                    {d}
+                  <div
+                    key={d}
+                    className="text-center caps-tight text-[9px] py-1"
+                    style={{ color: 'var(--color-text-faint)' }}
+                  >
+                    {d.slice(0, 1)}
                   </div>
                 ))}
               </div>
 
-              {/* Day grid */}
-              <div className="grid grid-cols-7">
+              <div className="grid grid-cols-7 gap-px" style={{ background: 'var(--color-line)' }}>
                 {calendarDays.map((cell) => {
                   const isSelected = cell.dateStr === value;
                   const isToday = cell.dateStr === today;
@@ -214,13 +241,18 @@ export default function DatePicker({ value, onChange }: DatePickerProps) {
                       key={cell.dateStr}
                       type="button"
                       onClick={() => selectDate(cell.dateStr)}
-                      className={`
-                        h-9 w-full flex items-center justify-center text-sm rounded-full
-                        ${!cell.inMonth ? 'text-gray-300' : 'text-gray-900'}
-                        ${isSelected ? 'bg-blue-600 !text-white font-semibold' : ''}
-                        ${isToday && !isSelected ? 'ring-1 ring-blue-400 font-semibold' : ''}
-                        ${cell.inMonth && !isSelected ? 'hover:bg-gray-100' : ''}
-                      `}
+                      className="h-10 font-mono text-[13px] flex items-center justify-center press"
+                      style={{
+                        background: isSelected ? 'var(--color-volt)' : 'var(--color-elev)',
+                        color: isSelected
+                          ? '#ffffff'
+                          : !cell.inMonth
+                          ? 'var(--color-text-faint)'
+                          : 'var(--color-text)',
+                        fontWeight: isSelected || isToday ? 600 : 400,
+                        fontVariantNumeric: 'tabular-nums',
+                        border: isToday && !isSelected ? '1px solid var(--color-volt)' : undefined,
+                      }}
                     >
                       {cell.day}
                     </button>

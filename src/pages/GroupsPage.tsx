@@ -42,27 +42,31 @@ export default function GroupsPage() {
 
   if (groups.length === 0) {
     return (
-      <PageShell title="Workout Groups" showBack>
+      <PageShell title="Protocols" eyebrow="SAVED GROUPS" showBack>
         <EmptyState
-          message="No saved groups yet"
+          message="No protocols saved"
           action={
             <Link
               to="/"
-              className="inline-flex items-center justify-center bg-blue-600 text-white rounded-lg min-h-[44px] px-6 font-medium"
+              className="inline-flex items-center justify-center h-12 px-6 caps-tight text-[11px] btn-volt press"
+              style={{ borderRadius: '2px' }}
             >
-              Log a Workout
+              Log a Session →
             </Link>
           }
         />
-        <p className="text-xs text-gray-400 text-center mt-4">
-          Add exercises to a workout and tap "Save as group" to create one.
+        <p
+          className="caps-tight text-[9px] text-center mt-6"
+          style={{ color: 'var(--color-text-faint)' }}
+        >
+          SAVE ANY WORKOUT AS GROUP TO REUSE
         </p>
       </PageShell>
     );
   }
 
   return (
-    <PageShell title="Workout Groups" showBack>
+    <PageShell title="Protocols" eyebrow="SAVED GROUPS" showBack>
       <ul className="flex flex-col gap-2">
         {groups.map((g, index) => {
           const isEditing = editingId === g.id;
@@ -70,8 +74,14 @@ export default function GroupsPage() {
             .map((id) => appData.exercises.find((e) => e.id === id)?.name)
             .filter(Boolean);
           return (
-            <li key={g.id} className="bg-white rounded-xl shadow-sm p-4">
-              <div className="flex items-center justify-between gap-2 mb-2">
+            <li key={g.id} className="card p-4">
+              <div className="flex items-center gap-3 mb-2">
+                <span
+                  className="font-mono text-[11px]"
+                  style={{ color: 'var(--color-text)' }}
+                >
+                  {String(index + 1).padStart(2, '0')}
+                </span>
                 {isEditing ? (
                   <input
                     type="text"
@@ -83,24 +93,38 @@ export default function GroupsPage() {
                       if (e.key === 'Enter') saveEdit(g);
                       if (e.key === 'Escape') setEditingId(null);
                     }}
-                    className="flex-1 min-h-[40px] px-2 py-1 border border-gray-300 rounded-lg text-[16px] text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-600"
+                    className="flex-1 h-10 px-2 font-display outline-none"
+                    style={{
+                      background: 'var(--color-ink)',
+                      border: '1px solid var(--color-line-2)',
+                      borderRadius: '2px',
+                      fontSize: '16px',
+                      color: 'var(--color-text)',
+                    }}
                   />
                 ) : (
                   <button
                     type="button"
                     onClick={() => startEdit(g)}
-                    className="flex-1 text-left text-base font-semibold text-gray-900 min-h-[40px]"
+                    className="flex-1 text-left font-display press"
+                    style={{
+                      fontSize: '1.0625rem',
+                      fontWeight: 600,
+                      letterSpacing: '-0.02em',
+                      color: 'var(--color-text)',
+                    }}
                   >
                     {g.name}
                   </button>
                 )}
-                <div className="flex items-center gap-1">
+                <div className="flex items-center">
                   <button
                     type="button"
                     aria-label="Move up"
                     disabled={index === 0}
                     onClick={() => move(index, -1)}
-                    className="w-9 h-9 rounded-full text-gray-500 disabled:opacity-30 active:bg-gray-100"
+                    className="w-9 h-9 press disabled:opacity-20"
+                    style={{ color: 'var(--color-text-muted)' }}
                   >
                     ↑
                   </button>
@@ -109,22 +133,33 @@ export default function GroupsPage() {
                     aria-label="Move down"
                     disabled={index === groups.length - 1}
                     onClick={() => move(index, 1)}
-                    className="w-9 h-9 rounded-full text-gray-500 disabled:opacity-30 active:bg-gray-100"
+                    className="w-9 h-9 press disabled:opacity-20"
+                    style={{ color: 'var(--color-text-muted)' }}
                   >
                     ↓
                   </button>
                   <button
                     type="button"
                     onClick={() => handleDelete(g)}
-                    className="w-9 h-9 rounded-full text-red-600 active:bg-red-50"
+                    className="w-9 h-9 press caps-tight text-[10px]"
+                    style={{ color: 'var(--color-rust)' }}
                     aria-label={`Delete ${g.name}`}
                   >
                     ✕
                   </button>
                 </div>
               </div>
-              <p className="text-sm text-gray-500">
-                {names.length === 0 ? 'No exercises' : names.join(', ')}
+              <div
+                className="caps-tight text-[9px] mb-1"
+                style={{ color: 'var(--color-text-faint)' }}
+              >
+                {String(names.length).padStart(2, '0')} EXERCISES
+              </div>
+              <p
+                className="text-[13px]"
+                style={{ color: 'var(--color-text-muted)', letterSpacing: '-0.005em' }}
+              >
+                {names.length === 0 ? '— empty —' : names.join(' ')}
               </p>
             </li>
           );
