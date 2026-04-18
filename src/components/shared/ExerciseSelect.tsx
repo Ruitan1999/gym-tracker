@@ -103,7 +103,7 @@ export default function ExerciseSelect({ onSelect, onClose }: ExerciseSelectProp
     if (dy > 120) {
       setClosing(true);
       setDragY(window.innerHeight);
-      setTimeout(handleClose, 180);
+      setTimeout(handleClose, 220);
     } else {
       setDragY(0);
     }
@@ -172,7 +172,12 @@ export default function ExerciseSelect({ onSelect, onClose }: ExerciseSelectProp
           background: 'var(--color-elev)',
           borderTop: '1px solid var(--color-line-2)',
           transform: dragY > 0 || closing ? `translateY(${dragY}px)` : undefined,
-          transition: closing ? 'transform 0.18s ease-in' : dragY === 0 ? 'transform 0.2s' : undefined,
+          opacity: closing ? 0 : Math.max(0.2, 1 - dragY / 500),
+          transition: closing
+            ? 'transform 0.22s ease-in, opacity 0.22s ease-in'
+            : dragY === 0
+              ? 'transform 0.2s, opacity 0.2s'
+              : undefined,
           touchAction: 'pan-y',
         }}
         onTouchStart={onSheetTouchStart}
