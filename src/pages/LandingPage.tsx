@@ -1,6 +1,36 @@
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Logo from '../components/shared/Logo';
 import SiteHeader from '../components/layout/SiteHeader';
+
+function Reveal({ children, delay = 0, className = '' }: { children: ReactNode; delay?: number; className?: string }) {
+  const ref = useRef<HTMLDivElement | null>(null);
+  const [visible, setVisible] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setVisible(true);
+          io.disconnect();
+        }
+      },
+      { threshold: 0.12, rootMargin: '0px 0px -40px 0px' },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+  return (
+    <div
+      ref={ref}
+      className={`reveal ${visible ? 'is-visible' : ''} ${className}`}
+      style={{ animationDelay: visible && delay ? `${delay}ms` : undefined }}
+    >
+      {children}
+    </div>
+  );
+}
 
 export default function LandingPage() {
   const navigate = useNavigate();
@@ -89,13 +119,13 @@ export default function LandingPage() {
               </div>
               <div className="h-px" style={{ background: 'var(--color-line)' }} />
               <div className="space-y-2">
-                <BarRow label="MON" pct={62} />
-                <BarRow label="TUE" pct={0} />
-                <BarRow label="WED" pct={88} active />
-                <BarRow label="THU" pct={45} />
-                <BarRow label="FRI" pct={71} />
-                <BarRow label="SAT" pct={0} />
-                <BarRow label="SUN" pct={0} />
+                <BarRow label="MON" pct={62} delay={0} />
+                <BarRow label="TUE" pct={0} delay={60} />
+                <BarRow label="WED" pct={88} active delay={120} />
+                <BarRow label="THU" pct={45} delay={180} />
+                <BarRow label="FRI" pct={71} delay={240} />
+                <BarRow label="SAT" pct={0} delay={300} />
+                <BarRow label="SUN" pct={0} delay={360} />
               </div>
               <div className="flex items-center justify-between pt-1">
                 <span className="caps-tight text-[10px]" style={{ color: 'var(--color-text-faint)' }}>
@@ -144,26 +174,34 @@ export default function LandingPage() {
           </div>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
-            <Feature
-              code="01"
-              title="Log Session"
-              desc="Tap, type, done. Last session's numbers prefilled so you only enter what changed."
-            />
-            <Feature
-              code="02"
-              title="Log Book"
-              desc="Every workout, every set, searchable. Edit history without breaking streaks."
-            />
-            <Feature
-              code="03"
-              title="Progress"
-              desc="Per-exercise charts. Volume, top set, estimated 1RM — actual signal, not vanity."
-            />
-            <Feature
-              code="04"
-              title="Library & Groups"
-              desc="Build your exercise library. Group movements into routines you actually run."
-            />
+            <Reveal delay={0}>
+              <Feature
+                code="01"
+                title="Log Session"
+                desc="Tap, type, done. Last session's numbers prefilled so you only enter what changed."
+              />
+            </Reveal>
+            <Reveal delay={80}>
+              <Feature
+                code="02"
+                title="Log Book"
+                desc="Every workout, every set, searchable. Edit history without breaking streaks."
+              />
+            </Reveal>
+            <Reveal delay={160}>
+              <Feature
+                code="03"
+                title="Progress"
+                desc="Per-exercise charts. Volume, top set, estimated 1RM — actual signal, not vanity."
+              />
+            </Reveal>
+            <Reveal delay={240}>
+              <Feature
+                code="04"
+                title="Library & Groups"
+                desc="Build your exercise library. Group movements into routines you actually run."
+              />
+            </Reveal>
           </div>
         </section>
 
@@ -191,38 +229,40 @@ export default function LandingPage() {
             </h2>
           </div>
           <div className="sm:col-span-7 space-y-0">
-            <Row k="NO ADS, NO STREAKS-AS-RANSOM" v="EVER" />
-            <Row k="DATA SYNCS, DATA STAYS YOURS" v="EXPORT ANYTIME" />
-            <Row k="WORKS OFFLINE, SAVES ON RECONNECT" v="PWA" />
-            <Row k="DESIGNED FOR ONE-HANDED LOGGING" v="MID-SET" />
-            <Row k="OPEN PRICING" v="FREE" />
+            <Reveal delay={0}><Row k="NO ADS, NO STREAKS-AS-RANSOM" v="EVER" /></Reveal>
+            <Reveal delay={70}><Row k="DATA SYNCS, DATA STAYS YOURS" v="EXPORT ANYTIME" /></Reveal>
+            <Reveal delay={140}><Row k="WORKS OFFLINE, SAVES ON RECONNECT" v="PWA" /></Reveal>
+            <Reveal delay={210}><Row k="DESIGNED FOR ONE-HANDED LOGGING" v="MID-SET" /></Reveal>
+            <Reveal delay={280}><Row k="OPEN PRICING" v="FREE" /></Reveal>
           </div>
         </section>
 
         {/* QUOTE */}
         <section className="py-16 sm:py-24">
-          <div className="grid sm:grid-cols-12 gap-8 items-start">
-            <div className="sm:col-span-2 caps-tight text-[10px]" style={{ color: 'var(--color-text-faint)' }}>
-              FIELD NOTE
-            </div>
-            <blockquote
-              className="sm:col-span-10 font-display"
-              style={{
-                fontSize: 'clamp(1.5rem, 3vw, 2.25rem)',
-                fontWeight: 500,
-                letterSpacing: '-0.025em',
-                lineHeight: 1.15,
-              }}
-            >
-              <span style={{ color: 'var(--color-volt-ink)' }}>“</span>
-              You don't need a smarter app. You need an honest one — that remembers
-              what you lifted last week, and gets out of the way.
-              <span style={{ color: 'var(--color-volt-ink)' }}>”</span>
-              <div className="mt-4 caps-tight text-[10px]" style={{ color: 'var(--color-text-faint)' }}>
-                LIFTGAUGE TEAM
+          <Reveal>
+            <div className="grid sm:grid-cols-12 gap-8 items-start">
+              <div className="sm:col-span-2 caps-tight text-[10px]" style={{ color: 'var(--color-text-faint)' }}>
+                FIELD NOTE
               </div>
-            </blockquote>
-          </div>
+              <blockquote
+                className="sm:col-span-10 font-display"
+                style={{
+                  fontSize: 'clamp(1.5rem, 3vw, 2.25rem)',
+                  fontWeight: 500,
+                  letterSpacing: '-0.025em',
+                  lineHeight: 1.15,
+                }}
+              >
+                <span style={{ color: 'var(--color-volt-ink)' }}>“</span>
+                You don't need a smarter app. You need an honest one — that remembers
+                what you lifted last week, and gets out of the way.
+                <span style={{ color: 'var(--color-volt-ink)' }}>”</span>
+                <div className="mt-4 caps-tight text-[10px]" style={{ color: 'var(--color-text-faint)' }}>
+                  LIFTGAUGE TEAM
+                </div>
+              </blockquote>
+            </div>
+          </Reveal>
         </section>
 
       </main>
@@ -237,8 +277,8 @@ export default function LandingPage() {
           alt=""
           aria-hidden
           loading="lazy"
-          className="absolute inset-0 w-full h-full object-cover -z-10"
-          style={{ opacity: 0.5 }}
+          className="absolute inset-0 w-full h-full object-cover -z-10 ken-burns"
+          style={{ opacity: 0.5, transformOrigin: 'center' }}
         />
         <div
           aria-hidden
@@ -337,7 +377,12 @@ function Metric({ value, label }: { value: string; label: string }) {
   );
 }
 
-function BarRow({ label, pct, active }: { label: string; pct: number; active?: boolean }) {
+function BarRow({ label, pct, active, delay = 0 }: { label: string; pct: number; active?: boolean; delay?: number }) {
+  const [width, setWidth] = useState(0);
+  useEffect(() => {
+    const t = setTimeout(() => setWidth(pct), 250 + delay);
+    return () => clearTimeout(t);
+  }, [pct, delay]);
   return (
     <div className="flex items-center gap-3">
       <span
@@ -350,9 +395,9 @@ function BarRow({ label, pct, active }: { label: string; pct: number; active?: b
         <div
           className="h-full"
           style={{
-            width: `${pct}%`,
+            width: `${width}%`,
             background: active ? 'var(--color-volt)' : 'var(--color-line-3)',
-            transition: 'width 600ms cubic-bezier(0.16, 1, 0.3, 1)',
+            transition: 'width 900ms cubic-bezier(0.22, 1, 0.36, 1)',
           }}
         />
       </div>
