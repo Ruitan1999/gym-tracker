@@ -84,7 +84,7 @@ export default function ExerciseDetailPage() {
 
   if (maxWeightData.length === 0) {
     return (
-      <PageShell title={exercise.name} eyebrow="03 TREND" showBack>
+      <PageShell title={exercise.name} showBack>
         <EmptyState message="No data logged for this exercise yet" />
       </PageShell>
     );
@@ -101,7 +101,7 @@ export default function ExerciseDetailPage() {
   }
 
   return (
-    <PageShell title={exercise.name} eyebrow="03 TREND" showBack>
+    <PageShell title={exercise.name} showBack>
       <div className="flex flex-col gap-5">
         {/* Stats grid */}
         <section className="card">

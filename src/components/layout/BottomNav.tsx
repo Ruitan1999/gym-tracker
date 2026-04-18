@@ -20,7 +20,7 @@ const tabs = [
   },
   {
     to: '/progress',
-    label: 'Trend',
+    label: 'Progress',
     code: '03',
     icon: <TrendingUp size={ICON_SIZE} strokeWidth={ICON_STROKE} />,
   },

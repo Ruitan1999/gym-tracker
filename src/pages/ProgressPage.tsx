@@ -99,7 +99,7 @@ export default function ProgressPage() {
       ? 'var(--color-volt)'
       : trendDown
         ? 'var(--color-rust)'
-        : 'var(--color-line-2)';
+        : 'var(--color-volt)';
     const trendLabel = trendUp
       ? `+${display(s.trend)}`
       : trendDown
@@ -164,7 +164,7 @@ export default function ProgressPage() {
               style={{
                 fontSize: '1.125rem',
                 fontWeight: 500,
-                color: 'var(--color-text)',
+                color: 'var(--color-volt)',
                 fontVariantNumeric: 'tabular-nums',
               }}
             >
@@ -196,14 +196,14 @@ export default function ProgressPage() {
 
   if (summaries.length === 0) {
     return (
-      <PageShell title="Progress" eyebrow="03 TREND">
+      <PageShell title="Progress">
         <EmptyState message="Log a workout to start tracking progress" />
       </PageShell>
     );
   }
 
   return (
-    <PageShell title="Progress" eyebrow="03 TREND">
+    <PageShell title="Progress">
       <div className="flex flex-col gap-5">
         {hasGroups && (
           <div className="flex self-start" role="tablist" aria-label="View mode">

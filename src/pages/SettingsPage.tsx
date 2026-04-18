@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PageShell from '../components/layout/PageShell';
 import NumberInput from '../components/shared/NumberInput';
+import WeightStepper from '../components/workout/WeightStepper';
 import { useAppContext } from '../context/AppContext';
 import { DEFAULT_PREFERENCES } from '../types';
 
@@ -49,7 +50,7 @@ export default function SettingsPage() {
   }
 
   return (
-    <PageShell title="Settings" eyebrow="04 PREFERENCES">
+    <PageShell title="Settings">
       <div className="space-y-6">
         <Section label="EXERCISE INDEX" index="01">
           <button
@@ -76,7 +77,7 @@ export default function SettingsPage() {
         </Section>
 
         <Section
-          label="QUICK REPS"
+          label="REPS OPTIONS"
           index="02"
           action={
             <button
@@ -176,7 +177,7 @@ export default function SettingsPage() {
         </Section>
 
         <Section label="LOAD INCREMENT" index="03">
-          <NumberInput label="STEP KG" value={preferences.weightStepKg} onChange={setStepKg} min={0.25} />
+          <WeightStepper label="STEP KG" value={preferences.weightStepKg} onChange={setStepKg} step={0.25} unit="kg" />
           <p
             className="caps-tight text-[9px] mt-3"
             style={{ color: 'var(--color-text-faint)' }}
@@ -222,9 +223,8 @@ function Section({
   return (
     <section>
       <div className="flex items-center justify-between mb-3">
-        <h2 className="caps text-[10px] flex items-baseline gap-2">
-          <span style={{ color: 'var(--color-text)' }}>{index}</span>
-          <span style={{ color: 'var(--color-text)' }}>{label}</span>
+        <h2 className="caps text-[10px]" style={{ color: 'var(--color-text)' }}>
+          {label}
         </h2>
         {action}
       </div>

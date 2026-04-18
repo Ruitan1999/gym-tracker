@@ -137,7 +137,7 @@ export default function WorkoutCard({ workout }: WorkoutCardProps) {
         <div className="grid grid-cols-3 gap-2">
           <MiniStat label="EXERCISE" value={exerciseCount} />
           <MiniStat label="SETS" value={totalSets} />
-          <MiniStat label="VOL KG" value={volumeLabel} />
+          <MiniStat label="LIFTED (KG)" value={volumeLabel} />
         </div>
       </div>
     </button>
