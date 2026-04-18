@@ -6,6 +6,7 @@ interface NumberInputProps {
   label?: string;
   placeholder?: string;
   min?: number;
+  max?: number;
   id?: string;
   variant?: 'default' | 'bare';
 }
@@ -16,6 +17,7 @@ export default function NumberInput({
   label,
   placeholder,
   min,
+  max,
   id: externalId,
   variant = 'default',
 }: NumberInputProps) {
@@ -43,7 +45,13 @@ export default function NumberInput({
 
     const num = parseFloat(raw);
     if (!isNaN(num) && (min === undefined || num >= min)) {
-      onChange(num);
+      if (max !== undefined && num > max) {
+        const clamped = max;
+        setRawValue(String(clamped));
+        onChange(clamped);
+      } else {
+        onChange(num);
+      }
     }
   }
 
@@ -59,8 +67,9 @@ export default function NumberInput({
     if (isNaN(num) || (min !== undefined && num < min)) {
       setRawValue(value === '' ? '' : String(value));
     } else {
-      setRawValue(String(num));
-      onChange(num);
+      const clamped = max !== undefined && num > max ? max : num;
+      setRawValue(String(clamped));
+      onChange(clamped);
     }
   }
 

@@ -144,5 +144,4 @@ export const defaultExercises: Exercise[] = [
   { id: 'ex-cardio-012', name: 'Sled Push', category: 'cardio', isCustom: false },
   { id: 'ex-cardio-013', name: 'Sled Pull', category: 'cardio', isCustom: false },
   { id: 'ex-cardio-014', name: 'Farmer\'s Walk', category: 'cardio', isCustom: false },
-  { id: 'ex-cardio-015', name: 'Swimming', category: 'cardio', isCustom: false },
 ];

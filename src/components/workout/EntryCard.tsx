@@ -28,6 +28,7 @@ export default function EntryCard({
   const { appData } = useAppContext();
   const exercise = appData.exercises.find((e) => e.id === exerciseId);
   const [showRemoveConfirm, setShowRemoveConfirm] = useState(false);
+  const [exitingKey, setExitingKey] = useState<string | null>(null);
   const cardRef = useRef<HTMLDivElement>(null);
   const prevCollapsedRef = useRef(collapsed);
 
@@ -63,19 +64,21 @@ export default function EntryCard({
     });
   }, [getScroller]);
 
+  const addSetBtnRef = useRef<HTMLButtonElement>(null);
+
   const scrollNewSetIntoView = useCallback(() => {
     const el = cardRef.current;
-    if (!el) return;
+    const addBtn = addSetBtnRef.current;
+    if (!el || !addBtn) return;
     requestAnimationFrame(() => {
-      const rows = el.querySelectorAll('[data-set-row]');
-      const lastRow = rows[rows.length - 1] as HTMLElement | undefined;
-      if (!lastRow) return;
       const container = getScroller(el);
       const containerRect = container.getBoundingClientRect();
-      const rowRect = lastRow.getBoundingClientRect();
-      const desiredBottom = containerRect.top + containerRect.height - 24;
-      if (rowRect.bottom > desiredBottom || rowRect.top < containerRect.top) {
-        const delta = rowRect.bottom - desiredBottom;
+      const paddingBottom = parseFloat(getComputedStyle(container).paddingBottom) || 0;
+      const btnRect = addBtn.getBoundingClientRect();
+      const desiredBottom =
+        containerRect.top + containerRect.height - paddingBottom - 16;
+      const delta = btnRect.bottom - desiredBottom;
+      if (Math.abs(delta) > 4) {
         container.scrollTo({
           top: Math.max(0, container.scrollTop + delta),
           behavior: 'smooth',
@@ -113,13 +116,24 @@ export default function EntryCard({
 
   const handleRemoveSet = useCallback(
     (i: number) => {
-      stableKeysRef.current.splice(i, 1);
-      const updated = sets
-        .filter((_, idx) => idx !== i)
-        .map((s, idx) => ({ ...s, setNumber: idx + 1 }));
-      onSetsChange(updated);
+      const key = stableKeysRef.current[i];
+      if (!key || exitingKey) return;
+      setExitingKey(key);
+      window.setTimeout(() => {
+        const idx = stableKeysRef.current.indexOf(key);
+        if (idx === -1) {
+          setExitingKey(null);
+          return;
+        }
+        stableKeysRef.current.splice(idx, 1);
+        const updated = sets
+          .filter((_, j) => j !== idx)
+          .map((s, j) => ({ ...s, setNumber: j + 1 }));
+        setExitingKey(null);
+        onSetsChange(updated);
+      }, 300);
     },
-    [sets, onSetsChange],
+    [sets, onSetsChange, exitingKey],
   );
 
   const handleRepsChange = useCallback(
@@ -238,21 +252,26 @@ export default function EntryCard({
         <>
       {/* Sets */}
       <div className="relative">
-        {sets.map((set, i) => (
-          <SetRow
-            key={stableKeysRef.current[i]}
-            setNumber={set.setNumber}
-            reps={set.reps}
-            weightKg={set.weightKg}
-            onRepsChange={(v) => handleRepsChange(i, v)}
-            onWeightChange={(v) => handleWeightChange(i, v)}
-            onRemove={() => handleRemoveSet(i)}
-          />
-        ))}
+        {sets.map((set, i) => {
+          const key = stableKeysRef.current[i];
+          return (
+            <SetRow
+              key={key}
+              setNumber={set.setNumber}
+              reps={set.reps}
+              weightKg={set.weightKg}
+              onRepsChange={(v) => handleRepsChange(i, v)}
+              onWeightChange={(v) => handleWeightChange(i, v)}
+              onRemove={() => handleRemoveSet(i)}
+              exiting={exitingKey === key}
+            />
+          );
+        })}
       </div>
 
       {/* Add Set */}
       <button
+        ref={addSetBtnRef}
         type="button"
         onClick={handleAddSet}
         className="relative w-full h-12 caps text-[10px] press flex items-center justify-center gap-2"

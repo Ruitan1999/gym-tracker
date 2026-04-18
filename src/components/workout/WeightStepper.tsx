@@ -8,6 +8,8 @@ interface WeightStepperProps {
   unit: string;
 }
 
+const MAX_WEIGHT_KG = 999.99;
+
 function roundToStep(value: number, step: number): number {
   const precision = step.toString().split('.')[1]?.length ?? 0;
   return Number(value.toFixed(Math.max(precision, 2)));
@@ -16,6 +18,7 @@ function roundToStep(value: number, step: number): number {
 export default function WeightStepper({ label, value, onChange, step, unit }: WeightStepperProps) {
   const numeric = typeof value === 'number' ? value : 0;
   const decrementDisabled = typeof value === 'number' && value <= 0;
+  const incrementDisabled = typeof value === 'number' && value >= MAX_WEIGHT_KG;
 
   function handleDecrement() {
     if (value === '' || typeof value !== 'number') return;
@@ -25,7 +28,8 @@ export default function WeightStepper({ label, value, onChange, step, unit }: We
 
   function handleIncrement() {
     const base = value === '' ? 0 : numeric;
-    onChange(roundToStep(base + step, step));
+    const next = Math.min(MAX_WEIGHT_KG, base + step);
+    onChange(roundToStep(next, step));
   }
 
   return (
@@ -47,7 +51,7 @@ export default function WeightStepper({ label, value, onChange, step, unit }: We
         }}
       >
         <div className="flex-1 min-w-0 flex items-center">
-          <NumberInput value={value} onChange={onChange} placeholder="0" min={0} variant="bare" />
+          <NumberInput value={value} onChange={onChange} placeholder="0" min={0} max={MAX_WEIGHT_KG} variant="bare" />
           <span
             className="caps-tight text-[10px] pr-3"
             style={{ color: 'var(--color-text-faint)' }}
@@ -73,8 +77,9 @@ export default function WeightStepper({ label, value, onChange, step, unit }: We
         <button
           type="button"
           onClick={handleIncrement}
+          disabled={incrementDisabled}
           aria-label={`Increase weight by ${step} ${unit}`}
-          className="w-12 h-12 flex items-center justify-center press"
+          className="w-12 h-12 flex items-center justify-center press disabled:opacity-30"
           style={{
             borderLeft: '1px solid var(--color-line-2)',
             background: 'var(--color-volt)',

@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useAppContext } from '../../context/AppContext';
 import type { Workout } from '../../types';
+import { formatVolume } from '../../utils/conversions';
 
 interface WorkoutCardProps {
   workout: Workout;
@@ -32,10 +33,7 @@ export default function WorkoutCard({ workout }: WorkoutCardProps) {
     (sum, e) => sum + e.sets.reduce((s, set) => s + set.reps * set.weightKg, 0),
     0,
   );
-  const volumeLabel =
-    totalVolumeKg < 10000
-      ? `${Math.round(totalVolumeKg)}`
-      : `${(totalVolumeKg / 1000).toFixed(1)}K`;
+  const volumeLabel = formatVolume(totalVolumeKg);
 
   const exerciseNames = workout.entries.map((entry) => {
     const exercise = appData.exercises.find((e) => e.id === entry.exerciseId);

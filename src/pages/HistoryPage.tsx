@@ -5,6 +5,7 @@ import PageShell from '../components/layout/PageShell';
 import EmptyState from '../components/shared/EmptyState';
 import WorkoutCard from '../components/history/WorkoutCard';
 import type { Workout } from '../types';
+import { formatVolume } from '../utils/conversions';
 
 function getMonthLabel(dateStr: string): string {
   const [year, month] = dateStr.split('-').map(Number);
@@ -57,12 +58,7 @@ export default function HistoryPage() {
         ),
       0,
     );
-    const totalVolumeStr =
-      volumeKg >= 1_000_000
-        ? `${(volumeKg / 1_000_000).toFixed(1)}M`
-        : volumeKg >= 1000
-        ? `${(volumeKg / 1000).toFixed(1)}K`
-        : String(Math.round(volumeKg));
+    const totalVolumeStr = formatVolume(volumeKg);
 
     // Current streak — consecutive days back from today with at least one workout
     const dateSet = new Set(sorted.map((w) => w.date));

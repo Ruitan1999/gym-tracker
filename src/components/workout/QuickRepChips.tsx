@@ -30,7 +30,7 @@ export default function QuickRepChips({
   function confirm() {
     const n = parseInt(draft, 10);
     if (Number.isFinite(n) && n >= 0) {
-      onPick(n);
+      onPick(Math.min(99, n));
       setModalOpen(false);
     }
   }
@@ -126,8 +126,14 @@ export default function QuickRepChips({
               type="number"
               inputMode="numeric"
               min={0}
+              max={99}
               value={draft}
-              onChange={(e) => setDraft(e.target.value)}
+              onChange={(e) => {
+                const raw = e.target.value;
+                if (raw === '') { setDraft(''); return; }
+                const n = parseInt(raw, 10);
+                setDraft(Number.isFinite(n) ? String(Math.min(99, Math.max(0, n))) : '');
+              }}
               onKeyDown={(e) => {
                 if (e.key === 'Enter') confirm();
                 if (e.key === 'Escape') setModalOpen(false);

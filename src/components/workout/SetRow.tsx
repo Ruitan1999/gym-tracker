@@ -9,6 +9,7 @@ interface SetRowProps {
   onRepsChange: (value: number | '') => void;
   onWeightChange: (valueKg: number | '') => void;
   onRemove: () => void;
+  exiting?: boolean;
 }
 
 export default function SetRow({
@@ -18,6 +19,7 @@ export default function SetRow({
   onRepsChange,
   onWeightChange,
   onRemove,
+  exiting = false,
 }: SetRowProps) {
   const { appData } = useAppContext();
   const { preferences } = appData;
@@ -38,7 +40,7 @@ export default function SetRow({
   return (
     <div
       data-set-row
-      className="relative"
+      className={`relative${exiting ? ' animate-set-exit' : ''}`}
       style={{
         borderTop: '1px solid var(--color-line)',
       }}
