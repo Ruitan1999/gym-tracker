@@ -37,6 +37,7 @@ export default function SetRow({
 
   return (
     <div
+      data-set-row
       className="relative"
       style={{
         borderTop: '1px solid var(--color-line)',
@@ -47,10 +48,10 @@ export default function SetRow({
         type="button"
         onClick={onRemove}
         aria-label={`Remove set ${setNumber}`}
-        className="absolute top-2 right-2 w-8 h-8 flex items-center justify-center press z-10"
+        className="absolute top-0 right-0 w-12 h-12 flex items-center justify-center press z-10"
         style={{ color: 'var(--color-text-faint)' }}
       >
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="square" className="w-4 h-4">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="square" className="w-[18px] h-[18px]">
           <path d="M6 6l12 12M18 6L6 18" />
         </svg>
       </button>

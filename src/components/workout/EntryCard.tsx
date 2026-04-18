@@ -31,24 +31,28 @@ export default function EntryCard({
   const cardRef = useRef<HTMLDivElement>(null);
   const prevCollapsedRef = useRef(collapsed);
 
+  const getScroller = useCallback((el: HTMLElement): HTMLElement => {
+    let node: HTMLElement | null = el.parentElement;
+    while (node) {
+      const s = getComputedStyle(node);
+      if (
+        (s.overflowY === 'auto' || s.overflowY === 'scroll') &&
+        node.scrollHeight > node.clientHeight
+      ) {
+        return node;
+      }
+      node = node.parentElement;
+    }
+    return document.scrollingElement as HTMLElement;
+  }, []);
+
   const scrollCardIntoView = useCallback(() => {
     const el = cardRef.current;
     if (!el) return;
     requestAnimationFrame(() => {
-      let scroller: HTMLElement | null = el.parentElement;
-      while (scroller) {
-        const s = getComputedStyle(scroller);
-        if (
-          (s.overflowY === 'auto' || s.overflowY === 'scroll') &&
-          scroller.scrollHeight > scroller.clientHeight
-        ) {
-          break;
-        }
-        scroller = scroller.parentElement;
-      }
-      const container = scroller ?? (document.scrollingElement as HTMLElement);
-      const containerRect = scroller
-        ? scroller.getBoundingClientRect()
+      const container = getScroller(el);
+      const containerRect = container.getBoundingClientRect
+        ? container.getBoundingClientRect()
         : { top: 0, height: window.innerHeight };
       const cardRect = el.getBoundingClientRect();
       const offsetWithin = cardRect.top - containerRect.top;
@@ -57,7 +61,28 @@ export default function EntryCard({
         container.scrollTo({ top: Math.max(0, target), behavior: 'smooth' });
       }
     });
-  }, []);
+  }, [getScroller]);
+
+  const scrollNewSetIntoView = useCallback(() => {
+    const el = cardRef.current;
+    if (!el) return;
+    requestAnimationFrame(() => {
+      const rows = el.querySelectorAll('[data-set-row]');
+      const lastRow = rows[rows.length - 1] as HTMLElement | undefined;
+      if (!lastRow) return;
+      const container = getScroller(el);
+      const containerRect = container.getBoundingClientRect();
+      const rowRect = lastRow.getBoundingClientRect();
+      const desiredBottom = containerRect.top + containerRect.height - 24;
+      if (rowRect.bottom > desiredBottom || rowRect.top < containerRect.top) {
+        const delta = rowRect.bottom - desiredBottom;
+        container.scrollTo({
+          top: Math.max(0, container.scrollTop + delta),
+          behavior: 'smooth',
+        });
+      }
+    });
+  }, [getScroller]);
 
   useEffect(() => {
     if (prevCollapsedRef.current && !collapsed) {
@@ -83,8 +108,8 @@ export default function EntryCard({
     };
     stableKeysRef.current.push(`set-${++globalKeyCounter}`);
     onSetsChange([...sets, newSet]);
-    scrollCardIntoView();
-  }, [sets, onSetsChange, scrollCardIntoView]);
+    scrollNewSetIntoView();
+  }, [sets, onSetsChange, scrollNewSetIntoView]);
 
   const handleRemoveSet = useCallback(
     (i: number) => {
