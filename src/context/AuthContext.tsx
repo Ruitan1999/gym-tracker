@@ -17,6 +17,7 @@ import {
   signInWithRedirect,
   signOut,
   createUserWithEmailAndPassword,
+  sendPasswordResetEmail,
   type User,
 } from 'firebase/auth';
 import { deleteDoc, doc } from 'firebase/firestore';
@@ -30,6 +31,7 @@ interface AuthContextValue {
   signInWithEmail: (email: string, password: string) => Promise<void>;
   signUpWithEmail: (email: string, password: string) => Promise<void>;
   signInAnon: () => Promise<void>;
+  sendPasswordReset: (email: string) => Promise<void>;
   logout: () => Promise<void>;
   deleteAccount: () => Promise<void>;
 }
@@ -105,6 +107,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const a = requireAuth();
         await signInAnonymously(a);
       },
+      sendPasswordReset: async (email) => {
+        const a = requireAuth();
+        await sendPasswordResetEmail(a, email);
+      },
       logout: async () => {
         const a = requireAuth();
         await signOut(a);
@@ -121,6 +127,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           }
         }
         await deleteUser(current);
+        try {
+          await signOut(a);
+        } catch {
+          // user already cleared by deleteUser
+        }
       },
     };
   }, [user, loading]);

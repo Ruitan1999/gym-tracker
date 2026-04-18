@@ -3,16 +3,36 @@ import { useAuth } from '../context/AuthContext';
 import Logo from '../components/shared/Logo';
 
 export default function SignInPage() {
-  const { signInWithGoogle, signInWithEmail, signUpWithEmail, signInAnon, configured } = useAuth();
+  const { signInWithGoogle, signInWithEmail, signUpWithEmail, signInAnon, sendPasswordReset, configured } = useAuth();
   const [mode, setMode] = useState<'signin' | 'signup'>('signin');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [info, setInfo] = useState<string | null>(null);
+
+  const handleForgotPassword = async () => {
+    setError(null);
+    setInfo(null);
+    if (!email.trim()) {
+      setError('Enter your email above, then tap forgot password.');
+      return;
+    }
+    setBusy(true);
+    try {
+      await sendPasswordReset(email.trim());
+      setInfo(`Password reset link sent to ${email.trim()}.`);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not send reset email');
+    } finally {
+      setBusy(false);
+    }
+  };
 
   const submit = async (e: FormEvent) => {
     e.preventDefault();
     setError(null);
+    setInfo(null);
     setBusy(true);
     try {
       if (mode === 'signin') {
@@ -20,6 +40,7 @@ export default function SignInPage() {
       } else {
         await signUpWithEmail(email, password);
       }
+      window.history.replaceState(null, '', '/');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong');
     } finally {
@@ -29,9 +50,11 @@ export default function SignInPage() {
 
   const handleProvider = async (fn: () => Promise<void>) => {
     setError(null);
+    setInfo(null);
     setBusy(true);
     try {
       await fn();
+      window.history.replaceState(null, '', '/');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong');
     } finally {
@@ -163,6 +186,17 @@ export default function SignInPage() {
           >
             {mode === 'signin' ? 'SIGN IN →' : 'CREATE ACCOUNT →'}
           </button>
+          {mode === 'signin' && (
+            <button
+              type="button"
+              onClick={handleForgotPassword}
+              disabled={busy}
+              className="caps-tight text-[10px] w-full text-center press disabled:opacity-40"
+              style={{ color: 'var(--color-text-faint)' }}
+            >
+              FORGOT PASSWORD?
+            </button>
+          )}
         </form>
 
         <button
@@ -196,6 +230,21 @@ export default function SignInPage() {
             }}
           >
             {error}
+          </p>
+        )}
+
+        {info && (
+          <p
+            className="text-[12px] p-3"
+            role="status"
+            style={{
+              color: 'var(--color-text)',
+              border: '1px solid var(--color-line-2)',
+              background: 'var(--color-elev)',
+              borderRadius: '2px',
+            }}
+          >
+            {info}
           </p>
         )}
       </div>
