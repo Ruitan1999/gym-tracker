@@ -4,7 +4,7 @@ import { useAppContext } from '../../context/AppContext';
 import ExerciseSelect from '../shared/ExerciseSelect';
 import DatePicker from '../shared/DatePicker';
 import EntryCard from './EntryCard';
-import SaveGroupModal from './SaveGroupModal';
+import SaveTemplatePrompt from './SaveTemplatePrompt';
 import type { Workout, WorkoutEntry, WorkoutGroup, WorkoutSet } from '../../types';
 
 interface WorkoutFormProps {
@@ -49,7 +49,7 @@ export default function WorkoutForm({ existingWorkout }: WorkoutFormProps) {
   const [entries, setEntries] = useState<WorkoutEntry[]>(existingWorkout?.entries ?? draft?.entries ?? []);
   const [notes, setNotes] = useState(existingWorkout?.notes ?? draft?.notes ?? '');
   const [showExerciseSelect, setShowExerciseSelect] = useState(false);
-  const [showSaveGroup, setShowSaveGroup] = useState(false);
+  const [templatePromptEntries, setTemplatePromptEntries] = useState<WorkoutEntry[] | null>(null);
   const [validationError, setValidationError] = useState('');
   const [collapsedIds, setCollapsedIds] = useState<Set<string>>(
     new Set(draft?.collapsedIds ?? []),
@@ -152,19 +152,35 @@ export default function WorkoutForm({ existingWorkout }: WorkoutFormProps) {
     });
     setEntries(newEntries);
     if (newEntries.length > 1) {
-      setCollapsedIds(new Set(newEntries.slice(0, -1).map((e) => e.id)));
+      setCollapsedIds(new Set(newEntries.slice(1).map((e) => e.id)));
     }
   }
 
-  function handleSaveAsGroup(name: string) {
+  function exerciseIdsMatchExistingGroup(ids: string[]): boolean {
+    const target = new Set(ids);
+    return groups.some(
+      (g) =>
+        g.exerciseIds.length === target.size &&
+        g.exerciseIds.every((id) => target.has(id)),
+    );
+  }
+
+  function handleTemplatePromptSave(name: string) {
+    if (!templatePromptEntries) return;
     const group: WorkoutGroup = {
       id: crypto.randomUUID(),
       name,
-      exerciseIds: entries.map((e) => e.exerciseId),
+      exerciseIds: templatePromptEntries.map((e) => e.exerciseId),
       createdAt: new Date().toISOString(),
     };
     addGroup(group);
-    setShowSaveGroup(false);
+    setTemplatePromptEntries(null);
+    navigate('/history');
+  }
+
+  function handleTemplatePromptDismiss() {
+    setTemplatePromptEntries(null);
+    navigate('/history');
   }
 
   function handleSave() {
@@ -187,22 +203,30 @@ export default function WorkoutForm({ existingWorkout }: WorkoutFormProps) {
       };
       if (!notes) delete (updated as Partial<Workout>).notes;
       updateWorkout(updated);
-    } else {
-      const workout: Workout = {
-        id: crypto.randomUUID(),
-        date,
-        entries,
-        ...(notes ? { notes } : {}),
-        createdAt: new Date().toISOString(),
-      };
-      addWorkout(workout);
+      localStorage.removeItem(DRAFT_KEY);
+      navigate('/history');
+      return;
     }
+    const savedEntries = entries;
+    const workout: Workout = {
+      id: crypto.randomUUID(),
+      date,
+      entries: savedEntries,
+      ...(notes ? { notes } : {}),
+      createdAt: new Date().toISOString(),
+    };
+    addWorkout(workout);
     localStorage.removeItem(DRAFT_KEY);
-    navigate('/history');
+
+    const exerciseIds = savedEntries.map((e) => e.exerciseId);
+    if (exerciseIdsMatchExistingGroup(exerciseIds)) {
+      navigate('/history');
+      return;
+    }
+    setTemplatePromptEntries(savedEntries);
   }
 
   const showGroupsPicker = !isEdit && entries.length === 0 && groups.length > 0;
-  const canSaveAsGroup = !isEdit && entries.length > 0;
   const ratingMatch = notes.match(/^Rating: (\d+)/);
   const currentRating = ratingMatch ? parseInt(ratingMatch[1], 10) : 0;
 
@@ -324,17 +348,6 @@ export default function WorkoutForm({ existingWorkout }: WorkoutFormProps) {
         </div>
       </button>
 
-      {canSaveAsGroup && (
-        <button
-          type="button"
-          onClick={() => setShowSaveGroup(true)}
-          className="caps text-[10px] press self-start"
-          style={{ color: 'var(--color-text)', padding: '0.75rem 0' }}
-        >
-          ＋ SAVE EXERCISES AS TEMPLATE
-        </button>
-      )}
-
       {showExerciseSelect && (
         <ExerciseSelect
           onSelect={handleSelectExercise}
@@ -422,8 +435,13 @@ export default function WorkoutForm({ existingWorkout }: WorkoutFormProps) {
         {isEdit ? 'Update Session →' : 'Save Session →'}
       </button>
 
-      {showSaveGroup && (
-        <SaveGroupModal onSave={handleSaveAsGroup} onClose={() => setShowSaveGroup(false)} />
+      {templatePromptEntries && (
+        <SaveTemplatePrompt
+          exerciseNames={templatePromptEntries
+            .map((e) => appData.exercises.find((x) => x.id === e.exerciseId)?.name ?? 'Exercise')}
+          onSave={handleTemplatePromptSave}
+          onDismiss={handleTemplatePromptDismiss}
+        />
       )}
     </div>
   );
