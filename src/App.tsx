@@ -5,6 +5,7 @@ import { AppProvider } from './context/AppContext';
 import SaveErrorBanner from './components/layout/SaveErrorBanner';
 import BottomNav from './components/layout/BottomNav';
 import Toast from './components/shared/Toast';
+import SessionSavedBanner, { type SessionSavedStats } from './components/shared/SessionSavedBanner';
 import LogWorkoutPage from './pages/LogWorkoutPage';
 import SignInPage from './pages/SignInPage';
 
@@ -37,7 +38,13 @@ function AppRoutes() {
   );
 }
 
-function AuthedApp({ showToast }: { showToast: (m: string) => void }) {
+function AuthedApp({
+  showToast,
+  showSessionSaved,
+}: {
+  showToast: (m: string) => void;
+  showSessionSaved: (s: SessionSavedStats) => void;
+}) {
   const { user, loading, configured } = useAuth();
 
   if (!configured) {
@@ -57,7 +64,7 @@ function AuthedApp({ showToast }: { showToast: (m: string) => void }) {
   }
 
   return (
-    <AppProvider uid={user.uid} showToast={showToast}>
+    <AppProvider uid={user.uid} showToast={showToast} showSessionSaved={showSessionSaved}>
       <BrowserRouter>
         <SaveErrorBanner />
         <AppRoutes />
@@ -68,15 +75,23 @@ function AuthedApp({ showToast }: { showToast: (m: string) => void }) {
 
 export default function App() {
   const [toast, setToast] = useState<string | null>(null);
+  const [sessionSaved, setSessionSaved] = useState<SessionSavedStats | null>(null);
 
   const showToast = useCallback((message: string) => {
     setToast(message);
   }, []);
 
+  const showSessionSaved = useCallback((stats: SessionSavedStats) => {
+    setSessionSaved(stats);
+  }, []);
+
   return (
     <AuthProvider>
+      {sessionSaved && (
+        <SessionSavedBanner stats={sessionSaved} onClose={() => setSessionSaved(null)} />
+      )}
       {toast && <Toast message={toast} onClose={() => setToast(null)} />}
-      <AuthedApp showToast={showToast} />
+      <AuthedApp showToast={showToast} showSessionSaved={showSessionSaved} />
     </AuthProvider>
   );
 }

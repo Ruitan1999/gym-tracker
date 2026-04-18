@@ -8,6 +8,7 @@ import {
   type ReactNode,
 } from 'react';
 import type { AppData, Workout, Exercise, UserPreferences, WorkoutGroup } from '../types';
+import type { SessionSavedStats } from '../components/shared/SessionSavedBanner';
 import { loadAppData, saveAppData, clearLocalAppData, hasLocalAppData } from '../utils/storage';
 import { loadRemoteAppData, saveRemoteAppData } from '../utils/remoteStorage';
 
@@ -34,9 +35,15 @@ interface AppProviderProps {
   children: ReactNode;
   uid?: string | null;
   showToast?: (message: string) => void;
+  showSessionSaved?: (stats: SessionSavedStats) => void;
 }
 
-export function AppProvider({ children, uid = null, showToast: externalToast }: AppProviderProps) {
+export function AppProvider({
+  children,
+  uid = null,
+  showToast: externalToast,
+  showSessionSaved: externalSessionSaved,
+}: AppProviderProps) {
   const [appData, setAppData] = useState<AppData>(() => loadAppData());
   const [loading, setLoading] = useState<boolean>(Boolean(uid));
   const [saveError, setSaveError] = useState(false);
@@ -119,9 +126,27 @@ export function AppProvider({ children, uid = null, showToast: externalToast }: 
   const addWorkout = useCallback(
     (workout: Workout) => {
       setAppData((prev) => ({ ...prev, workouts: [...prev.workouts, workout] }));
-      showToast('Workout saved!');
+      if (externalSessionSaved) {
+        const sets = workout.entries.reduce((a, e) => a + e.sets.length, 0);
+        const reps = workout.entries.reduce(
+          (a, e) => a + e.sets.reduce((s, set) => s + (set.reps || 0), 0),
+          0,
+        );
+        const volumeKg = workout.entries.reduce(
+          (a, e) => a + e.sets.reduce((s, set) => s + set.reps * set.weightKg, 0),
+          0,
+        );
+        externalSessionSaved({
+          exercises: workout.entries.length,
+          sets,
+          reps,
+          volumeKg,
+        });
+      } else {
+        showToast('Workout saved!');
+      }
     },
-    [showToast]
+    [showToast, externalSessionSaved],
   );
 
   const updateWorkout = useCallback(

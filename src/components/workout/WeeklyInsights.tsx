@@ -104,7 +104,7 @@ export default function WeeklyInsights() {
         </div>
       </div>
 
-      <div className="flex items-end justify-between gap-1.5">
+      <div className="flex items-end gap-1.5">
         {weekDays.map((day, i) => (
           <DayBox key={i} {...day} />
         ))}
@@ -226,9 +226,8 @@ function DayBox({
   return (
     <div className="flex-1 flex flex-col items-center gap-1">
       <div
-        className="w-full flex items-center justify-center"
+        className="w-full flex items-center justify-center aspect-square md:aspect-[2/1]"
         style={{
-          aspectRatio: '1 / 1',
           background: bg,
           border: `1px solid ${border}`,
           borderRadius: '2px',
@@ -237,10 +236,10 @@ function DayBox({
         }}
       >
         {trained ? (
-          <FireIcon className="w-4 h-4" />
+          <FireIcon className="w-4 h-4 md:w-6 md:h-6" />
         ) : (
           <span
-            className="caps-tight text-[10px]"
+            className="caps-tight text-[13px] md:text-[18px]"
             style={{ color: textColor, fontWeight: isToday ? 700 : 400 }}
           >
             {letter}

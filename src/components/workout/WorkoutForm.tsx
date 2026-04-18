@@ -443,7 +443,7 @@ function HeroStat({ label, value, divider }: { label: string; value: number; div
         style={{
           fontSize: '1.75rem',
           fontWeight: 500,
-          color: value > 0 ? 'var(--color-text)' : 'var(--color-text-faint)',
+          color: value > 0 ? 'var(--color-volt)' : 'var(--color-text-faint)',
           fontVariantNumeric: 'tabular-nums',
         }}
       >

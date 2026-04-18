@@ -24,7 +24,7 @@ export default function PageShell({ title, eyebrow, rightAction, children, showB
             paddingTop: 'var(--safe-top)',
           }}
         >
-          <div className="flex items-center justify-between px-4 h-14">
+          <div className="flex items-center justify-between px-4 h-14 w-full max-w-[800px] mx-auto">
             <div className="flex items-center gap-3 min-w-0">
               <button
                 type="button"
@@ -69,7 +69,7 @@ export default function PageShell({ title, eyebrow, rightAction, children, showB
           paddingBottom: 'calc(6rem + var(--safe-bottom))',
         }}
       >
-        <div className="px-4 pt-5">
+        <div className="px-4 pt-5 w-full max-w-[800px] mx-auto">
           {!showBack && topSlot}
           {!showBack && (
             <div className="mb-4">

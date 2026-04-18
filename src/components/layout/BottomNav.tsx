@@ -64,7 +64,7 @@ export default function BottomNav() {
       }}
       aria-label="Primary"
     >
-      <div className="grid grid-cols-4">
+      <div className="grid grid-cols-4 w-full max-w-[800px] mx-auto">
         {tabs.map((tab) => (
           <NavLink
             key={tab.to}
