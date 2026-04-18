@@ -344,7 +344,7 @@ export default function LandingPage() {
             <Logo withWordmark />
           </div>
           <div className="caps-tight text-[10px]" style={{ color: 'var(--color-text-faint)' }}>
-            © 2026 LIFTGAUGE · BUILT FOR LIFTERS
+            © 2026 LIFTGAUGE · BUILT FOR LIFTERS · BUILT BY RUITAN EXPERIENCE DESIGN
           </div>
           <button
             type="button"
