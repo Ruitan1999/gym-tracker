@@ -27,6 +27,7 @@ interface AppContextValue {
   reorderGroups: (ids: string[]) => void;
   updatePreferences: (preferences: UserPreferences) => void;
   showToast: (message: string) => void;
+  refreshAppData: () => Promise<void>;
 }
 
 const AppContext = createContext<AppContextValue | null>(null);
@@ -208,6 +209,19 @@ export function AppProvider({
     }));
   }, []);
 
+  const refreshAppData = useCallback(async () => {
+    if (!uid) return;
+    try {
+      const { data } = await loadRemoteAppData(uid);
+      skipNextSaveRef.current = true;
+      setAppData(data);
+      setSaveError(false);
+    } catch (err) {
+      console.error('Failed to refresh remote data:', err);
+      setSaveError(true);
+    }
+  }, [uid]);
+
   const reorderGroups = useCallback((ids: string[]) => {
     setAppData((prev) => {
       const byId = new Map((prev.groups ?? []).map((g) => [g.id, g]));
@@ -233,6 +247,7 @@ export function AppProvider({
         reorderGroups,
         updatePreferences,
         showToast,
+        refreshAppData,
       }}
     >
       {children}

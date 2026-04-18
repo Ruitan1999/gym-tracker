@@ -1,5 +1,6 @@
-import type { ReactNode } from 'react';
+import { useRef, useState, type ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAppContext } from '../../context/AppContext';
 
 interface PageShellProps {
   title: string;
@@ -8,10 +9,74 @@ interface PageShellProps {
   children: ReactNode;
   showBack?: boolean;
   topSlot?: ReactNode;
+  onRefresh?: () => Promise<void>;
 }
 
-export default function PageShell({ title, eyebrow, rightAction, children, showBack, topSlot }: PageShellProps) {
+const PULL_THRESHOLD = 72;
+const MAX_PULL = 120;
+
+export default function PageShell({ title, eyebrow, rightAction, children, showBack, topSlot, onRefresh }: PageShellProps) {
   const navigate = useNavigate();
+  const { refreshAppData } = useAppContext();
+  const mainRef = useRef<HTMLElement | null>(null);
+  const startYRef = useRef<number | null>(null);
+  const pullingRef = useRef(false);
+  const [pull, setPull] = useState(0);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const doRefresh = onRefresh ?? refreshAppData;
+
+  function onTouchStart(e: React.TouchEvent) {
+    if (refreshing) return;
+    const el = mainRef.current;
+    if (!el || el.scrollTop > 0) {
+      startYRef.current = null;
+      return;
+    }
+    startYRef.current = e.touches[0].clientY;
+    pullingRef.current = false;
+  }
+
+  function onTouchMove(e: React.TouchEvent) {
+    if (refreshing || startYRef.current == null) return;
+    const el = mainRef.current;
+    if (!el || el.scrollTop > 0) {
+      startYRef.current = null;
+      setPull(0);
+      return;
+    }
+    const dy = e.touches[0].clientY - startYRef.current;
+    if (dy <= 0) {
+      setPull(0);
+      return;
+    }
+    pullingRef.current = true;
+    const damped = Math.min(MAX_PULL, dy * 0.5);
+    setPull(damped);
+  }
+
+  async function onTouchEnd() {
+    if (refreshing) return;
+    const wasPulling = pullingRef.current;
+    const distance = pull;
+    startYRef.current = null;
+    pullingRef.current = false;
+    if (wasPulling && distance >= PULL_THRESHOLD) {
+      setRefreshing(true);
+      setPull(48);
+      try {
+        await doRefresh();
+      } finally {
+        setRefreshing(false);
+        setPull(0);
+      }
+    } else {
+      setPull(0);
+    }
+  }
+
+  const indicatorOpacity = Math.min(1, pull / PULL_THRESHOLD);
+  const ready = pull >= PULL_THRESHOLD;
 
   return (
     <div className="flex flex-col h-[100dvh] overflow-hidden" style={{ background: 'var(--color-bg)' }}>
@@ -63,13 +128,56 @@ export default function PageShell({ title, eyebrow, rightAction, children, showB
       )}
 
       <main
-        className="flex-1 overflow-y-auto"
+        ref={mainRef}
+        className="flex-1 overflow-y-auto relative"
         style={{
           paddingTop: showBack ? undefined : 'var(--safe-top)',
           paddingBottom: 'calc(6rem + var(--safe-bottom))',
+          overscrollBehaviorY: 'contain',
         }}
+        onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
+        onTouchEnd={onTouchEnd}
+        onTouchCancel={onTouchEnd}
       >
-        <div className="px-4 pt-5 w-full max-w-[800px] mx-auto">
+        {(pull > 0 || refreshing) && (
+          <div
+            className="pointer-events-none absolute left-0 right-0 flex items-center justify-center"
+            style={{
+              top: 0,
+              height: `${Math.max(pull, refreshing ? 48 : 0)}px`,
+              opacity: indicatorOpacity,
+              transition: pull === 0 || refreshing ? 'opacity 0.2s, height 0.2s' : undefined,
+              zIndex: 30,
+            }}
+          >
+            <div
+              className="caps-tight text-[10px] flex items-center gap-2"
+              style={{ color: 'var(--color-text-muted)' }}
+            >
+              <span
+                className="inline-block"
+                style={{
+                  width: 14,
+                  height: 14,
+                  border: '1.5px solid var(--color-text-muted)',
+                  borderTopColor: 'transparent',
+                  borderRadius: '50%',
+                  animation: refreshing ? 'spin 0.8s linear infinite' : undefined,
+                  transform: refreshing ? undefined : `rotate(${Math.min(360, (pull / PULL_THRESHOLD) * 360)}deg)`,
+                }}
+              />
+              {refreshing ? 'REFRESHING' : ready ? 'RELEASE TO REFRESH' : 'PULL TO REFRESH'}
+            </div>
+          </div>
+        )}
+        <div
+          className="px-4 pt-5 w-full max-w-[800px] mx-auto"
+          style={{
+            transform: pull > 0 || refreshing ? `translateY(${Math.max(pull, refreshing ? 48 : 0)}px)` : undefined,
+            transition: pull === 0 && !refreshing ? 'transform 0.2s' : undefined,
+          }}
+        >
           {!showBack && topSlot}
           {!showBack && (
             <div className="mb-4">

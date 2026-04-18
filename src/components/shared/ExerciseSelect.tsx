@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { useAppContext } from '../../context/AppContext';
 import type { ExerciseCategory } from '../../types';
 
@@ -26,6 +26,85 @@ const CATEGORY_ACCENT: Record<ExerciseCategory, string> = {
 export default function ExerciseSelect({ onSelect, onClose }: ExerciseSelectProps) {
   const { appData } = useAppContext();
   const [filter, setFilter] = useState('');
+  const [dragY, setDragY] = useState(0);
+  const [closing, setClosing] = useState(false);
+  const scrollRef = useRef<HTMLDivElement | null>(null);
+  const dragStartYRef = useRef<number | null>(null);
+  const draggingRef = useRef(false);
+  const closedRef = useRef(false);
+
+  const handleClose = () => {
+    if (closedRef.current) return;
+    closedRef.current = true;
+    onClose();
+  };
+
+  useEffect(() => {
+    const tag = 'exercise-select';
+    let pushed = false;
+    const prevState = window.history.state;
+    const timeoutId = window.setTimeout(() => {
+      window.history.pushState({ ...(prevState ?? {}), [tag]: true }, '');
+      pushed = true;
+    }, 0);
+    const onPop = () => {
+      if (!pushed) return;
+      if (closedRef.current) return;
+      closedRef.current = true;
+      pushed = false;
+      onClose();
+    };
+    window.addEventListener('popstate', onPop);
+    return () => {
+      window.clearTimeout(timeoutId);
+      window.removeEventListener('popstate', onPop);
+      if (pushed) {
+        window.history.back();
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  function onSheetTouchStart(e: React.TouchEvent) {
+    const target = e.target as HTMLElement;
+    const scroller = scrollRef.current;
+    const withinScroller = scroller && scroller.contains(target);
+    if (withinScroller && scroller!.scrollTop > 0) {
+      dragStartYRef.current = null;
+      return;
+    }
+    dragStartYRef.current = e.touches[0].clientY;
+    draggingRef.current = false;
+  }
+
+  function onSheetTouchMove(e: React.TouchEvent) {
+    if (dragStartYRef.current == null) return;
+    const scroller = scrollRef.current;
+    if (scroller && scroller.scrollTop > 0 && !draggingRef.current) {
+      dragStartYRef.current = null;
+      return;
+    }
+    const dy = e.touches[0].clientY - dragStartYRef.current;
+    if (dy <= 0) {
+      setDragY(0);
+      return;
+    }
+    draggingRef.current = true;
+    setDragY(dy);
+  }
+
+  function onSheetTouchEnd() {
+    const dy = dragY;
+    dragStartYRef.current = null;
+    draggingRef.current = false;
+    if (dy > 120) {
+      setClosing(true);
+      setDragY(window.innerHeight);
+      setTimeout(handleClose, 180);
+    } else {
+      setDragY(0);
+    }
+  }
 
   const recentExerciseIds = useMemo(() => {
     const seen = new Set<string>();
@@ -72,16 +151,28 @@ export default function ExerciseSelect({ onSelect, onClose }: ExerciseSelectProp
     <>
       <div
         className="fixed inset-0 z-50"
-        style={{ background: 'rgba(5,5,5,0.72)', backdropFilter: 'blur(6px)' }}
-        onClick={onClose}
+        style={{
+          background: 'rgba(5,5,5,0.72)',
+          backdropFilter: 'blur(6px)',
+          opacity: Math.max(0, 1 - dragY / 400),
+          transition: dragY === 0 && !closing ? 'opacity 0.2s' : undefined,
+        }}
+        onClick={handleClose}
       />
 
       <div
-        className="fixed inset-x-0 bottom-0 z-50 h-[88dvh] flex flex-col animate-[slideUp_0.22s_ease-out]"
+        className={`fixed inset-x-0 bottom-0 z-50 h-[88dvh] flex flex-col ${dragY === 0 && !closing ? 'animate-[slideUp_0.22s_ease-out]' : ''}`}
         style={{
           background: 'var(--color-elev)',
           borderTop: '1px solid var(--color-line-2)',
+          transform: dragY > 0 || closing ? `translateY(${dragY}px)` : undefined,
+          transition: closing ? 'transform 0.18s ease-in' : dragY === 0 ? 'transform 0.2s' : undefined,
+          touchAction: 'pan-y',
         }}
+        onTouchStart={onSheetTouchStart}
+        onTouchMove={onSheetTouchMove}
+        onTouchEnd={onSheetTouchEnd}
+        onTouchCancel={onSheetTouchEnd}
       >
         {/* Handle */}
         <div className="flex justify-center pt-2 pb-1.5">
@@ -105,7 +196,7 @@ export default function ExerciseSelect({ onSelect, onClose }: ExerciseSelectProp
           </div>
           <button
             type="button"
-            onClick={onClose}
+            onClick={handleClose}
             className="h-10 px-3 caps-tight text-[10px] press"
             style={{ color: 'var(--color-text-muted)' }}
           >
@@ -133,7 +224,7 @@ export default function ExerciseSelect({ onSelect, onClose }: ExerciseSelectProp
         </div>
 
         {/* Scrollable content */}
-        <div className="flex-1 overflow-y-auto px-5 pb-8">
+        <div ref={scrollRef} className="flex-1 overflow-y-auto px-5 pb-8">
           {isSearching ? (
             <div>
               {searchResults.length === 0 ? (
