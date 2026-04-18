@@ -66,6 +66,7 @@ export default function ExerciseSelect({ onSelect, onClose }: ExerciseSelectProp
   }, []);
 
   function onSheetTouchStart(e: React.TouchEvent) {
+    e.stopPropagation();
     const target = e.target as HTMLElement;
     const scroller = scrollRef.current;
     const withinScroller = scroller && scroller.contains(target);
@@ -78,6 +79,7 @@ export default function ExerciseSelect({ onSelect, onClose }: ExerciseSelectProp
   }
 
   function onSheetTouchMove(e: React.TouchEvent) {
+    e.stopPropagation();
     if (dragStartYRef.current == null) return;
     const scroller = scrollRef.current;
     if (scroller && scroller.scrollTop > 0 && !draggingRef.current) {
@@ -93,7 +95,8 @@ export default function ExerciseSelect({ onSelect, onClose }: ExerciseSelectProp
     setDragY(dy);
   }
 
-  function onSheetTouchEnd() {
+  function onSheetTouchEnd(e: React.TouchEvent) {
+    e.stopPropagation();
     const dy = dragY;
     dragStartYRef.current = null;
     draggingRef.current = false;
@@ -158,6 +161,9 @@ export default function ExerciseSelect({ onSelect, onClose }: ExerciseSelectProp
           transition: dragY === 0 && !closing ? 'opacity 0.2s' : undefined,
         }}
         onClick={handleClose}
+        onTouchStart={(e) => e.stopPropagation()}
+        onTouchMove={(e) => e.stopPropagation()}
+        onTouchEnd={(e) => e.stopPropagation()}
       />
 
       <div
