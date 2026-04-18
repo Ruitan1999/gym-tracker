@@ -32,6 +32,8 @@ export default function ExerciseSelect({ onSelect, onClose }: ExerciseSelectProp
   const dragStartYRef = useRef<number | null>(null);
   const draggingRef = useRef(false);
   const closedRef = useRef(false);
+  const lastMoveRef = useRef<{ y: number; t: number } | null>(null);
+  const velocityRef = useRef(0);
 
   const handleClose = () => {
     if (closedRef.current) return;
@@ -74,8 +76,11 @@ export default function ExerciseSelect({ onSelect, onClose }: ExerciseSelectProp
       dragStartYRef.current = null;
       return;
     }
-    dragStartYRef.current = e.touches[0].clientY;
+    const y = e.touches[0].clientY;
+    dragStartYRef.current = y;
     draggingRef.current = false;
+    lastMoveRef.current = { y, t: performance.now() };
+    velocityRef.current = 0;
   }
 
   function onSheetTouchMove(e: React.TouchEvent) {
@@ -86,7 +91,15 @@ export default function ExerciseSelect({ onSelect, onClose }: ExerciseSelectProp
       dragStartYRef.current = null;
       return;
     }
-    const dy = e.touches[0].clientY - dragStartYRef.current;
+    const y = e.touches[0].clientY;
+    const dy = y - dragStartYRef.current;
+    const now = performance.now();
+    const last = lastMoveRef.current;
+    if (last) {
+      const dt = now - last.t;
+      if (dt > 0) velocityRef.current = (y - last.y) / dt;
+    }
+    lastMoveRef.current = { y, t: now };
     if (dy <= 0) {
       setDragY(0);
       return;
@@ -98,9 +111,12 @@ export default function ExerciseSelect({ onSelect, onClose }: ExerciseSelectProp
   function onSheetTouchEnd(e: React.TouchEvent) {
     e.stopPropagation();
     const dy = dragY;
+    const v = velocityRef.current;
     dragStartYRef.current = null;
     draggingRef.current = false;
-    if (dy > 120) {
+    lastMoveRef.current = null;
+    const shouldClose = dy > 60 || (dy > 20 && v > 0.5);
+    if (shouldClose) {
       setClosing(true);
       setDragY(window.innerHeight);
       setTimeout(handleClose, 220);
