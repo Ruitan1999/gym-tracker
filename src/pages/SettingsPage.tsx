@@ -52,7 +52,7 @@ export default function SettingsPage() {
   return (
     <PageShell title="Settings">
       <div className="space-y-6">
-        <Section label="EXERCISE INDEX" index="01">
+        <Section label="EXERCISE INDEX">
           <button
             type="button"
             onClick={() => navigate('/exercises')}
@@ -78,7 +78,6 @@ export default function SettingsPage() {
 
         <Section
           label="REPS OPTIONS"
-          index="02"
           action={
             <button
               type="button"
@@ -176,7 +175,7 @@ export default function SettingsPage() {
           ) : null}
         </Section>
 
-        <Section label="LOAD INCREMENT" index="03">
+        <Section label="LOAD INCREMENT">
           <WeightStepper label="STEP KG" value={preferences.weightStepKg} onChange={setStepKg} step={0.25} unit="kg" />
           <p
             className="caps-tight text-[9px] mt-3"
@@ -211,12 +210,10 @@ export default function SettingsPage() {
 
 function Section({
   label,
-  index,
   action,
   children,
 }: {
   label: string;
-  index: string;
   action?: React.ReactNode;
   children: React.ReactNode;
 }) {
