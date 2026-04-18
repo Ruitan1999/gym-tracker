@@ -1,0 +1,35 @@
+# LiftGauge
+
+> The honest training log for lifters who care about the numbers. Log sets in seconds, watch the graph climb, never wonder what you did last Tuesday again.
+
+LiftGauge is a free, web-based gym tracking app (PWA) built for lifters who want a clean, fast logbook without ads, streaks-as-ransom, or social feeds. It works on any modern browser, installs to the home screen on iOS and Android, and syncs across devices.
+
+## What it does
+
+- **Log Session** — Tap, type, done. Last session's numbers prefill so you only enter what changed. Designed for one-thumb logging mid-set.
+- **Log Book** — Every workout, every set, searchable. Edit history without breaking streaks.
+- **Progress** — Per-exercise charts for total volume, top set, and estimated 1RM. Actual signal, not vanity metrics.
+- **Library & Groups** — Build a personal exercise library. Group movements into routines you actually run.
+
+## Principles
+
+- No ads, ever.
+- No dark patterns, no streaks held hostage.
+- Your data stays yours — export anytime.
+- Works offline (PWA); saves on reconnect.
+- Free forever for core tracking.
+
+## Tech
+
+- Web app (PWA) built with React + Vite + TypeScript.
+- Firebase for auth and data sync.
+- Deployed on Vercel.
+
+## Links
+
+- [Home](https://gym-tracker-indol-iota.vercel.app/)
+- [Sign in](https://gym-tracker-indol-iota.vercel.app/login)
+
+## Credit
+
+Built by Ruitan Experience Design.
