@@ -31,34 +31,40 @@ export default function EntryCard({
   const cardRef = useRef<HTMLDivElement>(null);
   const prevCollapsedRef = useRef(collapsed);
 
+  const scrollCardIntoView = useCallback(() => {
+    const el = cardRef.current;
+    if (!el) return;
+    requestAnimationFrame(() => {
+      let scroller: HTMLElement | null = el.parentElement;
+      while (scroller) {
+        const s = getComputedStyle(scroller);
+        if (
+          (s.overflowY === 'auto' || s.overflowY === 'scroll') &&
+          scroller.scrollHeight > scroller.clientHeight
+        ) {
+          break;
+        }
+        scroller = scroller.parentElement;
+      }
+      const container = scroller ?? (document.scrollingElement as HTMLElement);
+      const containerRect = scroller
+        ? scroller.getBoundingClientRect()
+        : { top: 0, height: window.innerHeight };
+      const cardRect = el.getBoundingClientRect();
+      const offsetWithin = cardRect.top - containerRect.top;
+      const target = container.scrollTop + offsetWithin - 12;
+      if (offsetWithin < 0 || offsetWithin > containerRect.height * 0.4) {
+        container.scrollTo({ top: Math.max(0, target), behavior: 'smooth' });
+      }
+    });
+  }, []);
+
   useEffect(() => {
-    if (prevCollapsedRef.current && !collapsed && cardRef.current) {
-      const el = cardRef.current;
-      requestAnimationFrame(() => {
-        let scroller: HTMLElement | null = el.parentElement;
-        while (scroller) {
-          const s = getComputedStyle(scroller);
-          if (
-            (s.overflowY === 'auto' || s.overflowY === 'scroll') &&
-            scroller.scrollHeight > scroller.clientHeight
-          ) {
-            break;
-          }
-          scroller = scroller.parentElement;
-        }
-        const container = scroller ?? document.scrollingElement as HTMLElement;
-        const containerRect =
-          scroller ? scroller.getBoundingClientRect() : { top: 0, height: window.innerHeight };
-        const cardRect = el.getBoundingClientRect();
-        const offsetWithin = cardRect.top - containerRect.top;
-        const target = container.scrollTop + offsetWithin - 12;
-        if (offsetWithin < 0 || offsetWithin > containerRect.height * 0.4) {
-          container.scrollTo({ top: Math.max(0, target), behavior: 'smooth' });
-        }
-      });
+    if (prevCollapsedRef.current && !collapsed) {
+      scrollCardIntoView();
     }
     prevCollapsedRef.current = collapsed;
-  }, [collapsed]);
+  }, [collapsed, scrollCardIntoView]);
 
   const stableKeysRef = useRef<string[]>([]);
   while (stableKeysRef.current.length < sets.length) {
@@ -77,7 +83,8 @@ export default function EntryCard({
     };
     stableKeysRef.current.push(`set-${++globalKeyCounter}`);
     onSetsChange([...sets, newSet]);
-  }, [sets, onSetsChange]);
+    scrollCardIntoView();
+  }, [sets, onSetsChange, scrollCardIntoView]);
 
   const handleRemoveSet = useCallback(
     (i: number) => {
