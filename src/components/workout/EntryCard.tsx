@@ -93,13 +93,13 @@ export default function EntryCard({
     >
       {/* Header */}
       <div
-        className="relative flex items-center justify-between pl-4 pr-1.5 py-3.5"
-        style={{ background: '#ffffff' }}
+        className="relative flex items-stretch"
+        style={{ background: '#ffffff', minHeight: '64px' }}
       >
         <button
           type="button"
           onClick={onToggleCollapsed}
-          className="flex items-center gap-3 min-w-0 flex-1 text-left press"
+          className="flex items-center gap-3 min-w-0 flex-1 text-left press pl-4 pr-2 py-4"
           aria-expanded={!collapsed}
           aria-label={collapsed ? 'Expand exercise' : 'Collapse exercise'}
         >
@@ -107,13 +107,7 @@ export default function EntryCard({
             className="caps-tight text-[10px] shrink-0 flex items-center justify-center"
             style={{ color: 'var(--color-text)', minWidth: '1.5rem' }}
           >
-            {collapsed ? (
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="square" className="w-3.5 h-3.5">
-                <path d="M6 15l6-6 6 6" />
-              </svg>
-            ) : (
-              <span>{String(index + 1).padStart(2, '0')}</span>
-            )}
+            {String(index + 1).padStart(2, '0')}
           </span>
           <div
             className="self-stretch w-px"
@@ -134,19 +128,38 @@ export default function EntryCard({
           </h3>
           {collapsed && (
             <span
-              className="caps-tight text-[9px] shrink-0 ml-auto pr-2"
+              className="caps-tight text-[9px] shrink-0 ml-auto"
               style={{ color: 'var(--color-text-faint)', fontVariantNumeric: 'tabular-nums' }}
             >
               {sets.length}×{totalReps} · {volumeStr}KG
             </span>
           )}
+          <span
+            className={`shrink-0 flex items-center justify-center ${collapsed ? '' : 'ml-auto'}`}
+            aria-hidden
+            style={{
+              width: '28px',
+              height: '28px',
+              color: 'var(--color-text-faint)',
+              transition: 'transform 180ms ease',
+              transform: collapsed ? 'rotate(0deg)' : 'rotate(180deg)',
+            }}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="square" className="w-4 h-4">
+              <path d="M6 9l6 6 6-6" />
+            </svg>
+          </span>
         </button>
         <button
           type="button"
           onClick={() => setShowRemoveConfirm(true)}
           aria-label="Remove exercise"
-          className="w-10 h-10 flex items-center justify-center press shrink-0"
-          style={{ color: 'var(--color-text-faint)' }}
+          className="flex items-center justify-center press shrink-0"
+          style={{
+            width: '56px',
+            color: 'var(--color-text-faint)',
+            borderLeft: '1px solid var(--color-line)',
+          }}
         >
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="square" className="w-4 h-4">
             <path d="M4 7h16" />

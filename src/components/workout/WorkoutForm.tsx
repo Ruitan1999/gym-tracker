@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAppContext } from '../../context/AppContext';
 import ExerciseSelect from '../shared/ExerciseSelect';
@@ -19,18 +19,76 @@ function todayString(): string {
   return `${yyyy}-${mm}-${dd}`;
 }
 
+const DRAFT_KEY = 'liftgauge.workoutDraft.v1';
+
+interface Draft {
+  date: string;
+  entries: WorkoutEntry[];
+  notes: string;
+  collapsedIds: string[];
+}
+
+function loadDraft(): Draft | null {
+  try {
+    const raw = localStorage.getItem(DRAFT_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw) as Draft;
+  } catch {
+    return null;
+  }
+}
+
 export default function WorkoutForm({ existingWorkout }: WorkoutFormProps) {
   const { appData, addWorkout, updateWorkout, addGroup } = useAppContext();
   const navigate = useNavigate();
   const isEdit = !!existingWorkout;
 
-  const [date, setDate] = useState(existingWorkout?.date ?? todayString());
-  const [entries, setEntries] = useState<WorkoutEntry[]>(existingWorkout?.entries ?? []);
-  const [notes, setNotes] = useState(existingWorkout?.notes ?? '');
+  const draft = !isEdit ? loadDraft() : null;
+
+  const [date, setDate] = useState(existingWorkout?.date ?? draft?.date ?? todayString());
+  const [entries, setEntries] = useState<WorkoutEntry[]>(existingWorkout?.entries ?? draft?.entries ?? []);
+  const [notes, setNotes] = useState(existingWorkout?.notes ?? draft?.notes ?? '');
   const [showExerciseSelect, setShowExerciseSelect] = useState(false);
   const [showSaveGroup, setShowSaveGroup] = useState(false);
   const [validationError, setValidationError] = useState('');
-  const [collapsedIds, setCollapsedIds] = useState<Set<string>>(new Set());
+  const [collapsedIds, setCollapsedIds] = useState<Set<string>>(
+    new Set(draft?.collapsedIds ?? []),
+  );
+  const [scrollToEntryId, setScrollToEntryId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!scrollToEntryId) return;
+    const el = document.querySelector(`[data-entry-id="${scrollToEntryId}"]`);
+    if (el) {
+      let scroller: HTMLElement | null = el.parentElement;
+      while (scroller && scroller !== document.body) {
+        const oy = getComputedStyle(scroller).overflowY;
+        if ((oy === 'auto' || oy === 'scroll') && scroller.scrollHeight > scroller.clientHeight) {
+          break;
+        }
+        scroller = scroller.parentElement;
+      }
+      const OFFSET = 80;
+      if (scroller && scroller !== document.body) {
+        const elTop = el.getBoundingClientRect().top;
+        const scTop = scroller.getBoundingClientRect().top;
+        scroller.scrollTo({ top: scroller.scrollTop + (elTop - scTop) - OFFSET, behavior: 'smooth' });
+      } else {
+        window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - OFFSET, behavior: 'smooth' });
+      }
+    }
+    setScrollToEntryId(null);
+  }, [scrollToEntryId]);
+
+  useEffect(() => {
+    if (isEdit) return;
+    if (entries.length === 0 && !notes && date === todayString()) {
+      localStorage.removeItem(DRAFT_KEY);
+      return;
+    }
+    const payload: Draft = { date, entries, notes, collapsedIds: [...collapsedIds] };
+    localStorage.setItem(DRAFT_KEY, JSON.stringify(payload));
+  }, [isEdit, date, entries, notes, collapsedIds]);
 
   const groups = appData.groups ?? [];
 
@@ -63,6 +121,7 @@ export default function WorkoutForm({ existingWorkout }: WorkoutFormProps) {
     setCollapsedIds(new Set(entries.map((e) => e.id)));
     setEntries((prev) => [...prev, newEntry]);
     setShowExerciseSelect(false);
+    setScrollToEntryId(newEntry.id);
   }
 
   function toggleCollapsed(entryId: string) {
@@ -138,6 +197,7 @@ export default function WorkoutForm({ existingWorkout }: WorkoutFormProps) {
       };
       addWorkout(workout);
     }
+    localStorage.removeItem(DRAFT_KEY);
     navigate('/history');
   }
 
@@ -225,16 +285,17 @@ export default function WorkoutForm({ existingWorkout }: WorkoutFormProps) {
           style={{ background: 'var(--color-bg)' }}
         >
           {entries.map((entry, index) => (
-            <EntryCard
-              key={entry.id}
-              index={index}
-              exerciseId={entry.exerciseId}
-              sets={entry.sets}
-              onSetsChange={(sets) => handleSetsChange(index, sets)}
-              onRemove={() => handleRemoveEntry(index)}
-              collapsed={collapsedIds.has(entry.id)}
-              onToggleCollapsed={() => toggleCollapsed(entry.id)}
-            />
+            <div key={entry.id} data-entry-id={entry.id}>
+              <EntryCard
+                index={index}
+                exerciseId={entry.exerciseId}
+                sets={entry.sets}
+                onSetsChange={(sets) => handleSetsChange(index, sets)}
+                onRemove={() => handleRemoveEntry(index)}
+                collapsed={collapsedIds.has(entry.id)}
+                onToggleCollapsed={() => toggleCollapsed(entry.id)}
+              />
+            </div>
           ))}
         </div>
       )}

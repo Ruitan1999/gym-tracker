@@ -25,8 +25,9 @@ describe('QuickRepChips', () => {
     expect(inactive.getAttribute('aria-pressed')).toBe('false');
   });
 
-  it('renders nothing when values is empty', () => {
-    const { container } = render(<QuickRepChips values={[]} current="" onPick={() => {}} />);
-    expect(container.firstChild).toBeNull();
+  it('still renders the custom-reps entry point when values is empty', () => {
+    render(<QuickRepChips values={[]} current="" onPick={() => {}} />);
+    expect(screen.getByRole('button', { name: 'Enter custom reps' })).toBeTruthy();
+    expect(screen.queryByRole('button', { name: /Set reps to/ })).toBeNull();
   });
 });

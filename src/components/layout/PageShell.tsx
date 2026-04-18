@@ -1,7 +1,5 @@
 import type { ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
-import AccountMenu from './AccountMenu';
-import Logo from '../shared/Logo';
 
 interface PageShellProps {
   title: string;
@@ -17,17 +15,17 @@ export default function PageShell({ title, eyebrow, rightAction, children, showB
 
   return (
     <div className="flex flex-col h-[100dvh] overflow-hidden" style={{ background: 'var(--color-bg)' }}>
-      <header
-        className="sticky top-0 z-40 flex flex-col"
-        style={{
-          background: '#ffffff',
-          borderBottom: '1px solid var(--color-line)',
-          paddingTop: 'var(--safe-top)',
-        }}
-      >
-        <div className="flex items-center justify-between px-4 h-14">
-          <div className="flex items-center gap-3 min-w-0">
-            {showBack && (
+      {showBack && (
+        <header
+          className="sticky top-0 z-40 flex flex-col"
+          style={{
+            background: '#ffffff',
+            borderBottom: '1px solid var(--color-line)',
+            paddingTop: 'var(--safe-top)',
+          }}
+        >
+          <div className="flex items-center justify-between px-4 h-14">
+            <div className="flex items-center gap-3 min-w-0">
               <button
                 type="button"
                 onClick={() => navigate(-1)}
@@ -39,8 +37,6 @@ export default function PageShell({ title, eyebrow, rightAction, children, showB
                   <path d="M15 6l-6 6 6 6" />
                 </svg>
               </button>
-            )}
-            {showBack ? (
               <div className="min-w-0">
                 {eyebrow && (
                   <div className="caps text-[10px] truncate" style={{ color: 'var(--color-text-faint)' }}>
@@ -60,20 +56,18 @@ export default function PageShell({ title, eyebrow, rightAction, children, showB
                   {title}
                 </h1>
               </div>
-            ) : (
-              <Logo withWordmark className="shrink-0" />
-            )}
+            </div>
+            <div className="flex items-center gap-1 shrink-0">{rightAction}</div>
           </div>
-          <div className="flex items-center gap-1 shrink-0">
-            {rightAction}
-            <AccountMenu />
-          </div>
-        </div>
-      </header>
+        </header>
+      )}
 
       <main
         className="flex-1 overflow-y-auto"
-        style={{ paddingBottom: 'calc(6rem + var(--safe-bottom))' }}
+        style={{
+          paddingTop: showBack ? undefined : 'var(--safe-top)',
+          paddingBottom: 'calc(6rem + var(--safe-bottom))',
+        }}
       >
         <div className="px-4 pt-5">
           {!showBack && topSlot}

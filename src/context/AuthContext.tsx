@@ -8,15 +8,19 @@ import {
 } from 'react';
 import {
   GoogleAuthProvider,
+  deleteUser,
+  getRedirectResult,
   onAuthStateChanged,
   signInAnonymously,
   signInWithEmailAndPassword,
   signInWithPopup,
+  signInWithRedirect,
   signOut,
   createUserWithEmailAndPassword,
   type User,
 } from 'firebase/auth';
-import { auth, isFirebaseConfigured } from '../firebase/config';
+import { deleteDoc, doc } from 'firebase/firestore';
+import { auth, db, isFirebaseConfigured } from '../firebase/config';
 
 interface AuthContextValue {
   user: User | null;
@@ -27,6 +31,7 @@ interface AuthContextValue {
   signUpWithEmail: (email: string, password: string) => Promise<void>;
   signInAnon: () => Promise<void>;
   logout: () => Promise<void>;
+  deleteAccount: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -40,6 +45,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setLoading(false);
       return;
     }
+    getRedirectResult(auth).catch((err) => {
+      console.error('Redirect sign-in failed:', err);
+    });
     const unsub = onAuthStateChanged(auth, (u) => {
       setUser(u);
       setLoading(false);
@@ -58,7 +66,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       configured: isFirebaseConfigured,
       signInWithGoogle: async () => {
         const a = requireAuth();
-        await signInWithPopup(a, new GoogleAuthProvider());
+        const provider = new GoogleAuthProvider();
+        const ua = typeof navigator !== 'undefined' ? navigator.userAgent : '';
+        const isIOS = /iPad|iPhone|iPod/.test(ua);
+        const isStandalone =
+          typeof window !== 'undefined' &&
+          // iOS PWA
+          ((window.navigator as unknown as { standalone?: boolean }).standalone === true ||
+            window.matchMedia?.('(display-mode: standalone)').matches);
+        if (isIOS || isStandalone) {
+          await signInWithRedirect(a, provider);
+          return;
+        }
+        try {
+          await signInWithPopup(a, provider);
+        } catch (err) {
+          const code = (err as { code?: string } | null)?.code ?? '';
+          if (
+            code === 'auth/popup-blocked' ||
+            code === 'auth/popup-closed-by-user' ||
+            code === 'auth/operation-not-supported-in-this-environment'
+          ) {
+            await signInWithRedirect(a, provider);
+            return;
+          }
+          throw err;
+        }
       },
       signInWithEmail: async (email, password) => {
         const a = requireAuth();
@@ -75,6 +108,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       logout: async () => {
         const a = requireAuth();
         await signOut(a);
+      },
+      deleteAccount: async () => {
+        const a = requireAuth();
+        const current = a.currentUser;
+        if (!current) throw new Error('No user is signed in.');
+        if (db) {
+          try {
+            await deleteDoc(doc(db, 'users', current.uid));
+          } catch (err) {
+            console.error('Failed to delete user data:', err);
+          }
+        }
+        await deleteUser(current);
       },
     };
   }, [user, loading]);

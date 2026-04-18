@@ -49,8 +49,22 @@ html, body, #root {
   letter-spacing: -0.01em;
 }
 
+html, body {
+  overscroll-behavior-y: none;
+}
+
 body {
   background-color: var(--color-bg);
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+/* iOS momentum scroll for any inner scroller */
+.overflow-y-auto,
+.overflow-x-auto,
+.overflow-auto {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
 }
 
 /* ————————— utilities ————————— */

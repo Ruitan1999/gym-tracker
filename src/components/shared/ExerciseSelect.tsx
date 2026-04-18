@@ -91,11 +91,8 @@ export default function ExerciseSelect({ onSelect, onClose }: ExerciseSelectProp
         {/* Header */}
         <div className="px-5 pt-2 pb-3 flex items-end justify-between">
           <div>
-            <div className="caps-tight text-[9px]" style={{ color: 'var(--color-text)' }}>
-              INDEX EXERCISE
-            </div>
             <h3
-              className="font-display mt-1"
+              className="font-display"
               style={{
                 fontSize: '1.5rem',
                 fontWeight: 700,
@@ -123,13 +120,12 @@ export default function ExerciseSelect({ onSelect, onClose }: ExerciseSelectProp
             placeholder="SEARCH TYPE TO FILTER"
             value={filter}
             onChange={(e) => setFilter(e.target.value)}
-            autoFocus
             className="w-full h-12 px-3 font-mono outline-none"
             style={{
               background: 'var(--color-ink)',
               border: '1px solid var(--color-line-2)',
               borderRadius: '2px',
-              fontSize: '15px',
+              fontSize: '16px',
               letterSpacing: '0.02em',
               color: 'var(--color-text)',
             }}

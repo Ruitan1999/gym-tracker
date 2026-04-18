@@ -3,8 +3,6 @@ import { useMaybeAuth } from '../../context/AuthContext';
 
 export default function AccountMenu() {
   const auth = useMaybeAuth();
-  if (!auth) return null;
-  const { user, logout } = auth;
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -17,6 +15,8 @@ export default function AccountMenu() {
     return () => document.removeEventListener('mousedown', handler);
   }, [open]);
 
+  if (!auth) return null;
+  const { user, logout } = auth;
   if (!user) return null;
 
   const label = user.isAnonymous ? 'Guest' : user.email || user.displayName || 'Account';

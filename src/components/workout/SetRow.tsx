@@ -120,7 +120,7 @@ export default function SetRow({
             className="caps-tight text-[9px] mb-1.5"
             style={{ color: 'var(--color-text-muted)' }}
           >
-            QUICK REPS
+            REPS
           </div>
           <QuickRepChips values={preferences.quickReps} current={reps} onPick={onRepsChange} />
         </div>

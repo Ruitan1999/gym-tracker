@@ -19,17 +19,17 @@ describe('Page integration tests', () => {
   });
 
   describe('LogWorkoutPage', () => {
-    it('shows "Log Workout" title when creating a new workout', () => {
+    it('shows the session title when creating a new workout', () => {
       renderWithProviders(<LogWorkoutPage />);
-      expect(screen.getByText('Log Workout')).toBeDefined();
+      expect(screen.getByText('Log Session')).toBeDefined();
     });
   });
 
   describe('HistoryPage', () => {
     it('shows empty state when there are no workouts', () => {
       renderWithProviders(<HistoryPage />);
-      expect(screen.getByText('No workouts yet')).toBeDefined();
-      expect(screen.getByText('Log a Workout')).toBeDefined();
+      expect(screen.getByText('No sessions logged yet')).toBeDefined();
+      expect(screen.getByText(/Start First Session/)).toBeDefined();
     });
   });
 });

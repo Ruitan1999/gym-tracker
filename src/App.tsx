@@ -1,40 +1,38 @@
-import { useState, useCallback } from 'react';
-import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
+import { useState, useCallback, lazy, Suspense } from 'react';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { AppProvider } from './context/AppContext';
 import SaveErrorBanner from './components/layout/SaveErrorBanner';
 import BottomNav from './components/layout/BottomNav';
-import RestTimer from './components/workout/RestTimer';
 import Toast from './components/shared/Toast';
 import LogWorkoutPage from './pages/LogWorkoutPage';
-import HistoryPage from './pages/HistoryPage';
-import WorkoutDetailPage from './pages/WorkoutDetailPage';
-import ProgressPage from './pages/ProgressPage';
-import ExerciseDetailPage from './pages/ExerciseDetailPage';
-import ExerciseLibraryPage from './pages/ExerciseLibraryPage';
-import GroupsPage from './pages/GroupsPage';
-import SettingsPage from './pages/SettingsPage';
 import SignInPage from './pages/SignInPage';
 
-function AppRoutes() {
-  const location = useLocation();
-  const isLogPage = location.pathname === '/' || location.pathname.startsWith('/workout/');
+const HistoryPage = lazy(() => import('./pages/HistoryPage'));
+const WorkoutDetailPage = lazy(() => import('./pages/WorkoutDetailPage'));
+const ProgressPage = lazy(() => import('./pages/ProgressPage'));
+const ExerciseDetailPage = lazy(() => import('./pages/ExerciseDetailPage'));
+const ExerciseLibraryPage = lazy(() => import('./pages/ExerciseLibraryPage'));
+const GroupsPage = lazy(() => import('./pages/GroupsPage'));
+const SettingsPage = lazy(() => import('./pages/SettingsPage'));
 
+function AppRoutes() {
   return (
     <>
-      <Routes>
-        <Route path="/" element={<LogWorkoutPage />} />
-        <Route path="/workout/:id" element={<LogWorkoutPage />} />
-        <Route path="/history" element={<HistoryPage />} />
-        <Route path="/history/:id" element={<WorkoutDetailPage />} />
-        <Route path="/progress" element={<ProgressPage />} />
-        <Route path="/progress/:exerciseId" element={<ExerciseDetailPage />} />
-        <Route path="/exercises" element={<ExerciseLibraryPage />} />
-        <Route path="/groups" element={<GroupsPage />} />
-        <Route path="/settings" element={<SettingsPage />} />
-      </Routes>
+      <Suspense fallback={<div className="min-h-[100dvh]" style={{ background: 'var(--color-bg)' }} />}>
+        <Routes>
+          <Route path="/" element={<LogWorkoutPage />} />
+          <Route path="/workout/:id" element={<LogWorkoutPage />} />
+          <Route path="/history" element={<HistoryPage />} />
+          <Route path="/history/:id" element={<WorkoutDetailPage />} />
+          <Route path="/progress" element={<ProgressPage />} />
+          <Route path="/progress/:exerciseId" element={<ExerciseDetailPage />} />
+          <Route path="/exercises" element={<ExerciseLibraryPage />} />
+          <Route path="/groups" element={<GroupsPage />} />
+          <Route path="/settings" element={<SettingsPage />} />
+        </Routes>
+      </Suspense>
       <BottomNav />
-      {false && isLogPage && <RestTimer />}
     </>
   );
 }

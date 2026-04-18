@@ -4,14 +4,55 @@ import PageShell from '../components/layout/PageShell';
 import NumberInput from '../components/shared/NumberInput';
 import WeightStepper from '../components/workout/WeightStepper';
 import { useAppContext } from '../context/AppContext';
+import { useMaybeAuth } from '../context/AuthContext';
 import { DEFAULT_PREFERENCES } from '../types';
 
 export default function SettingsPage() {
   const navigate = useNavigate();
   const { appData, updatePreferences } = useAppContext();
+  const auth = useMaybeAuth();
   const { preferences } = appData;
   const [addingRep, setAddingRep] = useState(false);
   const [newRep, setNewRep] = useState<number | ''>('');
+  const [accountBusy, setAccountBusy] = useState(false);
+
+  async function handleLogout() {
+    if (!auth) return;
+    if (!confirm('Log out of your account?')) return;
+    try {
+      setAccountBusy(true);
+      await auth.logout();
+    } catch (err) {
+      console.error(err);
+      alert('Could not log out. Please try again.');
+    } finally {
+      setAccountBusy(false);
+    }
+  }
+
+  async function handleDeleteAccount() {
+    if (!auth) return;
+    if (
+      !confirm(
+        'Delete your account? This will permanently erase your workouts, exercises, and settings. This cannot be undone.',
+      )
+    )
+      return;
+    if (!confirm('Are you absolutely sure? This action is irreversible.')) return;
+    try {
+      setAccountBusy(true);
+      await auth.deleteAccount();
+    } catch (err) {
+      console.error(err);
+      const message =
+        err instanceof Error && err.message.includes('requires-recent-login')
+          ? 'For security, please sign out and sign back in, then try again.'
+          : 'Could not delete account. Please try again.';
+      alert(message);
+    } finally {
+      setAccountBusy(false);
+    }
+  }
 
   function removeRep(n: number) {
     updatePreferences({
@@ -185,24 +226,61 @@ export default function SettingsPage() {
           </p>
         </Section>
 
-        {/* signature block */}
-        <div
-          className="pt-4 mt-4"
-          style={{ borderTop: '1px solid var(--color-line)' }}
-        >
-          <div
-            className="caps-tight text-[9px]"
-            style={{ color: 'var(--color-text-faint)' }}
-          >
-            LIFTGAUGE TRAINING JOURNAL v0.1
-          </div>
-          <div
-            className="caps-tight text-[9px] mt-1"
-            style={{ color: 'var(--color-text-faint)' }}
-          >
-            BUILT FOR THE RACK
-          </div>
-        </div>
+        {auth?.user ? (
+          <>
+            <Section label="ACCOUNT">
+              <div
+                className="caps-tight text-[10px] mb-3 truncate"
+                style={{ color: 'var(--color-text-faint)' }}
+              >
+                {auth.user.isAnonymous
+                  ? 'GUEST SESSION'
+                  : auth.user.email || auth.user.displayName || 'SIGNED IN'}
+              </div>
+              <button
+                type="button"
+                onClick={handleLogout}
+                disabled={accountBusy}
+                className="w-full h-12 press caps-tight text-[11px]"
+                style={{
+                  background: '#ffffff',
+                  border: '1px solid var(--color-line-2)',
+                  borderRadius: '2px',
+                  color: 'var(--color-text)',
+                  opacity: accountBusy ? 0.5 : 1,
+                }}
+              >
+                LOG OUT
+              </button>
+            </Section>
+
+            <Section label="DANGER ZONE">
+              <button
+                type="button"
+                onClick={handleDeleteAccount}
+                disabled={accountBusy}
+                className="w-full h-12 press caps-tight text-[11px]"
+                style={{
+                  background: '#c0392b',
+                  border: '1px solid #c0392b',
+                  borderRadius: '2px',
+                  color: '#ffffff',
+                  fontWeight: 600,
+                  opacity: accountBusy ? 0.5 : 1,
+                }}
+              >
+                DELETE ACCOUNT
+              </button>
+              <p
+                className="caps-tight text-[9px] mt-3"
+                style={{ color: 'var(--color-text-faint)' }}
+              >
+                DELETING YOUR ACCOUNT REMOVES ALL WORKOUTS AND SETTINGS. THIS CANNOT BE UNDONE.
+              </p>
+            </Section>
+          </>
+        ) : null}
+
       </div>
     </PageShell>
   );
