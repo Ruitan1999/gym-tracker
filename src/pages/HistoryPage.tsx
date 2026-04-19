@@ -141,7 +141,7 @@ export default function HistoryPage() {
       <section className="card mb-4">
         <div className="grid grid-cols-3">
           <BigStat label="STREAK" value={currentStreak} unit={currentStreak === 1 ? 'DAY' : 'DAYS'} accent={currentStreak > 0} />
-          <BigStat label="HEAVIEST LIFT" value={heaviestLift} unit={heaviestLift === '—' ? undefined : 'KG'} divider />
+          <BigStat label="TOP LIFT" value={heaviestLift} unit={heaviestLift === '—' ? undefined : 'KG'} divider />
           <BigStat label="SESSIONS" value={totalSessions} divider />
         </div>
       </section>

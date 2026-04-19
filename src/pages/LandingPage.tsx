@@ -439,7 +439,7 @@ function LandingCalendarCell({ day, trained, today, past }: LandingCell) {
           strokeWidth={2.25}
           strokeLinecap="square"
           strokeLinejoin="miter"
-          className="w-3 h-3"
+          className="w-4 h-4"
           aria-hidden
         >
           <path d="M6 15l6-6 6 6" />
