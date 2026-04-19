@@ -8,8 +8,10 @@ interface SetRowProps {
   weightKg: number | '';
   onRepsChange: (value: number | '') => void;
   onWeightChange: (valueKg: number | '') => void;
+  onApplyPrevious?: (reps: number, weightKg: number) => void;
   onRemove: () => void;
   exiting?: boolean;
+  previousSet?: { reps: number; weightKg: number };
 }
 
 export default function SetRow({
@@ -18,8 +20,10 @@ export default function SetRow({
   weightKg,
   onRepsChange,
   onWeightChange,
+  onApplyPrevious,
   onRemove,
   exiting = false,
+  previousSet,
 }: SetRowProps) {
   const { appData } = useAppContext();
   const { preferences } = appData;
@@ -36,6 +40,31 @@ export default function SetRow({
     typeof displayWeight === 'number' && displayWeight > 0
       ? displayWeight
       : '—';
+
+  const prevReps = previousSet?.reps ?? 0;
+  const prevWeight = previousSet?.weightKg ?? 0;
+  const hasPrevious = !!previousSet && (prevReps > 0 || prevWeight > 0);
+
+  let previousLabel = '';
+  if (hasPrevious) {
+    if (prevReps > 0 && prevWeight > 0) {
+      previousLabel = `${prevReps} × ${prevWeight} KG`;
+    } else if (prevReps > 0) {
+      previousLabel = `${prevReps} REPS`;
+    } else {
+      previousLabel = `${prevWeight} KG`;
+    }
+  }
+
+  function handleApplyPrevious() {
+    if (!previousSet) return;
+    if (onApplyPrevious) {
+      onApplyPrevious(previousSet.reps, previousSet.weightKg);
+      return;
+    }
+    onRepsChange(previousSet.reps);
+    onWeightChange(previousSet.weightKg);
+  }
 
   return (
     <div
@@ -143,6 +172,41 @@ export default function SetRow({
             unit="kg"
           />
         </div>
+
+        {hasPrevious && (
+          <button
+            type="button"
+            onClick={handleApplyPrevious}
+            className="press w-full flex items-center gap-3 py-2 px-3"
+            style={{
+              border: '1px solid var(--color-line)',
+              borderRadius: 2,
+              background: 'transparent',
+            }}
+          >
+            <span
+              className="caps-tight text-[9px]"
+              style={{ color: 'var(--color-text-faint)' }}
+            >
+              LAST
+            </span>
+            <span
+              className="font-mono text-[13px]"
+              style={{
+                color: 'var(--color-text-muted)',
+                fontVariantNumeric: 'tabular-nums',
+              }}
+            >
+              {previousLabel}
+            </span>
+            <span
+              className="caps-tight text-[9px] ml-auto"
+              style={{ color: 'var(--color-text-faint)' }}
+            >
+              TAP TO USE →
+            </span>
+          </button>
+        )}
       </div>
     </div>
   );

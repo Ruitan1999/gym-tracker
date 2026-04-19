@@ -44,8 +44,8 @@ export default function WorkoutDetailPage() {
 
   const totalExercises = workout.entries.length;
   const totalSets = workout.entries.reduce((sum, e) => sum + e.sets.length, 0);
-  const totalVolume = workout.entries.reduce(
-    (sum, e) => sum + e.sets.reduce((s, set) => s + set.reps * set.weightKg, 0),
+  const totalReps = workout.entries.reduce(
+    (sum, e) => sum + e.sets.reduce((s, set) => s + (set.reps || 0), 0),
     0
   );
   const topSet = workout.entries.reduce<{ weight: number; exercise: string }>(
@@ -64,9 +64,6 @@ export default function WorkoutDetailPage() {
   const ratingMatch = workout.notes?.match(/^Rating: (\d+)/);
   const rating = ratingMatch ? parseInt(ratingMatch[1]) : null;
   const notesText = workout.notes?.replace(/^Rating: \d+\n?/, '').trim() || null;
-
-  const volumeStr =
-    totalVolume < 10000 ? Math.round(totalVolume) : `${(totalVolume / 1000).toFixed(1)}K`;
 
   return (
     <PageShell
@@ -111,7 +108,7 @@ export default function WorkoutDetailPage() {
           <div className="grid grid-cols-3">
             <Tile label="EXERCISES" value={totalExercises} />
             <Tile label="SETS" value={totalSets} divider />
-            <Tile label="VOL KG" value={volumeStr} divider />
+            <Tile label="REPS" value={totalReps} divider />
           </div>
         </section>
 

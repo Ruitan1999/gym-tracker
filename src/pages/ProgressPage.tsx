@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { LineChart, Line, ResponsiveContainer } from 'recharts';
 import { useAppContext } from '../context/AppContext';
@@ -20,13 +20,55 @@ interface ExerciseSummary {
 
 type ViewMode = 'all' | 'groups';
 
+const VIEW_STORAGE_KEY = 'liftgauge.progressView.v1';
+
+interface ProgressView {
+  viewMode: ViewMode;
+  selectedGroupId: string | null;
+}
+
+function loadView(): ProgressView {
+  try {
+    const raw = sessionStorage.getItem(VIEW_STORAGE_KEY);
+    if (!raw) return { viewMode: 'all', selectedGroupId: null };
+    const parsed = JSON.parse(raw);
+    return {
+      viewMode: parsed.viewMode === 'groups' ? 'groups' : 'all',
+      selectedGroupId:
+        typeof parsed.selectedGroupId === 'string' ? parsed.selectedGroupId : null,
+    };
+  } catch {
+    return { viewMode: 'all', selectedGroupId: null };
+  }
+}
+
 export default function ProgressPage() {
   const { appData } = useAppContext();
   const navigate = useNavigate();
   const unit = appData.preferences.weightUnit;
   const groups = appData.groups ?? [];
 
-  const [viewMode, setViewMode] = useState<ViewMode>('all');
+  const initialView = loadView();
+  const [viewMode, setViewMode] = useState<ViewMode>(initialView.viewMode);
+  const [selectedGroupId, setSelectedGroupId] = useState<string | null>(
+    initialView.selectedGroupId,
+  );
+
+  useEffect(() => {
+    try {
+      sessionStorage.setItem(
+        VIEW_STORAGE_KEY,
+        JSON.stringify({ viewMode, selectedGroupId }),
+      );
+    } catch {
+      // storage unavailable — silently skip
+    }
+  }, [viewMode, selectedGroupId]);
+
+  function handleSetViewMode(m: ViewMode) {
+    setViewMode(m);
+    setSelectedGroupId(null);
+  }
 
   const summaries = useMemo<ExerciseSummary[]>(() => {
     const result: ExerciseSummary[] = [];
@@ -209,41 +251,117 @@ export default function ProgressPage() {
           <div className="flex self-start" role="tablist" aria-label="View mode">
             <ToggleBtn
               active={viewMode === 'all'}
-              onClick={() => setViewMode('all')}
+              onClick={() => handleSetViewMode('all')}
               label="ALL"
             />
             <ToggleBtn
               active={viewMode === 'groups'}
-              onClick={() => setViewMode('groups')}
+              onClick={() => handleSetViewMode('groups')}
               label="GROUPS"
             />
           </div>
         )}
 
-        {viewMode === 'all' || !hasGroups ? (
-          <ul className="flex flex-col gap-2">{summaries.map(renderRow)}</ul>
-        ) : (
-          <div className="flex flex-col gap-6">
-            {groupedSections.map((section) => (
-              <section key={section.id}>
-                <h2
-                  className="caps text-[10px] mb-3 flex items-center gap-3"
-                  style={{ color: 'var(--color-text-muted)' }}
-                >
-                  <span>{section.name}</span>
+        {(() => {
+          if (viewMode === 'all' || !hasGroups) {
+            return <ul className="flex flex-col gap-2">{summaries.map(renderRow)}</ul>;
+          }
+          const selectedSection = selectedGroupId
+            ? groupedSections.find((s) => s.id === selectedGroupId)
+            : null;
+          if (selectedSection) {
+            return (
+              <div className="flex flex-col gap-3">
+                <div className="flex items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setSelectedGroupId(null)}
+                    className="caps-tight text-[10px] press h-9 px-3 flex items-center gap-1.5"
+                    style={{
+                      color: 'var(--color-text)',
+                      border: '1px solid var(--color-line-2)',
+                      background: 'var(--color-surface)',
+                    }}
+                  >
+                    <span aria-hidden>←</span>
+                    <span>GROUPS</span>
+                  </button>
+                  <h2
+                    className="caps text-[10px] flex-1 truncate"
+                    style={{ color: 'var(--color-text-muted)' }}
+                  >
+                    {selectedSection.name}
+                  </h2>
                   <span
-                    className="flex-1 h-px"
-                    style={{ background: 'var(--color-line)' }}
-                  />
-                  <span style={{ color: 'var(--color-text-faint)' }}>
-                    {String(section.items.length).padStart(2, '0')}
+                    className="caps-tight text-[9px]"
+                    style={{ color: 'var(--color-text-faint)' }}
+                  >
+                    {String(selectedSection.items.length).padStart(2, '0')}
                   </span>
-                </h2>
-                <ul className="flex flex-col gap-2">{section.items.map(renderRow)}</ul>
-              </section>
-            ))}
-          </div>
-        )}
+                </div>
+                <ul className="flex flex-col gap-2">
+                  {selectedSection.items.map(renderRow)}
+                </ul>
+              </div>
+            );
+          }
+          return (
+            <ul className="flex flex-col gap-2">
+              {groupedSections.map((section) => (
+                <li key={section.id}>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedGroupId(section.id)}
+                    className="w-full text-left card press flex items-center gap-3 px-4 py-3 min-h-[64px]"
+                  >
+                    <div className="flex-1 min-w-0">
+                      <p
+                        className="font-display truncate leading-tight"
+                        style={{
+                          fontSize: '1rem',
+                          fontWeight: 600,
+                          letterSpacing: '-0.015em',
+                          fontVariationSettings: '"wdth" 95',
+                          color: 'var(--color-text)',
+                        }}
+                      >
+                        {section.name}
+                      </p>
+                      <div
+                        className="caps-tight text-[9px] mt-1"
+                        style={{ color: 'var(--color-text-faint)' }}
+                      >
+                        {String(section.items.length).padStart(2, '0')} EXERCISE
+                        {section.items.length === 1 ? '' : 'S'}
+                      </div>
+                    </div>
+                    <span
+                      className="shrink-0 flex items-center justify-center"
+                      aria-hidden
+                      style={{
+                        width: '24px',
+                        height: '24px',
+                        color: 'var(--color-text-faint)',
+                      }}
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth={2}
+                        strokeLinecap="square"
+                        className="w-4 h-4"
+                      >
+                        <path d="M9 6l6 6-6 6" />
+                      </svg>
+                    </span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          );
+        })()}
       </div>
     </PageShell>
   );

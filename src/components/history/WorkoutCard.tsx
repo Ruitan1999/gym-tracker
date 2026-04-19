@@ -1,7 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { useAppContext } from '../../context/AppContext';
 import type { Workout } from '../../types';
-import { formatVolume } from '../../utils/conversions';
 
 interface WorkoutCardProps {
   workout: Workout;
@@ -29,11 +28,10 @@ export default function WorkoutCard({ workout }: WorkoutCardProps) {
 
   const exerciseCount = workout.entries.length;
   const totalSets = workout.entries.reduce((sum, e) => sum + e.sets.length, 0);
-  const totalVolumeKg = workout.entries.reduce(
-    (sum, e) => sum + e.sets.reduce((s, set) => s + set.reps * set.weightKg, 0),
+  const totalReps = workout.entries.reduce(
+    (sum, e) => sum + e.sets.reduce((s, set) => s + (set.reps || 0), 0),
     0,
   );
-  const volumeLabel = formatVolume(totalVolumeKg);
 
   const exerciseNames = workout.entries.map((entry) => {
     const exercise = appData.exercises.find((e) => e.id === entry.exerciseId);
@@ -135,7 +133,7 @@ export default function WorkoutCard({ workout }: WorkoutCardProps) {
         <div className="grid grid-cols-3 gap-2">
           <MiniStat label="EXERCISE" value={exerciseCount} />
           <MiniStat label="SETS" value={totalSets} />
-          <MiniStat label="LIFTED (KG)" value={volumeLabel} />
+          <MiniStat label="REPS" value={totalReps} />
         </div>
       </div>
     </button>

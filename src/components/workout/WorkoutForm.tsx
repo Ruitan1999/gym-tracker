@@ -112,7 +112,9 @@ export default function WorkoutForm({ existingWorkout }: WorkoutFormProps) {
 
   function handleSelectExercise(exerciseId: string) {
     const lastSets = getLastWorkoutSets(exerciseId);
-    const sets: WorkoutSet[] = lastSets ?? [{ setNumber: 1, reps: 0, weightKg: 0 }];
+    const sets: WorkoutSet[] = lastSets
+      ? lastSets.map((_, j) => ({ setNumber: j + 1, reps: 0, weightKg: 0 }))
+      : [{ setNumber: 1, reps: 0, weightKg: 0 }];
     const newEntry: WorkoutEntry = {
       id: crypto.randomUUID(),
       exerciseId,
@@ -147,7 +149,9 @@ export default function WorkoutForm({ existingWorkout }: WorkoutFormProps) {
       return {
         id: crypto.randomUUID(),
         exerciseId,
-        sets: lastSets ?? [{ setNumber: 1, reps: 0, weightKg: 0 }],
+        sets: lastSets
+          ? lastSets.map((_, j) => ({ setNumber: j + 1, reps: 0, weightKg: 0 }))
+          : [{ setNumber: 1, reps: 0, weightKg: 0 }],
       };
     });
     setEntries(newEntries);
@@ -353,6 +357,7 @@ export default function WorkoutForm({ existingWorkout }: WorkoutFormProps) {
                 index={index}
                 exerciseId={entry.exerciseId}
                 sets={entry.sets}
+                previousSets={getLastWorkoutSets(entry.exerciseId) ?? undefined}
                 onSetsChange={(sets) => handleSetsChange(index, sets)}
                 onRemove={() => handleRemoveEntry(index)}
                 collapsed={collapsedIds.has(entry.id)}

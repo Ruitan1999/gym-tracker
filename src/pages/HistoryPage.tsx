@@ -5,7 +5,6 @@ import PageShell from '../components/layout/PageShell';
 import EmptyState from '../components/shared/EmptyState';
 import WorkoutCard from '../components/history/WorkoutCard';
 import type { Workout } from '../types';
-import { formatVolume } from '../utils/conversions';
 
 function getMonthLabel(dateStr: string): string {
   const [year, month] = dateStr.split('-').map(Number);
@@ -31,7 +30,7 @@ interface MonthDay {
 export default function HistoryPage() {
   const { appData } = useAppContext();
 
-  const { groupedWorkouts, totalSessions, totalVolume, currentStreak, monthLabel, monthDays, monthTrainedCount } = useMemo(() => {
+  const { groupedWorkouts, totalSessions, heaviestLift, currentStreak, monthLabel, monthDays, monthTrainedCount } = useMemo(() => {
     const sorted = [...appData.workouts].sort((a, b) => {
       const byCreated = (b.createdAt ?? '').localeCompare(a.createdAt ?? '');
       return byCreated !== 0 ? byCreated : b.date.localeCompare(a.date);
@@ -48,17 +47,15 @@ export default function HistoryPage() {
       groups[groups.length - 1].workouts.push(workout);
     }
 
-    const volumeKg = sorted.reduce(
-      (sum, w) =>
-        sum +
-        w.entries.reduce(
-          (acc, e) =>
-            acc + e.sets.reduce((s, set) => s + set.reps * set.weightKg, 0),
-          0,
-        ),
-      0,
-    );
-    const totalVolumeStr = formatVolume(volumeKg);
+    let heaviestKg = 0;
+    for (const w of sorted) {
+      for (const e of w.entries) {
+        for (const s of e.sets) {
+          if (s.reps > 0 && s.weightKg > heaviestKg) heaviestKg = s.weightKg;
+        }
+      }
+    }
+    const heaviestLiftStr = heaviestKg > 0 ? String(heaviestKg) : '—';
 
     // Current streak — consecutive days back from today with at least one workout
     const dateSet = new Set(sorted.map((w) => w.date));
@@ -111,7 +108,7 @@ export default function HistoryPage() {
     return {
       groupedWorkouts: groups,
       totalSessions: sorted.length,
-      totalVolume: totalVolumeStr,
+      heaviestLift: heaviestLiftStr,
       currentStreak: streak,
       monthLabel: label,
       monthDays: days,
@@ -144,7 +141,7 @@ export default function HistoryPage() {
       <section className="card mb-4">
         <div className="grid grid-cols-3">
           <BigStat label="STREAK" value={currentStreak} unit={currentStreak === 1 ? 'DAY' : 'DAYS'} accent={currentStreak > 0} />
-          <BigStat label="TOTAL LIFTED" value={totalVolume} unit="KG" divider />
+          <BigStat label="HEAVIEST LIFT" value={heaviestLift} unit={heaviestLift === '—' ? undefined : 'KG'} divider />
           <BigStat label="SESSIONS" value={totalSessions} divider />
         </div>
       </section>

@@ -7,6 +7,7 @@ import type { WorkoutSet } from '../../types';
 interface EntryCardProps {
   exerciseId: string;
   sets: WorkoutSet[];
+  previousSets?: WorkoutSet[];
   onSetsChange: (sets: WorkoutSet[]) => void;
   onRemove: () => void;
   index?: number;
@@ -19,6 +20,7 @@ let globalKeyCounter = 0;
 export default function EntryCard({
   exerciseId,
   sets,
+  previousSets,
   onSetsChange,
   onRemove,
   index = 0,
@@ -156,12 +158,26 @@ export default function EntryCard({
     [sets, onSetsChange],
   );
 
+  const handleApplyPrevious = useCallback(
+    (i: number, repsValue: number, weightValue: number) => {
+      const updated = sets.map((s, idx) =>
+        idx === i ? { ...s, reps: repsValue, weightKg: weightValue } : s,
+      );
+      onSetsChange(updated);
+    },
+    [sets, onSetsChange],
+  );
+
   const totalReps = sets.reduce((acc, s) => acc + (s.reps || 0), 0);
-  const volumeKg = sets.reduce((acc, s) => acc + s.reps * s.weightKg, 0);
-  const volumeStr =
-    volumeKg >= 10000
-      ? `${(volumeKg / 1000).toFixed(1)}K`
-      : Math.round(volumeKg).toString();
+  const topSet = sets.reduce<WorkoutSet | null>((best, s) => {
+    if (s.weightKg <= 0 || s.reps <= 0) return best;
+    if (!best) return s;
+    if (s.weightKg > best.weightKg) return s;
+    if (s.weightKg === best.weightKg && s.reps > best.reps) return s;
+    return best;
+  }, null);
+  const topSetStr = topSet ? `${topSet.reps} × ${topSet.weightKg}` : '—';
+  const topWeightStr = topSet ? String(topSet.weightKg) : '0';
 
   return (
     <div
@@ -209,7 +225,7 @@ export default function EntryCard({
               className="caps-tight text-[9px] shrink-0 ml-auto"
               style={{ color: 'var(--color-text-faint)', fontVariantNumeric: 'tabular-nums' }}
             >
-              {sets.length}×{totalReps} · {volumeStr}KG
+              {sets.length}×{totalReps} · {topWeightStr}KG
             </span>
           )}
           <span
@@ -260,8 +276,10 @@ export default function EntryCard({
               setNumber={set.setNumber}
               reps={set.reps}
               weightKg={set.weightKg}
+              previousSet={previousSets?.[i]}
               onRepsChange={(v) => handleRepsChange(i, v)}
               onWeightChange={(v) => handleWeightChange(i, v)}
+              onApplyPrevious={(r, w) => handleApplyPrevious(i, r, w)}
               onRemove={() => handleRemoveSet(i)}
               exiting={exitingKey === key}
             />
@@ -298,7 +316,7 @@ export default function EntryCard({
       >
         <Stat label="SETS" value={sets.length} />
         <Stat label="TOTAL REPS" value={totalReps} divider />
-        <Stat label="VOLUME KG" value={volumeStr} divider />
+        <Stat label="TOP SET" value={topSetStr} divider />
       </div>
         </>
       )}

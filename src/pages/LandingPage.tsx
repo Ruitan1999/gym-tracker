@@ -42,16 +42,8 @@ export default function LandingPage() {
 
       <main className="max-w-[1100px] mx-auto px-5 sm:px-8">
         {/* HERO */}
-        <section className="pt-12 sm:pt-20 pb-14 sm:pb-24 grid sm:grid-cols-12 gap-8 sm:gap-10 items-end">
+        <section className="pt-12 sm:pt-20 pb-14 sm:pb-24 grid sm:grid-cols-12 gap-8 sm:gap-10 items-center">
           <div className="sm:col-span-7 space-y-6">
-            <div className="caps-tight text-[10px] flex items-center gap-3" style={{ color: 'var(--color-text-faint)' }}>
-              <span
-                className="inline-block w-1.5 h-1.5"
-                style={{ background: 'var(--color-volt)', borderRadius: '999px' }}
-              />
-              EST. 2025 · LIFTGAUGE / 01
-              <span className="h-px flex-1 max-w-[140px]" style={{ background: 'var(--color-line)' }} />
-            </div>
             <h1
               className="font-display"
               style={{
@@ -106,7 +98,7 @@ export default function LandingPage() {
             >
               <div className="flex items-center justify-between">
                 <span className="caps-tight text-[10px]" style={{ color: 'var(--color-text-faint)' }}>
-                  THIS WEEK
+                  THIS MONTH
                 </span>
                 <span className="caps-tight text-[10px]" style={{ color: 'var(--color-volt-ink)' }}>
                   +12.4%
@@ -114,18 +106,27 @@ export default function LandingPage() {
               </div>
               <div className="grid grid-cols-3 gap-3">
                 <Metric value="14" label="SETS" />
-                <Metric value="8.2k" label="VOLUME" />
-                <Metric value="4" label="DAYS" />
+                <Metric value="100" label="TOP KG" />
+                <Metric value="4" label="DAYS" accent />
               </div>
               <div className="h-px" style={{ background: 'var(--color-line)' }} />
-              <div className="space-y-2">
-                <BarRow label="MON" pct={62} delay={0} />
-                <BarRow label="TUE" pct={0} delay={60} />
-                <BarRow label="WED" pct={88} active delay={120} />
-                <BarRow label="THU" pct={45} delay={180} />
-                <BarRow label="FRI" pct={71} delay={240} />
-                <BarRow label="SAT" pct={0} delay={300} />
-                <BarRow label="SUN" pct={0} delay={360} />
+              <div className="space-y-1.5">
+                <div className="grid grid-cols-7 gap-1">
+                  {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((l, i) => (
+                    <div
+                      key={i}
+                      className="caps-tight text-[9px] text-center"
+                      style={{ color: 'var(--color-text-faint)' }}
+                    >
+                      {l}
+                    </div>
+                  ))}
+                </div>
+                <div className="grid grid-cols-7 gap-1">
+                  {LANDING_CALENDAR.map((cell, i) => (
+                    <LandingCalendarCell key={i} {...cell} />
+                  ))}
+                </div>
               </div>
               <div className="flex items-center justify-between pt-1">
                 <span className="caps-tight text-[10px]" style={{ color: 'var(--color-text-faint)' }}>
@@ -152,14 +153,12 @@ export default function LandingPage() {
 
         {/* FEATURES */}
         <section className="pt-16 sm:pt-24 pb-12">
-          <div className="grid sm:grid-cols-12 gap-6 mb-10">
-            <div className="sm:col-span-4">
-              <div className="caps-tight text-[10px]" style={{ color: 'var(--color-text-faint)' }}>
-                CHAPTER 02 · WHAT IT DOES
-              </div>
+          <div className="mb-10">
+            <div className="caps-tight text-[13px] mb-3" style={{ color: 'var(--color-text-faint)', fontWeight: 600, letterSpacing: '0.08em' }}>
+              WHAT IT DOES
             </div>
             <h2
-              className="sm:col-span-8 font-display"
+              className="font-display"
               style={{
                 fontSize: 'clamp(1.75rem, 3.5vw, 2.5rem)',
                 fontWeight: 700,
@@ -208,8 +207,8 @@ export default function LandingPage() {
         {/* SPLIT — why */}
         <section className="py-16 sm:py-24 grid sm:grid-cols-12 gap-10 items-start">
           <div className="sm:col-span-5">
-            <div className="caps-tight text-[10px] mb-3" style={{ color: 'var(--color-text-faint)' }}>
-              CHAPTER 03 · WHY
+            <div className="caps-tight text-[13px] mb-3" style={{ color: 'var(--color-text-faint)', fontWeight: 600, letterSpacing: '0.08em' }}>
+              WHY
             </div>
             <h2
               className="font-display"
@@ -240,12 +239,12 @@ export default function LandingPage() {
         {/* QUOTE */}
         <section className="py-16 sm:py-24">
           <Reveal>
-            <div className="grid sm:grid-cols-12 gap-8 items-start">
-              <div className="sm:col-span-2 caps-tight text-[10px]" style={{ color: 'var(--color-text-faint)' }}>
+            <div>
+              <div className="caps-tight text-[13px] mb-3" style={{ color: 'var(--color-text-faint)', fontWeight: 600, letterSpacing: '0.08em' }}>
                 FIELD NOTE
               </div>
               <blockquote
-                className="sm:col-span-10 font-display"
+                className="font-display"
                 style={{
                   fontSize: 'clamp(1.5rem, 3vw, 2.25rem)',
                   fontWeight: 500,
@@ -361,14 +360,31 @@ export default function LandingPage() {
   );
 }
 
-function Metric({ value, label }: { value: string; label: string }) {
+function Metric({ value, label, accent }: { value: string; label: string; accent?: boolean }) {
   return (
     <div>
-      <div
-        className="font-mono"
-        style={{ fontSize: '1.5rem', fontWeight: 600, color: 'var(--color-text)', letterSpacing: '-0.02em' }}
-      >
-        {value}
+      <div className="flex items-baseline gap-1">
+        <div
+          className="font-mono"
+          style={{ fontSize: '1.5rem', fontWeight: 600, color: 'var(--color-volt)', letterSpacing: '-0.02em' }}
+        >
+          {value}
+        </div>
+        {accent && (
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="var(--color-volt)"
+            strokeWidth={2.5}
+            strokeLinecap="square"
+            strokeLinejoin="miter"
+            style={{ width: '0.85rem', height: '0.85rem', flexShrink: 0 }}
+            aria-hidden
+          >
+            <path d="M6 15l6-6 6 6" />
+          </svg>
+        )}
       </div>
       <div className="caps-tight text-[9px]" style={{ color: 'var(--color-text-faint)' }}>
         {label}
@@ -377,33 +393,69 @@ function Metric({ value, label }: { value: string; label: string }) {
   );
 }
 
-function BarRow({ label, pct, active, delay = 0 }: { label: string; pct: number; active?: boolean; delay?: number }) {
-  const [width, setWidth] = useState(0);
-  useEffect(() => {
-    const t = setTimeout(() => setWidth(pct), 250 + delay);
-    return () => clearTimeout(t);
-  }, [pct, delay]);
+interface LandingCell {
+  day: number | null;
+  trained?: boolean;
+  today?: boolean;
+  past?: boolean;
+}
+
+const LANDING_CALENDAR: LandingCell[] = [
+  { day: null }, { day: null },
+  { day: 1, past: true }, { day: 2, past: true }, { day: 3, past: true }, { day: 4, past: true }, { day: 5, past: true },
+  { day: 6, past: true }, { day: 7, past: true }, { day: 8, past: true }, { day: 9, past: true }, { day: 10, past: true }, { day: 11, past: true }, { day: 12, past: true },
+  { day: 13, past: true }, { day: 14, past: true }, { day: 15, past: true }, { day: 16, trained: true }, { day: 17, trained: true }, { day: 18, trained: true }, { day: 19, trained: true, today: true },
+  { day: 20 }, { day: 21 }, { day: 22 }, { day: 23 }, { day: 24 }, { day: 25 }, { day: 26 },
+  { day: 27 }, { day: 28 }, { day: 29 }, { day: 30 }, { day: null }, { day: null }, { day: null },
+];
+
+function LandingCalendarCell({ day, trained, today, past }: LandingCell) {
+  if (day === null) {
+    return <div style={{ aspectRatio: '1 / 1' }} />;
+  }
   return (
-    <div className="flex items-center gap-3">
-      <span
-        className="caps-tight text-[9px] w-7"
-        style={{ color: active ? 'var(--color-text)' : 'var(--color-text-faint)' }}
-      >
-        {label}
-      </span>
-      <div className="flex-1 h-1.5" style={{ background: 'var(--color-elev-2)' }}>
-        <div
-          className="h-full"
+    <div
+      className="flex items-center justify-center"
+      style={{
+        aspectRatio: '1 / 1',
+        background: trained ? 'var(--color-volt)' : '#ffffff',
+        border: `1px solid ${
+          trained
+            ? 'var(--color-volt)'
+            : today
+              ? 'var(--color-text)'
+              : 'var(--color-line-2)'
+        }`,
+        borderRadius: '2px',
+        opacity: past ? 0.55 : 1,
+      }}
+    >
+      {trained ? (
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="#ffffff"
+          strokeWidth={2.25}
+          strokeLinecap="square"
+          strokeLinejoin="miter"
+          className="w-3 h-3"
+          aria-hidden
+        >
+          <path d="M6 15l6-6 6 6" />
+        </svg>
+      ) : (
+        <span
+          className="font-mono text-[10px] leading-none"
           style={{
-            width: `${width}%`,
-            background: active ? 'var(--color-volt)' : 'var(--color-line-3)',
-            transition: 'width 900ms cubic-bezier(0.22, 1, 0.36, 1)',
+            color: past ? 'var(--color-text-faint)' : 'var(--color-text)',
+            fontWeight: today ? 700 : 500,
+            fontVariantNumeric: 'tabular-nums',
           }}
-        />
-      </div>
-      <span className="font-mono text-[10px] w-8 text-right" style={{ color: 'var(--color-text-muted)' }}>
-        {pct ? `${pct}%` : '—'}
-      </span>
+        >
+          {day}
+        </span>
+      )}
     </div>
   );
 }
