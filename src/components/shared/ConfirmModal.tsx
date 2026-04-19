@@ -24,12 +24,12 @@ export default function ConfirmModal({
   return createPortal(
     <>
       <div
-        className="fixed inset-0 z-50"
+        className="fixed inset-0 z-[60]"
         style={{ background: 'rgba(5,5,5,0.7)', backdropFilter: 'blur(6px)' }}
         onClick={onClose}
       />
       <div
-        className="fixed inset-x-4 top-1/2 -translate-y-1/2 z-50 max-w-md mx-auto p-5"
+        className="fixed inset-x-4 top-1/2 -translate-y-1/2 z-[60] max-w-md mx-auto p-5"
         style={{
           background: 'var(--color-elev)',
           border: '1px solid var(--color-line-2)',

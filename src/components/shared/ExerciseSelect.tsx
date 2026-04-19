@@ -169,7 +169,7 @@ export default function ExerciseSelect({ onSelect, onClose }: ExerciseSelectProp
   return (
     <>
       <div
-        className="fixed inset-0 z-50"
+        className="fixed inset-0 z-[60]"
         style={{
           background: 'rgba(5,5,5,0.72)',
           backdropFilter: 'blur(6px)',
@@ -183,7 +183,7 @@ export default function ExerciseSelect({ onSelect, onClose }: ExerciseSelectProp
       />
 
       <div
-        className={`fixed inset-x-0 bottom-0 z-50 h-[88dvh] flex flex-col ${dragY === 0 && !closing ? 'animate-[slideUp_0.22s_ease-out]' : ''}`}
+        className={`fixed inset-x-0 bottom-0 z-[60] h-[88dvh] flex flex-col ${dragY === 0 && !closing ? 'animate-[slideUp_0.22s_ease-out]' : ''}`}
         style={{
           background: 'var(--color-elev)',
           borderTop: '1px solid var(--color-line-2)',

@@ -27,6 +27,7 @@ interface AppContextValue {
   reorderGroups: (ids: string[]) => void;
   updatePreferences: (preferences: UserPreferences) => void;
   showToast: (message: string) => void;
+  showSessionSaved: (stats: SessionSavedStats) => void;
   refreshAppData: () => Promise<void>;
 }
 
@@ -124,31 +125,16 @@ export function AppProvider({
     [externalToast]
   );
 
-  const addWorkout = useCallback(
-    (workout: Workout) => {
-      setAppData((prev) => ({ ...prev, workouts: [...prev.workouts, workout] }));
-      if (externalSessionSaved) {
-        const sets = workout.entries.reduce((a, e) => a + e.sets.length, 0);
-        const reps = workout.entries.reduce(
-          (a, e) => a + e.sets.reduce((s, set) => s + (set.reps || 0), 0),
-          0,
-        );
-        const volumeKg = workout.entries.reduce(
-          (a, e) => a + e.sets.reduce((s, set) => s + set.reps * set.weightKg, 0),
-          0,
-        );
-        externalSessionSaved({
-          exercises: workout.entries.length,
-          sets,
-          reps,
-          volumeKg,
-        });
-      } else {
-        showToast('Workout saved!');
-      }
+  const showSessionSaved = useCallback(
+    (stats: SessionSavedStats) => {
+      externalSessionSaved?.(stats);
     },
-    [showToast, externalSessionSaved],
+    [externalSessionSaved]
   );
+
+  const addWorkout = useCallback((workout: Workout) => {
+    setAppData((prev) => ({ ...prev, workouts: [...prev.workouts, workout] }));
+  }, []);
 
   const updateWorkout = useCallback(
     (workout: Workout) => {
@@ -192,8 +178,7 @@ export function AppProvider({
 
   const addGroup = useCallback((group: WorkoutGroup) => {
     setAppData((prev) => ({ ...prev, groups: [...(prev.groups ?? []), group] }));
-    showToast('Group saved!');
-  }, [showToast]);
+  }, []);
 
   const updateGroup = useCallback((group: WorkoutGroup) => {
     setAppData((prev) => ({
@@ -247,6 +232,7 @@ export function AppProvider({
         reorderGroups,
         updatePreferences,
         showToast,
+        showSessionSaved,
         refreshAppData,
       }}
     >

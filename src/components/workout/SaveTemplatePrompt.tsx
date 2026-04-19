@@ -34,12 +34,12 @@ export default function SaveTemplatePrompt({
   return (
     <>
       <div
-        className="fixed inset-0 z-50"
+        className="fixed inset-0 z-[60]"
         style={{ background: 'rgba(5,5,5,0.7)', backdropFilter: 'blur(6px)' }}
         onClick={onDismiss}
       />
       <div
-        className="fixed inset-x-4 top-1/2 -translate-y-1/2 z-50 max-w-md mx-auto p-5"
+        className="fixed inset-x-4 top-1/2 -translate-y-1/2 z-[60] max-w-md mx-auto p-5"
         style={{
           background: 'var(--color-elev)',
           border: '1px solid var(--color-line-2)',
@@ -64,7 +64,7 @@ export default function SaveTemplatePrompt({
               >
                 <path d="M5 13l4 4L19 7" />
               </svg>
-              SESSION SAVED
+              ONE MORE THING
             </div>
             <h3
               className="font-display mb-1"
@@ -153,7 +153,7 @@ export default function SaveTemplatePrompt({
                 color: 'var(--color-text)',
               }}
             >
-              Name this protocol
+              Name your session
             </h3>
             <p
               className="text-[13px] mb-4"
@@ -202,7 +202,7 @@ export default function SaveTemplatePrompt({
                 className="h-12 btn-volt press caps-tight text-[11px] disabled:opacity-40"
                 style={{ borderRadius: '2px' }}
               >
-                COMMIT →
+                SAVE →
               </button>
             </div>
           </>

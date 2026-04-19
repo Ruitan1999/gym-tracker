@@ -6,6 +6,7 @@ export interface SessionSavedStats {
   sets: number;
   reps: number;
   volumeKg: number;
+  templateName?: string;
 }
 
 interface Props {
@@ -77,10 +78,16 @@ export default function SessionSavedBanner({ stats, onClose, duration = 2800 }: 
           </div>
           <div className="min-w-0 flex-1">
             <div
-              className="caps-tight text-[9px]"
+              className="caps-tight text-[9px] flex items-center gap-1.5 flex-wrap"
               style={{ color: 'var(--color-volt)', letterSpacing: '0.18em' }}
             >
-              SESSION LOGGED
+              <span>SESSION LOGGED</span>
+              {stats.templateName && (
+                <>
+                  <span style={{ color: 'var(--color-line-3)' }}>·</span>
+                  <span>TEMPLATE SAVED</span>
+                </>
+              )}
             </div>
             <div
               className="font-display leading-tight mt-0.5"

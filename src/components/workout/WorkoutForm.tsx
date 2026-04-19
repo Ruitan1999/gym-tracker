@@ -39,7 +39,7 @@ function loadDraft(): Draft | null {
 }
 
 export default function WorkoutForm({ existingWorkout }: WorkoutFormProps) {
-  const { appData, addWorkout, updateWorkout, addGroup } = useAppContext();
+  const { appData, addWorkout, updateWorkout, addGroup, showSessionSaved } = useAppContext();
   const navigate = useNavigate();
   const isEdit = !!existingWorkout;
 
@@ -49,7 +49,7 @@ export default function WorkoutForm({ existingWorkout }: WorkoutFormProps) {
   const [entries, setEntries] = useState<WorkoutEntry[]>(existingWorkout?.entries ?? draft?.entries ?? []);
   const [notes, setNotes] = useState(existingWorkout?.notes ?? draft?.notes ?? '');
   const [showExerciseSelect, setShowExerciseSelect] = useState(false);
-  const [templatePromptEntries, setTemplatePromptEntries] = useState<WorkoutEntry[] | null>(null);
+  const [pendingWorkout, setPendingWorkout] = useState<Workout | null>(null);
   const [validationError, setValidationError] = useState('');
   const [collapsedIds, setCollapsedIds] = useState<Set<string>>(
     new Set(draft?.collapsedIds ?? []),
@@ -154,7 +154,12 @@ export default function WorkoutForm({ existingWorkout }: WorkoutFormProps) {
     if (newEntries.length > 1) {
       setCollapsedIds(new Set(newEntries.slice(1).map((e) => e.id)));
     }
-    document.querySelector('main')?.scrollTo({ top: 0, behavior: 'smooth' });
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        const main = document.querySelector('main');
+        if (main) main.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+    });
   }
 
   function exerciseIdsMatchExistingGroup(ids: string[]): boolean {
@@ -166,22 +171,44 @@ export default function WorkoutForm({ existingWorkout }: WorkoutFormProps) {
     );
   }
 
-  function handleTemplatePromptSave(name: string) {
-    if (!templatePromptEntries) return;
-    const group: WorkoutGroup = {
-      id: crypto.randomUUID(),
-      name,
-      exerciseIds: templatePromptEntries.map((e) => e.exerciseId),
-      createdAt: new Date().toISOString(),
-    };
-    addGroup(group);
-    setTemplatePromptEntries(null);
+  function commitPending(templateName?: string) {
+    if (!pendingWorkout) return;
+    addWorkout(pendingWorkout);
+    const sets = pendingWorkout.entries.reduce((a, e) => a + e.sets.length, 0);
+    const reps = pendingWorkout.entries.reduce(
+      (a, e) => a + e.sets.reduce((s, set) => s + (set.reps || 0), 0),
+      0,
+    );
+    const volumeKg = pendingWorkout.entries.reduce(
+      (a, e) => a + e.sets.reduce((s, set) => s + set.reps * set.weightKg, 0),
+      0,
+    );
+    showSessionSaved({
+      exercises: pendingWorkout.entries.length,
+      sets,
+      reps,
+      volumeKg,
+      ...(templateName ? { templateName } : {}),
+    });
+    localStorage.removeItem(DRAFT_KEY);
+    setPendingWorkout(null);
     navigate('/history');
   }
 
+  function handleTemplatePromptSave(name: string) {
+    if (!pendingWorkout) return;
+    const group: WorkoutGroup = {
+      id: crypto.randomUUID(),
+      name,
+      exerciseIds: pendingWorkout.entries.map((e) => e.exerciseId),
+      createdAt: new Date().toISOString(),
+    };
+    addGroup(group);
+    commitPending(name);
+  }
+
   function handleTemplatePromptDismiss() {
-    setTemplatePromptEntries(null);
-    navigate('/history');
+    commitPending();
   }
 
   function handleSave() {
@@ -216,15 +243,25 @@ export default function WorkoutForm({ existingWorkout }: WorkoutFormProps) {
       ...(notes ? { notes } : {}),
       createdAt: new Date().toISOString(),
     };
-    addWorkout(workout);
-    localStorage.removeItem(DRAFT_KEY);
 
     const exerciseIds = savedEntries.map((e) => e.exerciseId);
     if (exerciseIdsMatchExistingGroup(exerciseIds)) {
+      addWorkout(workout);
+      const sets = workout.entries.reduce((a, e) => a + e.sets.length, 0);
+      const reps = workout.entries.reduce(
+        (a, e) => a + e.sets.reduce((s, set) => s + (set.reps || 0), 0),
+        0,
+      );
+      const volumeKg = workout.entries.reduce(
+        (a, e) => a + e.sets.reduce((s, set) => s + set.reps * set.weightKg, 0),
+        0,
+      );
+      showSessionSaved({ exercises: workout.entries.length, sets, reps, volumeKg });
+      localStorage.removeItem(DRAFT_KEY);
       navigate('/history');
       return;
     }
-    setTemplatePromptEntries(savedEntries);
+    setPendingWorkout(workout);
   }
 
   const showGroupsPicker = !isEdit && entries.length === 0 && groups.length > 0;
@@ -267,13 +304,14 @@ export default function WorkoutForm({ existingWorkout }: WorkoutFormProps) {
               const names = g.exerciseIds
                 .map((id) => appData.exercises.find((e) => e.id === id)?.name)
                 .filter(Boolean)
-                .join(' ');
+                .join(', ');
               return (
                 <button
                   key={g.id}
                   type="button"
                   onClick={() => handleStartFromGroup(g)}
                   className="w-full text-left card press p-3"
+                  style={{ borderLeft: '4px solid var(--color-volt)' }}
                 >
                   <div className="flex items-center justify-between">
                     <div
@@ -436,9 +474,9 @@ export default function WorkoutForm({ existingWorkout }: WorkoutFormProps) {
         {isEdit ? 'Update Session →' : 'Save Session →'}
       </button>
 
-      {templatePromptEntries && (
+      {pendingWorkout && (
         <SaveTemplatePrompt
-          exerciseNames={templatePromptEntries
+          exerciseNames={pendingWorkout.entries
             .map((e) => appData.exercises.find((x) => x.id === e.exerciseId)?.name ?? 'Exercise')}
           onSave={handleTemplatePromptSave}
           onDismiss={handleTemplatePromptDismiss}
