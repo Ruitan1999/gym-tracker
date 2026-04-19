@@ -274,14 +274,15 @@ export default function EntryCard({
         ref={addSetBtnRef}
         type="button"
         onClick={handleAddSet}
-        className="relative w-full h-12 caps text-[10px] press flex items-center justify-center gap-2"
+        className="relative w-full h-12 caps text-[11px] press flex items-center justify-center gap-2"
         style={{
           color: 'var(--color-text)',
           borderTop: '1px solid var(--color-line)',
-          background: 'transparent',
+          background: 'rgba(0, 0, 0, 0.015)',
+          fontWeight: 700,
         }}
       >
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="square" className="w-3.5 h-3.5">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="square" className="w-4 h-4">
           <path d="M12 5v14M5 12h14" />
         </svg>
         ADD SET

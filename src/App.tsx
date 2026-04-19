@@ -1,4 +1,4 @@
-import { useState, useCallback, lazy, Suspense } from 'react';
+import { useState, useCallback, lazy, Suspense, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { AppProvider } from './context/AppContext';
@@ -10,15 +10,42 @@ import LogWorkoutPage from './pages/LogWorkoutPage';
 import SignInPage from './pages/SignInPage';
 import LandingPage from './pages/LandingPage';
 
-const HistoryPage = lazy(() => import('./pages/HistoryPage'));
-const WorkoutDetailPage = lazy(() => import('./pages/WorkoutDetailPage'));
-const ProgressPage = lazy(() => import('./pages/ProgressPage'));
-const ExerciseDetailPage = lazy(() => import('./pages/ExerciseDetailPage'));
-const ExerciseLibraryPage = lazy(() => import('./pages/ExerciseLibraryPage'));
-const GroupsPage = lazy(() => import('./pages/GroupsPage'));
-const SettingsPage = lazy(() => import('./pages/SettingsPage'));
+const importHistory = () => import('./pages/HistoryPage');
+const importWorkoutDetail = () => import('./pages/WorkoutDetailPage');
+const importProgress = () => import('./pages/ProgressPage');
+const importExerciseDetail = () => import('./pages/ExerciseDetailPage');
+const importExerciseLibrary = () => import('./pages/ExerciseLibraryPage');
+const importGroups = () => import('./pages/GroupsPage');
+const importSettings = () => import('./pages/SettingsPage');
+
+const HistoryPage = lazy(importHistory);
+const WorkoutDetailPage = lazy(importWorkoutDetail);
+const ProgressPage = lazy(importProgress);
+const ExerciseDetailPage = lazy(importExerciseDetail);
+const ExerciseLibraryPage = lazy(importExerciseLibrary);
+const GroupsPage = lazy(importGroups);
+const SettingsPage = lazy(importSettings);
+
+function prefetchAllPages() {
+  importHistory();
+  importProgress();
+  importSettings();
+  importWorkoutDetail();
+  importExerciseDetail();
+  importExerciseLibrary();
+  importGroups();
+}
 
 function AppRoutes() {
+  useEffect(() => {
+    const ric = (window as unknown as { requestIdleCallback?: (cb: () => void) => number }).requestIdleCallback;
+    if (ric) {
+      ric(prefetchAllPages);
+    } else {
+      setTimeout(prefetchAllPages, 200);
+    }
+  }, []);
+
   return (
     <>
       <Suspense fallback={<div className="min-h-[100dvh]" style={{ background: 'var(--color-bg)' }} />}>

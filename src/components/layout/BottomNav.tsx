@@ -11,24 +11,28 @@ const tabs = [
     label: 'Log',
     code: '01',
     icon: <Dumbbell size={ICON_SIZE} strokeWidth={ICON_STROKE} />,
+    prefetch: () => {},
   },
   {
     to: '/history',
     label: 'Log Book',
     code: '02',
     icon: <NotebookText size={ICON_SIZE} strokeWidth={ICON_STROKE} />,
+    prefetch: () => import('../../pages/HistoryPage'),
   },
   {
     to: '/progress',
     label: 'Progress',
     code: '03',
     icon: <TrendingUp size={ICON_SIZE} strokeWidth={ICON_STROKE} />,
+    prefetch: () => import('../../pages/ProgressPage'),
   },
   {
     to: '/settings',
     label: 'Settings',
     code: '04',
     icon: <Settings size={ICON_SIZE} strokeWidth={ICON_STROKE} />,
+    prefetch: () => import('../../pages/SettingsPage'),
   },
 ];
 
@@ -70,6 +74,8 @@ export default function BottomNav() {
             key={tab.to}
             to={tab.to}
             end={tab.to === '/'}
+            onTouchStart={() => tab.prefetch()}
+            onMouseEnter={() => tab.prefetch()}
             className={({ isActive }) =>
               `group relative flex flex-col items-center justify-center gap-1 pt-3 pb-3 min-h-[60px] press ${
                 isActive ? 'text-[var(--color-text)]' : 'text-[var(--color-text-muted)]'

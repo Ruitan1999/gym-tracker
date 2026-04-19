@@ -24,8 +24,9 @@ const CATEGORY_ACCENT: Record<ExerciseCategory, string> = {
 };
 
 export default function ExerciseSelect({ onSelect, onClose }: ExerciseSelectProps) {
-  const { appData } = useAppContext();
+  const { appData, addExercise } = useAppContext();
   const [filter, setFilter] = useState('');
+  const [choosingCategoryFor, setChoosingCategoryFor] = useState<string | null>(null);
   const [dragY, setDragY] = useState(0);
   const [closing, setClosing] = useState(false);
   const scrollRef = useRef<HTMLDivElement | null>(null);
@@ -255,11 +256,101 @@ export default function ExerciseSelect({ onSelect, onClose }: ExerciseSelectProp
           {isSearching ? (
             <div>
               {searchResults.length === 0 ? (
-                <div
-                  className="text-center py-10 caps-tight text-[10px]"
-                  style={{ color: 'var(--color-text-faint)' }}
-                >
-                  NO MATCH
+                <div className="pt-2">
+                  {choosingCategoryFor === null ? (
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        (e.currentTarget as HTMLButtonElement).blur();
+                        if (document.activeElement instanceof HTMLElement) {
+                          document.activeElement.blur();
+                        }
+                        setChoosingCategoryFor(filter.trim());
+                      }}
+                      className="w-full press flex items-center justify-center gap-2 h-14"
+                      style={{
+                        color: 'var(--color-volt)',
+                        background: 'rgba(243, 91, 38, 0.08)',
+                        border: '1.5px dashed var(--color-volt)',
+                        borderRadius: '2px',
+                      }}
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="square" className="w-5 h-5">
+                        <path d="M12 5v14M5 12h14" />
+                      </svg>
+                      <span
+                        className="font-display"
+                        style={{ fontSize: '0.95rem', fontWeight: 700, letterSpacing: '-0.015em' }}
+                      >
+                        Add "{filter.trim()}" to library
+                      </span>
+                    </button>
+                  ) : (
+                    <div>
+                      <div
+                        className="caps text-[10px] mb-3"
+                        style={{ color: 'var(--color-text-muted)' }}
+                      >
+                        WHAT TYPE OF EXERCISE IS "{choosingCategoryFor.toUpperCase()}"?
+                      </div>
+                      <div className="grid grid-cols-1 gap-2">
+                        {CATEGORY_ORDER.map((cat) => (
+                          <button
+                            key={cat}
+                            type="button"
+                            onClick={() => {
+                              const newExercise = {
+                                id: crypto.randomUUID(),
+                                name: choosingCategoryFor,
+                                category: cat,
+                                isCustom: true,
+                              };
+                              addExercise(newExercise);
+                              setChoosingCategoryFor(null);
+                              setFilter('');
+                              onSelect(newExercise.id);
+                            }}
+                            className="w-full h-14 px-4 flex items-center justify-between press"
+                            style={{
+                              background: '#ffffff',
+                              border: `1px solid ${CATEGORY_ACCENT[cat]}`,
+                              borderRadius: '2px',
+                            }}
+                          >
+                            <span
+                              className="font-display"
+                              style={{
+                                color: 'var(--color-text)',
+                                fontSize: '0.95rem',
+                                fontWeight: 700,
+                                letterSpacing: '-0.015em',
+                              }}
+                            >
+                              {cat.charAt(0).toUpperCase() + cat.slice(1)}
+                            </span>
+                            <span
+                              className="caps-tight text-[9px] px-2 py-0.5"
+                              style={{
+                                color: CATEGORY_ACCENT[cat],
+                                border: `1px solid ${CATEGORY_ACCENT[cat]}`,
+                                borderRadius: '2px',
+                              }}
+                            >
+                              {CATEGORY_CODE[cat]}
+                            </span>
+                          </button>
+                        ))}
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setChoosingCategoryFor(null)}
+                        className="w-full h-12 mt-3 caps-tight text-[10px] press"
+                        style={{ color: 'var(--color-text-muted)' }}
+                      >
+                        ← BACK
+                      </button>
+                    </div>
+                  )}
                 </div>
               ) : (
                 <ul>

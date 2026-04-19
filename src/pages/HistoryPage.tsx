@@ -272,6 +272,14 @@ function CalendarCell({
   );
 }
 
+function adaptiveValueSize(value: string | number): string {
+  const len = String(value).length;
+  if (len <= 3) return '1.75rem';
+  if (len === 4) return '1.5rem';
+  if (len === 5) return '1.25rem';
+  return '1.05rem';
+}
+
 function BigStat({
   label,
   value,
@@ -293,11 +301,11 @@ function BigStat({
       <div className="caps-tight text-[9px]" style={{ color: 'var(--color-text-faint)' }}>
         {label}
       </div>
-      <div className="flex items-baseline gap-1 mt-1.5">
+      <div className="flex items-baseline gap-1 mt-1.5 min-w-0">
         <div
-          className="font-mono leading-none"
+          className="font-mono leading-none min-w-0 truncate"
           style={{
-            fontSize: '1.75rem',
+            fontSize: adaptiveValueSize(value),
             fontWeight: 500,
             color: accent ? 'var(--color-volt)' : 'var(--color-text)',
             fontVariantNumeric: 'tabular-nums',
