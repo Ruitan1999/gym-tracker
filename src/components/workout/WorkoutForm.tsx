@@ -392,7 +392,7 @@ export default function WorkoutForm({ existingWorkout }: WorkoutFormProps) {
               fontVariationSettings: '"wdth" 95',
             }}
           >
-            Add Exercise
+            {entries.length === 0 ? 'Add your first exercise' : 'Add Exercise'}
           </div>
         </div>
       </button>
@@ -405,6 +405,7 @@ export default function WorkoutForm({ existingWorkout }: WorkoutFormProps) {
       )}
 
       {/* HERO — session header + RPE rating */}
+      {(entries.length > 0 || isEdit) && (
       <section className="relative card">
         <div className="relative p-4">
           <div className="flex items-center justify-between">
@@ -468,6 +469,7 @@ export default function WorkoutForm({ existingWorkout }: WorkoutFormProps) {
           </div>
         </div>
       </section>
+      )}
 
       {validationError && (
         <p className="caps-tight text-[10px] text-center" style={{ color: 'var(--color-rust)' }}>
@@ -475,6 +477,7 @@ export default function WorkoutForm({ existingWorkout }: WorkoutFormProps) {
         </p>
       )}
 
+      {(entries.length > 0 || isEdit) && (
       <button
         type="button"
         onClick={handleSave}
@@ -483,6 +486,7 @@ export default function WorkoutForm({ existingWorkout }: WorkoutFormProps) {
       >
         {isEdit ? 'Update Session →' : 'Save Session →'}
       </button>
+      )}
 
       {pendingWorkout && (
         <SaveTemplatePrompt
