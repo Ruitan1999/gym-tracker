@@ -154,6 +154,7 @@ export default function WorkoutForm({ existingWorkout }: WorkoutFormProps) {
     if (newEntries.length > 1) {
       setCollapsedIds(new Set(newEntries.slice(1).map((e) => e.id)));
     }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   function exerciseIdsMatchExistingGroup(ids: string[]): boolean {
