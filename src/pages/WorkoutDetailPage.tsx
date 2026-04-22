@@ -68,7 +68,6 @@ export default function WorkoutDetailPage() {
   return (
     <PageShell
       title="Session"
-      eyebrow="DETAIL READOUT"
       showBack
       rightAction={
         <button

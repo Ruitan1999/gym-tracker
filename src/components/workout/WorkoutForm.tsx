@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAppContext } from '../../context/AppContext';
 import ExerciseSelect from '../shared/ExerciseSelect';
 import DatePicker from '../shared/DatePicker';
+import ConfirmModal from '../shared/ConfirmModal';
 import EntryCard from './EntryCard';
 import SaveTemplatePrompt from './SaveTemplatePrompt';
 import heroIllustration from '../../assets/healthy-habit.svg';
@@ -68,6 +70,7 @@ export default function WorkoutForm({ existingWorkout, autoOpenSelect }: Workout
   const [hasStartedSession, setHasStartedSession] = useState(
     () => (existingWorkout?.entries?.length ?? draft?.entries?.length ?? 0) > 0,
   );
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
   const [pendingWorkout, setPendingWorkout] = useState<Workout | null>(null);
   const [validationError, setValidationError] = useState('');
   const [collapsedIds, setCollapsedIds] = useState<Set<string>>(
@@ -133,6 +136,23 @@ export default function WorkoutForm({ existingWorkout, autoOpenSelect }: Workout
       }
     }
     return null;
+  }
+
+  function discardWorkout() {
+    localStorage.removeItem(DRAFT_KEY);
+    setEntries([]);
+    setNotes('');
+    setCollapsedIds(new Set());
+    setShowCancelConfirm(false);
+    navigate('/');
+  }
+
+  function handleCancel() {
+    if (entries.length > 0) {
+      setShowCancelConfirm(true);
+      return;
+    }
+    discardWorkout();
   }
 
   function handleSelectExercise(exerciseId: string) {
@@ -448,7 +468,7 @@ export default function WorkoutForm({ existingWorkout, autoOpenSelect }: Workout
         </button>
       )}
 
-      {showEmptyState && (groups.length > 0 || hasTodaysWorkout) && (
+      {showEmptyState && (groups.length > 0 || hasTodaysWorkout) && createPortal(
         <div
           className="fixed left-0 right-0 z-40 px-4"
           style={{ bottom: `calc(60px + var(--safe-bottom) + 28px)` }}
@@ -479,10 +499,11 @@ export default function WorkoutForm({ existingWorkout, autoOpenSelect }: Workout
               {sessionInProgress ? 'WORKOUT IN PROGRESS →' : 'START WORKOUT →'}
             </button>
           </div>
-        </div>
+        </div>,
+        document.body,
       )}
 
-      {showEmptyState && groups.length === 0 && !hasTodaysWorkout && (
+      {showEmptyState && groups.length === 0 && !hasTodaysWorkout && createPortal(
         <div
           className="fixed left-0 right-0 z-40 px-6 flex flex-col items-center justify-center pointer-events-none"
           style={{
@@ -525,7 +546,8 @@ export default function WorkoutForm({ existingWorkout, autoOpenSelect }: Workout
           >
             {sessionInProgress ? 'WORKOUT IN PROGRESS →' : 'LOG WORKOUT →'}
           </button>
-        </div>
+        </div>,
+        document.body,
       )}
 
       {showExerciseSelect && (
@@ -619,12 +641,42 @@ export default function WorkoutForm({ existingWorkout, autoOpenSelect }: Workout
       </button>
       )}
 
+      {showActiveSession && !isEdit && (
+        <button
+          type="button"
+          onClick={handleCancel}
+          className="w-full h-12 press caps-tight text-[11px]"
+          style={{
+            borderRadius: '2px',
+            letterSpacing: '0.12em',
+            background: 'transparent',
+            color: 'var(--color-text-muted)',
+            border: '1px solid var(--color-line-2)',
+          }}
+        >
+          CANCEL
+        </button>
+      )}
+
       {pendingWorkout && (
         <SaveTemplatePrompt
           exerciseNames={pendingWorkout.entries
             .map((e) => appData.exercises.find((x) => x.id === e.exerciseId)?.name ?? 'Exercise')}
           onSave={handleTemplatePromptSave}
           onDismiss={handleTemplatePromptDismiss}
+        />
+      )}
+
+      {showCancelConfirm && (
+        <ConfirmModal
+          eyebrow="DISCARD WORKOUT"
+          title="Discard this workout?"
+          message="Your current exercises and sets will be lost."
+          confirmLabel="DISCARD →"
+          cancelLabel="KEEP"
+          destructive
+          onConfirm={discardWorkout}
+          onClose={() => setShowCancelConfirm(false)}
         />
       )}
     </div>

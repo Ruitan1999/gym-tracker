@@ -31,6 +31,7 @@ export default function LogWorkoutPage() {
         ) : undefined
       }
       hideTitle={!isEdit && !isNewFocused}
+      disableRefresh={isNewFocused || isEdit}
     >
       <WorkoutForm
         key={existingWorkout?.id ?? (isNewFocused ? 'focused-new' : 'new')}

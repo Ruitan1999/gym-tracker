@@ -11,12 +11,13 @@ interface PageShellProps {
   topSlot?: ReactNode;
   onRefresh?: () => Promise<void>;
   hideTitle?: boolean;
+  disableRefresh?: boolean;
 }
 
 const PULL_THRESHOLD = 72;
 const MAX_PULL = 120;
 
-export default function PageShell({ title, eyebrow, rightAction, children, showBack, topSlot, onRefresh, hideTitle }: PageShellProps) {
+export default function PageShell({ title, eyebrow, rightAction, children, showBack, topSlot, onRefresh, hideTitle, disableRefresh }: PageShellProps) {
   const navigate = useNavigate();
   const { refreshAppData } = useAppContext();
   const mainRef = useRef<HTMLElement | null>(null);
@@ -135,11 +136,12 @@ export default function PageShell({ title, eyebrow, rightAction, children, showB
           paddingTop: showBack ? undefined : 'var(--safe-top)',
           paddingBottom: 'calc(6rem + var(--safe-bottom))',
           overscrollBehaviorY: 'contain',
+          touchAction: 'pan-y',
         }}
-        onTouchStart={onTouchStart}
-        onTouchMove={onTouchMove}
-        onTouchEnd={onTouchEnd}
-        onTouchCancel={onTouchEnd}
+        onTouchStart={disableRefresh ? undefined : onTouchStart}
+        onTouchMove={disableRefresh ? undefined : onTouchMove}
+        onTouchEnd={disableRefresh ? undefined : onTouchEnd}
+        onTouchCancel={disableRefresh ? undefined : onTouchEnd}
       >
         {(pull > 0 || refreshing) && (
           <div
