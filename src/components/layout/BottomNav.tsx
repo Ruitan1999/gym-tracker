@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useLocation } from 'react-router-dom';
 import { Dumbbell, NotebookText, TrendingUp, Settings } from 'lucide-react';
 
 const ICON_SIZE = 22;
@@ -38,6 +38,9 @@ const tabs = [
 
 export default function BottomNav() {
   const [keyboardOpen, setKeyboardOpen] = useState(false);
+  const location = useLocation();
+  const TOP_LEVEL_PATHS = ['/', '/history', '/progress', '/settings'];
+  const hideOnRoute = !TOP_LEVEL_PATHS.includes(location.pathname);
 
   useEffect(() => {
     const isTextField = (el: EventTarget | null) =>
@@ -56,7 +59,7 @@ export default function BottomNav() {
     };
   }, []);
 
-  if (keyboardOpen) return null;
+  if (keyboardOpen || hideOnRoute) return null;
 
   return (
     <nav

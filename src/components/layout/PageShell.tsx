@@ -10,12 +10,13 @@ interface PageShellProps {
   showBack?: boolean;
   topSlot?: ReactNode;
   onRefresh?: () => Promise<void>;
+  hideTitle?: boolean;
 }
 
 const PULL_THRESHOLD = 72;
 const MAX_PULL = 120;
 
-export default function PageShell({ title, eyebrow, rightAction, children, showBack, topSlot, onRefresh }: PageShellProps) {
+export default function PageShell({ title, eyebrow, rightAction, children, showBack, topSlot, onRefresh, hideTitle }: PageShellProps) {
   const navigate = useNavigate();
   const { refreshAppData } = useAppContext();
   const mainRef = useRef<HTMLElement | null>(null);
@@ -179,7 +180,7 @@ export default function PageShell({ title, eyebrow, rightAction, children, showB
           }}
         >
           {!showBack && topSlot}
-          {!showBack && (
+          {!showBack && !hideTitle && (
             <div className="mb-4">
               {eyebrow && (
                 <div className="caps text-[10px]" style={{ color: 'var(--color-text-faint)' }}>

@@ -2,10 +2,11 @@ import type { ReactNode } from 'react';
 
 interface EmptyStateProps {
   message: string;
+  description?: string;
   action?: ReactNode;
 }
 
-export default function EmptyState({ message, action }: EmptyStateProps) {
+export default function EmptyState({ message, description, action }: EmptyStateProps) {
   return (
     <div className="flex flex-col items-center justify-center py-20 text-center px-6">
       <div
@@ -22,7 +23,7 @@ export default function EmptyState({ message, action }: EmptyStateProps) {
         </svg>
       </div>
       <p
-        className="font-display mb-6"
+        className="font-display mb-2"
         style={{
           fontSize: '1.125rem',
           fontWeight: 600,
@@ -32,7 +33,16 @@ export default function EmptyState({ message, action }: EmptyStateProps) {
       >
         {message}
       </p>
-      {action && <div>{action}</div>}
+      {description && (
+        <p
+          className="caps-tight text-[9px] mb-6"
+          style={{ color: 'var(--color-text-faint)', letterSpacing: '0.12em' }}
+        >
+          {description}
+        </p>
+      )}
+      {!description && <div className="mb-6" />}
+      {action && <div className="w-full">{action}</div>}
     </div>
   );
 }

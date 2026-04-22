@@ -1,14 +1,16 @@
 import { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAppContext } from '../../context/AppContext';
 import ExerciseSelect from '../shared/ExerciseSelect';
 import DatePicker from '../shared/DatePicker';
 import EntryCard from './EntryCard';
 import SaveTemplatePrompt from './SaveTemplatePrompt';
+import heroIllustration from '../../assets/healthy-habit.svg';
 import type { Workout, WorkoutEntry, WorkoutGroup, WorkoutSet } from '../../types';
 
 interface WorkoutFormProps {
   existingWorkout?: Workout;
+  autoOpenSelect?: boolean;
 }
 
 function todayString(): string {
@@ -38,23 +40,46 @@ function loadDraft(): Draft | null {
   }
 }
 
-export default function WorkoutForm({ existingWorkout }: WorkoutFormProps) {
+export default function WorkoutForm({ existingWorkout, autoOpenSelect }: WorkoutFormProps) {
   const { appData, addWorkout, updateWorkout, addGroup, showSessionSaved } = useAppContext();
   const navigate = useNavigate();
+  const location = useLocation();
   const isEdit = !!existingWorkout;
+  const isFocusedRoute = location.pathname === '/workout/new';
+
+  function startExerciseSelection() {
+    if (isFocusedRoute) {
+      setShowExerciseSelect(true);
+    } else if (entries.length > 0) {
+      navigate('/workout/new');
+    } else {
+      navigate('/workout/new', { state: { autoOpenSelect: true } });
+    }
+  }
 
   const draft = !isEdit ? loadDraft() : null;
 
   const [date, setDate] = useState(existingWorkout?.date ?? draft?.date ?? todayString());
   const [entries, setEntries] = useState<WorkoutEntry[]>(existingWorkout?.entries ?? draft?.entries ?? []);
   const [notes, setNotes] = useState(existingWorkout?.notes ?? draft?.notes ?? '');
-  const [showExerciseSelect, setShowExerciseSelect] = useState(false);
+  const [showExerciseSelect, setShowExerciseSelect] = useState(
+    () => !!autoOpenSelect && !existingWorkout,
+  );
+  const [hasStartedSession, setHasStartedSession] = useState(
+    () => (existingWorkout?.entries?.length ?? draft?.entries?.length ?? 0) > 0,
+  );
   const [pendingWorkout, setPendingWorkout] = useState<Workout | null>(null);
   const [validationError, setValidationError] = useState('');
   const [collapsedIds, setCollapsedIds] = useState<Set<string>>(
     new Set(draft?.collapsedIds ?? []),
   );
   const [scrollToEntryId, setScrollToEntryId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (entries.length > 0 && !hasStartedSession) {
+      setHasStartedSession(true);
+    }
+  }, [entries.length, hasStartedSession]);
 
   useEffect(() => {
     if (!scrollToEntryId) return;
@@ -154,9 +179,23 @@ export default function WorkoutForm({ existingWorkout }: WorkoutFormProps) {
           : [{ setNumber: 1, reps: 0, weightKg: 0 }],
       };
     });
+    const collapsed = newEntries.length > 1 ? newEntries.slice(1).map((e) => e.id) : [];
+
+    if (!isFocusedRoute) {
+      const draftPayload: Draft = {
+        date: todayString(),
+        entries: newEntries,
+        notes: '',
+        collapsedIds: collapsed,
+      };
+      localStorage.setItem(DRAFT_KEY, JSON.stringify(draftPayload));
+      navigate('/workout/new');
+      return;
+    }
+
     setEntries(newEntries);
-    if (newEntries.length > 1) {
-      setCollapsedIds(new Set(newEntries.slice(1).map((e) => e.id)));
+    if (collapsed.length > 0) {
+      setCollapsedIds(new Set(collapsed));
     }
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
@@ -196,7 +235,7 @@ export default function WorkoutForm({ existingWorkout }: WorkoutFormProps) {
     });
     localStorage.removeItem(DRAFT_KEY);
     setPendingWorkout(null);
-    navigate('/history');
+    navigate('/');
   }
 
   function handleTemplatePromptSave(name: string) {
@@ -236,7 +275,7 @@ export default function WorkoutForm({ existingWorkout }: WorkoutFormProps) {
       if (!notes) delete (updated as Partial<Workout>).notes;
       updateWorkout(updated);
       localStorage.removeItem(DRAFT_KEY);
-      navigate('/history');
+      navigate('/');
       return;
     }
     const savedEntries = entries;
@@ -262,13 +301,18 @@ export default function WorkoutForm({ existingWorkout }: WorkoutFormProps) {
       );
       showSessionSaved({ exercises: workout.entries.length, sets, reps, volumeKg });
       localStorage.removeItem(DRAFT_KEY);
-      navigate('/history');
+      navigate('/');
       return;
     }
     setPendingWorkout(workout);
   }
 
-  const showGroupsPicker = !isEdit && entries.length === 0 && groups.length > 0;
+  const showActiveSession = isEdit || isFocusedRoute;
+  const showEmptyState = !isEdit && !isFocusedRoute;
+  const showGroupsPicker = showEmptyState && groups.length > 0;
+  const sessionInProgress = !isEdit && !isFocusedRoute && entries.length > 0;
+  const todayIso = todayString();
+  const hasTodaysWorkout = !isEdit && !isFocusedRoute && appData.workouts.some((w) => w.date === todayIso);
   const ratingMatch = notes.match(/^Rating: (\d+)/);
   const currentRating = ratingMatch ? parseInt(ratingMatch[1], 10) : 0;
 
@@ -279,20 +323,25 @@ export default function WorkoutForm({ existingWorkout }: WorkoutFormProps) {
     0,
   );
 
-  return (
-    <div className="flex flex-col gap-5 pb-8">
-      {!isEdit && entries.length === 0 && groups.length === 0 && (
-        <p className="caps-tight text-[10px] -mt-3" style={{ color: 'var(--color-text-faint)' }}>
-          TIP SAVE MULTIPLE EXERCISES AS A TEMPLATE TO REUSE
-        </p>
-      )}
+  const hasFixedCta = showEmptyState && (groups.length > 0 || hasTodaysWorkout);
 
+  return (
+    <div className={`flex flex-col gap-5 ${hasFixedCta ? 'pb-32' : 'pb-8'}`}>
       {/* Groups picker */}
       {showGroupsPicker && (
         <section>
-          <div className="flex items-center justify-between mb-2">
-            <h2 className="caps text-[10px]" style={{ color: 'var(--color-text-muted)' }}>
-              SAVED TEMPLATES
+          <div className="flex items-center justify-between mb-4">
+            <h2
+              className="font-display leading-none"
+              style={{
+                fontSize: '1.25rem',
+                fontWeight: 700,
+                letterSpacing: '-0.02em',
+                fontVariationSettings: '"wdth" 90',
+                color: 'var(--color-text)',
+              }}
+            >
+              Workout Template
             </h2>
             <Link
               to="/groups"
@@ -346,7 +395,7 @@ export default function WorkoutForm({ existingWorkout }: WorkoutFormProps) {
         </section>
       )}
 
-      {entries.length > 0 && (
+      {showActiveSession && entries.length > 0 && (
         <div
           className="flex flex-col gap-4 stagger"
           style={{ background: 'var(--color-bg)' }}
@@ -368,34 +417,116 @@ export default function WorkoutForm({ existingWorkout }: WorkoutFormProps) {
         </div>
       )}
 
-      <button
-        type="button"
-        onClick={() => setShowExerciseSelect(true)}
-        className="press h-20 flex items-center justify-center gap-3"
-        style={{
-          color: 'var(--color-volt)',
-          background: 'rgba(243, 91, 38, 0.08)',
-          border: '1.5px dashed var(--color-volt)',
-          borderRadius: '2px',
-        }}
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="square" className="w-5 h-5">
-          <path d="M12 5v14M5 12h14" />
-        </svg>
-        <div className="text-left">
-          <div
-            className="font-display leading-none"
-            style={{
-              fontSize: '1.0625rem',
-              fontWeight: 700,
-              letterSpacing: '-0.02em',
-              fontVariationSettings: '"wdth" 95',
-            }}
-          >
-            {entries.length === 0 ? 'Add your first exercise' : 'Add Exercise'}
+      {showActiveSession && (
+        <button
+          type="button"
+          onClick={() => setShowExerciseSelect(true)}
+          className="press h-20 flex items-center justify-center gap-3"
+          style={{
+            color: 'var(--color-volt)',
+            background: 'rgba(243, 91, 38, 0.08)',
+            border: '1.5px dashed var(--color-volt)',
+            borderRadius: '2px',
+          }}
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="square" className="w-5 h-5">
+            <path d="M12 5v14M5 12h14" />
+          </svg>
+          <div className="text-left">
+            <div
+              className="font-display leading-none"
+              style={{
+                fontSize: '1.0625rem',
+                fontWeight: 700,
+                letterSpacing: '-0.02em',
+                fontVariationSettings: '"wdth" 95',
+              }}
+            >
+              Add Exercise
+            </div>
+          </div>
+        </button>
+      )}
+
+      {showEmptyState && (groups.length > 0 || hasTodaysWorkout) && (
+        <div
+          className="fixed left-0 right-0 z-40 px-4"
+          style={{ bottom: `calc(60px + var(--safe-bottom) + 28px)` }}
+        >
+          <div className="w-full max-w-[800px] mx-auto">
+            <button
+              type="button"
+              onClick={startExerciseSelection}
+              className="w-full h-14 press caps-tight text-[11px]"
+              style={
+                sessionInProgress
+                  ? {
+                      borderRadius: '2px',
+                      letterSpacing: '0.12em',
+                      background: 'var(--color-steel)',
+                      color: '#ffffff',
+                      boxShadow: '0 12px 32px -8px rgba(58, 111, 214, 0.35), 0 4px 12px -2px rgba(0, 0, 0, 0.08)',
+                    }
+                  : {
+                      borderRadius: '2px',
+                      letterSpacing: '0.12em',
+                      background: 'var(--color-volt)',
+                      color: '#ffffff',
+                      boxShadow: '0 12px 32px -8px rgba(243, 91, 38, 0.35), 0 4px 12px -2px rgba(0, 0, 0, 0.08)',
+                    }
+              }
+            >
+              {sessionInProgress ? 'WORKOUT IN PROGRESS →' : 'START WORKOUT →'}
+            </button>
           </div>
         </div>
-      </button>
+      )}
+
+      {showEmptyState && groups.length === 0 && !hasTodaysWorkout && (
+        <div
+          className="fixed left-0 right-0 z-40 px-6 flex flex-col items-center justify-center pointer-events-none"
+          style={{
+            top: `calc(var(--safe-top) + 300px)`,
+            bottom: `calc(60px + var(--safe-bottom))`,
+          }}
+        >
+          <img
+            src={heroIllustration}
+            alt=""
+            aria-hidden
+            className="pointer-events-none mb-4 w-full max-w-[190px]"
+            style={{ height: 'auto' }}
+          />
+          <p
+            className="caps-tight text-[11px] mb-4 text-center"
+            style={{ color: 'var(--color-text-muted)', letterSpacing: '0.08em' }}
+          >
+            LET'S GET YOU STARTED WITH YOUR WORKOUT
+          </p>
+          <button
+            type="button"
+            onClick={startExerciseSelection}
+            className="pointer-events-auto w-full max-w-[420px] h-14 press caps-tight text-[11px]"
+            style={
+              sessionInProgress
+                ? {
+                    borderRadius: '2px',
+                    letterSpacing: '0.12em',
+                    background: 'var(--color-steel)',
+                    color: '#ffffff',
+                  }
+                : {
+                    borderRadius: '2px',
+                    letterSpacing: '0.12em',
+                    background: 'var(--color-volt)',
+                    color: '#ffffff',
+                  }
+            }
+          >
+            {sessionInProgress ? 'WORKOUT IN PROGRESS →' : 'LOG WORKOUT →'}
+          </button>
+        </div>
+      )}
 
       {showExerciseSelect && (
         <ExerciseSelect
@@ -405,7 +536,7 @@ export default function WorkoutForm({ existingWorkout }: WorkoutFormProps) {
       )}
 
       {/* HERO — session header + RPE rating */}
-      {(entries.length > 0 || isEdit) && (
+      {showActiveSession && (
       <section className="relative card">
         <div className="relative p-4">
           <div className="flex items-center justify-between">
@@ -477,7 +608,7 @@ export default function WorkoutForm({ existingWorkout }: WorkoutFormProps) {
         </p>
       )}
 
-      {(entries.length > 0 || isEdit) && (
+      {showActiveSession && (
       <button
         type="button"
         onClick={handleSave}

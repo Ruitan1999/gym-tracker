@@ -42,31 +42,26 @@ export default function GroupsPage() {
 
   if (groups.length === 0) {
     return (
-      <PageShell title="Protocols" eyebrow="SAVED GROUPS" showBack>
+      <PageShell title="Workout Template" showBack>
         <EmptyState
-          message="No protocols saved"
+          message="No template saved"
+          description="SAVE ANY WORKOUT AS GROUP TO REUSE"
           action={
             <Link
               to="/"
-              className="inline-flex items-center justify-center h-12 px-6 caps-tight text-[11px] btn-volt press"
+              className="flex w-full items-center justify-center h-12 px-6 caps-tight text-[11px] btn-volt press"
               style={{ borderRadius: '2px' }}
             >
-              Log a Session →
+              START WORKOUT →
             </Link>
           }
         />
-        <p
-          className="caps-tight text-[9px] text-center mt-6"
-          style={{ color: 'var(--color-text-faint)' }}
-        >
-          SAVE ANY WORKOUT AS GROUP TO REUSE
-        </p>
       </PageShell>
     );
   }
 
   return (
-    <PageShell title="Protocols" eyebrow="SAVED GROUPS" showBack>
+    <PageShell title="Workout Template" showBack>
       <ul className="flex flex-col gap-2">
         {groups.map((g, index) => {
           const isEditing = editingId === g.id;
@@ -117,13 +112,13 @@ export default function GroupsPage() {
                     {g.name}
                   </button>
                 )}
-                <div className="flex items-center">
+                <div className="flex items-center gap-1">
                   <button
                     type="button"
                     aria-label="Move up"
                     disabled={index === 0}
                     onClick={() => move(index, -1)}
-                    className="w-9 h-9 press disabled:opacity-20"
+                    className="w-12 h-12 press disabled:opacity-20 flex items-center justify-center text-[20px]"
                     style={{ color: 'var(--color-text-muted)' }}
                   >
                     ↑
@@ -133,7 +128,7 @@ export default function GroupsPage() {
                     aria-label="Move down"
                     disabled={index === groups.length - 1}
                     onClick={() => move(index, 1)}
-                    className="w-9 h-9 press disabled:opacity-20"
+                    className="w-12 h-12 press disabled:opacity-20 flex items-center justify-center text-[20px]"
                     style={{ color: 'var(--color-text-muted)' }}
                   >
                     ↓
@@ -141,7 +136,7 @@ export default function GroupsPage() {
                   <button
                     type="button"
                     onClick={() => handleDelete(g)}
-                    className="w-9 h-9 press caps-tight text-[10px]"
+                    className="w-12 h-12 press flex items-center justify-center text-[18px]"
                     style={{ color: 'var(--color-rust)' }}
                     aria-label={`Delete ${g.name}`}
                   >

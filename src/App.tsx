@@ -51,6 +51,7 @@ function AppRoutes() {
       <Suspense fallback={<div className="min-h-[100dvh]" style={{ background: 'var(--color-bg)' }} />}>
         <Routes>
           <Route path="/" element={<LogWorkoutPage />} />
+          <Route path="/workout/new" element={<LogWorkoutPage />} />
           <Route path="/workout/:id" element={<LogWorkoutPage />} />
           <Route path="/history" element={<HistoryPage />} />
           <Route path="/history/:id" element={<WorkoutDetailPage />} />
