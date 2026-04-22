@@ -61,7 +61,7 @@ export default function EntryCard({
       const offsetWithin = cardRect.top - containerRect.top;
       const target = container.scrollTop + offsetWithin - 12;
       if (offsetWithin < 0 || offsetWithin > containerRect.height * 0.4) {
-        container.scrollTo({ top: Math.max(0, target), behavior: 'smooth' });
+        container.scrollTo({ top: Math.max(0, target) });
       }
     });
   }, [getScroller]);
@@ -83,7 +83,6 @@ export default function EntryCard({
       if (Math.abs(delta) > 4) {
         container.scrollTo({
           top: Math.max(0, container.scrollTop + delta),
-          behavior: 'smooth',
         });
       }
     });

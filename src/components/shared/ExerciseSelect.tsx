@@ -43,27 +43,15 @@ export default function ExerciseSelect({ onSelect, onClose }: ExerciseSelectProp
   };
 
   useEffect(() => {
-    const tag = 'exercise-select';
-    let pushed = false;
-    const prevState = window.history.state;
-    const timeoutId = window.setTimeout(() => {
-      window.history.pushState({ ...(prevState ?? {}), [tag]: true }, '');
-      pushed = true;
-    }, 0);
-    const onPop = () => {
-      if (!pushed) return;
-      if (closedRef.current) return;
-      closedRef.current = true;
-      pushed = false;
-      onClose();
-    };
-    window.addEventListener('popstate', onPop);
-    return () => {
-      window.clearTimeout(timeoutId);
-      window.removeEventListener('popstate', onPop);
-      if (pushed) {
-        window.history.back();
+    const onKeydown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && !closedRef.current) {
+        closedRef.current = true;
+        onClose();
       }
+    };
+    window.addEventListener('keydown', onKeydown);
+    return () => {
+      window.removeEventListener('keydown', onKeydown);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

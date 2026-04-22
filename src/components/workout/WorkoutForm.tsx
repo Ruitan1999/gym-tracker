@@ -100,9 +100,9 @@ export default function WorkoutForm({ existingWorkout, autoOpenSelect }: Workout
       if (scroller && scroller !== document.body) {
         const elTop = el.getBoundingClientRect().top;
         const scTop = scroller.getBoundingClientRect().top;
-        scroller.scrollTo({ top: scroller.scrollTop + (elTop - scTop) - OFFSET, behavior: 'smooth' });
+        scroller.scrollTo({ top: scroller.scrollTop + (elTop - scTop) - OFFSET });
       } else {
-        window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - OFFSET, behavior: 'smooth' });
+        window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - OFFSET });
       }
     }
     setScrollToEntryId(null);
@@ -220,7 +220,7 @@ export default function WorkoutForm({ existingWorkout, autoOpenSelect }: Workout
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
         const main = document.querySelector('main');
-        if (main) main.scrollTo({ top: 0, behavior: 'smooth' });
+        if (main) main.scrollTo({ top: 0 });
       });
     });
   }
@@ -417,7 +417,7 @@ export default function WorkoutForm({ existingWorkout, autoOpenSelect }: Workout
 
       {showActiveSession && entries.length > 0 && (
         <div
-          className="flex flex-col gap-4 stagger"
+          className="flex flex-col gap-4"
           style={{ background: 'var(--color-bg)' }}
         >
           {entries.map((entry, index) => (
