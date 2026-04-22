@@ -135,7 +135,7 @@ export default function PageShell({ title, eyebrow, rightAction, children, showB
         style={{
           paddingTop: showBack ? undefined : 'var(--safe-top)',
           paddingBottom: 'calc(6rem + var(--safe-bottom))',
-          overscrollBehaviorY: 'contain',
+          overscrollBehaviorY: disableRefresh ? 'none' : 'contain',
           touchAction: 'pan-y',
         }}
         onTouchStart={disableRefresh ? undefined : onTouchStart}
@@ -176,10 +176,14 @@ export default function PageShell({ title, eyebrow, rightAction, children, showB
         )}
         <div
           className="px-4 pt-5 w-full max-w-[800px] mx-auto"
-          style={{
-            transform: pull > 0 || refreshing ? `translateY(${Math.max(pull, refreshing ? 48 : 0)}px)` : undefined,
-            transition: pull === 0 && !refreshing ? 'transform 0.2s' : undefined,
-          }}
+          style={
+            disableRefresh
+              ? undefined
+              : {
+                  transform: pull > 0 || refreshing ? `translateY(${Math.max(pull, refreshing ? 48 : 0)}px)` : undefined,
+                  transition: pull === 0 && !refreshing ? 'transform 0.2s' : undefined,
+                }
+          }
         >
           {!showBack && topSlot}
           {!showBack && !hideTitle && (
