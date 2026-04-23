@@ -115,10 +115,10 @@ export default function EntryCard({
     stableKeysRef.current.push(newKey);
     setEnteringKey(newKey);
     onSetsChange([...sets, newSet]);
-    scrollNewSetIntoView();
     window.setTimeout(() => {
+      scrollNewSetIntoView();
       setEnteringKey((current) => (current === newKey ? null : current));
-    }, 450);
+    }, 320);
   }, [sets, onSetsChange, scrollNewSetIntoView]);
 
   const handleRemoveSet = useCallback(
