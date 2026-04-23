@@ -43,7 +43,7 @@ function loadDraft(): Draft | null {
 }
 
 export default function WorkoutForm({ existingWorkout, autoOpenSelect }: WorkoutFormProps) {
-  const { appData, addWorkout, updateWorkout, addGroup, showSessionSaved } = useAppContext();
+  const { appData, loading, addWorkout, updateWorkout, addGroup, showSessionSaved } = useAppContext();
   const navigate = useNavigate();
   const location = useLocation();
   const isEdit = !!existingWorkout;
@@ -468,7 +468,7 @@ export default function WorkoutForm({ existingWorkout, autoOpenSelect }: Workout
         </button>
       )}
 
-      {showEmptyState && (groups.length > 0 || hasTodaysWorkout) && createPortal(
+      {!loading && showEmptyState && (groups.length > 0 || hasTodaysWorkout) && createPortal(
         <div
           className="fixed left-0 right-0 z-40 px-4"
           style={{ bottom: `calc(60px + var(--safe-bottom) + 28px)` }}
@@ -496,14 +496,23 @@ export default function WorkoutForm({ existingWorkout, autoOpenSelect }: Workout
                     }
               }
             >
-              {sessionInProgress ? 'WORKOUT IN PROGRESS →' : 'START WORKOUT →'}
+              {sessionInProgress ? (
+                <span className="inline-flex items-center">
+                  WORKOUT IN PROGRESS
+                  <span className="progress-dots" aria-hidden>
+                    <span /><span /><span />
+                  </span>
+                </span>
+              ) : (
+                'START WORKOUT →'
+              )}
             </button>
           </div>
         </div>,
         document.body,
       )}
 
-      {showEmptyState && groups.length === 0 && !hasTodaysWorkout && createPortal(
+      {!loading && showEmptyState && groups.length === 0 && !hasTodaysWorkout && createPortal(
         <div
           className="fixed left-0 right-0 z-40 px-6 flex flex-col items-center justify-center pointer-events-none"
           style={{
@@ -544,7 +553,16 @@ export default function WorkoutForm({ existingWorkout, autoOpenSelect }: Workout
                   }
             }
           >
-            {sessionInProgress ? 'WORKOUT IN PROGRESS →' : 'LOG WORKOUT →'}
+            {sessionInProgress ? (
+              <span className="inline-flex items-center">
+                WORKOUT IN PROGRESS
+                <span className="progress-dots" aria-hidden>
+                  <span /><span /><span />
+                </span>
+              </span>
+            ) : (
+              'LOG WORKOUT →'
+            )}
           </button>
         </div>,
         document.body,

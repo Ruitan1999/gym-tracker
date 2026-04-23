@@ -1,10 +1,11 @@
 import { useState, useCallback, lazy, Suspense, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
-import { AppProvider } from './context/AppContext';
+import { AppProvider, useAppContext } from './context/AppContext';
 import SaveErrorBanner from './components/layout/SaveErrorBanner';
 import BottomNav from './components/layout/BottomNav';
 import Toast from './components/shared/Toast';
+import LoadingScreen from './components/shared/LoadingScreen';
 import SessionSavedBanner, { type SessionSavedStats } from './components/shared/SessionSavedBanner';
 import LogWorkoutPage from './pages/LogWorkoutPage';
 import SignInPage from './pages/SignInPage';
@@ -37,6 +38,8 @@ function prefetchAllPages() {
 }
 
 function AppRoutes() {
+  const { loading: appLoading } = useAppContext();
+
   useEffect(() => {
     const ric = (window as unknown as { requestIdleCallback?: (cb: () => void) => number }).requestIdleCallback;
     if (ric) {
@@ -45,6 +48,10 @@ function AppRoutes() {
       setTimeout(prefetchAllPages, 200);
     }
   }, []);
+
+  if (appLoading) {
+    return <LoadingScreen />;
+  }
 
   return (
     <>
@@ -95,11 +102,7 @@ function AuthedApp({
   }
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center text-slate-500">
-        Loading…
-      </div>
-    );
+    return <LoadingScreen />;
   }
 
   if (!user) {
