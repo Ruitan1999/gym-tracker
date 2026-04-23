@@ -1,6 +1,8 @@
+import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAppContext } from '../context/AppContext';
 import PageShell from '../components/layout/PageShell';
+import ConfirmModal from '../components/shared/ConfirmModal';
 
 function formatDate(dateStr: string): string {
   const [year, month, day] = dateStr.split('-').map(Number);
@@ -19,14 +21,13 @@ export default function WorkoutDetailPage() {
   const { appData, deleteWorkout } = useAppContext();
 
   const workout = appData.workouts.find((w) => w.id === id);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
-  function handleDelete() {
+  function confirmDelete() {
     if (!workout) return;
-    const confirmed = window.confirm('Delete this session? This cannot be undone.');
-    if (confirmed) {
-      deleteWorkout(workout.id);
-      navigate('/history');
-    }
+    deleteWorkout(workout.id);
+    setShowDeleteConfirm(false);
+    navigate('/history');
   }
 
   if (!workout) {
@@ -313,7 +314,7 @@ export default function WorkoutDetailPage() {
         {/* Delete */}
         <button
           type="button"
-          onClick={handleDelete}
+          onClick={() => setShowDeleteConfirm(true)}
           className="h-12 press caps-tight text-[11px]"
           style={{
             background: 'transparent',
@@ -325,6 +326,19 @@ export default function WorkoutDetailPage() {
           ✕ DELETE SESSION
         </button>
       </div>
+
+      {showDeleteConfirm && (
+        <ConfirmModal
+          eyebrow="DELETE SESSION"
+          title="Delete this session?"
+          message="This cannot be undone."
+          confirmLabel="DELETE →"
+          cancelLabel="KEEP"
+          destructive
+          onConfirm={confirmDelete}
+          onClose={() => setShowDeleteConfirm(false)}
+        />
+      )}
     </PageShell>
   );
 }
