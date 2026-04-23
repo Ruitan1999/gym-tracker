@@ -43,15 +43,29 @@ export default function ExerciseSelect({ onSelect, onClose }: ExerciseSelectProp
   };
 
   useEffect(() => {
+    window.history.pushState({ modal: 'exercise-select' }, '');
+    let hasPushed = true;
+
+    const onPop = () => {
+      hasPushed = false;
+      if (closedRef.current) return;
+      closedRef.current = true;
+      onClose();
+    };
     const onKeydown = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && !closedRef.current) {
         closedRef.current = true;
         onClose();
       }
     };
+    window.addEventListener('popstate', onPop);
     window.addEventListener('keydown', onKeydown);
     return () => {
+      window.removeEventListener('popstate', onPop);
       window.removeEventListener('keydown', onKeydown);
+      if (hasPushed) {
+        window.history.back();
+      }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
