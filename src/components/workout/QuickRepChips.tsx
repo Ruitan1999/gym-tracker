@@ -50,7 +50,6 @@ export default function QuickRepChips({
         className="flex gap-1.5 overflow-x-auto -mx-1 px-1 pb-0.5 no-scrollbar"
         role="group"
         aria-label="Quick rep values"
-        style={{ touchAction: 'pan-x' }}
       >
         {showCustom && (
           <button
