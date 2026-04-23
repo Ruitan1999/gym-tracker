@@ -11,6 +11,7 @@ interface SetRowProps {
   onApplyPrevious?: (reps: number, weightKg: number) => void;
   onRemove: () => void;
   exiting?: boolean;
+  entering?: boolean;
   previousSet?: { reps: number; weightKg: number };
 }
 
@@ -23,6 +24,7 @@ export default function SetRow({
   onApplyPrevious,
   onRemove,
   exiting = false,
+  entering = false,
   previousSet,
 }: SetRowProps) {
   const { appData } = useAppContext();
@@ -69,7 +71,7 @@ export default function SetRow({
   return (
     <div
       data-set-row
-      className={`relative${exiting ? ' animate-set-exit' : ''}`}
+      className={`relative${exiting ? ' animate-set-exit' : ''}${entering ? ' animate-set-enter' : ''}`}
       style={{
         borderTop: '1px solid var(--color-line)',
       }}

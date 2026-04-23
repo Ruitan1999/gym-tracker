@@ -31,6 +31,7 @@ export default function EntryCard({
   const exercise = appData.exercises.find((e) => e.id === exerciseId);
   const [showRemoveConfirm, setShowRemoveConfirm] = useState(false);
   const [exitingKey, setExitingKey] = useState<string | null>(null);
+  const [enteringKey, setEnteringKey] = useState<string | null>(null);
   const cardRef = useRef<HTMLDivElement>(null);
   const prevCollapsedRef = useRef(collapsed);
 
@@ -110,9 +111,14 @@ export default function EntryCard({
       reps: lastSet?.reps ?? 0,
       weightKg: lastSet?.weightKg ?? 0,
     };
-    stableKeysRef.current.push(`set-${++globalKeyCounter}`);
+    const newKey = `set-${++globalKeyCounter}`;
+    stableKeysRef.current.push(newKey);
+    setEnteringKey(newKey);
     onSetsChange([...sets, newSet]);
     scrollNewSetIntoView();
+    window.setTimeout(() => {
+      setEnteringKey((current) => (current === newKey ? null : current));
+    }, 450);
   }, [sets, onSetsChange, scrollNewSetIntoView]);
 
   const handleRemoveSet = useCallback(
@@ -281,6 +287,7 @@ export default function EntryCard({
               onApplyPrevious={(r, w) => handleApplyPrevious(i, r, w)}
               onRemove={() => handleRemoveSet(i)}
               exiting={exitingKey === key}
+              entering={enteringKey === key}
             />
           );
         })}
