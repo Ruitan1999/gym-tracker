@@ -59,12 +59,14 @@ body {
   text-size-adjust: 100%;
 }
 
-/* iOS momentum scroll for any inner scroller */
+/* iOS momentum scroll for vertical scrollers only */
 .overflow-y-auto,
-.overflow-x-auto,
 .overflow-auto {
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
+}
+.overflow-x-auto {
+  touch-action: pan-x;
 }
 
 /* ————————— utilities ————————— */

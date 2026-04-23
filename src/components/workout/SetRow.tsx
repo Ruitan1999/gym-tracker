@@ -99,8 +99,7 @@ export default function SetRow({
               SET {String(setNumber).padStart(2, '0')} REPS
             </span>
             <span
-              key={String(reps)}
-              className="font-mono leading-none mt-1 animate-tick-in"
+              className="font-mono leading-none mt-1"
               style={{
                 fontSize: '2.25rem',
                 fontWeight: 500,
@@ -109,6 +108,7 @@ export default function SetRow({
                     ? 'var(--color-text-faint)'
                     : 'var(--color-text)',
                 fontVariantNumeric: 'tabular-nums',
+                transition: 'color 120ms ease',
               }}
             >
               {repsDisplay}
@@ -129,8 +129,7 @@ export default function SetRow({
               LOAD KG
             </span>
             <span
-              key={String(weightDisplay)}
-              className="font-mono leading-none mt-1 animate-tick-in"
+              className="font-mono leading-none mt-1"
               style={{
                 fontSize: '2.25rem',
                 fontWeight: 500,
@@ -139,6 +138,7 @@ export default function SetRow({
                     ? 'var(--color-text-faint)'
                     : 'var(--color-volt)',
                 fontVariantNumeric: 'tabular-nums',
+                transition: 'color 120ms ease',
               }}
             >
               {weightDisplay}
