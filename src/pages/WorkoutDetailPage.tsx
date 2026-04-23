@@ -27,7 +27,11 @@ export default function WorkoutDetailPage() {
     if (!workout) return;
     deleteWorkout(workout.id);
     setShowDeleteConfirm(false);
-    navigate('/history');
+    if (window.history.length > 1) {
+      navigate(-1);
+    } else {
+      navigate('/history');
+    }
   }
 
   if (!workout) {

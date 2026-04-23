@@ -138,13 +138,22 @@ export default function WorkoutForm({ existingWorkout, autoOpenSelect }: Workout
     return null;
   }
 
+  function navigateHomeAndScrollTop() {
+    navigate('/');
+    requestAnimationFrame(() => {
+      const main = document.querySelector('main');
+      if (main) main.scrollTop = 0;
+      window.scrollTo({ top: 0 });
+    });
+  }
+
   function discardWorkout() {
     localStorage.removeItem(DRAFT_KEY);
     setEntries([]);
     setNotes('');
     setCollapsedIds(new Set());
     setShowCancelConfirm(false);
-    navigate('/');
+    navigateHomeAndScrollTop();
   }
 
   function handleCancel() {
@@ -255,7 +264,7 @@ export default function WorkoutForm({ existingWorkout, autoOpenSelect }: Workout
     });
     localStorage.removeItem(DRAFT_KEY);
     setPendingWorkout(null);
-    navigate('/');
+    navigateHomeAndScrollTop();
   }
 
   function handleTemplatePromptSave(name: string) {
@@ -295,7 +304,7 @@ export default function WorkoutForm({ existingWorkout, autoOpenSelect }: Workout
       if (!notes) delete (updated as Partial<Workout>).notes;
       updateWorkout(updated);
       localStorage.removeItem(DRAFT_KEY);
-      navigate('/');
+      navigateHomeAndScrollTop();
       return;
     }
     const savedEntries = entries;
@@ -321,7 +330,7 @@ export default function WorkoutForm({ existingWorkout, autoOpenSelect }: Workout
       );
       showSessionSaved({ exercises: workout.entries.length, sets, reps, volumeKg });
       localStorage.removeItem(DRAFT_KEY);
-      navigate('/');
+      navigateHomeAndScrollTop();
       return;
     }
     setPendingWorkout(workout);
