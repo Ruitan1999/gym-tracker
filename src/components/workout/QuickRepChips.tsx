@@ -47,7 +47,7 @@ export default function QuickRepChips({
   return (
     <>
       <div
-        className="flex gap-1.5 overflow-x-auto -mx-1 px-1 pb-0.5 no-scrollbar"
+        className="flex flex-wrap gap-1.5"
         role="group"
         aria-label="Quick rep values"
       >

@@ -135,8 +135,7 @@ export default function PageShell({ title, eyebrow, rightAction, children, showB
         style={{
           paddingTop: showBack ? undefined : 'var(--safe-top)',
           paddingBottom: 'calc(6rem + var(--safe-bottom))',
-          overscrollBehaviorY: disableRefresh ? 'none' : 'contain',
-          touchAction: disableRefresh ? 'auto' : 'pan-y',
+          overscrollBehaviorY: 'contain',
         }}
         onTouchStart={disableRefresh ? undefined : onTouchStart}
         onTouchMove={disableRefresh ? undefined : onTouchMove}
