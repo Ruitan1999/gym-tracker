@@ -84,6 +84,7 @@ export default function EntryCard({
       if (Math.abs(delta) > 4) {
         container.scrollTo({
           top: Math.max(0, container.scrollTop + delta),
+          behavior: 'smooth',
         });
       }
     });
@@ -115,8 +116,8 @@ export default function EntryCard({
     stableKeysRef.current.push(newKey);
     setEnteringKey(newKey);
     onSetsChange([...sets, newSet]);
+    scrollNewSetIntoView();
     window.setTimeout(() => {
-      scrollNewSetIntoView();
       setEnteringKey((current) => (current === newKey ? null : current));
     }, 320);
   }, [sets, onSetsChange, scrollNewSetIntoView]);
