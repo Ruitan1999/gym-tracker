@@ -89,7 +89,6 @@ export default function SetRow({
       style={{
         borderTop: '1px solid var(--color-line)',
         background: setNumber % 2 === 0 ? 'rgba(10, 10, 10, 0.025)' : 'transparent',
-        boxShadow: `inset 3px 0 0 0 ${accentColor}`,
       }}
     >
       {/* Top-right delete button */}

@@ -63,7 +63,13 @@ export default function WorkoutForm({ existingWorkout, autoOpenSelect }: Workout
   const draft = !isEdit ? loadDraft() : null;
 
   const [date, setDate] = useState(existingWorkout?.date ?? draft?.date ?? todayString());
-  const [entries, setEntries] = useState<WorkoutEntry[]>(existingWorkout?.entries ?? draft?.entries ?? []);
+  // A workout that's already saved is finished by definition, so entries from
+  // before `done` existed count as done — otherwise editing history is unsavable.
+  const [entries, setEntries] = useState<WorkoutEntry[]>(
+    existingWorkout?.entries.map((e) => ({ ...e, done: e.done ?? true })) ??
+      draft?.entries ??
+      [],
+  );
   const [notes, setNotes] = useState(existingWorkout?.notes ?? draft?.notes ?? '');
   const [showExerciseSelect, setShowExerciseSelect] = useState(
     () => !!autoOpenSelect && !existingWorkout,
@@ -305,6 +311,12 @@ export default function WorkoutForm({ existingWorkout, autoOpenSelect }: Workout
       setValidationError('At least one set must have reps greater than 0.');
       return;
     }
+    if (pendingCount > 0) {
+      setValidationError(
+        `Mark ${pendingCount === 1 ? 'the last exercise' : `all ${pendingCount} remaining exercises`} done before saving.`,
+      );
+      return;
+    }
     if (isEdit && existingWorkout) {
       const updated: Workout = {
         ...existingWorkout,
@@ -362,6 +374,10 @@ export default function WorkoutForm({ existingWorkout, autoOpenSelect }: Workout
     (acc, e) => acc + e.sets.reduce((s, set) => s + (set.reps || 0), 0),
     0,
   );
+  const doneCount = entries.filter((e) => e.done).length;
+  const pendingCount = totalExercises - doneCount;
+  // An empty session keeps its existing "add an exercise" validation instead.
+  const saveGated = totalExercises > 0 && pendingCount > 0;
 
   const hasFixedCta = showEmptyState && (groups.length > 0 || hasTodaysWorkout);
 
@@ -677,14 +693,66 @@ export default function WorkoutForm({ existingWorkout, autoOpenSelect }: Workout
       )}
 
       {showActiveSession && (
-      <button
-        type="button"
-        onClick={handleSave}
-        className="w-full h-14 btn-volt press caps-tight text-[11px]"
-        style={{ borderRadius: '2px', letterSpacing: '0.12em' }}
-      >
-        {isEdit ? 'Update Session →' : 'Save Session →'}
-      </button>
+      <div className="flex flex-col gap-2">
+        {totalExercises > 0 && (
+          <div
+            className="flex items-center justify-between caps-tight text-[9px]"
+            style={{ color: saveGated ? 'var(--color-text-muted)' : 'var(--color-volt-deep)' }}
+          >
+            <span>
+              {saveGated
+                ? `${pendingCount} EXERCISE${pendingCount === 1 ? '' : 'S'} LEFT TO MARK DONE`
+                : 'ALL EXERCISES DONE'}
+            </span>
+            <span style={{ fontVariantNumeric: 'tabular-nums' }}>
+              {String(doneCount).padStart(2, '0')}/{String(totalExercises).padStart(2, '0')}
+            </span>
+          </div>
+        )}
+        <div
+          aria-hidden
+          style={{ height: '2px', background: 'var(--color-line)', borderRadius: '2px' }}
+        >
+          <div
+            style={{
+              height: '100%',
+              width: totalExercises > 0 ? `${(doneCount / totalExercises) * 100}%` : '0%',
+              background: 'var(--color-volt)',
+              transition: 'width 260ms cubic-bezier(0.2, 0.8, 0.2, 1)',
+            }}
+          />
+        </div>
+        <button
+          type="button"
+          onClick={handleSave}
+          disabled={saveGated}
+          aria-describedby={saveGated ? 'save-gate-hint' : undefined}
+          className={`w-full h-14 caps-tight text-[11px] ${saveGated ? '' : 'btn-volt press'}`}
+          style={
+            saveGated
+              ? {
+                  borderRadius: '2px',
+                  letterSpacing: '0.12em',
+                  background: 'var(--color-elev-2)',
+                  color: 'var(--color-text-faint)',
+                  border: '1px solid var(--color-line-2)',
+                  cursor: 'not-allowed',
+                }
+              : { borderRadius: '2px', letterSpacing: '0.12em' }
+          }
+        >
+          {isEdit ? 'Update Session →' : 'Save Session →'}
+        </button>
+        {saveGated && (
+          <p
+            id="save-gate-hint"
+            className="caps-tight text-[9px] text-center"
+            style={{ color: 'var(--color-text-faint)' }}
+          >
+            TICK EVERY EXERCISE TO FINISH THE SESSION
+          </p>
+        )}
+      </div>
       )}
 
       {showActiveSession && !isEdit && (

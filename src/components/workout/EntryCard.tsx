@@ -241,36 +241,40 @@ export default function EntryCard({
             </svg>
           </button>
         )}
-        <button
-          type="button"
-          onClick={onToggleDone}
-          aria-pressed={!!done}
-          aria-label={done ? 'Mark exercise not done' : 'Mark exercise done'}
-          className="flex items-center justify-center shrink-0 press"
-          style={{
-            width: '38px',
-            borderRight: '1px solid var(--color-line)',
-          }}
-        >
-          <span
-            aria-hidden
-            className="flex items-center justify-center"
+        {/* Collapsed cards keep a compact toggle here; expanded cards get the
+            full-width one under the stat strip, where the sets just ended. */}
+        {collapsed && (
+          <button
+            type="button"
+            onClick={onToggleDone}
+            aria-pressed={!!done}
+            aria-label={done ? 'Mark exercise not done' : 'Mark exercise done'}
+            className="flex items-center justify-center shrink-0 press"
             style={{
-              width: '20px',
-              height: '20px',
-              borderRadius: '3px',
-              border: `1.5px solid ${done ? 'var(--color-volt)' : 'var(--color-line-2)'}`,
-              background: done ? 'var(--color-volt)' : 'transparent',
-              transition: 'background-color 150ms ease, border-color 150ms ease',
+              width: '38px',
+              borderRight: '1px solid var(--color-line)',
             }}
           >
-            {done && (
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth={3} strokeLinecap="square" className="w-3 h-3">
-                <path d="M4 12l5 5L20 6" />
-              </svg>
-            )}
-          </span>
-        </button>
+            <span
+              aria-hidden
+              className="flex items-center justify-center"
+              style={{
+                width: '20px',
+                height: '20px',
+                borderRadius: '3px',
+                border: `1.5px solid ${done ? 'var(--color-volt)' : 'var(--color-line-2)'}`,
+                background: done ? 'var(--color-volt)' : 'transparent',
+                transition: 'background-color 150ms ease, border-color 150ms ease',
+              }}
+            >
+              {done && (
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth={3} strokeLinecap="square" className="w-3 h-3">
+                  <path d="M4 12l5 5L20 6" />
+                </svg>
+              )}
+            </span>
+          </button>
+        )}
         <button
           type="button"
           onClick={onToggleCollapsed}
@@ -406,6 +410,43 @@ export default function EntryCard({
         <Stat label="TOTAL REPS" value={totalReps} divider />
         <Stat label="TOP SET" value={topSetStr} divider />
       </div>
+
+      {/* Mark done — the last thing you touch after logging the sets */}
+      <button
+        type="button"
+        onClick={onToggleDone}
+        aria-pressed={!!done}
+        aria-label={done ? 'Mark exercise not done' : 'Mark exercise done'}
+        className="relative w-full h-14 caps-tight text-[11px] press flex items-center justify-center gap-2.5"
+        style={{
+          borderTop: '1px solid var(--color-line)',
+          background: done ? 'var(--color-volt)' : 'transparent',
+          color: done ? '#ffffff' : 'var(--color-volt)',
+          fontWeight: 700,
+          letterSpacing: '0.12em',
+          transition: 'background-color 180ms ease, color 180ms ease',
+        }}
+      >
+        <span
+          aria-hidden
+          className="flex items-center justify-center shrink-0"
+          style={{
+            width: '20px',
+            height: '20px',
+            borderRadius: '3px',
+            border: `1.5px solid ${done ? '#ffffff' : 'var(--color-volt)'}`,
+            background: 'transparent',
+            transition: 'border-color 180ms ease',
+          }}
+        >
+          {done && (
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth={3} strokeLinecap="square" className="w-3 h-3">
+              <path d="M4 12l5 5L20 6" />
+            </svg>
+          )}
+        </span>
+        {done ? 'DONE — TAP TO UNDO' : 'MARK AS DONE'}
+      </button>
         </>
       )}
       {showRemoveConfirm && (
