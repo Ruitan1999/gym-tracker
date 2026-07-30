@@ -203,17 +203,18 @@ export default function EntryCard({
       style={{
         background: '#ffffff',
         border: `1px solid ${isDragging ? 'var(--color-volt)' : 'var(--color-line)'}`,
-        boxShadow: done ? 'inset 4px 0 0 0 var(--color-volt)' : 'none',
-        transition: 'border-color 150ms ease, box-shadow 200ms ease',
+        transition: 'border-color 150ms ease',
       }}
     >
-      {/* Header */}
+      {/* Header — the done rail lives here so it stops at the header edge
+          instead of running the full height of an expanded card. */}
       <div
         className="relative flex items-stretch"
         style={{
           background: done ? 'rgba(255, 87, 34, 0.05)' : '#ffffff',
           minHeight: '64px',
-          transition: 'background-color 200ms ease',
+          boxShadow: done ? 'inset 4px 0 0 0 var(--color-volt)' : 'none',
+          transition: 'background-color 200ms ease, box-shadow 200ms ease',
         }}
       >
         {dragHandleProps && (
@@ -420,7 +421,7 @@ export default function EntryCard({
         className="relative w-full h-14 caps-tight text-[11px] press flex items-center justify-center gap-2.5"
         style={{
           borderTop: '1px solid var(--color-line)',
-          background: done ? 'var(--color-volt)' : 'transparent',
+          background: done ? 'var(--color-text)' : 'transparent',
           color: done ? '#ffffff' : 'var(--color-volt)',
           fontWeight: 700,
           letterSpacing: '0.12em',

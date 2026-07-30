@@ -30,7 +30,9 @@ function pinToPointer(el: HTMLElement, state: DragState) {
 export function useDragReorder<T>({ items, getId, onReorder }: UseDragReorderArgs<T>) {
   const itemRefs = useRef(new Map<string, HTMLElement>());
   const refCallbacks = useRef(new Map<string, (el: HTMLElement | null) => void>());
-  const prevRects = useRef(new Map<string, DOMRect>());
+  // Layout-relative offsets, not viewport rects: scrolling must not read as movement.
+  const prevTops = useRef(new Map<string, number>());
+  const prevOrder = useRef<string[]>([]);
   const itemsRef = useRef(items);
   itemsRef.current = items;
   const onReorderRef = useRef(onReorder);
@@ -51,26 +53,38 @@ export function useDragReorder<T>({ items, getId, onReorder }: UseDragReorderArg
     return cb;
   }, []);
 
-  // FLIP: whenever items settle into new positions, animate non-dragged
-  // items from their previous spot into the new one.
+  // FLIP: when a reorder settles items into new positions, animate the
+  // non-dragged ones from their previous spot into the new one. Only a genuine
+  // order change animates — expanding a card or re-rendering for unrelated
+  // state must leave the list alone.
   useLayoutEffect(() => {
-    const next = new Map<string, DOMRect>();
+    const ids = items.map(getId);
+    const next = new Map<string, number>();
     items.forEach((item) => {
-      const id = getId(item);
-      const el = itemRefs.current.get(id);
-      if (!el) return;
-      const rect = el.getBoundingClientRect();
-      next.set(id, rect);
-      const dragState = dragStateRef.current;
-      if (dragState && id === dragState.id) {
-        // A reorder just relocated the dragged card in the DOM; re-pin it so it
-        // stays under the finger instead of snapping for a frame.
-        pinToPointer(el, dragState);
-        return;
-      }
-      const prev = prevRects.current.get(id);
-      if (prev) {
-        const deltaY = prev.top - rect.top;
+      const el = itemRefs.current.get(getId(item));
+      if (el) next.set(getId(item), el.offsetTop);
+    });
+
+    const orderChanged =
+      ids.length !== prevOrder.current.length ||
+      ids.some((id, i) => prevOrder.current[i] !== id);
+
+    if (orderChanged) {
+      items.forEach((item) => {
+        const id = getId(item);
+        const el = itemRefs.current.get(id);
+        if (!el) return;
+        const dragState = dragStateRef.current;
+        if (dragState && id === dragState.id) {
+          // A reorder just relocated the dragged card in the DOM; re-pin it so it
+          // stays under the finger instead of snapping for a frame.
+          pinToPointer(el, dragState);
+          return;
+        }
+        const prev = prevTops.current.get(id);
+        const now = next.get(id);
+        if (prev === undefined || now === undefined) return;
+        const deltaY = prev - now;
         if (Math.abs(deltaY) > 0.5) {
           el.style.transition = 'none';
           el.style.transform = `translateY(${deltaY}px)`;
@@ -80,9 +94,10 @@ export function useDragReorder<T>({ items, getId, onReorder }: UseDragReorderArg
             el.style.transform = '';
           });
         }
-      }
-    });
-    prevRects.current = next;
+      });
+    }
+    prevTops.current = next;
+    prevOrder.current = ids;
   });
 
   const finishDrag = useCallback(() => {

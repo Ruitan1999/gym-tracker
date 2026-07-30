@@ -696,6 +696,7 @@ export default function WorkoutForm({ existingWorkout, autoOpenSelect }: Workout
       <div className="flex flex-col gap-2">
         {totalExercises > 0 && (
           <div
+            id="save-gate-hint"
             className="flex items-center justify-between caps-tight text-[9px]"
             style={{ color: saveGated ? 'var(--color-text-muted)' : 'var(--color-volt-deep)' }}
           >
@@ -743,15 +744,6 @@ export default function WorkoutForm({ existingWorkout, autoOpenSelect }: Workout
         >
           {isEdit ? 'Update Session →' : 'Save Session →'}
         </button>
-        {saveGated && (
-          <p
-            id="save-gate-hint"
-            className="caps-tight text-[9px] text-center"
-            style={{ color: 'var(--color-text-faint)' }}
-          >
-            TICK EVERY EXERCISE TO FINISH THE SESSION
-          </p>
-        )}
       </div>
       )}
 
