@@ -13,6 +13,13 @@ interface EntryCardProps {
   index?: number;
   collapsed?: boolean;
   onToggleCollapsed?: () => void;
+  done?: boolean;
+  onToggleDone?: () => void;
+  dragHandleProps?: {
+    onPointerDown: (e: React.PointerEvent<HTMLButtonElement>) => void;
+    onKeyDown: (e: React.KeyboardEvent<HTMLButtonElement>) => void;
+  };
+  isDragging?: boolean;
 }
 
 let globalKeyCounter = 0;
@@ -26,6 +33,10 @@ export default function EntryCard({
   index = 0,
   collapsed = false,
   onToggleCollapsed,
+  done = false,
+  onToggleDone,
+  dragHandleProps,
+  isDragging = false,
 }: EntryCardProps) {
   const { appData } = useAppContext();
   const exercise = appData.exercises.find((e) => e.id === exerciseId);
@@ -189,56 +200,126 @@ export default function EntryCard({
     <div
       ref={cardRef}
       className="card-elev overflow-hidden relative"
-      style={{ background: '#ffffff', border: '1px solid var(--color-line)' }}
+      style={{
+        background: '#ffffff',
+        border: `1px solid ${isDragging ? 'var(--color-volt)' : 'var(--color-line)'}`,
+        boxShadow: done ? 'inset 4px 0 0 0 var(--color-volt)' : 'none',
+        transition: 'border-color 150ms ease, box-shadow 200ms ease',
+      }}
     >
       {/* Header */}
       <div
         className="relative flex items-stretch"
-        style={{ background: '#ffffff', minHeight: '64px' }}
+        style={{
+          background: done ? 'rgba(255, 87, 34, 0.05)' : '#ffffff',
+          minHeight: '64px',
+          transition: 'background-color 200ms ease',
+        }}
       >
+        {dragHandleProps && (
+          <button
+            type="button"
+            aria-label="Drag to reorder exercise"
+            className="flex items-center justify-center shrink-0"
+            style={{
+              width: '30px',
+              color: isDragging ? 'var(--color-text)' : 'var(--color-text-faint)',
+              borderRight: '1px solid var(--color-line)',
+              touchAction: 'none',
+              cursor: isDragging ? 'grabbing' : 'grab',
+            }}
+            onPointerDown={dragHandleProps.onPointerDown}
+            onKeyDown={dragHandleProps.onKeyDown}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
+              <circle cx="9" cy="6" r="1.5" />
+              <circle cx="15" cy="6" r="1.5" />
+              <circle cx="9" cy="12" r="1.5" />
+              <circle cx="15" cy="12" r="1.5" />
+              <circle cx="9" cy="18" r="1.5" />
+              <circle cx="15" cy="18" r="1.5" />
+            </svg>
+          </button>
+        )}
+        <button
+          type="button"
+          onClick={onToggleDone}
+          aria-pressed={!!done}
+          aria-label={done ? 'Mark exercise not done' : 'Mark exercise done'}
+          className="flex items-center justify-center shrink-0 press"
+          style={{
+            width: '38px',
+            borderRight: '1px solid var(--color-line)',
+          }}
+        >
+          <span
+            aria-hidden
+            className="flex items-center justify-center"
+            style={{
+              width: '20px',
+              height: '20px',
+              borderRadius: '3px',
+              border: `1.5px solid ${done ? 'var(--color-volt)' : 'var(--color-line-2)'}`,
+              background: done ? 'var(--color-volt)' : 'transparent',
+              transition: 'background-color 150ms ease, border-color 150ms ease',
+            }}
+          >
+            {done && (
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth={3} strokeLinecap="square" className="w-3 h-3">
+                <path d="M4 12l5 5L20 6" />
+              </svg>
+            )}
+          </span>
+        </button>
         <button
           type="button"
           onClick={onToggleCollapsed}
-          className="flex items-center gap-3 min-w-0 flex-1 text-left press pl-4 pr-2 py-4"
+          className="flex items-center gap-2 min-w-0 flex-1 text-left press pl-2.5 pr-1 py-4"
           aria-expanded={!collapsed}
           aria-label={collapsed ? 'Expand exercise' : 'Collapse exercise'}
         >
           <span
             className="caps-tight text-[10px] shrink-0 flex items-center justify-center"
-            style={{ color: 'var(--color-text)', minWidth: '1.5rem' }}
+            style={{ color: 'var(--color-text)', minWidth: '1.25rem' }}
           >
             {String(index + 1).padStart(2, '0')}
           </span>
           <div
-            className="self-stretch w-px"
+            className="self-stretch w-px shrink-0"
             style={{ background: 'var(--color-line)' }}
             aria-hidden
           />
-          <h3
-            className="font-display leading-tight truncate"
-            style={{
-              fontSize: '1.0625rem',
-              fontWeight: 700,
-              letterSpacing: '-0.02em',
-              fontVariationSettings: '"wdth" 95',
-              color: 'var(--color-text)',
-            }}
-          >
-            {exercise?.name ?? 'Unknown Exercise'}
-          </h3>
-          {collapsed && (
-            <span
-              className="caps-tight text-[9px] shrink-0 ml-auto"
-              style={{ color: 'var(--color-text-faint)', fontVariantNumeric: 'tabular-nums' }}
+          <div className="flex-1 min-w-0">
+            <h3
+              className="font-display leading-tight truncate"
+              style={{
+                fontSize: '1.0625rem',
+                fontWeight: 700,
+                letterSpacing: '-0.02em',
+                fontVariationSettings: '"wdth" 95',
+                color: done && collapsed ? 'var(--color-text-muted)' : 'var(--color-text)',
+              }}
             >
-              {sets.length}×{totalReps} · {topWeightStr}KG
-            </span>
-          )}
+              {exercise?.name ?? 'Unknown Exercise'}
+            </h3>
+            {collapsed && (
+              <div
+                className="caps-tight text-[9px] truncate mt-0.5"
+                style={{
+                  color: done ? 'var(--color-volt-deep)' : 'var(--color-text-faint)',
+                  fontVariantNumeric: 'tabular-nums',
+                }}
+              >
+                {done && <span style={{ fontWeight: 700 }}>DONE · </span>}
+                {sets.length}×{totalReps} · {topWeightStr}KG
+              </div>
+            )}
+          </div>
           <span
             className={`shrink-0 flex items-center justify-center ${collapsed ? '' : 'ml-auto'}`}
             aria-hidden
             style={{
-              width: '28px',
+              width: '24px',
               height: '28px',
               color: 'var(--color-text-faint)',
               transition: 'transform 180ms ease',
@@ -256,7 +337,7 @@ export default function EntryCard({
           aria-label="Remove exercise"
           className="flex items-center justify-center press shrink-0"
           style={{
-            width: '56px',
+            width: '46px',
             color: 'var(--color-text-faint)',
             borderLeft: '1px solid var(--color-line)',
           }}

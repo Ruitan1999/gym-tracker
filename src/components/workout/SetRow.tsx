@@ -2,6 +2,18 @@ import QuickRepChips from './QuickRepChips';
 import WeightStepper from './WeightStepper';
 import { useAppContext } from '../../context/AppContext';
 
+const SET_ACCENT_COLORS = [
+  'var(--color-text)',
+  'var(--color-steel)',
+  'var(--color-ember)',
+  'var(--color-blood)',
+  'var(--color-volt-deep)',
+];
+
+function setAccentColor(setNumber: number): string {
+  return SET_ACCENT_COLORS[(setNumber - 1) % SET_ACCENT_COLORS.length];
+}
+
 interface SetRowProps {
   setNumber: number;
   reps: number | '';
@@ -68,12 +80,16 @@ export default function SetRow({
     onWeightChange(previousSet.weightKg);
   }
 
+  const accentColor = setAccentColor(setNumber);
+
   return (
     <div
       data-set-row
       className={`relative${exiting ? ' animate-set-exit' : ''}${entering ? ' animate-set-enter' : ''}`}
       style={{
         borderTop: '1px solid var(--color-line)',
+        background: setNumber % 2 === 0 ? 'rgba(10, 10, 10, 0.025)' : 'transparent',
+        boxShadow: `inset 3px 0 0 0 ${accentColor}`,
       }}
     >
       {/* Top-right delete button */}
@@ -90,7 +106,32 @@ export default function SetRow({
       </button>
 
       {/* Content: big live readouts + controls */}
-      <div className="py-4 px-4 space-y-4">
+      <div className="py-4 pl-4 pr-4 space-y-4">
+        {/* Set number badge */}
+        <div className="flex items-center gap-2">
+          <span
+            className="font-mono shrink-0 flex items-center justify-center"
+            style={{
+              width: 30,
+              height: 30,
+              background: accentColor,
+              color: '#ffffff',
+              fontSize: '12px',
+              fontWeight: 700,
+              borderRadius: 2,
+              fontVariantNumeric: 'tabular-nums',
+            }}
+          >
+            {String(setNumber).padStart(2, '0')}
+          </span>
+          <span
+            className="caps-tight text-[9px]"
+            style={{ color: 'var(--color-text-muted)' }}
+          >
+            SET
+          </span>
+        </div>
+
         {/* Readout strip */}
         <div className="flex items-end gap-6">
           <div className="flex flex-col">
@@ -98,7 +139,7 @@ export default function SetRow({
               className="caps-tight text-[9px]"
               style={{ color: 'var(--color-text-faint)' }}
             >
-              SET {String(setNumber).padStart(2, '0')} REPS
+              REPS
             </span>
             <span
               className="font-mono leading-none mt-1"

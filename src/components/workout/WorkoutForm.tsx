@@ -9,6 +9,7 @@ import EntryCard from './EntryCard';
 import SaveTemplatePrompt from './SaveTemplatePrompt';
 import heroIllustration from '../../assets/healthy-habit.svg';
 import type { Workout, WorkoutEntry, WorkoutGroup, WorkoutSet } from '../../types';
+import { useDragReorder } from '../../utils/useDragReorder';
 
 interface WorkoutFormProps {
   existingWorkout?: Workout;
@@ -77,6 +78,12 @@ export default function WorkoutForm({ existingWorkout, autoOpenSelect }: Workout
     new Set(draft?.collapsedIds ?? []),
   );
   const [scrollToEntryId, setScrollToEntryId] = useState<string | null>(null);
+
+  const { registerItem, handlePointerDown, handleKeyDown, draggingId } = useDragReorder({
+    items: entries,
+    getId: (e: WorkoutEntry) => e.id,
+    onReorder: setEntries,
+  });
 
   useEffect(() => {
     if (entries.length > 0 && !hasStartedSession) {
@@ -195,6 +202,10 @@ export default function WorkoutForm({ existingWorkout, autoOpenSelect }: Workout
 
   function handleRemoveEntry(entryIndex: number) {
     setEntries((prev) => prev.filter((_, i) => i !== entryIndex));
+  }
+
+  function handleToggleDone(entryIndex: number) {
+    setEntries((prev) => prev.map((e, i) => (i === entryIndex ? { ...e, done: !e.done } : e)));
   }
 
   function handleStartFromGroup(group: WorkoutGroup) {
@@ -430,7 +441,7 @@ export default function WorkoutForm({ existingWorkout, autoOpenSelect }: Workout
           style={{ background: 'var(--color-bg)' }}
         >
           {entries.map((entry, index) => (
-            <div key={entry.id} data-entry-id={entry.id}>
+            <div key={entry.id} data-entry-id={entry.id} ref={registerItem(entry.id)}>
               <EntryCard
                 index={index}
                 exerciseId={entry.exerciseId}
@@ -440,6 +451,14 @@ export default function WorkoutForm({ existingWorkout, autoOpenSelect }: Workout
                 onRemove={() => handleRemoveEntry(index)}
                 collapsed={collapsedIds.has(entry.id)}
                 onToggleCollapsed={() => toggleCollapsed(entry.id)}
+                done={!!entry.done}
+                onToggleDone={() => handleToggleDone(index)}
+                isDragging={draggingId === entry.id}
+                dragHandleProps={
+                  entries.length > 1
+                    ? { onPointerDown: handlePointerDown(entry.id), onKeyDown: handleKeyDown(entry.id) }
+                    : undefined
+                }
               />
             </div>
           ))}

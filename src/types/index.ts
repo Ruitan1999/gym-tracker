@@ -17,6 +17,7 @@ export interface WorkoutEntry {
   id: string;
   exerciseId: string;
   sets: WorkoutSet[];
+  done?: boolean;
 }
 
 export interface Workout {

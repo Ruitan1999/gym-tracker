@@ -270,6 +270,13 @@ button, a { -webkit-tap-highlight-color: transparent; }
   animation: ken-burns 28s ease-out both;
 }
 
+/* Prevent text selection / native scroll while dragging a list item */
+.dragging-active {
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: none;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .reveal, .reveal.is-visible { opacity: 1; transform: none; animation: none; }
   .ken-burns, .marquee { animation: none; }
