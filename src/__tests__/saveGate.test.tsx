@@ -60,7 +60,7 @@ describe('Save gating on exercise completion', () => {
     renderForm();
     expect(saveButton().disabled).toBe(true);
 
-    fireEvent.click(screen.getAllByRole('button', { name: 'Mark exercise done' })[0]);
+    fireEvent.click(screen.getAllByRole('button', { name: 'Mark exercise complete' })[0]);
 
     expect(saveButton().disabled).toBe(false);
     expect(screen.getByText('ALL EXERCISES DONE')).toBeDefined();
@@ -71,7 +71,7 @@ describe('Save gating on exercise completion', () => {
     renderForm();
     expect(saveButton().disabled).toBe(false);
 
-    fireEvent.click(screen.getAllByRole('button', { name: 'Mark exercise not done' })[0]);
+    fireEvent.click(screen.getAllByRole('button', { name: 'Mark exercise not complete' })[0]);
 
     expect(saveButton().disabled).toBe(true);
   });

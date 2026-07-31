@@ -210,8 +210,19 @@ export default function WorkoutForm({ existingWorkout, autoOpenSelect }: Workout
     setEntries((prev) => prev.filter((_, i) => i !== entryIndex));
   }
 
+  // Completing an exercise is the moment you're done looking at it, so it folds
+  // away and the next one comes up to meet you. Undoing opens it back up.
   function handleToggleDone(entryIndex: number) {
-    setEntries((prev) => prev.map((e, i) => (i === entryIndex ? { ...e, done: !e.done } : e)));
+    const entry = entries[entryIndex];
+    if (!entry) return;
+    const nextDone = !entry.done;
+    setEntries((prev) => prev.map((e, i) => (i === entryIndex ? { ...e, done: nextDone } : e)));
+    setCollapsedIds((prev) => {
+      const next = new Set(prev);
+      if (nextDone) next.add(entry.id);
+      else next.delete(entry.id);
+      return next;
+    });
   }
 
   function handleStartFromGroup(group: WorkoutGroup) {
@@ -698,7 +709,7 @@ export default function WorkoutForm({ existingWorkout, autoOpenSelect }: Workout
           <div
             id="save-gate-hint"
             className="flex items-center justify-between caps-tight text-[9px]"
-            style={{ color: saveGated ? 'var(--color-text-muted)' : 'var(--color-volt-deep)' }}
+            style={{ color: saveGated ? 'var(--color-text-muted)' : 'var(--color-done-deep)' }}
           >
             <span>
               {saveGated
@@ -718,7 +729,7 @@ export default function WorkoutForm({ existingWorkout, autoOpenSelect }: Workout
             style={{
               height: '100%',
               width: totalExercises > 0 ? `${(doneCount / totalExercises) * 100}%` : '0%',
-              background: 'var(--color-volt)',
+              background: 'var(--color-done)',
               transition: 'width 260ms cubic-bezier(0.2, 0.8, 0.2, 1)',
             }}
           />

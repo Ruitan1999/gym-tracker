@@ -46,7 +46,7 @@ export default function EntryCard({
   const cardRef = useRef<HTMLDivElement>(null);
   const prevCollapsedRef = useRef(collapsed);
 
-  const getScroller = useCallback((el: HTMLElement): HTMLElement => {
+  const getScroller = useCallback((el: HTMLElement): HTMLElement | null => {
     let node: HTMLElement | null = el.parentElement;
     while (node) {
       const s = getComputedStyle(node);
@@ -58,14 +58,18 @@ export default function EntryCard({
       }
       node = node.parentElement;
     }
-    return document.scrollingElement as HTMLElement;
+    return (document.scrollingElement as HTMLElement | null) ?? null;
   }, []);
 
   const scrollCardIntoView = useCallback(() => {
     const el = cardRef.current;
     if (!el) return;
     requestAnimationFrame(() => {
+      // The card can be gone by the time this frame runs — removed, or the whole
+      // form unmounted on save.
+      if (!el.isConnected) return;
       const container = getScroller(el);
+      if (!container) return;
       const containerRect = container.getBoundingClientRect
         ? container.getBoundingClientRect()
         : { top: 0, height: window.innerHeight };
@@ -85,7 +89,9 @@ export default function EntryCard({
     const addBtn = addSetBtnRef.current;
     if (!el || !addBtn) return;
     requestAnimationFrame(() => {
+      if (!el.isConnected || !addBtn.isConnected) return;
       const container = getScroller(el);
+      if (!container?.getBoundingClientRect) return;
       const containerRect = container.getBoundingClientRect();
       const paddingBottom = parseFloat(getComputedStyle(container).paddingBottom) || 0;
       const btnRect = addBtn.getBoundingClientRect();
@@ -102,7 +108,9 @@ export default function EntryCard({
   }, [getScroller]);
 
   useEffect(() => {
-    if (prevCollapsedRef.current && !collapsed) {
+    // Either direction can leave this card off-screen: expanding pushes its own
+    // body down, collapsing pulls everything below it up by the card's height.
+    if (prevCollapsedRef.current !== collapsed) {
       scrollCardIntoView();
     }
     prevCollapsedRef.current = collapsed;
@@ -211,9 +219,9 @@ export default function EntryCard({
       <div
         className="relative flex items-stretch"
         style={{
-          background: done ? 'rgba(255, 87, 34, 0.05)' : '#ffffff',
+          background: done ? 'var(--color-done-tint)' : '#ffffff',
           minHeight: '64px',
-          boxShadow: done ? 'inset 4px 0 0 0 var(--color-volt)' : 'none',
+          boxShadow: done ? 'inset 4px 0 0 0 var(--color-done)' : 'none',
           transition: 'background-color 200ms ease, box-shadow 200ms ease',
         }}
       >
@@ -249,7 +257,7 @@ export default function EntryCard({
             type="button"
             onClick={onToggleDone}
             aria-pressed={!!done}
-            aria-label={done ? 'Mark exercise not done' : 'Mark exercise done'}
+            aria-label={done ? 'Mark exercise not complete' : 'Mark exercise complete'}
             className="flex items-center justify-center shrink-0 press"
             style={{
               width: '38px',
@@ -263,8 +271,8 @@ export default function EntryCard({
                 width: '20px',
                 height: '20px',
                 borderRadius: '3px',
-                border: `1.5px solid ${done ? 'var(--color-volt)' : 'var(--color-line-2)'}`,
-                background: done ? 'var(--color-volt)' : 'transparent',
+                border: `1.5px solid ${done ? 'var(--color-done)' : 'var(--color-line-2)'}`,
+                background: done ? 'var(--color-done)' : 'transparent',
                 transition: 'background-color 150ms ease, border-color 150ms ease',
               }}
             >
@@ -311,7 +319,7 @@ export default function EntryCard({
               <div
                 className="caps-tight text-[9px] truncate mt-0.5"
                 style={{
-                  color: done ? 'var(--color-volt-deep)' : 'var(--color-text-faint)',
+                  color: done ? 'var(--color-done-deep)' : 'var(--color-text-faint)',
                   fontVariantNumeric: 'tabular-nums',
                 }}
               >
@@ -412,41 +420,45 @@ export default function EntryCard({
         <Stat label="TOP SET" value={topSetStr} divider />
       </div>
 
-      {/* Mark done — the last thing you touch after logging the sets */}
+      {/* Complete — the last thing you touch after logging the sets. Pending is
+          the loud state because it's the one asking for action; completed falls
+          back to a quiet line. */}
       <button
         type="button"
         onClick={onToggleDone}
         aria-pressed={!!done}
-        aria-label={done ? 'Mark exercise not done' : 'Mark exercise done'}
-        className="relative w-full h-14 caps-tight text-[11px] press flex items-center justify-center gap-2.5"
+        aria-label={done ? 'Mark exercise not complete' : 'Mark exercise complete'}
+        className={`relative w-full h-14 caps-tight text-[11px] press flex items-center gap-2.5 ${done ? 'justify-start px-4' : 'justify-center'}`}
         style={{
-          borderTop: '1px solid var(--color-line)',
-          background: done ? 'var(--color-text)' : 'transparent',
-          color: done ? '#ffffff' : 'var(--color-volt)',
+          borderTop: `1px solid ${done ? 'var(--color-done-line)' : 'var(--color-line)'}`,
+          background: done ? 'var(--color-done-tint)' : 'var(--color-volt)',
+          color: done ? 'var(--color-done-deep)' : '#ffffff',
           fontWeight: 700,
           letterSpacing: '0.12em',
           transition: 'background-color 180ms ease, color 180ms ease',
         }}
       >
-        <span
-          aria-hidden
-          className="flex items-center justify-center shrink-0"
-          style={{
-            width: '20px',
-            height: '20px',
-            borderRadius: '3px',
-            border: `1.5px solid ${done ? '#ffffff' : 'var(--color-volt)'}`,
-            background: 'transparent',
-            transition: 'border-color 180ms ease',
-          }}
-        >
-          {done && (
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth={3} strokeLinecap="square" className="w-3 h-3">
+        {done ? (
+          <>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3} strokeLinecap="square" className="w-4 h-4 shrink-0">
               <path d="M4 12l5 5L20 6" />
             </svg>
-          )}
-        </span>
-        {done ? 'DONE — TAP TO UNDO' : 'MARK AS DONE'}
+            COMPLETED
+            <span
+              className="caps-tight text-[9px] ml-auto"
+              style={{
+                color: 'var(--color-text-muted)',
+                borderBottom: '1px solid var(--color-line-2)',
+                paddingBottom: '1px',
+                letterSpacing: '0.1em',
+              }}
+            >
+              UNDO
+            </span>
+          </>
+        ) : (
+          'COMPLETE EXERCISE →'
+        )}
       </button>
         </>
       )}

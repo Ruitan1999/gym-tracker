@@ -27,6 +27,12 @@
   --color-ember: #b47a00;
   --color-steel: #3a6fd6;
 
+  /* completion — green carries "done" so orange stays purely an action colour */
+  --color-done: #3f8a57;
+  --color-done-deep: #2f6b41;
+  --color-done-tint: #eaf3ec;
+  --color-done-line: #cfe4d5;
+
   --font-display: "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
   --font-serif: "Instrument Serif", ui-serif, Georgia, serif;

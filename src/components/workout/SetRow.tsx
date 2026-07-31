@@ -2,16 +2,19 @@ import QuickRepChips from './QuickRepChips';
 import WeightStepper from './WeightStepper';
 import { useAppContext } from '../../context/AppContext';
 
-const SET_ACCENT_COLORS = [
-  'var(--color-text)',
-  'var(--color-steel)',
-  'var(--color-ember)',
-  'var(--color-blood)',
-  'var(--color-volt-deep)',
+// Pastel tints with the hue carried by the numeral rather than the fill — small
+// dark type on a pale ground reads better than white on a saturated block, and
+// every pair below clears WCAG AA.
+const SET_ACCENTS = [
+  { bg: '#ECEDEF', fg: '#454B54', line: '#DCDEE2' },
+  { bg: '#E5ECFA', fg: '#2F5FBE', line: '#CFDCF5' },
+  { bg: '#F5EEDC', fg: '#856210', line: '#EAE0C6' },
+  { bg: '#F9E8EA', fg: '#AE4453', line: '#F0D5D9' },
+  { bg: '#FAE9E0', fg: '#A34A1E', line: '#F2D7C9' },
 ];
 
-function setAccentColor(setNumber: number): string {
-  return SET_ACCENT_COLORS[(setNumber - 1) % SET_ACCENT_COLORS.length];
+function setAccent(setNumber: number) {
+  return SET_ACCENTS[(setNumber - 1) % SET_ACCENTS.length];
 }
 
 interface SetRowProps {
@@ -80,7 +83,7 @@ export default function SetRow({
     onWeightChange(previousSet.weightKg);
   }
 
-  const accentColor = setAccentColor(setNumber);
+  const accent = setAccent(setNumber);
 
   return (
     <div
@@ -113,8 +116,9 @@ export default function SetRow({
             style={{
               width: 30,
               height: 30,
-              background: accentColor,
-              color: '#ffffff',
+              background: accent.bg,
+              color: accent.fg,
+              boxShadow: `inset 0 0 0 1px ${accent.line}`,
               fontSize: '12px',
               fontWeight: 700,
               borderRadius: 2,
