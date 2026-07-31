@@ -201,7 +201,6 @@ export default function EntryCard({
     if (s.weightKg === best.weightKg && s.reps > best.reps) return s;
     return best;
   }, null);
-  const topSetStr = topSet ? `${topSet.reps} × ${topSet.weightKg}` : '—';
   const topWeightStr = topSet ? String(topSet.weightKg) : '0';
 
   return (
@@ -407,19 +406,6 @@ export default function EntryCard({
         ADD SET
       </button>
 
-      {/* Stat strip */}
-      <div
-        className="relative grid grid-cols-3"
-        style={{
-          background: 'transparent',
-          borderTop: '1px solid var(--color-line)',
-        }}
-      >
-        <Stat label="SETS" value={sets.length} />
-        <Stat label="TOTAL REPS" value={totalReps} divider />
-        <Stat label="TOP SET" value={topSetStr} divider />
-      </div>
-
       {/* Complete — the last thing you touch after logging the sets. Pending is
           the loud state because it's the one asking for action; completed falls
           back to a quiet line. */}
@@ -480,26 +466,3 @@ export default function EntryCard({
   );
 }
 
-function Stat({ label, value, divider }: { label: string; value: string | number; divider?: boolean }) {
-  return (
-    <div
-      className="px-3 py-2.5"
-      style={divider ? { borderLeft: '1px solid var(--color-line)' } : undefined}
-    >
-      <div className="caps-tight text-[9px]" style={{ color: 'var(--color-text-faint)' }}>
-        {label}
-      </div>
-      <div
-        className="font-mono leading-none mt-1"
-        style={{
-          fontSize: '1.125rem',
-          fontWeight: 500,
-          color: 'var(--color-text)',
-          fontVariantNumeric: 'tabular-nums',
-        }}
-      >
-        {value}
-      </div>
-    </div>
-  );
-}
