@@ -9,6 +9,12 @@ interface ExerciseSelectProps {
   title?: string;
   /** Exercises already in the target; shown as added, and tapping toggles them. */
   addedIds?: string[];
+  /**
+   * Whether the sheet owns a history entry of its own so Back closes it. Turn
+   * this off where the sheet is the whole point of the route it sits on — there,
+   * Back should unwind the route itself rather than uncover an empty page.
+   */
+  manageHistory?: boolean;
 }
 
 const CATEGORY_ORDER: ExerciseCategory[] = ['push', 'pull', 'legs', 'core', 'cardio'];
@@ -32,6 +38,7 @@ export default function ExerciseSelect({
   onClose,
   title = 'Add to session',
   addedIds,
+  manageHistory = true,
 }: ExerciseSelectProps) {
   const { appData, addExercise } = useAppContext();
   const added = useMemo(() => new Set(addedIds ?? []), [addedIds]);
@@ -53,8 +60,11 @@ export default function ExerciseSelect({
   };
 
   useEffect(() => {
-    window.history.pushState({ modal: 'exercise-select' }, '');
-    let hasPushed = true;
+    let hasPushed = false;
+    if (manageHistory) {
+      window.history.pushState({ modal: 'exercise-select' }, '');
+      hasPushed = true;
+    }
 
     const onPop = () => {
       hasPushed = false;

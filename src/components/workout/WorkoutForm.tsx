@@ -98,6 +98,10 @@ export default function WorkoutForm({ existingWorkout, autoOpenSelect }: Workout
   );
   const hasAnyInput = hasLoggedWork || notes.trim().length > 0;
 
+  // Tapping Start Workout lands here with the picker already up and nothing
+  // behind it, so the sheet is the page rather than something layered over it.
+  const pickerOpensEmptySession = isFocusedRoute && !isEdit && entries.length === 0;
+
   useEffect(() => {
     if (entries.length > 0 && !hasStartedSession) {
       setHasStartedSession(true);
@@ -636,8 +640,14 @@ export default function WorkoutForm({ existingWorkout, autoOpenSelect }: Workout
 
       {showExerciseSelect && (
         <ExerciseSelect
+          manageHistory={!pickerOpensEmptySession}
           onSelect={handleSelectExercise}
-          onClose={() => setShowExerciseSelect(false)}
+          onClose={() => {
+            setShowExerciseSelect(false);
+            // Nothing was picked and there's nothing behind the sheet, so the
+            // session was never really started — go back where it began.
+            if (pickerOpensEmptySession) navigate('/', { replace: true });
+          }}
         />
       )}
 
