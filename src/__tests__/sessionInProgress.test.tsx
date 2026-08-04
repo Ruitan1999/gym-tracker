@@ -73,6 +73,22 @@ describe('A session only counts as in progress once something is recorded', () =
     expect(screen.getByText(/WORKOUT IN PROGRESS/)).toBeDefined();
   });
 
+  it('does not persist a session that has nothing recorded in it', () => {
+    // Leaving the page is not an explicit discard, so this is what stops an
+    // abandoned session reappearing the next time Start Workout is tapped.
+    seedDraft([entry('a', 'ex-push-001', emptySets)]);
+    renderAt('/workout/new');
+
+    expect(localStorage.getItem(DRAFT_KEY)).toBeNull();
+  });
+
+  it('persists the session as soon as something is recorded', () => {
+    seedDraft([entry('a', 'ex-push-001', [{ setNumber: 1, reps: 8, weightKg: 60 }])]);
+    renderAt('/workout/new');
+
+    expect(localStorage.getItem(DRAFT_KEY)).not.toBeNull();
+  });
+
   it('backs straight out of an untouched session without asking', () => {
     seedDraft([entry('a', 'ex-push-001', emptySets)]);
     renderAt('/workout/new');

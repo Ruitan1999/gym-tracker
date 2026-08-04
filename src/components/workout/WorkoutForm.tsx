@@ -91,6 +91,13 @@ export default function WorkoutForm({ existingWorkout, autoOpenSelect }: Workout
     onReorder: setEntries,
   });
 
+  // Picking exercises only sets up empty sets — that's scaffolding, not work.
+  // A session counts as underway once something has actually been recorded.
+  const hasLoggedWork = entries.some((e) =>
+    e.sets.some((s) => s.reps > 0 || s.weightKg > 0),
+  );
+  const hasAnyInput = hasLoggedWork || notes.trim().length > 0;
+
   useEffect(() => {
     if (entries.length > 0 && !hasStartedSession) {
       setHasStartedSession(true);
@@ -123,15 +130,17 @@ export default function WorkoutForm({ existingWorkout, autoOpenSelect }: Workout
 
   useEffect(() => {
     if (isEdit) return;
-    // A draft holding nothing but a date isn't a session, and keeping one meant
-    // discarding left it behind to silently date the next session.
-    if (entries.length === 0 && !notes) {
+    // Only a session with something recorded is worth restoring. Keeping the
+    // exercise picks alone meant an abandoned session came back the next time
+    // you tapped Start Workout, and left a bare date behind that silently
+    // carried into the following one.
+    if (!hasAnyInput) {
       localStorage.removeItem(DRAFT_KEY);
       return;
     }
     const payload: Draft = { date, entries, notes, collapsedIds: [...collapsedIds] };
     localStorage.setItem(DRAFT_KEY, JSON.stringify(payload));
-  }, [isEdit, date, entries, notes, collapsedIds]);
+  }, [isEdit, date, entries, notes, collapsedIds, hasAnyInput]);
 
   const groups = appData.groups ?? [];
 
@@ -376,12 +385,6 @@ export default function WorkoutForm({ existingWorkout, autoOpenSelect }: Workout
   const showActiveSession = isEdit || isFocusedRoute;
   const showEmptyState = !isEdit && !isFocusedRoute;
   const showGroupsPicker = showEmptyState && groups.length > 0;
-  // Picking exercises only sets up empty sets — that's scaffolding, not work.
-  // A session counts as underway once something has actually been recorded.
-  const hasLoggedWork = entries.some((e) =>
-    e.sets.some((s) => s.reps > 0 || s.weightKg > 0),
-  );
-  const hasAnyInput = hasLoggedWork || notes.trim().length > 0;
   const sessionInProgress = !isEdit && !isFocusedRoute && hasAnyInput;
   const todayIso = todayString();
   const hasTodaysWorkout = !isEdit && !isFocusedRoute && appData.workouts.some((w) => w.date === todayIso);
