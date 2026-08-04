@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PageShell from '../components/layout/PageShell';
 import EmptyState from '../components/shared/EmptyState';
-import ConfirmModal from '../components/shared/ConfirmModal';
 import ActionSheet from '../components/shared/ActionSheet';
 import RenameModal from '../components/shared/RenameModal';
 import { useAppContext } from '../context/AppContext';
@@ -10,13 +9,12 @@ import { useDragReorder } from '../utils/useDragReorder';
 import type { WorkoutGroup } from '../types';
 
 export default function GroupsPage() {
-  const { appData, addGroup, updateGroup, deleteGroup, reorderGroups } = useAppContext();
+  const { appData, addGroup, updateGroup, reorderGroups } = useAppContext();
   const navigate = useNavigate();
   const groups = appData.groups ?? [];
 
   const [menuFor, setMenuFor] = useState<WorkoutGroup | null>(null);
   const [renaming, setRenaming] = useState<WorkoutGroup | null>(null);
-  const [deleting, setDeleting] = useState<WorkoutGroup | null>(null);
 
   const { registerItem, handlePointerDown, handleKeyDown, draggingId } = useDragReorder({
     items: groups,
@@ -76,7 +74,7 @@ export default function GroupsPage() {
         </p>
 
         <ul className="flex flex-col gap-2">
-          {groups.map((g, index) => {
+          {groups.map((g) => {
             const names = g.exerciseIds
               .map((id) => appData.exercises.find((e) => e.id === id)?.name)
               .filter(Boolean) as string[];
@@ -122,19 +120,8 @@ export default function GroupsPage() {
                   <button
                     type="button"
                     onClick={() => navigate(`/groups/${g.id}`)}
-                    className="flex-1 min-w-0 text-left press flex items-center gap-2.5 px-3 py-3"
+                    className="flex-1 min-w-0 text-left press flex items-center px-3.5 py-3"
                   >
-                    <span
-                      className="caps-tight text-[10px] shrink-0"
-                      style={{ color: 'var(--color-text)' }}
-                    >
-                      {String(index + 1).padStart(2, '0')}
-                    </span>
-                    <span
-                      className="self-stretch w-px shrink-0"
-                      style={{ background: 'var(--color-line)' }}
-                      aria-hidden
-                    />
                     <span className="flex-1 min-w-0">
                       <span
                         className="font-display block truncate"
@@ -156,13 +143,6 @@ export default function GroupsPage() {
                           ? 'EMPTY — TAP TO ADD EXERCISES'
                           : `${String(names.length).padStart(2, '0')} · ${preview}${rest > 0 ? ` +${rest}` : ''}`}
                       </span>
-                    </span>
-                    <span
-                      className="shrink-0 text-[11px]"
-                      style={{ color: 'var(--color-text-faint)' }}
-                      aria-hidden
-                    >
-                      →
                     </span>
                   </button>
 
@@ -214,14 +194,6 @@ export default function GroupsPage() {
                 setMenuFor(null);
               },
             },
-            {
-              label: 'DELETE',
-              destructive: true,
-              onSelect: () => {
-                setDeleting(menuFor);
-                setMenuFor(null);
-              },
-            },
           ]}
         />
       )}
@@ -239,21 +211,6 @@ export default function GroupsPage() {
         />
       )}
 
-      {deleting && (
-        <ConfirmModal
-          eyebrow="DELETE TEMPLATE"
-          title={`Delete "${deleting.name}"?`}
-          message="Saved workouts keep their history — only the template is removed."
-          confirmLabel="DELETE →"
-          cancelLabel="KEEP"
-          destructive
-          onConfirm={() => {
-            deleteGroup(deleting.id);
-            setDeleting(null);
-          }}
-          onClose={() => setDeleting(null)}
-        />
-      )}
     </PageShell>
   );
 }
