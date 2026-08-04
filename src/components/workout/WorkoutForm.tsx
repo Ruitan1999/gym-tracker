@@ -431,7 +431,6 @@ export default function WorkoutForm({ existingWorkout, autoOpenSelect }: Workout
                   type="button"
                   onClick={() => handleStartFromGroup(g)}
                   className="w-full text-left card press p-3"
-                  style={{ borderLeft: '4px solid var(--color-volt)' }}
                 >
                   <div className="flex items-center justify-between">
                     <div
