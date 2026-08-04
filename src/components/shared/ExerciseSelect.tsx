@@ -5,17 +5,21 @@ import type { ExerciseCategory } from '../../types';
 interface ExerciseSelectProps {
   onSelect: (exerciseId: string) => void;
   onClose: () => void;
+  /** Sheet heading — the picker serves both a session and a template. */
+  title?: string;
+  /** Exercises already in the target; shown as added, and tapping toggles them. */
+  addedIds?: string[];
 }
 
 const CATEGORY_ORDER: ExerciseCategory[] = ['push', 'pull', 'legs', 'core', 'cardio'];
-const CATEGORY_CODE: Record<ExerciseCategory, string> = {
+export const CATEGORY_CODE: Record<ExerciseCategory, string> = {
   push: 'PSH',
   pull: 'PLL',
   legs: 'LEG',
   core: 'COR',
   cardio: 'CRD',
 };
-const CATEGORY_ACCENT: Record<ExerciseCategory, string> = {
+export const CATEGORY_ACCENT: Record<ExerciseCategory, string> = {
   push: 'var(--color-volt)',
   pull: 'var(--color-ember)',
   legs: 'var(--color-rust)',
@@ -23,8 +27,14 @@ const CATEGORY_ACCENT: Record<ExerciseCategory, string> = {
   cardio: 'var(--color-ember)',
 };
 
-export default function ExerciseSelect({ onSelect, onClose }: ExerciseSelectProps) {
+export default function ExerciseSelect({
+  onSelect,
+  onClose,
+  title = 'Add to session',
+  addedIds,
+}: ExerciseSelectProps) {
   const { appData, addExercise } = useAppContext();
+  const added = useMemo(() => new Set(addedIds ?? []), [addedIds]);
   const [filter, setFilter] = useState('');
   const [choosingCategoryFor, setChoosingCategoryFor] = useState<string | null>(null);
   const [dragY, setDragY] = useState(0);
@@ -221,7 +231,7 @@ export default function ExerciseSelect({ onSelect, onClose }: ExerciseSelectProp
                 color: 'var(--color-text)',
               }}
             >
-              Add to session
+              {title}
             </h3>
           </div>
           <button
@@ -379,16 +389,20 @@ export default function ExerciseSelect({ onSelect, onClose }: ExerciseSelectProp
                         >
                           {ex.name}
                         </span>
-                        <span
-                          className="caps-tight text-[9px] px-2 py-0.5"
-                          style={{
-                            color: CATEGORY_ACCENT[ex.category],
-                            border: `1px solid ${CATEGORY_ACCENT[ex.category]}`,
-                            borderRadius: '2px',
-                          }}
-                        >
-                          {CATEGORY_CODE[ex.category]}
-                        </span>
+                        {added.has(ex.id) ? (
+                          <AddedTag />
+                        ) : (
+                          <span
+                            className="caps-tight text-[9px] px-2 py-0.5"
+                            style={{
+                              color: CATEGORY_ACCENT[ex.category],
+                              border: `1px solid ${CATEGORY_ACCENT[ex.category]}`,
+                              borderRadius: '2px',
+                            }}
+                          >
+                            {CATEGORY_CODE[ex.category]}
+                          </span>
+                        )}
                       </button>
                     </li>
                   ))}
@@ -412,14 +426,14 @@ export default function ExerciseSelect({ onSelect, onClose }: ExerciseSelectProp
                         onClick={() => onSelect(ex.id)}
                         className="h-10 px-3 text-[13px] press"
                         style={{
-                          background: 'transparent',
-                          color: 'var(--color-text)',
-                          border: '1px solid var(--color-volt)',
+                          background: added.has(ex.id) ? 'var(--color-done-tint)' : 'transparent',
+                          color: added.has(ex.id) ? 'var(--color-done-deep)' : 'var(--color-text)',
+                          border: `1px solid ${added.has(ex.id) ? 'var(--color-done)' : 'var(--color-volt)'}`,
                           borderRadius: '2px',
                           fontWeight: 500,
                         }}
                       >
-                        {ex.name}
+                        {added.has(ex.id) ? '✓ ' : ''}{ex.name}
                       </button>
                     ))}
                   </div>
@@ -464,12 +478,16 @@ export default function ExerciseSelect({ onSelect, onClose }: ExerciseSelectProp
                             >
                               {ex.name}
                             </span>
-                            <span
-                              className="text-[11px]"
-                              style={{ color: 'var(--color-text-muted)' }}
-                            >
-                              →
-                            </span>
+                            {added.has(ex.id) ? (
+                              <AddedTag />
+                            ) : (
+                              <span
+                                className="text-[11px]"
+                                style={{ color: 'var(--color-text-muted)' }}
+                              >
+                                →
+                              </span>
+                            )}
                           </button>
                         </li>
                       ))}
@@ -482,5 +500,24 @@ export default function ExerciseSelect({ onSelect, onClose }: ExerciseSelectProp
         </div>
       </div>
     </>
+  );
+}
+
+function AddedTag() {
+  return (
+    <span
+      className="caps-tight text-[9px] px-2 py-0.5 flex items-center gap-1"
+      style={{
+        color: 'var(--color-done-deep)',
+        background: 'var(--color-done-tint)',
+        border: '1px solid var(--color-done)',
+        borderRadius: '2px',
+      }}
+    >
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3} strokeLinecap="square" className="w-2.5 h-2.5">
+        <path d="M4 12l5 5L20 6" />
+      </svg>
+      ADDED
+    </span>
   );
 }

@@ -17,6 +17,7 @@ const importProgress = () => import('./pages/ProgressPage');
 const importExerciseDetail = () => import('./pages/ExerciseDetailPage');
 const importExerciseLibrary = () => import('./pages/ExerciseLibraryPage');
 const importGroups = () => import('./pages/GroupsPage');
+const importTemplateDetail = () => import('./pages/TemplateDetailPage');
 const importSettings = () => import('./pages/SettingsPage');
 
 const HistoryPage = lazy(importHistory);
@@ -25,6 +26,7 @@ const ProgressPage = lazy(importProgress);
 const ExerciseDetailPage = lazy(importExerciseDetail);
 const ExerciseLibraryPage = lazy(importExerciseLibrary);
 const GroupsPage = lazy(importGroups);
+const TemplateDetailPage = lazy(importTemplateDetail);
 const SettingsPage = lazy(importSettings);
 
 function prefetchAllPages() {
@@ -35,6 +37,7 @@ function prefetchAllPages() {
   importExerciseDetail();
   importExerciseLibrary();
   importGroups();
+  importTemplateDetail();
 }
 
 function AppRoutes() {
@@ -66,6 +69,7 @@ function AppRoutes() {
           <Route path="/progress/:exerciseId" element={<ExerciseDetailPage />} />
           <Route path="/exercises" element={<ExerciseLibraryPage />} />
           <Route path="/groups" element={<GroupsPage />} />
+          <Route path="/groups/:id" element={<TemplateDetailPage />} />
           <Route path="/settings" element={<SettingsPage />} />
         </Routes>
       </Suspense>
