@@ -6,6 +6,7 @@ import WeeklyInsights from '../components/workout/WeeklyInsights';
 import TodayWork from '../components/workout/TodayWork';
 import RenameModal from '../components/shared/RenameModal';
 import { useAppContext } from '../context/AppContext';
+import type { Workout } from '../types';
 
 export default function LogWorkoutPage() {
   const { id } = useParams<{ id: string }>();
@@ -15,9 +16,32 @@ export default function LogWorkoutPage() {
   const isNewFocused = location.pathname === '/workout/new';
   const existingWorkout =
     id && !isNewFocused ? appData.workouts.find((w) => w.id === id) : undefined;
+  const autoOpenSelect =
+    isNewFocused && (location.state as { autoOpenSelect?: boolean } | null)?.autoOpenSelect === true;
 
+  // Every one of these routes renders this same component, so React keeps the
+  // instance alive across them. Keying on the session means starting a workout
+  // reads the draft fresh instead of holding the home page's empty name.
+  return (
+    <SessionPage
+      key={existingWorkout?.id ?? (isNewFocused ? 'focused-new' : 'new')}
+      existingWorkout={existingWorkout}
+      isNewFocused={isNewFocused}
+      autoOpenSelect={autoOpenSelect}
+    />
+  );
+}
+
+function SessionPage({
+  existingWorkout,
+  isNewFocused,
+  autoOpenSelect,
+}: {
+  existingWorkout?: Workout;
+  isNewFocused: boolean;
+  autoOpenSelect: boolean;
+}) {
   const isEdit = !!existingWorkout;
-  const autoOpenSelect = isNewFocused && (location.state as { autoOpenSelect?: boolean } | null)?.autoOpenSelect === true;
 
   // The session's name is the page title, so it lives here rather than in the
   // form — there's no second field for it.
@@ -48,7 +72,6 @@ export default function LogWorkoutPage() {
       disableRefresh={isSession}
     >
       <WorkoutForm
-        key={existingWorkout?.id ?? (isNewFocused ? 'focused-new' : 'new')}
         existingWorkout={existingWorkout}
         autoOpenSelect={autoOpenSelect}
         name={name}
