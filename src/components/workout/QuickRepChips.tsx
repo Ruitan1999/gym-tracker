@@ -133,7 +133,7 @@ export default function QuickRepChips({
                 0–99
               </div>
             </div>
-            <div className="flex items-stretch gap-2 mb-4">
+            <div className="mb-4">
               <input
                 ref={inputRef}
                 type="number"
@@ -152,7 +152,7 @@ export default function QuickRepChips({
                   if (e.key === 'Escape') setModalOpen(false);
                 }}
                 placeholder="0"
-                className="font-mono flex-1 min-w-0 text-center outline-none"
+                className="font-mono w-full text-center outline-none"
                 style={{
                   background: 'var(--color-ink)',
                   color: 'var(--color-text)',
@@ -166,46 +166,6 @@ export default function QuickRepChips({
                   letterSpacing: '-0.02em',
                 }}
               />
-              <button
-                type="button"
-                onClick={() => {
-                  const n = parseInt(draft, 10);
-                  const base = Number.isFinite(n) ? n : 0;
-                  setDraft(String(Math.max(0, base - 1)));
-                }}
-                aria-label="Decrease reps"
-                className="w-14 flex items-center justify-center press"
-                style={{
-                  border: '1px solid var(--color-line-2)',
-                  borderRadius: '2px',
-                  background: 'var(--color-ink)',
-                  color: 'var(--color-text)',
-                }}
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="square" className="w-5 h-5">
-                  <path d="M5 12h14" />
-                </svg>
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  const n = parseInt(draft, 10);
-                  const base = Number.isFinite(n) ? n : 0;
-                  setDraft(String(Math.min(99, base + 1)));
-                }}
-                aria-label="Increase reps"
-                className="w-14 flex items-center justify-center press"
-                style={{
-                  border: '1px solid var(--color-volt)',
-                  borderRadius: '2px',
-                  background: 'var(--color-volt)',
-                  color: '#ffffff',
-                }}
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="square" className="w-5 h-5">
-                  <path d="M12 5v14M5 12h14" />
-                </svg>
-              </button>
             </div>
             <div className="grid grid-cols-2 gap-2">
               <button
