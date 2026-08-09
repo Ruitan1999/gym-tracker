@@ -29,8 +29,9 @@ export default function ConfirmModal({
         onClick={onClose}
       />
       <div
-        className="fixed inset-x-4 top-1/2 -translate-y-1/2 z-[60] max-w-md mx-auto p-5"
+        className="fixed inset-x-4 z-[60] max-w-md mx-auto p-5"
         style={{
+          top: 'calc(var(--safe-top) + 5.5rem)',
           background: 'var(--color-elev)',
           border: '1px solid var(--color-line-2)',
           borderRadius: '2px',

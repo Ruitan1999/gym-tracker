@@ -25,8 +25,14 @@ export default function RenameModal({
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    inputRef.current?.focus();
-    inputRef.current?.select();
+    // Let the dialog paint before the keyboard is summoned. Focusing in the
+    // same frame resizes the viewport mid-composite, which flashes the blurred
+    // backdrop on mobile.
+    const frame = requestAnimationFrame(() => {
+      inputRef.current?.focus();
+      inputRef.current?.select();
+    });
+    return () => cancelAnimationFrame(frame);
   }, []);
 
   const trimmed = value.trim();
@@ -45,8 +51,9 @@ export default function RenameModal({
         onClick={onClose}
       />
       <div
-        className="fixed inset-x-4 top-1/2 -translate-y-1/2 z-[60] max-w-md mx-auto p-5"
+        className="fixed inset-x-4 z-[60] max-w-md mx-auto p-5"
         style={{
+          top: 'calc(var(--safe-top) + 5.5rem)',
           background: 'var(--color-elev)',
           border: '1px solid var(--color-line-2)',
           borderRadius: '2px',

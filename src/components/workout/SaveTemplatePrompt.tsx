@@ -18,10 +18,13 @@ export default function SaveTemplatePrompt({
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (step === 'name') {
+    if (step !== 'name') return;
+    // Paint first, then raise the keyboard — see RenameModal.
+    const frame = requestAnimationFrame(() => {
       inputRef.current?.focus();
       inputRef.current?.select();
-    }
+    });
+    return () => cancelAnimationFrame(frame);
   }, [step]);
 
   function submit() {
@@ -42,8 +45,9 @@ export default function SaveTemplatePrompt({
         onClick={onDismiss}
       />
       <div
-        className="fixed inset-x-4 top-1/2 -translate-y-1/2 z-[60] max-w-md mx-auto p-5"
+        className="fixed inset-x-4 z-[60] max-w-md mx-auto p-5"
         style={{
+          top: 'calc(var(--safe-top) + 5.5rem)',
           background: 'var(--color-elev)',
           border: '1px solid var(--color-line-2)',
           borderRadius: '2px',
