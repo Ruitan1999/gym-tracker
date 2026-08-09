@@ -121,6 +121,7 @@ function TemplateEditor({ group }: { group: WorkoutGroup }) {
     <PageShell
       title="Template"
       showBack
+      disableRefresh={draggingId !== null}
       rightAction={
         <button
           type="button"

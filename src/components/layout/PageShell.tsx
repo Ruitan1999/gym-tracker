@@ -1,4 +1,4 @@
-import { useRef, useState, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAppContext } from '../../context/AppContext';
 
@@ -30,6 +30,16 @@ export default function PageShell({ title, onTitlePress, titlePressLabel, eyebro
   const [refreshing, setRefreshing] = useState(false);
 
   const doRefresh = onRefresh ?? refreshAppData;
+
+  // Refresh can be switched off part-way through a gesture — picking a card up
+  // to reorder it does exactly that. Abandon any pull already in progress, or
+  // the indicator hangs there and the page stays pushed down.
+  useEffect(() => {
+    if (!disableRefresh) return;
+    startYRef.current = null;
+    pullingRef.current = false;
+    setPull(0);
+  }, [disableRefresh]);
 
   function onTouchStart(e: React.TouchEvent) {
     if (refreshing) return;

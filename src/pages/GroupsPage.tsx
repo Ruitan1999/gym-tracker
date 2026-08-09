@@ -75,7 +75,7 @@ export default function GroupsPage() {
   }
 
   return (
-    <PageShell title="Workout Template" showBack>
+    <PageShell title="Workout Template" showBack disableRefresh={draggingId !== null}>
       <div className="flex flex-col gap-4">
         <p className="caps-tight text-[9px]" style={{ color: 'var(--color-text-faint)' }}>
           {String(groups.length).padStart(2, '0')} TEMPLATE{groups.length === 1 ? '' : 'S'}
