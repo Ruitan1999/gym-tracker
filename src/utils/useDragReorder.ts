@@ -4,6 +4,12 @@ interface UseDragReorderArgs<T> {
   items: T[];
   getId: (item: T) => string;
   onReorder: (next: T[]) => void;
+  /**
+   * Runs before the card is measured, so a consumer can shrink the list into
+   * something draggable. Must apply synchronously (flushSync) to be seen.
+   */
+  onBeforeDrag?: (id: string) => void;
+  onAfterDrag?: () => void;
 }
 
 interface DragState {
@@ -29,7 +35,13 @@ function pinToPointer(el: HTMLElement, state: DragState) {
   el.style.transform = `translateY(${state.pointerY - state.grabOffset - baseTop}px)`;
 }
 
-export function useDragReorder<T>({ items, getId, onReorder }: UseDragReorderArgs<T>) {
+export function useDragReorder<T>({
+  items,
+  getId,
+  onReorder,
+  onBeforeDrag,
+  onAfterDrag,
+}: UseDragReorderArgs<T>) {
   const itemRefs = useRef(new Map<string, HTMLElement>());
   const refCallbacks = useRef(new Map<string, (el: HTMLElement | null) => void>());
   // Layout-relative offsets, not viewport rects: scrolling must not read as movement.
@@ -39,6 +51,10 @@ export function useDragReorder<T>({ items, getId, onReorder }: UseDragReorderArg
   itemsRef.current = items;
   const onReorderRef = useRef(onReorder);
   onReorderRef.current = onReorder;
+  const onBeforeDragRef = useRef(onBeforeDrag);
+  onBeforeDragRef.current = onBeforeDrag;
+  const onAfterDragRef = useRef(onAfterDrag);
+  onAfterDragRef.current = onAfterDrag;
   const dragStateRef = useRef<DragState | null>(null);
   const cleanupRef = useRef<() => void>(() => {});
   const longPressFiredRef = useRef(false);
@@ -116,10 +132,12 @@ export function useDragReorder<T>({ items, getId, onReorder }: UseDragReorderArg
       }
     }
     document.body.classList.remove('dragging-active');
+    const wasDragging = dragStateRef.current !== null;
     dragStateRef.current = null;
     setDraggingId(null);
     cleanupRef.current();
     cleanupRef.current = () => {};
+    if (wasDragging) onAfterDragRef.current?.();
   }, []);
 
   const reorderTo = useCallback(
@@ -139,16 +157,20 @@ export function useDragReorder<T>({ items, getId, onReorder }: UseDragReorderArg
     (id: string, clientY: number, pointerId: number, captureTarget: HTMLElement | null) => {
       const el = itemRefs.current.get(id);
       if (!el) return;
-      if (captureTarget) {
-        try {
-          captureTarget.setPointerCapture(pointerId);
-        } catch {
-          // ignore — not all pointer types support capture
-        }
+      try {
+        (captureTarget ?? el).setPointerCapture(pointerId);
+      } catch {
+        // ignore — not all pointer types support capture
       }
 
+      onBeforeDragRef.current?.(id);
+
       const rect = el.getBoundingClientRect();
-      dragStateRef.current = { id, grabOffset: clientY - rect.top, pointerY: clientY };
+      // Folding the card can leave the grab point past its new bottom edge —
+      // hold it by the middle rather than flying it above the finger.
+      const rawOffset = clientY - rect.top;
+      const grabOffset = rawOffset > rect.height ? rect.height / 2 : Math.max(0, rawOffset);
+      dragStateRef.current = { id, grabOffset, pointerY: clientY };
       setDraggingId(id);
       document.body.classList.add('dragging-active');
       el.style.position = 'relative';
@@ -191,14 +213,21 @@ export function useDragReorder<T>({ items, getId, onReorder }: UseDragReorderArg
       };
 
       const handleUp = () => finishDrag();
+      // A touch gesture commits to scrolling the moment it starts moving, and
+      // touch-action set after the fact can't call that back. Cancelling the
+      // move at source is the only thing that stops the page sliding away
+      // under a card that's being dragged.
+      const blockScroll = (ev: TouchEvent) => ev.preventDefault();
 
       window.addEventListener('pointermove', handleMove);
       window.addEventListener('pointerup', handleUp);
       window.addEventListener('pointercancel', handleUp);
+      window.addEventListener('touchmove', blockScroll, { passive: false });
       cleanupRef.current = () => {
         window.removeEventListener('pointermove', handleMove);
         window.removeEventListener('pointerup', handleUp);
         window.removeEventListener('pointercancel', handleUp);
+        window.removeEventListener('touchmove', blockScroll);
       };
     },
     [finishDrag, reorderTo, getId],

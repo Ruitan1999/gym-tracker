@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { createPortal } from 'react-dom';
+import { useEffect, useRef, useState } from 'react';
+import { createPortal, flushSync } from 'react-dom';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAppContext } from '../../context/AppContext';
 import ExerciseSelect from '../shared/ExerciseSelect';
@@ -94,6 +94,10 @@ export default function WorkoutForm({
   );
   const [scrollToEntryId, setScrollToEntryId] = useState<string | null>(null);
 
+  // A list of expanded cards is impossible to reorder — one card fills the
+  // screen. Everything folds for the drag and comes back as it was.
+  const preDragCollapsedRef = useRef<Set<string> | null>(null);
+
   const {
     registerItem,
     handlePointerDown,
@@ -105,6 +109,18 @@ export default function WorkoutForm({
     items: entries,
     getId: (e: WorkoutEntry) => e.id,
     onReorder: setEntries,
+    onBeforeDrag: () => {
+      if (preDragCollapsedRef.current) return;
+      preDragCollapsedRef.current = collapsedIds;
+      // Synchronous so the card is measured at its folded height, not the one
+      // it had a frame ago.
+      flushSync(() => setCollapsedIds(new Set(entries.map((e) => e.id))));
+    },
+    onAfterDrag: () => {
+      const previous = preDragCollapsedRef.current;
+      preDragCollapsedRef.current = null;
+      if (previous) setCollapsedIds(previous);
+    },
   });
 
   // Picking exercises only sets up empty sets — that's scaffolding, not work.
@@ -512,6 +528,10 @@ export default function WorkoutForm({
               ref={registerItem(entry.id)}
               onPointerDown={entries.length > 1 ? handleLongPressDown(entry.id) : undefined}
               onClickCapture={entries.length > 1 ? handleLongPressClickCapture : undefined}
+              // iOS answers a long press with the selection callout otherwise,
+              // which steals the gesture before the hold completes.
+              onContextMenu={(e) => e.preventDefault()}
+              style={{ WebkitTouchCallout: 'none' }}
             >
               <EntryCard
                 index={index}
