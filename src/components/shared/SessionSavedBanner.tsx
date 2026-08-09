@@ -43,23 +43,18 @@ export default function SessionSavedBanner({ stats, onClose, duration = 2800 }: 
         className="relative overflow-hidden"
         style={{
           background: 'var(--color-ink)',
-          border: '1px solid var(--color-volt)',
+          border: '1px solid var(--color-line)',
           borderRadius: '2px',
           boxShadow: '0 18px 44px rgba(0,0,0,0.55)',
         }}
       >
-        <div
-          aria-hidden
-          className="absolute inset-y-0 left-0"
-          style={{ width: '6px', background: 'var(--color-volt)' }}
-        />
-        <div className="pl-5 pr-4 py-3.5 flex items-center gap-4">
+        <div className="px-4 py-3.5 flex items-center gap-4">
           <div
             className="shrink-0 flex items-center justify-center"
             style={{
               width: 36,
               height: 36,
-              background: 'var(--color-volt)',
+              background: 'var(--color-done)',
               color: '#ffffff',
               borderRadius: '2px',
             }}
@@ -79,7 +74,7 @@ export default function SessionSavedBanner({ stats, onClose, duration = 2800 }: 
           <div className="min-w-0 flex-1">
             <div
               className="caps-tight text-[9px] flex items-center gap-1.5 flex-wrap"
-              style={{ color: 'var(--color-volt)', letterSpacing: '0.18em' }}
+              style={{ color: 'var(--color-done-deep)', letterSpacing: '0.18em' }}
             >
               <span>SESSION LOGGED</span>
               {stats.templateName && (
@@ -122,7 +117,7 @@ export default function SessionSavedBanner({ stats, onClose, duration = 2800 }: 
           aria-hidden
           className="absolute bottom-0 left-0 h-[2px]"
           style={{
-            background: 'var(--color-volt)',
+            background: 'var(--color-done)',
             animation: `banner-progress ${duration}ms linear forwards`,
           }}
         />
