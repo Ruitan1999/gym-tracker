@@ -3,6 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useAppContext } from '../context/AppContext';
 import PageShell from '../components/layout/PageShell';
 import ConfirmModal from '../components/shared/ConfirmModal';
+import RenameModal from '../components/shared/RenameModal';
+import type { WorkoutGroup } from '../types';
 
 function formatDate(dateStr: string): string {
   const [year, month, day] = dateStr.split('-').map(Number);
@@ -18,10 +20,27 @@ function formatDate(dateStr: string): string {
 export default function WorkoutDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { appData, deleteWorkout } = useAppContext();
+  const { appData, deleteWorkout, addGroup, showToast } = useAppContext();
 
   const workout = appData.workouts.find((w) => w.id === id);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showSaveTemplate, setShowSaveTemplate] = useState(false);
+
+  function saveAsTemplate(name: string) {
+    if (!workout) return;
+    // The same exercise can appear twice in a session; a template is just the
+    // line-up, so keep first appearances only.
+    const exerciseIds = [...new Set(workout.entries.map((e) => e.exerciseId))];
+    const group: WorkoutGroup = {
+      id: crypto.randomUUID(),
+      name,
+      exerciseIds,
+      createdAt: new Date().toISOString(),
+    };
+    addGroup(group);
+    setShowSaveTemplate(false);
+    showToast(`Template "${name}" saved`);
+  }
 
   function confirmDelete() {
     if (!workout) return;
@@ -103,8 +122,13 @@ export default function WorkoutDetailPage() {
               color: 'var(--color-text)',
             }}
           >
-            {formatDate(workout.date)}
+            {workout.name || formatDate(workout.date)}
           </p>
+          {workout.name && (
+            <p className="text-[13px] mt-0.5" style={{ color: 'var(--color-text-muted)' }}>
+              {formatDate(workout.date)}
+            </p>
+          )}
         </div>
 
         {/* Stats */}
@@ -315,6 +339,16 @@ export default function WorkoutDetailPage() {
           </section>
         )}
 
+        {/* Reuse this line-up */}
+        <button
+          type="button"
+          onClick={() => setShowSaveTemplate(true)}
+          className="h-12 btn-ghost press caps-tight text-[11px]"
+          style={{ borderRadius: '2px' }}
+        >
+          SAVE AS TEMPLATE →
+        </button>
+
         {/* Delete */}
         <button
           type="button"
@@ -330,6 +364,17 @@ export default function WorkoutDetailPage() {
           ✕ DELETE SESSION
         </button>
       </div>
+
+      {showSaveTemplate && (
+        <RenameModal
+          eyebrow="SAVE AS TEMPLATE"
+          title="Name this template"
+          initialValue={workout.name ?? ''}
+          placeholder="e.g. Push Day A"
+          onSave={saveAsTemplate}
+          onClose={() => setShowSaveTemplate(false)}
+        />
+      )}
 
       {showDeleteConfirm && (
         <ConfirmModal
