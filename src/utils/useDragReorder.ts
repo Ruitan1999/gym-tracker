@@ -13,6 +13,8 @@ interface DragState {
 }
 
 const SETTLE_TRANSITION = 'transform 240ms cubic-bezier(0.2, 0.8, 0.2, 1)';
+const HOLD_MS = 350;
+const SLOP = 8;
 
 function currentTranslateY(el: HTMLElement): number {
   return parseFloat(el.style.transform.replace(/[^-\d.]/g, '')) || 0;
@@ -39,6 +41,7 @@ export function useDragReorder<T>({ items, getId, onReorder }: UseDragReorderArg
   onReorderRef.current = onReorder;
   const dragStateRef = useRef<DragState | null>(null);
   const cleanupRef = useRef<() => void>(() => {});
+  const longPressFiredRef = useRef(false);
   const [draggingId, setDraggingId] = useState<string | null>(null);
 
   const registerItem = useCallback((id: string) => {
@@ -132,21 +135,20 @@ export function useDragReorder<T>({ items, getId, onReorder }: UseDragReorderArg
     [getId],
   );
 
-  const handlePointerDown = useCallback(
-    (id: string) => (e: React.PointerEvent<HTMLElement>) => {
-      if (e.pointerType === 'mouse' && e.button !== 0) return;
+  const beginDrag = useCallback(
+    (id: string, clientY: number, pointerId: number, captureTarget: HTMLElement | null) => {
       const el = itemRefs.current.get(id);
       if (!el) return;
-      e.preventDefault();
-      const target = e.currentTarget;
-      try {
-        target.setPointerCapture(e.pointerId);
-      } catch {
-        // ignore — not all pointer types support capture
+      if (captureTarget) {
+        try {
+          captureTarget.setPointerCapture(pointerId);
+        } catch {
+          // ignore — not all pointer types support capture
+        }
       }
 
       const rect = el.getBoundingClientRect();
-      dragStateRef.current = { id, grabOffset: e.clientY - rect.top, pointerY: e.clientY };
+      dragStateRef.current = { id, grabOffset: clientY - rect.top, pointerY: clientY };
       setDraggingId(id);
       document.body.classList.add('dragging-active');
       el.style.position = 'relative';
@@ -202,6 +204,63 @@ export function useDragReorder<T>({ items, getId, onReorder }: UseDragReorderArg
     [finishDrag, reorderTo, getId],
   );
 
+  const handlePointerDown = useCallback(
+    (id: string) => (e: React.PointerEvent<HTMLElement>) => {
+      if (e.pointerType === 'mouse' && e.button !== 0) return;
+      if (!itemRefs.current.has(id)) return;
+      e.preventDefault();
+      beginDrag(id, e.clientY, e.pointerId, e.currentTarget);
+    },
+    [beginDrag],
+  );
+
+  // Press and hold anywhere on a card to pick it up, so reordering doesn't
+  // depend on hitting the grip — which an expanded card scrolls away from.
+  const handleLongPressDown = useCallback(
+    (id: string) => (e: React.PointerEvent<HTMLElement>) => {
+      if (e.pointerType === 'mouse' && e.button !== 0) return;
+      if (!itemRefs.current.has(id)) return;
+
+      const startY = e.clientY;
+      const startX = e.clientX;
+      const { pointerId } = e;
+      longPressFiredRef.current = false;
+
+      const cancel = () => {
+        window.clearTimeout(timer);
+        window.removeEventListener('pointermove', onMove);
+        window.removeEventListener('pointerup', cancel);
+        window.removeEventListener('pointercancel', cancel);
+        window.removeEventListener('scroll', cancel, true);
+      };
+      // Any real movement before the hold completes is a scroll or a swipe.
+      const onMove = (ev: PointerEvent) => {
+        if (Math.abs(ev.clientY - startY) > SLOP || Math.abs(ev.clientX - startX) > SLOP) cancel();
+      };
+      const timer = window.setTimeout(() => {
+        cancel();
+        longPressFiredRef.current = true;
+        navigator.vibrate?.(10);
+        beginDrag(id, startY, pointerId, null);
+      }, HOLD_MS);
+
+      window.addEventListener('pointermove', onMove);
+      window.addEventListener('pointerup', cancel);
+      window.addEventListener('pointercancel', cancel);
+      window.addEventListener('scroll', cancel, true);
+    },
+    [beginDrag],
+  );
+
+  // The press that started a drag must not also read as a tap on whatever sits
+  // under the finger — a collapse toggle, a menu, a rep chip.
+  const handleLongPressClickCapture = useCallback((e: React.MouseEvent) => {
+    if (!longPressFiredRef.current) return;
+    longPressFiredRef.current = false;
+    e.preventDefault();
+    e.stopPropagation();
+  }, []);
+
   const handleKeyDown = useCallback(
     (id: string) => (e: React.KeyboardEvent) => {
       if (e.key !== 'ArrowUp' && e.key !== 'ArrowDown') return;
@@ -214,5 +273,12 @@ export function useDragReorder<T>({ items, getId, onReorder }: UseDragReorderArg
     [getId, reorderTo],
   );
 
-  return { registerItem, handlePointerDown, handleKeyDown, draggingId };
+  return {
+    registerItem,
+    handlePointerDown,
+    handleLongPressDown,
+    handleLongPressClickCapture,
+    handleKeyDown,
+    draggingId,
+  };
 }

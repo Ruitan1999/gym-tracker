@@ -94,7 +94,14 @@ export default function WorkoutForm({
   );
   const [scrollToEntryId, setScrollToEntryId] = useState<string | null>(null);
 
-  const { registerItem, handlePointerDown, handleKeyDown, draggingId } = useDragReorder({
+  const {
+    registerItem,
+    handlePointerDown,
+    handleLongPressDown,
+    handleLongPressClickCapture,
+    handleKeyDown,
+    draggingId,
+  } = useDragReorder({
     items: entries,
     getId: (e: WorkoutEntry) => e.id,
     onReorder: setEntries,
@@ -499,7 +506,13 @@ export default function WorkoutForm({
           style={{ background: 'var(--color-bg)' }}
         >
           {entries.map((entry, index) => (
-            <div key={entry.id} data-entry-id={entry.id} ref={registerItem(entry.id)}>
+            <div
+              key={entry.id}
+              data-entry-id={entry.id}
+              ref={registerItem(entry.id)}
+              onPointerDown={entries.length > 1 ? handleLongPressDown(entry.id) : undefined}
+              onClickCapture={entries.length > 1 ? handleLongPressClickCapture : undefined}
+            >
               <EntryCard
                 index={index}
                 exerciseId={entry.exerciseId}
