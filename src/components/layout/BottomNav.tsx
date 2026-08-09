@@ -18,21 +18,24 @@ const tabs = [
     label: 'Log Book',
     code: '02',
     icon: <NotebookText size={ICON_SIZE} strokeWidth={ICON_STROKE} />,
-    prefetch: () => import('../../pages/HistoryPage'),
+    prefetch: () => {},
   },
   {
     to: '/progress',
     label: 'Progress',
     code: '03',
     icon: <TrendingUp size={ICON_SIZE} strokeWidth={ICON_STROKE} />,
-    prefetch: () => import('../../pages/ProgressPage'),
+    // The only tab still behind its own chunk — the rest ship in the bundle.
+    prefetch: () => {
+      import('../../pages/ProgressPage').catch(() => {});
+    },
   },
   {
     to: '/settings',
     label: 'Settings',
     code: '04',
     icon: <Settings size={ICON_SIZE} strokeWidth={ICON_STROKE} />,
-    prefetch: () => import('../../pages/SettingsPage'),
+    prefetch: () => {},
   },
 ];
 

@@ -12,36 +12,24 @@ import SessionSavedBanner, { type SessionSavedStats } from './components/shared/
 import LogWorkoutPage from './pages/LogWorkoutPage';
 import SignInPage from './pages/SignInPage';
 import LandingPage from './pages/LandingPage';
+import HistoryPage from './pages/HistoryPage';
+import WorkoutDetailPage from './pages/WorkoutDetailPage';
+import ExerciseLibraryPage from './pages/ExerciseLibraryPage';
+import GroupsPage from './pages/GroupsPage';
+import TemplateDetailPage from './pages/TemplateDetailPage';
+import SettingsPage from './pages/SettingsPage';
 
-const importHistory = () => import('./pages/HistoryPage');
-const importWorkoutDetail = () => import('./pages/WorkoutDetailPage');
+// Only the chart pages are worth splitting — they pull in the charting library,
+// which dwarfs the app. Every other page is a couple of kilobytes, and splitting
+// them bought nothing while giving each one its own way to fail to load.
 const importProgress = () => import('./pages/ProgressPage');
 const importExerciseDetail = () => import('./pages/ExerciseDetailPage');
-const importExerciseLibrary = () => import('./pages/ExerciseLibraryPage');
-const importGroups = () => import('./pages/GroupsPage');
-const importTemplateDetail = () => import('./pages/TemplateDetailPage');
-const importSettings = () => import('./pages/SettingsPage');
 
-const HistoryPage = lazyWithRetry(importHistory);
-const WorkoutDetailPage = lazyWithRetry(importWorkoutDetail);
 const ProgressPage = lazyWithRetry(importProgress);
 const ExerciseDetailPage = lazyWithRetry(importExerciseDetail);
-const ExerciseLibraryPage = lazyWithRetry(importExerciseLibrary);
-const GroupsPage = lazyWithRetry(importGroups);
-const TemplateDetailPage = lazyWithRetry(importTemplateDetail);
-const SettingsPage = lazyWithRetry(importSettings);
 
 function prefetchAllPages() {
-  for (const load of [
-    importHistory,
-    importProgress,
-    importSettings,
-    importWorkoutDetail,
-    importExerciseDetail,
-    importExerciseLibrary,
-    importGroups,
-    importTemplateDetail,
-  ]) {
+  for (const load of [importProgress, importExerciseDetail]) {
     load().catch(() => {
       /* the navigation itself handles a stale chunk */
     });
