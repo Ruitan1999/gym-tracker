@@ -2,22 +2,25 @@ import { useEffect, useRef, useState } from 'react';
 
 interface SaveTemplatePromptProps {
   exerciseNames: string[];
+  defaultName?: string;
   onSave: (name: string) => void;
   onDismiss: () => void;
 }
 
 export default function SaveTemplatePrompt({
   exerciseNames,
+  defaultName = '',
   onSave,
   onDismiss,
 }: SaveTemplatePromptProps) {
   const [step, setStep] = useState<'ask' | 'name'>('ask');
-  const [name, setName] = useState('');
+  const [name, setName] = useState(defaultName);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (step === 'name') {
       inputRef.current?.focus();
+      inputRef.current?.select();
     }
   }, [step]);
 

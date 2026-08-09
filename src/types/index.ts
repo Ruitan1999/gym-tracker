@@ -23,6 +23,7 @@ export interface WorkoutEntry {
 export interface Workout {
   id: string;
   date: string; // YYYY-MM-DD
+  name?: string;
   entries: WorkoutEntry[];
   notes?: string;
   createdAt: string; // ISO datetime

@@ -5,6 +5,7 @@ import { useAppContext } from '../../context/AppContext';
 import ExerciseSelect from '../shared/ExerciseSelect';
 import DatePicker from '../shared/DatePicker';
 import ConfirmModal from '../shared/ConfirmModal';
+import RenameModal from '../shared/RenameModal';
 import EntryCard from './EntryCard';
 import SaveTemplatePrompt from './SaveTemplatePrompt';
 import heroIllustration from '../../assets/healthy-habit.svg';
@@ -28,6 +29,7 @@ const DRAFT_KEY = 'liftgauge.workoutDraft.v1';
 
 interface Draft {
   date: string;
+  name?: string;
   entries: WorkoutEntry[];
   notes: string;
   collapsedIds: string[];
@@ -70,6 +72,8 @@ export default function WorkoutForm({ existingWorkout, autoOpenSelect }: Workout
       draft?.entries ??
       [],
   );
+  const [name, setName] = useState(existingWorkout?.name ?? draft?.name ?? '');
+  const [showRename, setShowRename] = useState(false);
   const [notes, setNotes] = useState(existingWorkout?.notes ?? draft?.notes ?? '');
   const [showExerciseSelect, setShowExerciseSelect] = useState(
     () => !!autoOpenSelect && !existingWorkout,
@@ -142,9 +146,9 @@ export default function WorkoutForm({ existingWorkout, autoOpenSelect }: Workout
       localStorage.removeItem(DRAFT_KEY);
       return;
     }
-    const payload: Draft = { date, entries, notes, collapsedIds: [...collapsedIds] };
+    const payload: Draft = { date, name, entries, notes, collapsedIds: [...collapsedIds] };
     localStorage.setItem(DRAFT_KEY, JSON.stringify(payload));
-  }, [isEdit, date, entries, notes, collapsedIds, hasAnyInput]);
+  }, [isEdit, date, name, entries, notes, collapsedIds, hasAnyInput]);
 
   const groups = appData.groups ?? [];
 
@@ -178,6 +182,7 @@ export default function WorkoutForm({ existingWorkout, autoOpenSelect }: Workout
   function discardWorkout() {
     localStorage.removeItem(DRAFT_KEY);
     setEntries([]);
+    setName('');
     setNotes('');
     setCollapsedIds(new Set());
     setShowCancelConfirm(false);
@@ -257,6 +262,7 @@ export default function WorkoutForm({ existingWorkout, autoOpenSelect }: Workout
     if (!isFocusedRoute) {
       const draftPayload: Draft = {
         date: todayString(),
+        name: group.name,
         entries: newEntries,
         notes: '',
         collapsedIds: collapsed,
@@ -266,6 +272,7 @@ export default function WorkoutForm({ existingWorkout, autoOpenSelect }: Workout
       return;
     }
 
+    setName(group.name);
     setEntries(newEntries);
     if (collapsed.length > 0) {
       setCollapsedIds(new Set(collapsed));
@@ -344,13 +351,16 @@ export default function WorkoutForm({ existingWorkout, autoOpenSelect }: Workout
       );
       return;
     }
+    const trimmedName = name.trim();
     if (isEdit && existingWorkout) {
       const updated: Workout = {
         ...existingWorkout,
         date,
         entries,
+        ...(trimmedName ? { name: trimmedName } : {}),
         ...(notes ? { notes } : {}),
       };
+      if (!trimmedName) delete (updated as Partial<Workout>).name;
       if (!notes) delete (updated as Partial<Workout>).notes;
       updateWorkout(updated);
       localStorage.removeItem(DRAFT_KEY);
@@ -361,6 +371,7 @@ export default function WorkoutForm({ existingWorkout, autoOpenSelect }: Workout
     const workout: Workout = {
       id: crypto.randomUUID(),
       date,
+      ...(trimmedName ? { name: trimmedName } : {}),
       entries: savedEntries,
       ...(notes ? { notes } : {}),
       createdAt: new Date().toISOString(),
@@ -475,6 +486,50 @@ export default function WorkoutForm({ existingWorkout, autoOpenSelect }: Workout
             })}
           </div>
         </section>
+      )}
+
+      {/* Session name — sits at the top of the session so it can be set or
+          changed at any point while you're still working out. */}
+      {showActiveSession && (
+        <button
+          type="button"
+          onClick={() => setShowRename(true)}
+          className="w-full text-left card press px-4 py-3 flex items-center gap-3"
+        >
+          <span className="min-w-0 flex-1">
+            <span
+              className="caps-tight text-[9px] block"
+              style={{ color: 'var(--color-text-faint)' }}
+            >
+              SESSION NAME
+            </span>
+            <span
+              className="font-display block truncate mt-0.5"
+              style={{
+                fontSize: '1.0625rem',
+                fontWeight: 700,
+                letterSpacing: '-0.02em',
+                fontVariationSettings: '"wdth" 95',
+                color: name ? 'var(--color-text)' : 'var(--color-text-faint)',
+              }}
+            >
+              {name || 'Name this session'}
+            </span>
+          </span>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={1.75}
+            strokeLinecap="square"
+            className="w-4 h-4 shrink-0"
+            style={{ color: 'var(--color-text-muted)' }}
+            aria-hidden
+          >
+            <path d="M4 20h4L20 8l-4-4L4 16v4z" />
+          </svg>
+        </button>
       )}
 
       {showActiveSession && entries.length > 0 && (
@@ -800,8 +855,23 @@ export default function WorkoutForm({ existingWorkout, autoOpenSelect }: Workout
         <SaveTemplatePrompt
           exerciseNames={pendingWorkout.entries
             .map((e) => appData.exercises.find((x) => x.id === e.exerciseId)?.name ?? 'Exercise')}
+          defaultName={pendingWorkout.name ?? ''}
           onSave={handleTemplatePromptSave}
           onDismiss={handleTemplatePromptDismiss}
+        />
+      )}
+
+      {showRename && (
+        <RenameModal
+          eyebrow={name ? 'RENAME SESSION' : 'NAME SESSION'}
+          title={name ? 'Rename this session' : 'Name this session'}
+          initialValue={name}
+          placeholder="e.g. Push Day A"
+          onSave={(value) => {
+            setName(value);
+            setShowRename(false);
+          }}
+          onClose={() => setShowRename(false)}
         />
       )}
 

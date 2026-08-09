@@ -103,18 +103,28 @@ export default function WorkoutCard({ workout }: WorkoutCardProps) {
 
       <div className="flex-1 min-w-0 p-4">
         <div className="flex items-start justify-between gap-2 mb-3">
-          <p
-            className="font-display truncate leading-tight"
-            style={{
-              fontSize: '1rem',
-              fontWeight: 600,
-              letterSpacing: '-0.015em',
-              fontVariationSettings: '"wdth" 95',
-              color: 'var(--color-text)',
-            }}
-          >
-            {summary}
-          </p>
+          <div className="min-w-0">
+            <p
+              className="font-display truncate leading-tight"
+              style={{
+                fontSize: '1rem',
+                fontWeight: 600,
+                letterSpacing: '-0.015em',
+                fontVariationSettings: '"wdth" 95',
+                color: 'var(--color-text)',
+              }}
+            >
+              {workout.name || summary}
+            </p>
+            {workout.name && (
+              <p
+                className="text-[12px] truncate mt-0.5"
+                style={{ color: 'var(--color-text-muted)' }}
+              >
+                {summary}
+              </p>
+            )}
+          </div>
           {rating && ratingColor && (
             <span
               className="font-mono text-[10px] shrink-0 px-1.5 py-0.5"
