@@ -28,7 +28,7 @@ function renderAt(path: string) {
   return render(
     <MemoryRouter initialEntries={[path]}>
       <AppProvider>
-        <WorkoutForm />
+        <WorkoutForm name="" onNameChange={() => {}} />
       </AppProvider>
     </MemoryRouter>,
   );

@@ -4,6 +4,9 @@ import { useAppContext } from '../../context/AppContext';
 
 interface PageShellProps {
   title: string;
+  /** Makes the title itself the rename target rather than a separate field. */
+  onTitlePress?: () => void;
+  titlePressLabel?: string;
   eyebrow?: string;
   rightAction?: ReactNode;
   children: ReactNode;
@@ -17,7 +20,7 @@ interface PageShellProps {
 const PULL_THRESHOLD = 72;
 const MAX_PULL = 120;
 
-export default function PageShell({ title, eyebrow, rightAction, children, showBack, topSlot, onRefresh, hideTitle, disableRefresh }: PageShellProps) {
+export default function PageShell({ title, onTitlePress, titlePressLabel, eyebrow, rightAction, children, showBack, topSlot, onRefresh, hideTitle, disableRefresh }: PageShellProps) {
   const navigate = useNavigate();
   const { refreshAppData } = useAppContext();
   const mainRef = useRef<HTMLElement | null>(null);
@@ -120,7 +123,32 @@ export default function PageShell({ title, eyebrow, rightAction, children, showB
                     color: 'var(--color-text)',
                   }}
                 >
-                  {title}
+                  {onTitlePress ? (
+                    <button
+                      type="button"
+                      onClick={onTitlePress}
+                      aria-label={titlePressLabel ?? `Rename ${title}`}
+                      className="press flex items-baseline gap-2 min-w-0 max-w-full text-left"
+                      style={{ font: 'inherit', letterSpacing: 'inherit', color: 'inherit' }}
+                    >
+                      <span className="truncate">{title}</span>
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth={1.75}
+                        strokeLinecap="square"
+                        className="w-3.5 h-3.5 shrink-0"
+                        style={{ color: 'var(--color-text-faint)' }}
+                        aria-hidden
+                      >
+                        <path d="M4 20h4L20 8l-4-4L4 16v4z" />
+                      </svg>
+                    </button>
+                  ) : (
+                    title
+                  )}
                 </h1>
               </div>
             </div>

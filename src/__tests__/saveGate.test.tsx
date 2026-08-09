@@ -27,7 +27,7 @@ function renderForm(existingWorkout?: Workout) {
   return render(
     <MemoryRouter initialEntries={['/workout/new']}>
       <AppProvider>
-        <WorkoutForm existingWorkout={existingWorkout} />
+        <WorkoutForm existingWorkout={existingWorkout} name="" onNameChange={() => {}} />
       </AppProvider>
     </MemoryRouter>,
   );

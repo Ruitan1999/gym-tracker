@@ -1,8 +1,10 @@
+import { useState } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
 import PageShell from '../components/layout/PageShell';
-import WorkoutForm from '../components/workout/WorkoutForm';
+import WorkoutForm, { loadDraft } from '../components/workout/WorkoutForm';
 import WeeklyInsights from '../components/workout/WeeklyInsights';
 import TodayWork from '../components/workout/TodayWork';
+import RenameModal from '../components/shared/RenameModal';
 import { useAppContext } from '../context/AppContext';
 
 export default function LogWorkoutPage() {
@@ -17,27 +19,56 @@ export default function LogWorkoutPage() {
   const isEdit = !!existingWorkout;
   const autoOpenSelect = isNewFocused && (location.state as { autoOpenSelect?: boolean } | null)?.autoOpenSelect === true;
 
+  // The session's name is the page title, so it lives here rather than in the
+  // form — there's no second field for it.
+  const [name, setName] = useState(
+    () => existingWorkout?.name ?? (isEdit ? '' : loadDraft()?.name) ?? '',
+  );
+  const [showRename, setShowRename] = useState(false);
+
+  const isSession = isEdit || isNewFocused;
+  const fallbackTitle = isEdit ? 'Edit Session' : isNewFocused ? 'New Session' : 'Log Session';
+
   return (
     <PageShell
-      title={isEdit ? 'Edit Session' : isNewFocused ? 'New Session' : 'Log Session'}
+      title={isSession ? name || fallbackTitle : fallbackTitle}
+      onTitlePress={isSession ? () => setShowRename(true) : undefined}
+      titlePressLabel={name ? 'Rename this session' : 'Name this session'}
       eyebrow={isEdit ? 'REVISE ENTRY' : undefined}
-      showBack={isEdit || isNewFocused}
+      showBack={isSession}
       topSlot={
-        !isEdit && !isNewFocused ? (
+        !isSession ? (
           <>
             <WeeklyInsights />
             <TodayWork />
           </>
         ) : undefined
       }
-      hideTitle={!isEdit && !isNewFocused}
-      disableRefresh={isNewFocused || isEdit}
+      hideTitle={!isSession}
+      disableRefresh={isSession}
     >
       <WorkoutForm
         key={existingWorkout?.id ?? (isNewFocused ? 'focused-new' : 'new')}
         existingWorkout={existingWorkout}
         autoOpenSelect={autoOpenSelect}
+        name={name}
+        onNameChange={setName}
       />
+
+      {showRename && (
+        <RenameModal
+          eyebrow={name ? 'RENAME SESSION' : 'NAME SESSION'}
+          title={name ? 'Rename this session' : 'Name this session'}
+          initialValue={name}
+          placeholder="e.g. Push Day A"
+          allowEmpty
+          onSave={(value) => {
+            setName(value);
+            setShowRename(false);
+          }}
+          onClose={() => setShowRename(false)}
+        />
+      )}
     </PageShell>
   );
 }
