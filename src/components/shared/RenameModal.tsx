@@ -6,6 +6,8 @@ interface RenameModalProps {
   title: string;
   initialValue: string;
   placeholder?: string;
+  /** Lets an optional name be emptied again by clearing the field and saving. */
+  allowEmpty?: boolean;
   onSave: (value: string) => void;
   onClose: () => void;
 }
@@ -15,6 +17,7 @@ export default function RenameModal({
   title,
   initialValue,
   placeholder = 'Name',
+  allowEmpty = false,
   onSave,
   onClose,
 }: RenameModalProps) {
@@ -27,7 +30,7 @@ export default function RenameModal({
   }, []);
 
   const trimmed = value.trim();
-  const canSave = trimmed.length > 0;
+  const canSave = allowEmpty || trimmed.length > 0;
 
   function submit() {
     if (!canSave) return;
@@ -83,6 +86,11 @@ export default function RenameModal({
             color: 'var(--color-text)',
           }}
         />
+        {allowEmpty && (
+          <p className="text-[12px] mt-2" style={{ color: 'var(--color-text-muted)' }}>
+            Leave it blank to go back to no name.
+          </p>
+        )}
         <div className="grid grid-cols-2 gap-2 mt-5">
           <button
             type="button"

@@ -88,6 +88,42 @@ describe('Naming a session while it is underway', () => {
     expect('name' in savedWorkouts()[0]).toBe(false);
   });
 
+  it('clears the name again when the field is emptied', () => {
+    seedDraft({ name: 'Leg Day' });
+    renderForm();
+
+    fireEvent.click(screen.getByText('Leg Day'));
+    fireEvent.change(screen.getByPlaceholderText('e.g. Push Day A'), { target: { value: '  ' } });
+    fireEvent.click(screen.getByRole('button', { name: 'SAVE →' }));
+
+    expect(screen.getByText('Name this session')).toBeDefined();
+
+    saveSessionAndSkipTemplate();
+    expect('name' in savedWorkouts()[0]).toBe(false);
+  });
+
+  it('drops the name from a saved workout when it is cleared on edit', () => {
+    const saved: Workout = {
+      id: 'w1',
+      date: '2026-07-29',
+      name: 'Old Name',
+      entries: [entry('a', 'ex-push-001')],
+      createdAt: '2026-07-29T10:00:00.000Z',
+    };
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({ workouts: [saved], groups: [], dataVersion: 1 }),
+    );
+    renderForm(saved);
+
+    fireEvent.click(screen.getByText('Old Name'));
+    fireEvent.change(screen.getByPlaceholderText('e.g. Push Day A'), { target: { value: '' } });
+    fireEvent.click(screen.getByRole('button', { name: 'SAVE →' }));
+    fireEvent.click(screen.getByRole('button', { name: /Update Session →/ }));
+
+    expect('name' in savedWorkouts()[0]).toBe(false);
+  });
+
   it('restores a name that was saved to the draft', () => {
     seedDraft({ name: 'Leg Day' });
     renderForm();

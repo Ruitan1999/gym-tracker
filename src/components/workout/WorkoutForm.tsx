@@ -867,6 +867,7 @@ export default function WorkoutForm({ existingWorkout, autoOpenSelect }: Workout
           title={name ? 'Rename this session' : 'Name this session'}
           initialValue={name}
           placeholder="e.g. Push Day A"
+          allowEmpty
           onSave={(value) => {
             setName(value);
             setShowRename(false);
