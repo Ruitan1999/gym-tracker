@@ -1,12 +1,14 @@
 import { useMemo } from 'react';
 import { useAppContext } from '../../context/AppContext';
 import { useMaybeAuth } from '../../context/AuthContext';
+import { weeklyStreak } from '../../utils/streak';
 
 function isoDate(d: Date): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
 
-const STREAK_GOAL = 7;
+// A quarter of consistent weeks fills the ring.
+const STREAK_GOAL_WEEKS = 12;
 
 function deriveName(user: { isAnonymous?: boolean; displayName?: string | null; email?: string | null } | null): string {
   if (!user || user.isAnonymous) return 'friend';
@@ -28,13 +30,7 @@ export default function WeeklyInsights() {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    let s = 0;
-    for (let i = 0; i < 365; i++) {
-      const d = new Date(today);
-      d.setDate(today.getDate() - i);
-      if (dateSet.has(isoDate(d))) s++;
-      else if (i > 0) break;
-    }
+    const s = weeklyStreak(dateSet, today);
 
     const dow = today.getDay();
     const mondayOffset = dow === 0 ? 6 : dow - 1;
@@ -62,7 +58,7 @@ export default function WeeklyInsights() {
     };
   }, [appData.workouts]);
 
-  const streakPct = Math.min(streak / STREAK_GOAL, 1);
+  const streakPct = Math.min(streak / STREAK_GOAL_WEEKS, 1);
 
   return (
     <>
@@ -92,14 +88,14 @@ export default function WeeklyInsights() {
           MOMENTUM
         </div>
         <div className="caps-tight text-[9px]" style={{ color: 'var(--color-text-faint)' }}>
-          {weekCount}/7 THIS WEEK
+          {weekCount} {weekCount === 1 ? 'SESSION' : 'SESSIONS'} THIS WEEK
         </div>
       </div>
 
       <div className="flex items-center gap-4 mb-4">
         <StreakRing pct={streakPct} value={streak} />
         <div className="flex-1 grid grid-cols-2 gap-3">
-          <Metric label="STREAK" value={streak} unit={streak === 1 ? 'DAY' : 'DAYS'} accent />
+          <Metric label="STREAK" value={streak} unit={streak === 1 ? 'WEEK' : 'WEEKS'} accent />
           <Metric label="SESSIONS" value={totalSessions} unit={totalSessions === 1 ? 'TOTAL' : 'TOTAL'} />
         </div>
       </div>

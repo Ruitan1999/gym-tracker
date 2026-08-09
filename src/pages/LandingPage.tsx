@@ -133,7 +133,7 @@ export default function LandingPage() {
                   STREAK
                 </span>
                 <span className="font-mono text-[12px]" style={{ color: 'var(--color-text)' }}>
-                  4 DAYS
+                  6 WEEKS
                 </span>
               </div>
             </div>

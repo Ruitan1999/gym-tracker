@@ -5,6 +5,7 @@ import PageShell from '../components/layout/PageShell';
 import EmptyState from '../components/shared/EmptyState';
 import WorkoutCard from '../components/history/WorkoutCard';
 import type { Workout } from '../types';
+import { weeklyStreak } from '../utils/streak';
 
 function getMonthLabel(dateStr: string): string {
   const [year, month] = dateStr.split('-').map(Number);
@@ -57,18 +58,11 @@ export default function HistoryPage() {
     }
     const heaviestLiftStr = heaviestKg > 0 ? String(heaviestKg) : '—';
 
-    // Current streak — consecutive days back from today with at least one workout
     const dateSet = new Set(sorted.map((w) => w.date));
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const todayIso = isoLocal(today);
-    let streak = 0;
-    for (let i = 0; i < 365; i++) {
-      const d = new Date(today);
-      d.setDate(today.getDate() - i);
-      if (dateSet.has(isoLocal(d))) streak++;
-      else if (i > 0) break;
-    }
+    const streak = weeklyStreak(dateSet, today);
 
     // Month calendar — grid starting Monday of first week, through Sunday of last week
     const year = today.getFullYear();
@@ -140,7 +134,7 @@ export default function HistoryPage() {
       {/* Big stats */}
       <section className="card mb-4">
         <div className="grid grid-cols-3">
-          <BigStat label="STREAK" value={currentStreak} unit={currentStreak === 1 ? 'DAY' : 'DAYS'} accent={currentStreak > 0} />
+          <BigStat label="STREAK" value={currentStreak} unit={currentStreak === 1 ? 'WEEK' : 'WEEKS'} accent={currentStreak > 0} />
           <BigStat label="TOP LIFT" value={heaviestLift} unit={heaviestLift === '—' ? undefined : 'KG'} divider />
           <BigStat label="SESSIONS" value={totalSessions} divider />
         </div>
