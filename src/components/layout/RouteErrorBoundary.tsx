@@ -1,4 +1,5 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react';
+import { reloadFresh } from '../../utils/lazyWithRetry';
 
 interface Props {
   children: ReactNode;
@@ -6,6 +7,7 @@ interface Props {
 
 interface State {
   failed: boolean;
+  detail: string;
 }
 
 /**
@@ -13,10 +15,10 @@ interface State {
  * the Suspense fallback — a blank screen with no way out and nothing to report.
  */
 export default class RouteErrorBoundary extends Component<Props, State> {
-  state: State = { failed: false };
+  state: State = { failed: false, detail: '' };
 
-  static getDerivedStateFromError(): State {
-    return { failed: true };
+  static getDerivedStateFromError(error: Error): State {
+    return { failed: true, detail: `${error.name}: ${error.message}` };
   }
 
   componentDidCatch(error: Error, info: ErrorInfo) {
@@ -48,9 +50,17 @@ export default class RouteErrorBoundary extends Component<Props, State> {
         <p className="text-[13px] mb-6" style={{ color: 'var(--color-text-muted)' }}>
           Your workouts are safe. Reloading usually sorts it.
         </p>
+        {this.state.detail && (
+          <p
+            className="font-mono text-[10px] mb-6 max-w-full break-words"
+            style={{ color: 'var(--color-text-faint)' }}
+          >
+            {this.state.detail}
+          </p>
+        )}
         <button
           type="button"
-          onClick={() => window.location.reload()}
+          onClick={reloadFresh}
           className="h-12 px-6 btn-volt press caps-tight text-[11px]"
           style={{ borderRadius: '2px' }}
         >

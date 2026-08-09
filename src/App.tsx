@@ -4,7 +4,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import { AppProvider, useAppContext } from './context/AppContext';
 import SaveErrorBanner from './components/layout/SaveErrorBanner';
 import RouteErrorBoundary from './components/layout/RouteErrorBoundary';
-import { lazyWithRetry } from './utils/lazyWithRetry';
+import { lazyWithRetry, tidyReloadMarker } from './utils/lazyWithRetry';
 import BottomNav from './components/layout/BottomNav';
 import Toast from './components/shared/Toast';
 import LoadingScreen from './components/shared/LoadingScreen';
@@ -52,6 +52,7 @@ function AppRoutes() {
   const { loading: appLoading } = useAppContext();
 
   useEffect(() => {
+    tidyReloadMarker();
     const ric = (window as unknown as { requestIdleCallback?: (cb: () => void) => number }).requestIdleCallback;
     if (ric) {
       ric(prefetchAllPages);
