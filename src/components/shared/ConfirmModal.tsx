@@ -1,4 +1,4 @@
-import { createPortal } from 'react-dom';
+import ModalShell from './ModalShell';
 
 interface ConfirmModalProps {
   eyebrow?: string;
@@ -21,23 +21,8 @@ export default function ConfirmModal({
   onConfirm,
   onClose,
 }: ConfirmModalProps) {
-  return createPortal(
-    <>
-      <div
-        className="fixed inset-0 z-[60]"
-        style={{ background: 'rgba(5,5,5,0.7)', backdropFilter: 'blur(6px)' }}
-        onClick={onClose}
-      />
-      <div
-        className="fixed inset-x-4 z-[60] max-w-md mx-auto p-5"
-        style={{
-          top: 'calc(var(--safe-top) + 5.5rem)',
-          background: 'var(--color-elev)',
-          border: '1px solid var(--color-line-2)',
-          borderRadius: '2px',
-          boxShadow: '0 20px 60px rgba(0,0,0,0.6)',
-        }}
-      >
+  return (
+    <ModalShell onDismiss={onClose}>
         <div className="caps-tight text-[9px] mb-2" style={{ color: 'var(--color-text)' }}>
           {eyebrow}
         </div>
@@ -79,8 +64,6 @@ export default function ConfirmModal({
             {confirmLabel}
           </button>
         </div>
-      </div>
-    </>,
-    document.body,
+    </ModalShell>
   );
 }

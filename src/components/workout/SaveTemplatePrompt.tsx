@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import ModalShell from '../shared/ModalShell';
 
 interface SaveTemplatePromptProps {
   exerciseNames: string[];
@@ -38,22 +39,7 @@ export default function SaveTemplatePrompt({
   const remaining = Math.max(0, exerciseNames.length - previewCount);
 
   return (
-    <>
-      <div
-        className="fixed inset-0 z-[60]"
-        style={{ background: 'rgba(5,5,5,0.7)', backdropFilter: 'blur(6px)' }}
-        onClick={onDismiss}
-      />
-      <div
-        className="fixed inset-x-4 z-[60] max-w-md mx-auto p-5"
-        style={{
-          top: 'calc(var(--safe-top) + 5.5rem)',
-          background: 'var(--color-elev)',
-          border: '1px solid var(--color-line-2)',
-          borderRadius: '2px',
-          boxShadow: '0 20px 60px rgba(0,0,0,0.6)',
-        }}
-      >
+    <ModalShell onDismiss={onDismiss}>
         {step === 'ask' ? (
           <>
             <div
@@ -214,7 +200,6 @@ export default function SaveTemplatePrompt({
             </div>
           </>
         )}
-      </div>
-    </>
+    </ModalShell>
   );
 }
