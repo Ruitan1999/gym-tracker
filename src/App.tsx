@@ -1,8 +1,10 @@
-import { useState, useCallback, lazy, Suspense, useEffect } from 'react';
+import { useState, useCallback, Suspense, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { AppProvider, useAppContext } from './context/AppContext';
 import SaveErrorBanner from './components/layout/SaveErrorBanner';
+import RouteErrorBoundary from './components/layout/RouteErrorBoundary';
+import { lazyWithRetry } from './utils/lazyWithRetry';
 import BottomNav from './components/layout/BottomNav';
 import Toast from './components/shared/Toast';
 import LoadingScreen from './components/shared/LoadingScreen';
@@ -20,24 +22,30 @@ const importGroups = () => import('./pages/GroupsPage');
 const importTemplateDetail = () => import('./pages/TemplateDetailPage');
 const importSettings = () => import('./pages/SettingsPage');
 
-const HistoryPage = lazy(importHistory);
-const WorkoutDetailPage = lazy(importWorkoutDetail);
-const ProgressPage = lazy(importProgress);
-const ExerciseDetailPage = lazy(importExerciseDetail);
-const ExerciseLibraryPage = lazy(importExerciseLibrary);
-const GroupsPage = lazy(importGroups);
-const TemplateDetailPage = lazy(importTemplateDetail);
-const SettingsPage = lazy(importSettings);
+const HistoryPage = lazyWithRetry(importHistory);
+const WorkoutDetailPage = lazyWithRetry(importWorkoutDetail);
+const ProgressPage = lazyWithRetry(importProgress);
+const ExerciseDetailPage = lazyWithRetry(importExerciseDetail);
+const ExerciseLibraryPage = lazyWithRetry(importExerciseLibrary);
+const GroupsPage = lazyWithRetry(importGroups);
+const TemplateDetailPage = lazyWithRetry(importTemplateDetail);
+const SettingsPage = lazyWithRetry(importSettings);
 
 function prefetchAllPages() {
-  importHistory();
-  importProgress();
-  importSettings();
-  importWorkoutDetail();
-  importExerciseDetail();
-  importExerciseLibrary();
-  importGroups();
-  importTemplateDetail();
+  for (const load of [
+    importHistory,
+    importProgress,
+    importSettings,
+    importWorkoutDetail,
+    importExerciseDetail,
+    importExerciseLibrary,
+    importGroups,
+    importTemplateDetail,
+  ]) {
+    load().catch(() => {
+      /* the navigation itself handles a stale chunk */
+    });
+  }
 }
 
 function AppRoutes() {
@@ -58,6 +66,7 @@ function AppRoutes() {
 
   return (
     <>
+      <RouteErrorBoundary>
       <Suspense fallback={<div className="min-h-[100dvh]" style={{ background: 'var(--color-bg)' }} />}>
         <Routes>
           <Route path="/" element={<LogWorkoutPage />} />
@@ -73,6 +82,7 @@ function AppRoutes() {
           <Route path="/settings" element={<SettingsPage />} />
         </Routes>
       </Suspense>
+      </RouteErrorBoundary>
       <BottomNav />
     </>
   );
