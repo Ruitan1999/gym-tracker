@@ -38,8 +38,13 @@ function stored(): { exercises: Exercise[]; workouts: Workout[] } {
   return JSON.parse(localStorage.getItem(STORAGE_KEY)!);
 }
 
+function openRename(from: string) {
+  fireEvent.click(screen.getByRole('button', { name: `Actions for ${from}` }));
+  fireEvent.click(screen.getByRole('menuitem', { name: 'EDIT EXERCISE NAME' }));
+}
+
 function rename(from: string, to: string) {
-  fireEvent.click(screen.getByRole('button', { name: `Rename ${from}` }));
+  openRename(from);
   fireEvent.change(screen.getByPlaceholderText('Exercise name'), { target: { value: to } });
   fireEvent.click(screen.getByRole('button', { name: 'SAVE →' }));
 }
@@ -49,7 +54,7 @@ describe('Renaming an exercise from the session', () => {
     localStorage.clear();
   });
 
-  it('renames it in place when its name is tapped', () => {
+  it('renames it in place from the card menu', () => {
     seedSession();
     renderSession();
 
@@ -93,17 +98,27 @@ describe('Renaming an exercise from the session', () => {
     seedSession();
     renderSession();
 
-    fireEvent.click(screen.getByRole('button', { name: 'Rename Bench Press' }));
+    openRename('Bench Press');
     fireEvent.change(screen.getByPlaceholderText('Exercise name'), { target: { value: '  ' } });
     expect((screen.getByRole('button', { name: 'SAVE →' }) as HTMLButtonElement).disabled).toBe(true);
   });
 
-  it('still folds the card from the chevron', () => {
+  it('leaves tapping the card header as the fold toggle', () => {
     seedSession();
     renderSession();
 
-    const collapse = screen.getByRole('button', { name: 'Collapse exercise' });
-    fireEvent.click(collapse);
+    fireEvent.click(screen.getByRole('button', { name: 'Collapse exercise' }));
     expect(screen.getByRole('button', { name: 'Expand exercise' })).toBeDefined();
+  });
+
+  it('offers removal from the same menu', () => {
+    seedSession();
+    renderSession();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Actions for Bench Press' }));
+    fireEvent.click(screen.getByRole('menuitem', { name: 'REMOVE FROM SESSION' }));
+    fireEvent.click(screen.getByRole('button', { name: 'REMOVE →' }));
+
+    expect(screen.queryByText('Bench Press')).toBeNull();
   });
 });

@@ -3,6 +3,7 @@ import { useAppContext } from '../../context/AppContext';
 import SetRow from './SetRow';
 import ConfirmModal from '../shared/ConfirmModal';
 import RenameModal from '../shared/RenameModal';
+import ActionSheet from '../shared/ActionSheet';
 import type { WorkoutSet } from '../../types';
 
 interface EntryCardProps {
@@ -43,6 +44,7 @@ export default function EntryCard({
   const exercise = appData.exercises.find((e) => e.id === exerciseId);
   const [showRemoveConfirm, setShowRemoveConfirm] = useState(false);
   const [showRename, setShowRename] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
   const [exitingKey, setExitingKey] = useState<string | null>(null);
   const [enteringKey, setEnteringKey] = useState<string | null>(null);
   const cardRef = useRef<HTMLDivElement>(null);
@@ -287,9 +289,10 @@ export default function EntryCard({
         )}
         <button
           type="button"
-          onClick={() => setShowRename(true)}
+          onClick={onToggleCollapsed}
           className="flex items-center gap-2 min-w-0 flex-1 text-left press pl-2.5 pr-1 py-4"
-          aria-label={`Rename ${exercise?.name ?? 'exercise'}`}
+          aria-expanded={!collapsed}
+          aria-label={collapsed ? 'Expand exercise' : 'Collapse exercise'}
         >
           <span
             className="caps-tight text-[10px] shrink-0 flex items-center justify-center"
@@ -328,21 +331,13 @@ export default function EntryCard({
               </div>
             )}
           </div>
-        </button>
-        {/* The name is the rename target now, so folding the card moves onto
-            the chevron — with a tap area the size of the header, not the icon. */}
-        <button
-          type="button"
-          onClick={onToggleCollapsed}
-          aria-expanded={!collapsed}
-          aria-label={collapsed ? 'Expand exercise' : 'Collapse exercise'}
-          className="flex items-center justify-center press shrink-0"
-          style={{ width: '40px', color: 'var(--color-text-faint)' }}
-        >
           <span
+            className={`shrink-0 flex items-center justify-center ${collapsed ? '' : 'ml-auto'}`}
             aria-hidden
-            className="flex items-center justify-center"
             style={{
+              width: '24px',
+              height: '28px',
+              color: 'var(--color-text-faint)',
               transition: 'transform 180ms ease',
               transform: collapsed ? 'rotate(0deg)' : 'rotate(180deg)',
             }}
@@ -354,8 +349,9 @@ export default function EntryCard({
         </button>
         <button
           type="button"
-          onClick={() => setShowRemoveConfirm(true)}
-          aria-label="Remove exercise"
+          onClick={() => setShowMenu(true)}
+          aria-label={`Actions for ${exercise?.name ?? 'exercise'}`}
+          aria-haspopup="menu"
           className="flex items-center justify-center press shrink-0"
           style={{
             width: '46px',
@@ -363,11 +359,10 @@ export default function EntryCard({
             borderLeft: '1px solid var(--color-line)',
           }}
         >
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="square" className="w-4 h-4">
-            <path d="M4 7h16" />
-            <path d="M10 4h4" />
-            <path d="M6 7l1 13h10l1-13" />
-            <path d="M10 11v6M14 11v6" />
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
+            <circle cx="12" cy="5" r="1.75" />
+            <circle cx="12" cy="12" r="1.75" />
+            <circle cx="12" cy="19" r="1.75" />
           </svg>
         </button>
       </div>
@@ -457,6 +452,31 @@ export default function EntryCard({
       </button>
         </>
       )}
+      {showMenu && (
+        <ActionSheet
+          eyebrow="EXERCISE"
+          title={exercise?.name ?? 'Exercise'}
+          onClose={() => setShowMenu(false)}
+          items={[
+            {
+              label: 'EDIT EXERCISE NAME',
+              onSelect: () => {
+                setShowMenu(false);
+                setShowRename(true);
+              },
+            },
+            {
+              label: 'REMOVE FROM SESSION',
+              destructive: true,
+              onSelect: () => {
+                setShowMenu(false);
+                setShowRemoveConfirm(true);
+              },
+            },
+          ]}
+        />
+      )}
+
       {showRename && exercise && (
         <RenameModal
           eyebrow="RENAME EXERCISE"
