@@ -19,9 +19,16 @@ describe('Page integration tests', () => {
   });
 
   describe('LogWorkoutPage', () => {
-    it('shows the session title when creating a new workout', () => {
+    it('gives the home page over to the momentum panel instead of a title', () => {
       renderWithProviders(<LogWorkoutPage />);
-      expect(screen.getByText('Log Session')).toBeDefined();
+      expect(screen.queryByText('Log Session')).toBeNull();
+      expect(screen.getByText('MOMENTUM')).toBeDefined();
+      expect(screen.getByRole('button', { name: /LOG WORKOUT/ })).toBeDefined();
+    });
+
+    it('shows the session title when creating a new workout', () => {
+      renderWithProviders(<LogWorkoutPage />, { route: '/workout/new' });
+      expect(screen.getByText('New Session')).toBeDefined();
     });
   });
 
