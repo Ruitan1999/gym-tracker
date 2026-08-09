@@ -20,6 +20,7 @@ interface AppContextValue {
   updateWorkout: (workout: Workout) => void;
   deleteWorkout: (id: string) => void;
   addExercise: (exercise: Exercise) => void;
+  renameExercise: (id: string, name: string) => void;
   deleteExercise: (id: string) => boolean;
   addGroup: (group: WorkoutGroup) => void;
   updateGroup: (group: WorkoutGroup) => void;
@@ -159,6 +160,15 @@ export function AppProvider({
     setAppData((prev) => ({ ...prev, exercises: [...prev.exercises, exercise] }));
   }, []);
 
+  // Workouts and templates both reference an exercise by id, so a rename
+  // follows through to everything already logged under the old name.
+  const renameExercise = useCallback((id: string, name: string) => {
+    setAppData((prev) => ({
+      ...prev,
+      exercises: prev.exercises.map((e) => (e.id === id ? { ...e, name } : e)),
+    }));
+  }, []);
+
   const deleteExercise = useCallback((id: string): boolean => {
     let blocked = false;
     setAppData((prev) => {
@@ -225,6 +235,7 @@ export function AppProvider({
         updateWorkout,
         deleteWorkout,
         addExercise,
+        renameExercise,
         deleteExercise,
         addGroup,
         updateGroup,

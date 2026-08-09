@@ -2,6 +2,7 @@ import { useRef, useCallback, useState, useEffect } from 'react';
 import { useAppContext } from '../../context/AppContext';
 import SetRow from './SetRow';
 import ConfirmModal from '../shared/ConfirmModal';
+import RenameModal from '../shared/RenameModal';
 import type { WorkoutSet } from '../../types';
 
 interface EntryCardProps {
@@ -38,9 +39,10 @@ export default function EntryCard({
   dragHandleProps,
   isDragging = false,
 }: EntryCardProps) {
-  const { appData } = useAppContext();
+  const { appData, renameExercise } = useAppContext();
   const exercise = appData.exercises.find((e) => e.id === exerciseId);
   const [showRemoveConfirm, setShowRemoveConfirm] = useState(false);
+  const [showRename, setShowRename] = useState(false);
   const [exitingKey, setExitingKey] = useState<string | null>(null);
   const [enteringKey, setEnteringKey] = useState<string | null>(null);
   const cardRef = useRef<HTMLDivElement>(null);
@@ -285,10 +287,9 @@ export default function EntryCard({
         )}
         <button
           type="button"
-          onClick={onToggleCollapsed}
+          onClick={() => setShowRename(true)}
           className="flex items-center gap-2 min-w-0 flex-1 text-left press pl-2.5 pr-1 py-4"
-          aria-expanded={!collapsed}
-          aria-label={collapsed ? 'Expand exercise' : 'Collapse exercise'}
+          aria-label={`Rename ${exercise?.name ?? 'exercise'}`}
         >
           <span
             className="caps-tight text-[10px] shrink-0 flex items-center justify-center"
@@ -327,13 +328,21 @@ export default function EntryCard({
               </div>
             )}
           </div>
+        </button>
+        {/* The name is the rename target now, so folding the card moves onto
+            the chevron — with a tap area the size of the header, not the icon. */}
+        <button
+          type="button"
+          onClick={onToggleCollapsed}
+          aria-expanded={!collapsed}
+          aria-label={collapsed ? 'Expand exercise' : 'Collapse exercise'}
+          className="flex items-center justify-center press shrink-0"
+          style={{ width: '40px', color: 'var(--color-text-faint)' }}
+        >
           <span
-            className={`shrink-0 flex items-center justify-center ${collapsed ? '' : 'ml-auto'}`}
             aria-hidden
+            className="flex items-center justify-center"
             style={{
-              width: '24px',
-              height: '28px',
-              color: 'var(--color-text-faint)',
               transition: 'transform 180ms ease',
               transform: collapsed ? 'rotate(0deg)' : 'rotate(180deg)',
             }}
@@ -448,6 +457,20 @@ export default function EntryCard({
       </button>
         </>
       )}
+      {showRename && exercise && (
+        <RenameModal
+          eyebrow="RENAME EXERCISE"
+          title="Rename this exercise"
+          initialValue={exercise.name}
+          placeholder="Exercise name"
+          onSave={(value) => {
+            renameExercise(exercise.id, value);
+            setShowRename(false);
+          }}
+          onClose={() => setShowRename(false)}
+        />
+      )}
+
       {showRemoveConfirm && (
         <ConfirmModal
           eyebrow="REMOVE EXERCISE"
