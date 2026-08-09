@@ -66,7 +66,13 @@ function TemplateEditor({ group }: { group: WorkoutGroup }) {
     updateGroup({ ...groupRef.current, exerciseIds: next.map((s) => s.exerciseId) });
   }, [updateGroup]);
 
-  const { registerItem, handlePointerDown, handleKeyDown, draggingId } = useDragReorder({
+  const {
+    registerItem,
+    handleLongPressDown,
+    handleLongPressClickCapture,
+    handleKeyDown,
+    draggingId,
+  } = useDragReorder({
     items: slots,
     getId: (s: Slot) => s.key,
     onReorder: commit,
@@ -152,7 +158,7 @@ function TemplateEditor({ group }: { group: WorkoutGroup }) {
           </h2>
           <div className="caps-tight text-[9px] mt-1.5" style={{ color: 'var(--color-text-faint)' }}>
             {String(slots.length).padStart(2, '0')} EXERCISE{slots.length === 1 ? '' : 'S'}
-            {slots.length > 1 && ' · DRAG TO REORDER'}
+            {slots.length > 1 && ' · HOLD TO REORDER'}
           </div>
         </header>
 
@@ -188,34 +194,18 @@ function TemplateEditor({ group }: { group: WorkoutGroup }) {
                   style={{
                     border: `1px solid ${isDragging ? 'var(--color-volt)' : 'var(--color-line)'}`,
                     transition: 'border-color 150ms ease',
+                    WebkitTouchCallout: 'none',
                   }}
+                  onPointerDown={slots.length > 1 ? handleLongPressDown(slot.key) : undefined}
+                  onClickCapture={slots.length > 1 ? handleLongPressClickCapture : undefined}
+                  onContextMenu={(e) => e.preventDefault()}
                 >
                   <div className="flex items-stretch" style={{ minHeight: '56px' }}>
-                    <button
-                      type="button"
-                      aria-label={`Drag to reorder ${exercise?.name ?? 'exercise'}`}
-                      className="flex items-center justify-center shrink-0"
-                      style={{
-                        width: '32px',
-                        color: isDragging ? 'var(--color-text)' : 'var(--color-text-faint)',
-                        borderRight: '1px solid var(--color-line)',
-                        touchAction: 'none',
-                        cursor: isDragging ? 'grabbing' : 'grab',
-                      }}
-                      onPointerDown={handlePointerDown(slot.key)}
+                    <div
+                      className="flex-1 min-w-0 flex items-center gap-2.5 px-3"
+                      tabIndex={slots.length > 1 ? 0 : undefined}
                       onKeyDown={handleKeyDown(slot.key)}
                     >
-                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
-                        <circle cx="9" cy="6" r="1.5" />
-                        <circle cx="15" cy="6" r="1.5" />
-                        <circle cx="9" cy="12" r="1.5" />
-                        <circle cx="15" cy="12" r="1.5" />
-                        <circle cx="9" cy="18" r="1.5" />
-                        <circle cx="15" cy="18" r="1.5" />
-                      </svg>
-                    </button>
-
-                    <div className="flex-1 min-w-0 flex items-center gap-2.5 px-3">
                       <span
                         className="caps-tight text-[10px] shrink-0"
                         style={{ color: 'var(--color-text)' }}

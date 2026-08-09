@@ -17,10 +17,8 @@ interface EntryCardProps {
   onToggleCollapsed?: () => void;
   done?: boolean;
   onToggleDone?: () => void;
-  dragHandleProps?: {
-    onPointerDown: (e: React.PointerEvent<HTMLButtonElement>) => void;
-    onKeyDown: (e: React.KeyboardEvent<HTMLButtonElement>) => void;
-  };
+  /** Arrow-key reordering, since there's no grip to hang it off any more. */
+  onReorderKeyDown?: (e: React.KeyboardEvent) => void;
   isDragging?: boolean;
 }
 
@@ -37,7 +35,7 @@ export default function EntryCard({
   onToggleCollapsed,
   done = false,
   onToggleDone,
-  dragHandleProps,
+  onReorderKeyDown,
   isDragging = false,
 }: EntryCardProps) {
   const { appData, renameExercise } = useAppContext();
@@ -228,31 +226,6 @@ export default function EntryCard({
           transition: 'background-color 200ms ease, box-shadow 200ms ease',
         }}
       >
-        {dragHandleProps && (
-          <button
-            type="button"
-            aria-label="Drag to reorder exercise"
-            className="flex items-center justify-center shrink-0"
-            style={{
-              width: '30px',
-              color: isDragging ? 'var(--color-text)' : 'var(--color-text-faint)',
-              borderRight: '1px solid var(--color-line)',
-              touchAction: 'none',
-              cursor: isDragging ? 'grabbing' : 'grab',
-            }}
-            onPointerDown={dragHandleProps.onPointerDown}
-            onKeyDown={dragHandleProps.onKeyDown}
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
-              <circle cx="9" cy="6" r="1.5" />
-              <circle cx="15" cy="6" r="1.5" />
-              <circle cx="9" cy="12" r="1.5" />
-              <circle cx="15" cy="12" r="1.5" />
-              <circle cx="9" cy="18" r="1.5" />
-              <circle cx="15" cy="18" r="1.5" />
-            </svg>
-          </button>
-        )}
         {/* Collapsed cards keep a compact toggle here; expanded cards get the
             full-width one under the stat strip, where the sets just ended. */}
         {collapsed && (
@@ -290,6 +263,7 @@ export default function EntryCard({
         <button
           type="button"
           onClick={onToggleCollapsed}
+          onKeyDown={onReorderKeyDown}
           className="flex items-center gap-2 min-w-0 flex-1 text-left press pl-2.5 pr-1 py-4"
           aria-expanded={!collapsed}
           aria-label={collapsed ? 'Expand exercise' : 'Collapse exercise'}

@@ -4,19 +4,27 @@ import PageShell from '../components/layout/PageShell';
 import EmptyState from '../components/shared/EmptyState';
 import ActionSheet from '../components/shared/ActionSheet';
 import RenameModal from '../components/shared/RenameModal';
+import ConfirmModal from '../components/shared/ConfirmModal';
 import { useAppContext } from '../context/AppContext';
 import { useDragReorder } from '../utils/useDragReorder';
 import type { WorkoutGroup } from '../types';
 
 export default function GroupsPage() {
-  const { appData, addGroup, updateGroup, reorderGroups } = useAppContext();
+  const { appData, addGroup, updateGroup, deleteGroup, reorderGroups } = useAppContext();
   const navigate = useNavigate();
   const groups = appData.groups ?? [];
 
   const [menuFor, setMenuFor] = useState<WorkoutGroup | null>(null);
   const [renaming, setRenaming] = useState<WorkoutGroup | null>(null);
+  const [deleting, setDeleting] = useState<WorkoutGroup | null>(null);
 
-  const { registerItem, handlePointerDown, handleKeyDown, draggingId } = useDragReorder({
+  const {
+    registerItem,
+    handleLongPressDown,
+    handleLongPressClickCapture,
+    handleKeyDown,
+    draggingId,
+  } = useDragReorder({
     items: groups,
     getId: (g: WorkoutGroup) => g.id,
     onReorder: (next) => reorderGroups(next.map((g) => g.id)),
@@ -70,7 +78,8 @@ export default function GroupsPage() {
     <PageShell title="Workout Template" showBack>
       <div className="flex flex-col gap-4">
         <p className="caps-tight text-[9px]" style={{ color: 'var(--color-text-faint)' }}>
-          {String(groups.length).padStart(2, '0')} TEMPLATE{groups.length === 1 ? '' : 'S'} · DRAG TO REORDER
+          {String(groups.length).padStart(2, '0')} TEMPLATE{groups.length === 1 ? '' : 'S'}
+          {groups.length > 1 && ' · HOLD TO REORDER'}
         </p>
 
         <ul className="flex flex-col gap-2">
@@ -90,36 +99,17 @@ export default function GroupsPage() {
                 style={{
                   border: `1px solid ${isDragging ? 'var(--color-volt)' : 'var(--color-line)'}`,
                   transition: 'border-color 150ms ease',
+                  WebkitTouchCallout: 'none',
                 }}
+                onPointerDown={groups.length > 1 ? handleLongPressDown(g.id) : undefined}
+                onClickCapture={groups.length > 1 ? handleLongPressClickCapture : undefined}
+                onContextMenu={(e) => e.preventDefault()}
               >
                 <div className="flex items-stretch" style={{ minHeight: '68px' }}>
                   <button
                     type="button"
-                    aria-label={`Drag to reorder ${g.name}`}
-                    className="flex items-center justify-center shrink-0"
-                    style={{
-                      width: '32px',
-                      color: isDragging ? 'var(--color-text)' : 'var(--color-text-faint)',
-                      borderRight: '1px solid var(--color-line)',
-                      touchAction: 'none',
-                      cursor: isDragging ? 'grabbing' : 'grab',
-                    }}
-                    onPointerDown={handlePointerDown(g.id)}
-                    onKeyDown={handleKeyDown(g.id)}
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
-                      <circle cx="9" cy="6" r="1.5" />
-                      <circle cx="15" cy="6" r="1.5" />
-                      <circle cx="9" cy="12" r="1.5" />
-                      <circle cx="15" cy="12" r="1.5" />
-                      <circle cx="9" cy="18" r="1.5" />
-                      <circle cx="15" cy="18" r="1.5" />
-                    </svg>
-                  </button>
-
-                  <button
-                    type="button"
                     onClick={() => navigate(`/groups/${g.id}`)}
+                    onKeyDown={handleKeyDown(g.id)}
                     className="flex-1 min-w-0 text-left press flex items-center px-3.5 py-3"
                   >
                     <span className="flex-1 min-w-0">
@@ -194,7 +184,31 @@ export default function GroupsPage() {
                 setMenuFor(null);
               },
             },
+            {
+              label: 'DELETE',
+              destructive: true,
+              onSelect: () => {
+                setDeleting(menuFor);
+                setMenuFor(null);
+              },
+            },
           ]}
+        />
+      )}
+
+      {deleting && (
+        <ConfirmModal
+          eyebrow="DELETE TEMPLATE"
+          title={`Delete "${deleting.name}"?`}
+          message="Saved workouts keep their history — only the template is removed."
+          confirmLabel="DELETE →"
+          cancelLabel="KEEP"
+          destructive
+          onConfirm={() => {
+            deleteGroup(deleting.id);
+            setDeleting(null);
+          }}
+          onClose={() => setDeleting(null)}
         />
       )}
 

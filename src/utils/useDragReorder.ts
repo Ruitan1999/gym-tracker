@@ -154,11 +154,11 @@ export function useDragReorder<T>({
   );
 
   const beginDrag = useCallback(
-    (id: string, clientY: number, pointerId: number, captureTarget: HTMLElement | null) => {
+    (id: string, clientY: number, pointerId: number) => {
       const el = itemRefs.current.get(id);
       if (!el) return;
       try {
-        (captureTarget ?? el).setPointerCapture(pointerId);
+        el.setPointerCapture(pointerId);
       } catch {
         // ignore — not all pointer types support capture
       }
@@ -233,16 +233,6 @@ export function useDragReorder<T>({
     [finishDrag, reorderTo, getId],
   );
 
-  const handlePointerDown = useCallback(
-    (id: string) => (e: React.PointerEvent<HTMLElement>) => {
-      if (e.pointerType === 'mouse' && e.button !== 0) return;
-      if (!itemRefs.current.has(id)) return;
-      e.preventDefault();
-      beginDrag(id, e.clientY, e.pointerId, e.currentTarget);
-    },
-    [beginDrag],
-  );
-
   // Press and hold anywhere on a card to pick it up, so reordering doesn't
   // depend on hitting the grip — which an expanded card scrolls away from.
   const handleLongPressDown = useCallback(
@@ -270,7 +260,7 @@ export function useDragReorder<T>({
         cancel();
         longPressFiredRef.current = true;
         navigator.vibrate?.(10);
-        beginDrag(id, startY, pointerId, null);
+        beginDrag(id, startY, pointerId);
       }, HOLD_MS);
 
       window.addEventListener('pointermove', onMove);
@@ -304,7 +294,6 @@ export function useDragReorder<T>({
 
   return {
     registerItem,
-    handlePointerDown,
     handleLongPressDown,
     handleLongPressClickCapture,
     handleKeyDown,

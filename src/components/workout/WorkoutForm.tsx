@@ -100,7 +100,6 @@ export default function WorkoutForm({
 
   const {
     registerItem,
-    handlePointerDown,
     handleLongPressDown,
     handleLongPressClickCapture,
     handleKeyDown,
@@ -545,11 +544,7 @@ export default function WorkoutForm({
                 done={!!entry.done}
                 onToggleDone={() => handleToggleDone(index)}
                 isDragging={draggingId === entry.id}
-                dragHandleProps={
-                  entries.length > 1
-                    ? { onPointerDown: handlePointerDown(entry.id), onKeyDown: handleKeyDown(entry.id) }
-                    : undefined
-                }
+                onReorderKeyDown={entries.length > 1 ? handleKeyDown(entry.id) : undefined}
               />
             </div>
           ))}
