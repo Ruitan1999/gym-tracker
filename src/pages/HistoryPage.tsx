@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { Link } from 'react-router-dom';
+import { Dumbbell } from 'lucide-react';
 import { useAppContext } from '../context/AppContext';
 import PageShell from '../components/layout/PageShell';
 import EmptyState from '../components/shared/EmptyState';
@@ -14,6 +15,9 @@ function getMonthLabel(dateStr: string): string {
     .toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
     .toUpperCase();
 }
+
+// Matches the momentum panel's icon weight; these render even smaller.
+const ICON_STROKE = 2;
 
 function isoLocal(d: Date): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
@@ -234,19 +238,7 @@ function CalendarCell({
       }}
     >
       {trained ? (
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="#ffffff"
-          strokeWidth={2.25}
-          strokeLinecap="square"
-          strokeLinejoin="miter"
-          className="w-4 h-4"
-          aria-hidden
-        >
-          <path d="M6 15l6-6 6 6" />
-        </svg>
+        <Dumbbell className="w-4 h-4" color="#ffffff" strokeWidth={ICON_STROKE} aria-hidden />
       ) : (
         <span
           className="font-mono text-[11px] leading-none"
@@ -311,18 +303,11 @@ function BigStat({
           </span>
         )}
         {accent && (
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="var(--color-volt)"
-            strokeWidth={2.5}
-            strokeLinecap="square"
-            strokeLinejoin="miter"
+          <Dumbbell
+            color="var(--color-volt)"
+            strokeWidth={ICON_STROKE}
             style={{ width: '0.85rem', height: '0.85rem', flexShrink: 0 }}
-          >
-            <path d="M6 15l6-6 6 6" />
-          </svg>
+          />
         )}
       </div>
     </div>
