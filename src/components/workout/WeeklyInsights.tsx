@@ -253,7 +253,7 @@ function FireIcon({ className, color }: { className?: string; color?: string }) 
       viewBox="0 0 24 24"
       fill="none"
       stroke={color ?? 'currentColor'}
-      strokeWidth={2.25}
+      strokeWidth={3.5}
       strokeLinecap="square"
       strokeLinejoin="miter"
       className={className}
