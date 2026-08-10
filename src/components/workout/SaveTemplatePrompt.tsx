@@ -4,6 +4,12 @@ import ModalShell from '../shared/ModalShell';
 interface SaveTemplatePromptProps {
   exerciseNames: string[];
   defaultName?: string;
+  /**
+   * Set when the session started from a template and no longer matches it,
+   * which turns the prompt into a three-way choice about that template.
+   */
+  sourceTemplateName?: string;
+  onUpdateTemplate?: () => void;
   onSave: (name: string) => void;
   onDismiss: () => void;
 }
@@ -11,6 +17,8 @@ interface SaveTemplatePromptProps {
 export default function SaveTemplatePrompt({
   exerciseNames,
   defaultName = '',
+  sourceTemplateName,
+  onUpdateTemplate,
   onSave,
   onDismiss,
 }: SaveTemplatePromptProps) {
@@ -37,28 +45,38 @@ export default function SaveTemplatePrompt({
   const previewCount = 3;
   const preview = exerciseNames.slice(0, previewCount);
   const remaining = Math.max(0, exerciseNames.length - previewCount);
+  const changedTemplate = !!sourceTemplateName;
 
   return (
     <ModalShell onDismiss={onDismiss}>
         {step === 'ask' ? (
           <>
-            <div
-              className="flex items-center gap-1.5 caps-tight text-[9px] mb-2"
-              style={{ color: 'var(--color-volt)' }}
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth={2.5}
-                strokeLinecap="square"
-                className="w-3 h-3"
+            {changedTemplate ? (
+              <div
+                className="caps-tight text-[9px] mb-2"
+                style={{ color: 'var(--color-volt)' }}
               >
-                <path d="M5 13l4 4L19 7" />
-              </svg>
-              ONE MORE THING
-            </div>
+                TEMPLATE CHANGED
+              </div>
+            ) : (
+              <div
+                className="flex items-center gap-1.5 caps-tight text-[9px] mb-2"
+                style={{ color: 'var(--color-volt)' }}
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={2.5}
+                  strokeLinecap="square"
+                  className="w-3 h-3"
+                >
+                  <path d="M5 13l4 4L19 7" />
+                </svg>
+                ONE MORE THING
+              </div>
+            )}
             <h3
               className="font-display mb-1"
               style={{
@@ -68,13 +86,15 @@ export default function SaveTemplatePrompt({
                 color: 'var(--color-text)',
               }}
             >
-              Save as template?
+              {changedTemplate ? `Update ${sourceTemplateName}?` : 'Save as template?'}
             </h3>
             <p
               className="text-[13px] mb-4"
               style={{ color: 'var(--color-text-muted)' }}
             >
-              Reuse these exercises next session without re-adding them.
+              {changedTemplate
+                ? 'You changed the exercises this session. Your workout is logged either way — this only affects the template.'
+                : 'Reuse these exercises next session without re-adding them.'}
             </p>
             <div
               className="p-3 mb-5"
@@ -110,24 +130,57 @@ export default function SaveTemplatePrompt({
                 )}
               </ul>
             </div>
-            <div className="grid grid-cols-2 gap-2">
-              <button
-                type="button"
-                onClick={onDismiss}
-                className="h-12 btn-ghost press caps-tight text-[11px]"
-                style={{ borderRadius: '2px' }}
-              >
-                NOT NOW
-              </button>
-              <button
-                type="button"
-                onClick={() => setStep('name')}
-                className="h-12 btn-volt press caps-tight text-[11px]"
-                style={{ borderRadius: '2px' }}
-              >
-                SAVE TEMPLATE →
-              </button>
-            </div>
+            {changedTemplate ? (
+              <div className="flex flex-col gap-2">
+                <button
+                  type="button"
+                  onClick={onUpdateTemplate}
+                  className="h-12 btn-volt press caps-tight text-[11px]"
+                  style={{ borderRadius: '2px' }}
+                >
+                  UPDATE TEMPLATE →
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setStep('name')}
+                  className="h-12 btn-ghost press caps-tight text-[11px]"
+                  style={{ borderRadius: '2px' }}
+                >
+                  SAVE AS NEW TEMPLATE
+                </button>
+                <button
+                  type="button"
+                  onClick={onDismiss}
+                  className="h-12 press caps-tight text-[11px]"
+                  style={{
+                    borderRadius: '2px',
+                    background: 'transparent',
+                    color: 'var(--color-text-muted)',
+                  }}
+                >
+                  LEAVE TEMPLATE AS IS
+                </button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={onDismiss}
+                  className="h-12 btn-ghost press caps-tight text-[11px]"
+                  style={{ borderRadius: '2px' }}
+                >
+                  NOT NOW
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setStep('name')}
+                  className="h-12 btn-volt press caps-tight text-[11px]"
+                  style={{ borderRadius: '2px' }}
+                >
+                  SAVE TEMPLATE →
+                </button>
+              </div>
+            )}
           </>
         ) : (
           <>

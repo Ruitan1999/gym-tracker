@@ -35,6 +35,16 @@ interface Draft {
   entries: WorkoutEntry[];
   notes: string;
   collapsedIds: string[];
+  /** The template this session was started from, if any. */
+  sourceGroupId?: string;
+}
+
+/**
+ * Ordered, because a template hands its exercises to the next session in this
+ * order — moving one is a change to what the template will produce.
+ */
+function sameExerciseIds(a: string[], b: string[]): boolean {
+  return a.length === b.length && a.every((id, i) => id === b[i]);
 }
 
 export function loadDraft(): Draft | null {
@@ -53,7 +63,8 @@ export default function WorkoutForm({
   name,
   onNameChange,
 }: WorkoutFormProps) {
-  const { appData, loading, addWorkout, updateWorkout, addGroup, showSessionSaved } = useAppContext();
+  const { appData, loading, addWorkout, updateWorkout, addGroup, updateGroup, showSessionSaved } =
+    useAppContext();
   const navigate = useNavigate();
   const location = useLocation();
   const isEdit = !!existingWorkout;
@@ -93,6 +104,11 @@ export default function WorkoutForm({
     new Set(draft?.collapsedIds ?? []),
   );
   const [scrollToEntryId, setScrollToEntryId] = useState<string | null>(null);
+  // Editing history is never "started from a template" — the link only exists
+  // for the session it was started in.
+  const [sourceGroupId, setSourceGroupId] = useState<string | null>(
+    () => (isEdit ? null : (draft?.sourceGroupId ?? null)),
+  );
 
   // A list of expanded cards is impossible to reorder — one card fills the
   // screen. Everything folds for the drag and comes back as it was.
@@ -173,11 +189,21 @@ export default function WorkoutForm({
       localStorage.removeItem(DRAFT_KEY);
       return;
     }
-    const payload: Draft = { date, name, entries, notes, collapsedIds: [...collapsedIds] };
+    const payload: Draft = {
+      date,
+      name,
+      entries,
+      notes,
+      collapsedIds: [...collapsedIds],
+      ...(sourceGroupId ? { sourceGroupId } : {}),
+    };
     localStorage.setItem(DRAFT_KEY, JSON.stringify(payload));
-  }, [isEdit, date, name, entries, notes, collapsedIds, hasAnyInput]);
+  }, [isEdit, date, name, entries, notes, collapsedIds, hasAnyInput, sourceGroupId]);
 
   const groups = appData.groups ?? [];
+  // Undefined once the template has been deleted mid-session, which just falls
+  // back to the ordinary save-as-template flow.
+  const sourceGroup = sourceGroupId ? groups.find((g) => g.id === sourceGroupId) : undefined;
 
   function getLastWorkoutSets(exerciseId: string): WorkoutSet[] | null {
     const sorted = [...appData.workouts].sort(
@@ -212,6 +238,7 @@ export default function WorkoutForm({
     onNameChange('');
     setNotes('');
     setCollapsedIds(new Set());
+    setSourceGroupId(null);
     setShowCancelConfirm(false);
     navigateHomeAndScrollTop();
   }
@@ -293,6 +320,7 @@ export default function WorkoutForm({
         entries: newEntries,
         notes: '',
         collapsedIds: collapsed,
+        sourceGroupId: group.id,
       };
       localStorage.setItem(DRAFT_KEY, JSON.stringify(draftPayload));
       navigate('/workout/new');
@@ -300,6 +328,7 @@ export default function WorkoutForm({
     }
 
     onNameChange(group.name);
+    setSourceGroupId(group.id);
     setEntries(newEntries);
     if (collapsed.length > 0) {
       setCollapsedIds(new Set(collapsed));
@@ -321,20 +350,19 @@ export default function WorkoutForm({
     );
   }
 
-  function commitPending(templateName?: string) {
-    if (!pendingWorkout) return;
-    addWorkout(pendingWorkout);
-    const sets = pendingWorkout.entries.reduce((a, e) => a + e.sets.length, 0);
-    const reps = pendingWorkout.entries.reduce(
+  function commitWorkout(workout: Workout, templateName?: string) {
+    addWorkout(workout);
+    const sets = workout.entries.reduce((a, e) => a + e.sets.length, 0);
+    const reps = workout.entries.reduce(
       (a, e) => a + e.sets.reduce((s, set) => s + (set.reps || 0), 0),
       0,
     );
-    const volumeKg = pendingWorkout.entries.reduce(
+    const volumeKg = workout.entries.reduce(
       (a, e) => a + e.sets.reduce((s, set) => s + set.reps * set.weightKg, 0),
       0,
     );
     showSessionSaved({
-      exercises: pendingWorkout.entries.length,
+      exercises: workout.entries.length,
       sets,
       reps,
       volumeKg,
@@ -343,6 +371,11 @@ export default function WorkoutForm({
     localStorage.removeItem(DRAFT_KEY);
     setPendingWorkout(null);
     navigateHomeAndScrollTop();
+  }
+
+  function commitPending(templateName?: string) {
+    if (!pendingWorkout) return;
+    commitWorkout(pendingWorkout, templateName);
   }
 
   function handleTemplatePromptSave(name: string) {
@@ -355,6 +388,17 @@ export default function WorkoutForm({
     };
     addGroup(group);
     commitPending(name);
+  }
+
+  // Keeps the template's identity — its id, name and place in the list — and
+  // swaps in the exercises the session actually ended up with.
+  function handleTemplatePromptUpdate() {
+    if (!pendingWorkout || !sourceGroup) return;
+    updateGroup({
+      ...sourceGroup,
+      exerciseIds: pendingWorkout.entries.map((e) => e.exerciseId),
+    });
+    commitPending(sourceGroup.name);
   }
 
   function handleTemplatePromptDismiss() {
@@ -405,20 +449,20 @@ export default function WorkoutForm({
     };
 
     const exerciseIds = savedEntries.map((e) => e.exerciseId);
+
+    // Started from a template: the only question worth asking is what should
+    // happen to that template, and only if the session drifted from it.
+    if (sourceGroup) {
+      if (sameExerciseIds(sourceGroup.exerciseIds, exerciseIds)) {
+        commitWorkout(workout);
+        return;
+      }
+      setPendingWorkout(workout);
+      return;
+    }
+
     if (exerciseIdsMatchExistingGroup(exerciseIds)) {
-      addWorkout(workout);
-      const sets = workout.entries.reduce((a, e) => a + e.sets.length, 0);
-      const reps = workout.entries.reduce(
-        (a, e) => a + e.sets.reduce((s, set) => s + (set.reps || 0), 0),
-        0,
-      );
-      const volumeKg = workout.entries.reduce(
-        (a, e) => a + e.sets.reduce((s, set) => s + set.reps * set.weightKg, 0),
-        0,
-      );
-      showSessionSaved({ exercises: workout.entries.length, sets, reps, volumeKg });
-      localStorage.removeItem(DRAFT_KEY);
-      navigateHomeAndScrollTop();
+      commitWorkout(workout);
       return;
     }
     setPendingWorkout(workout);
@@ -845,6 +889,8 @@ export default function WorkoutForm({
           exerciseNames={pendingWorkout.entries
             .map((e) => appData.exercises.find((x) => x.id === e.exerciseId)?.name ?? 'Exercise')}
           defaultName={pendingWorkout.name ?? ''}
+          sourceTemplateName={sourceGroup?.name}
+          onUpdateTemplate={handleTemplatePromptUpdate}
           onSave={handleTemplatePromptSave}
           onDismiss={handleTemplatePromptDismiss}
         />
