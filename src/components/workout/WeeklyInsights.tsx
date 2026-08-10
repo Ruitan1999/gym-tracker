@@ -153,7 +153,7 @@ function StreakRing({ pct, value }: { pct: number; value: number }) {
         >
           {value}
         </span>
-        {active && <FireIcon className="w-3 h-3 mt-0.5" color="var(--color-volt)" />}
+        {active && <DumbbellIcon className="w-3 h-3 mt-0.5" color="var(--color-volt)" />}
       </div>
     </div>
   );
@@ -232,7 +232,7 @@ function DayBox({
         }}
       >
         {trained ? (
-          <FireIcon className="w-4 h-4 md:w-6 md:h-6" />
+          <DumbbellIcon className="w-4 h-4 md:w-6 md:h-6" />
         ) : (
           <span
             className="caps-tight text-[13px] md:text-[18px]"
@@ -246,19 +246,26 @@ function DayBox({
   );
 }
 
-function FireIcon({ className, color }: { className?: string; color?: string }) {
+/**
+ * A dumbbell drawn as solid plates rather than strokes, for the 12-16px it
+ * renders at. lucide's Dumbbell is five curved paths on a diagonal and silts
+ * up completely at this size.
+ *
+ * The plates have to be about three times the bar's thickness. Draw them any
+ * closer in weight — the obvious two-stems-and-a-crossbar shape — and it is
+ * the letter H, because that is exactly what an H is.
+ */
+function DumbbellIcon({ className, color }: { className?: string; color?: string }) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
       viewBox="0 0 24 24"
-      fill="none"
-      stroke={color ?? 'currentColor'}
-      strokeWidth={3.5}
-      strokeLinecap="square"
-      strokeLinejoin="miter"
+      fill={color ?? 'currentColor'}
       className={className}
     >
-      <path d="M6 15l6-6 6 6" />
+      <rect x="1" y="6.5" width="8" height="11" rx="1.5" />
+      <rect x="15" y="6.5" width="8" height="11" rx="1.5" />
+      <rect x="9" y="10.75" width="6" height="2.5" />
     </svg>
   );
 }
