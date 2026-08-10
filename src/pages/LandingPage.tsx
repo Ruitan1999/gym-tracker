@@ -1,7 +1,11 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Dumbbell } from 'lucide-react';
 import Logo from '../components/shared/Logo';
 import SiteHeader from '../components/layout/SiteHeader';
+
+// Matches the momentum panel and the log book.
+const ICON_STROKE = 2;
 
 function Reveal({ children, delay = 0, className = '' }: { children: ReactNode; delay?: number; className?: string }) {
   const ref = useRef<HTMLDivElement | null>(null);
@@ -371,19 +375,12 @@ function Metric({ value, label, accent }: { value: string; label: string; accent
           {value}
         </div>
         {accent && (
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="var(--color-volt)"
-            strokeWidth={2.5}
-            strokeLinecap="square"
-            strokeLinejoin="miter"
+          <Dumbbell
+            color="var(--color-volt)"
+            strokeWidth={ICON_STROKE}
             style={{ width: '0.85rem', height: '0.85rem', flexShrink: 0 }}
             aria-hidden
-          >
-            <path d="M6 15l6-6 6 6" />
-          </svg>
+          />
         )}
       </div>
       <div className="caps-tight text-[9px]" style={{ color: 'var(--color-text-faint)' }}>
@@ -431,19 +428,7 @@ function LandingCalendarCell({ day, trained, today, past }: LandingCell) {
       }}
     >
       {trained ? (
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="#ffffff"
-          strokeWidth={2.25}
-          strokeLinecap="square"
-          strokeLinejoin="miter"
-          className="w-4 h-4"
-          aria-hidden
-        >
-          <path d="M6 15l6-6 6 6" />
-        </svg>
+        <Dumbbell className="w-4 h-4" color="#ffffff" strokeWidth={ICON_STROKE} aria-hidden />
       ) : (
         <span
           className="font-mono text-[10px] leading-none"
