@@ -1,6 +1,11 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 
-const RETRY_KEY = 'liftgauge.chunkRetry.v1';
+const RETRY_KEY = 'liftgauge.chunkRetry.v2';
+
+function retryState(): { at: number; count: number } | null {
+  const raw = localStorage.getItem(RETRY_KEY);
+  return raw ? JSON.parse(raw) : null;
+}
 
 /** Stands in for window.location so the redirect can be observed. */
 function stubLocation(href: string) {
@@ -15,6 +20,7 @@ function stubLocation(href: string) {
 describe('reloadFresh', () => {
   beforeEach(() => {
     sessionStorage.clear();
+    localStorage.clear();
     vi.resetModules();
   });
   afterEach(() => {
@@ -48,6 +54,7 @@ describe('reloadFresh', () => {
 describe('tidyReloadMarker', () => {
   beforeEach(() => {
     sessionStorage.clear();
+    localStorage.clear();
     vi.resetModules();
   });
 
@@ -79,6 +86,7 @@ describe('tidyReloadMarker', () => {
 describe('lazyWithRetry retry window', () => {
   beforeEach(() => {
     sessionStorage.clear();
+    localStorage.clear();
     vi.resetModules();
   });
   afterEach(() => {
@@ -103,10 +111,30 @@ describe('lazyWithRetry retry window', () => {
     startLoad(lazyWithRetry(factory));
     await settle();
     expect(replace).toHaveBeenCalledTimes(1);
-    expect(sessionStorage.getItem(RETRY_KEY)).toBeTruthy();
+    expect(retryState()!.count).toBe(1);
 
     // A second failure inside the window must surface rather than loop.
     await expect(startLoad(lazyWithRetry(factory))).rejects.toThrow('Failed to fetch module');
+    expect(replace).toHaveBeenCalledTimes(1);
+  });
+
+  it('still refuses to loop after the app is relaunched', async () => {
+    // The reload the guard is meant to catch is the one that starts a new
+    // session, so sessionStorage is empty by the time it counts. This is the
+    // loop that sent an installed app round and round on its own.
+    const replace = stubLocation('https://app.test/groups');
+    const { lazyWithRetry } = await import('../utils/lazyWithRetry');
+    const factory = vi.fn(() => Promise.reject(new TypeError('Failed to fetch module')));
+
+    startLoad(lazyWithRetry(factory));
+    await settle();
+    expect(replace).toHaveBeenCalledTimes(1);
+
+    sessionStorage.clear();
+    vi.resetModules();
+    const { lazyWithRetry: relaunched } = await import('../utils/lazyWithRetry');
+
+    await expect(startLoad(relaunched(factory))).rejects.toThrow('Failed to fetch module');
     expect(replace).toHaveBeenCalledTimes(1);
   });
 
@@ -114,7 +142,10 @@ describe('lazyWithRetry retry window', () => {
     const replace = stubLocation('https://app.test/groups');
     // A retry recorded well in the past must not veto a later failure — that
     // left one flaky load poisoning the whole session.
-    sessionStorage.setItem(RETRY_KEY, String(Date.now() - 60_000));
+    localStorage.setItem(
+      RETRY_KEY,
+      JSON.stringify({ at: Date.now() - 120_000, count: 1 }),
+    );
     const { lazyWithRetry } = await import('../utils/lazyWithRetry');
     const factory = vi.fn(() => Promise.reject(new TypeError('Failed to fetch module')));
 
@@ -122,16 +153,29 @@ describe('lazyWithRetry retry window', () => {
     await settle();
 
     expect(replace).toHaveBeenCalledTimes(1);
+    expect(retryState()!.count).toBe(1);
   });
 
   it('clears the marker after a load succeeds', async () => {
     stubLocation('https://app.test/groups');
-    sessionStorage.setItem(RETRY_KEY, String(Date.now()));
+    localStorage.setItem(RETRY_KEY, JSON.stringify({ at: Date.now(), count: 1 }));
     const { lazyWithRetry } = await import('../utils/lazyWithRetry');
     const factory = () => Promise.resolve({ default: () => null });
 
     await startLoad(lazyWithRetry(factory));
 
-    expect(sessionStorage.getItem(RETRY_KEY)).toBeNull();
+    expect(localStorage.getItem(RETRY_KEY)).toBeNull();
+  });
+
+  it('ignores a marker left behind in the old format', async () => {
+    const replace = stubLocation('https://app.test/groups');
+    localStorage.setItem(RETRY_KEY, 'not json');
+    const { lazyWithRetry } = await import('../utils/lazyWithRetry');
+    const factory = vi.fn(() => Promise.reject(new TypeError('Failed to fetch module')));
+
+    startLoad(lazyWithRetry(factory));
+    await settle();
+
+    expect(replace).toHaveBeenCalledTimes(1);
   });
 });

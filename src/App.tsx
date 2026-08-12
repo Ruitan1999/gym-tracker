@@ -40,7 +40,6 @@ function AppRoutes() {
   const { loading: appLoading } = useAppContext();
 
   useEffect(() => {
-    tidyReloadMarker();
     const ric = (window as unknown as { requestIdleCallback?: (cb: () => void) => number }).requestIdleCallback;
     if (ric) {
       ric(prefetchAllPages);
@@ -129,6 +128,12 @@ function AuthedApp({
 export default function App() {
   const [toast, setToast] = useState<string | null>(null);
   const [sessionSaved, setSessionSaved] = useState<SessionSavedStats | null>(null);
+
+  // Above the auth split: a reload that lands on the landing or sign-in page
+  // was leaving its cache-busting marker in the address bar for good.
+  useEffect(() => {
+    tidyReloadMarker();
+  }, []);
 
   const showToast = useCallback((message: string) => {
     setToast(message);

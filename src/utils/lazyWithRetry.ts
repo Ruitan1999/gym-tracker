@@ -1,27 +1,59 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { lazy, type ComponentType } from 'react';
 
-const RETRY_KEY = 'liftgauge.chunkRetry.v1';
+/**
+ * localStorage, not sessionStorage: an installed app relaunched from the home
+ * screen starts a brand new session, so a session-scoped guard is empty on
+ * exactly the load it exists to catch. A chunk that stays missing then reloads,
+ * comes back to an empty guard, and reloads again — forever.
+ */
+const RETRY_KEY = 'liftgauge.chunkRetry.v2';
 const BUST_PARAM = '_fresh';
 /**
  * How long a retry counts as "just tried". Long enough that a genuinely missing
  * chunk can't loop, short enough that a flaky connection an hour into the
  * session still gets its own attempt instead of inheriting an old verdict.
  */
-const RETRY_WINDOW_MS = 15_000;
+const RETRY_WINDOW_MS = 60_000;
+/** One reload is the whole fix; a second has never been the difference. */
+const MAX_RETRIES = 1;
 
-function retriedJustNow(): boolean {
+interface RetryState {
+  at: number;
+  count: number;
+}
+
+function readRetry(): RetryState | null {
   try {
-    const at = Number(sessionStorage.getItem(RETRY_KEY));
-    return Number.isFinite(at) && at > 0 && Date.now() - at < RETRY_WINDOW_MS;
+    const raw = localStorage.getItem(RETRY_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as Partial<RetryState>;
+    const at = Number(parsed?.at);
+    if (!Number.isFinite(at) || at <= 0) return null;
+    const count = Number(parsed?.count);
+    return { at, count: Number.isFinite(count) ? count : 0 };
   } catch {
-    return false;
+    return null;
   }
 }
 
+/** True once reloading has been tried and clearly isn't working. */
+function retriesExhausted(): boolean {
+  const state = readRetry();
+  if (!state) return false;
+  if (Date.now() - state.at >= RETRY_WINDOW_MS) return false;
+  return state.count >= MAX_RETRIES;
+}
+
 function markRetry(): void {
+  const previous = readRetry();
+  const stillInWindow = !!previous && Date.now() - previous.at < RETRY_WINDOW_MS;
+  const next: RetryState = {
+    at: Date.now(),
+    count: stillInWindow ? previous.count + 1 : 1,
+  };
   try {
-    sessionStorage.setItem(RETRY_KEY, String(Date.now()));
+    localStorage.setItem(RETRY_KEY, JSON.stringify(next));
   } catch {
     /* private mode — we just lose the loop guard */
   }
@@ -29,7 +61,7 @@ function markRetry(): void {
 
 function clearRetry(): void {
   try {
-    sessionStorage.removeItem(RETRY_KEY);
+    localStorage.removeItem(RETRY_KEY);
   } catch {
     /* ignore */
   }
@@ -79,7 +111,7 @@ export function lazyWithRetry<T extends ComponentType<any>>(
       clearRetry();
       return mod;
     } catch (err) {
-      if (retriedJustNow()) throw err;
+      if (retriesExhausted()) throw err;
       markRetry();
       reloadFresh();
       // The navigation takes over; never resolve, so nothing renders meanwhile.
