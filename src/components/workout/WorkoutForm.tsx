@@ -5,6 +5,8 @@ import { useAppContext } from '../../context/AppContext';
 import ExerciseSelect from '../shared/ExerciseSelect';
 import DatePicker from '../shared/DatePicker';
 import ConfirmModal from '../shared/ConfirmModal';
+import ActionSheet from '../shared/ActionSheet';
+import RenameModal from '../shared/RenameModal';
 import EntryCard from './EntryCard';
 import SaveTemplatePrompt from './SaveTemplatePrompt';
 import heroIllustration from '../../assets/healthy-habit.svg';
@@ -63,8 +65,16 @@ export default function WorkoutForm({
   name,
   onNameChange,
 }: WorkoutFormProps) {
-  const { appData, loading, addWorkout, updateWorkout, addGroup, updateGroup, showSessionSaved } =
-    useAppContext();
+  const {
+    appData,
+    loading,
+    addWorkout,
+    updateWorkout,
+    addGroup,
+    updateGroup,
+    deleteGroup,
+    showSessionSaved,
+  } = useAppContext();
   const navigate = useNavigate();
   const location = useLocation();
   const isEdit = !!existingWorkout;
@@ -104,6 +114,9 @@ export default function WorkoutForm({
     new Set(draft?.collapsedIds ?? []),
   );
   const [scrollToEntryId, setScrollToEntryId] = useState<string | null>(null);
+  const [menuForGroup, setMenuForGroup] = useState<WorkoutGroup | null>(null);
+  const [renamingGroup, setRenamingGroup] = useState<WorkoutGroup | null>(null);
+  const [deletingGroup, setDeletingGroup] = useState<WorkoutGroup | null>(null);
   // Editing history is never "started from a template" — the link only exists
   // for the session it was started in.
   const [sourceGroupId, setSourceGroupId] = useState<string | null>(
@@ -524,15 +537,14 @@ export default function WorkoutForm({
                 .filter(Boolean)
                 .join(', ');
               return (
-                <button
-                  key={g.id}
-                  type="button"
-                  onClick={() => handleStartFromGroup(g)}
-                  className="w-full text-left card press p-3"
-                >
-                  <div className="flex items-center justify-between">
+                <div key={g.id} className="card">
+                  <button
+                    type="button"
+                    onClick={() => handleStartFromGroup(g)}
+                    className="w-full text-left press px-3 pt-3"
+                  >
                     <div
-                      className="font-display min-w-0 truncate"
+                      className="font-display truncate"
                       style={{
                         fontWeight: 700,
                         fontSize: '1rem',
@@ -543,16 +555,41 @@ export default function WorkoutForm({
                     >
                       {g.name}
                     </div>
-                    <div className="caps-tight text-[9px] shrink-0 ml-2" style={{ color: 'var(--color-text-faint)' }}>
+                    {names && (
+                      <div className="text-[12px] mt-1" style={{ color: 'var(--color-text-muted)' }}>
+                        {names}
+                      </div>
+                    )}
+                  </button>
+                  {/* The count sits down here so the name gets the full width. */}
+                  <div className="flex items-center justify-between pl-3 pr-1 pb-1">
+                    <span
+                      className="caps-tight text-[9px]"
+                      style={{ color: 'var(--color-text-faint)' }}
+                    >
                       {exCount} EXERCISE{exCount === 1 ? '' : 'S'}
-                    </div>
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setMenuForGroup(g)}
+                      aria-label={`Actions for ${g.name}`}
+                      aria-haspopup="menu"
+                      className="w-10 h-10 flex items-center justify-center press shrink-0"
+                      style={{ color: 'var(--color-text-faint)' }}
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                        className="w-4 h-4"
+                      >
+                        <circle cx="12" cy="5" r="1.75" />
+                        <circle cx="12" cy="12" r="1.75" />
+                        <circle cx="12" cy="19" r="1.75" />
+                      </svg>
+                    </button>
                   </div>
-                  {names && (
-                    <div className="text-[12px] mt-1" style={{ color: 'var(--color-text-muted)' }}>
-                      {names}
-                    </div>
-                  )}
-                </button>
+                </div>
               );
             })}
           </div>
@@ -893,6 +930,68 @@ export default function WorkoutForm({
           onUpdateTemplate={handleTemplatePromptUpdate}
           onSave={handleTemplatePromptSave}
           onDismiss={handleTemplatePromptDismiss}
+        />
+      )}
+
+      {menuForGroup && (
+        <ActionSheet
+          eyebrow="TEMPLATE"
+          title={menuForGroup.name}
+          onClose={() => setMenuForGroup(null)}
+          items={[
+            {
+              label: 'EDIT EXERCISES',
+              onSelect: () => {
+                const target = menuForGroup;
+                setMenuForGroup(null);
+                navigate(`/groups/${target.id}`);
+              },
+            },
+            {
+              label: 'RENAME',
+              onSelect: () => {
+                setRenamingGroup(menuForGroup);
+                setMenuForGroup(null);
+              },
+            },
+            {
+              label: 'DELETE',
+              destructive: true,
+              onSelect: () => {
+                setDeletingGroup(menuForGroup);
+                setMenuForGroup(null);
+              },
+            },
+          ]}
+        />
+      )}
+
+      {renamingGroup && (
+        <RenameModal
+          eyebrow="RENAME TEMPLATE"
+          title="Rename template"
+          initialValue={renamingGroup.name}
+          onSave={(name) => {
+            updateGroup({ ...renamingGroup, name });
+            setRenamingGroup(null);
+          }}
+          onClose={() => setRenamingGroup(null)}
+        />
+      )}
+
+      {deletingGroup && (
+        <ConfirmModal
+          eyebrow="DELETE TEMPLATE"
+          title={`Delete "${deletingGroup.name}"?`}
+          message="Saved workouts keep their history — only the template is removed."
+          confirmLabel="DELETE →"
+          cancelLabel="KEEP"
+          destructive
+          onConfirm={() => {
+            deleteGroup(deletingGroup.id);
+            setDeletingGroup(null);
+          }}
+          onClose={() => setDeletingGroup(null)}
         />
       )}
 
