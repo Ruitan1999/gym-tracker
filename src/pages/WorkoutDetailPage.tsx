@@ -4,6 +4,8 @@ import { useAppContext } from '../context/AppContext';
 import PageShell from '../components/layout/PageShell';
 import ConfirmModal from '../components/shared/ConfirmModal';
 import RenameModal from '../components/shared/RenameModal';
+import BodyMap from '../components/workout/BodyMap';
+import { workedBodyParts } from '../utils/bodyParts';
 import type { WorkoutGroup } from '../types';
 
 function formatDate(dateStr: string): string {
@@ -139,6 +141,8 @@ export default function WorkoutDetailPage() {
             <Tile label="REPS" value={totalReps} divider />
           </div>
         </section>
+
+        <BodyMap worked={workedBodyParts(workout, appData.exercises)} />
 
         {/* Top set highlight */}
         {topSet.weight > 0 && (
