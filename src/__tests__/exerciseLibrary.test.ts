@@ -32,7 +32,7 @@ describe('mergeExerciseLibrary', () => {
   });
 
   it('keeps custom exercises, and keeps them first', () => {
-    const custom: Exercise = { id: 'custom-1', name: 'Custom Ex', category: 'push', isCustom: true };
+    const custom: Exercise = { id: 'custom-1', name: 'Custom Ex', bodyPart: 'chest', isCustom: true };
 
     const merged = mergeExerciseLibrary([custom]);
 
@@ -49,12 +49,54 @@ describe('mergeExerciseLibrary', () => {
     expect(merged.find((e) => e.id === withoutBodyPart.id)!.bodyPart).toBe(bodyPart);
   });
 
-  it('leaves a custom exercise without a body part alone', () => {
-    const custom: Exercise = { id: 'custom-1', name: 'Custom Ex', category: 'push', isCustom: true };
+  it('carries a custom exercise across from the movement pattern it was filed under', () => {
+    // Made up by hand back when exercises were push/pull/legs/core/cardio.
+    const legacy = { id: 'custom-1', name: 'Custom Ex', category: 'pull', isCustom: true };
 
-    const merged = mergeExerciseLibrary([custom]);
+    const merged = mergeExerciseLibrary([legacy as unknown as Exercise]);
 
-    expect(merged[0].bodyPart).toBeUndefined();
+    expect(merged[0].bodyPart).toBe('back');
+    expect(merged[0].name).toBe('Custom Ex');
+  });
+
+  it('gives a body part to a custom exercise that has neither', () => {
+    const orphan = { id: 'custom-2', name: 'Mystery', isCustom: true };
+
+    const merged = mergeExerciseLibrary([orphan as unknown as Exercise]);
+
+    // Whatever it lands on, nothing downstream may be handed an exercise
+    // without one — grouping and the body map both index straight off it.
+    expect(merged[0].bodyPart).toBeTruthy();
+  });
+});
+
+describe('migrating a library stored under movement patterns', () => {
+  it('takes the shipped body part rather than guessing from the pattern', () => {
+    // "push" covers chest, shoulders and triceps, so the pattern can't say
+    // which. For exercises we ship, the answer is already known.
+    const shipped = defaultExercises.find((e) => e.bodyPart === 'shoulders')!;
+    const asStored = {
+      id: shipped.id,
+      name: shipped.name,
+      category: 'push',
+      isCustom: false,
+    };
+
+    const merged = mergeExerciseLibrary([asStored as unknown as Exercise]);
+
+    expect(merged.find((e) => e.id === shipped.id)!.bodyPart).toBe('shoulders');
+  });
+
+  it('gives every exercise a body part, whatever shape it arrived in', () => {
+    const mixed = [
+      { id: 'ex-push-001', name: 'Bench Press', category: 'push', isCustom: false },
+      { id: 'custom-1', name: 'Mine', category: 'cardio', isCustom: true },
+      { id: 'custom-2', name: 'Older', isCustom: true },
+    ];
+
+    const merged = mergeExerciseLibrary(mixed as unknown as Exercise[]);
+
+    expect(merged.filter((e) => !e.bodyPart)).toEqual([]);
   });
 });
 

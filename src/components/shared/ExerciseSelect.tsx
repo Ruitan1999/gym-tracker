@@ -1,7 +1,8 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { useAppContext } from '../../context/AppContext';
-import type { ExerciseCategory } from '../../types';
+
 import { exerciseImageUrl, MEDIA_ATTRIBUTION } from '../../utils/exerciseImage';
+import { BODY_PART_ORDER, BODY_PART_CODE, BODY_PART_ACCENT } from '../../utils/bodyParts';
 
 interface ExerciseSelectProps {
   onSelect: (exerciseId: string) => void;
@@ -17,22 +18,6 @@ interface ExerciseSelectProps {
    */
   manageHistory?: boolean;
 }
-
-const CATEGORY_ORDER: ExerciseCategory[] = ['push', 'pull', 'legs', 'core', 'cardio'];
-export const CATEGORY_CODE: Record<ExerciseCategory, string> = {
-  push: 'PSH',
-  pull: 'PLL',
-  legs: 'LEG',
-  core: 'COR',
-  cardio: 'CRD',
-};
-export const CATEGORY_ACCENT: Record<ExerciseCategory, string> = {
-  push: 'var(--color-volt)',
-  pull: 'var(--color-ember)',
-  legs: 'var(--color-rust)',
-  core: 'var(--color-volt)',
-  cardio: 'var(--color-ember)',
-};
 
 export default function ExerciseSelect({
   onSelect,
@@ -184,8 +169,8 @@ export default function ExerciseSelect({
 
   const groupedByCategory = useMemo(() => {
     const groups: Record<string, typeof appData.exercises> = {};
-    for (const cat of CATEGORY_ORDER) {
-      groups[cat] = appData.exercises.filter((e) => e.category === cat);
+    for (const cat of BODY_PART_ORDER) {
+      groups[cat] = appData.exercises.filter((e) => e.bodyPart === cat);
     }
     return groups;
   }, [appData.exercises]);
@@ -317,7 +302,7 @@ export default function ExerciseSelect({
                         WHAT TYPE OF EXERCISE IS "{choosingCategoryFor.toUpperCase()}"?
                       </div>
                       <div className="grid grid-cols-1 gap-2">
-                        {CATEGORY_ORDER.map((cat) => (
+                        {BODY_PART_ORDER.map((cat) => (
                           <button
                             key={cat}
                             type="button"
@@ -325,7 +310,7 @@ export default function ExerciseSelect({
                               const newExercise = {
                                 id: crypto.randomUUID(),
                                 name: choosingCategoryFor,
-                                category: cat,
+                                bodyPart: cat,
                                 isCustom: true,
                               };
                               addExercise(newExercise);
@@ -336,7 +321,7 @@ export default function ExerciseSelect({
                             className="w-full h-14 px-4 flex items-center justify-between press"
                             style={{
                               background: '#ffffff',
-                              border: `1px solid ${CATEGORY_ACCENT[cat]}`,
+                              border: `1px solid ${BODY_PART_ACCENT[cat]}`,
                               borderRadius: '2px',
                             }}
                           >
@@ -354,12 +339,12 @@ export default function ExerciseSelect({
                             <span
                               className="caps-tight text-[9px] px-2 py-0.5"
                               style={{
-                                color: CATEGORY_ACCENT[cat],
-                                border: `1px solid ${CATEGORY_ACCENT[cat]}`,
+                                color: BODY_PART_ACCENT[cat],
+                                border: `1px solid ${BODY_PART_ACCENT[cat]}`,
                                 borderRadius: '2px',
                               }}
                             >
-                              {CATEGORY_CODE[cat]}
+                              {BODY_PART_CODE[cat]}
                             </span>
                           </button>
                         ))}
@@ -401,12 +386,12 @@ export default function ExerciseSelect({
                           <span
                             className="caps-tight text-[9px] px-2 py-0.5"
                             style={{
-                              color: CATEGORY_ACCENT[ex.category],
-                              border: `1px solid ${CATEGORY_ACCENT[ex.category]}`,
+                              color: BODY_PART_ACCENT[ex.bodyPart],
+                              border: `1px solid ${BODY_PART_ACCENT[ex.bodyPart]}`,
                               borderRadius: '2px',
                             }}
                           >
-                            {CATEGORY_CODE[ex.category]}
+                            {BODY_PART_CODE[ex.bodyPart]}
                           </span>
                         )}
                       </button>
@@ -446,13 +431,13 @@ export default function ExerciseSelect({
                 </div>
               )}
 
-              {CATEGORY_ORDER.map((cat, idx) => {
+              {BODY_PART_ORDER.map((cat, idx) => {
                 const list = groupedByCategory[cat];
                 if (list.length === 0) return null;
                 return (
                   <div key={cat}>
                     <div className="caps text-[10px] mb-2 flex items-center gap-3">
-                      <span style={{ color: CATEGORY_ACCENT[cat] }}>
+                      <span style={{ color: BODY_PART_ACCENT[cat] }}>
                         {String(idx + 1).padStart(2, '0')}
                       </span>
                       <span style={{ color: 'var(--color-text)' }}>{cat.toUpperCase()}</span>

@@ -5,10 +5,12 @@ import { workedBodyParts } from '../utils/bodyParts';
 import type { Exercise, WorkoutEntry } from '../types';
 
 const exercises: Exercise[] = [
-  { id: 'a', name: 'Bench Press', category: 'push', bodyPart: 'chest', isCustom: false },
-  { id: 'b', name: 'Curl', category: 'pull', bodyPart: 'arms', isCustom: false },
-  { id: 'c', name: 'Dip', category: 'push', bodyPart: 'chest', isCustom: false },
-  { id: 'd', name: 'My Thing', category: 'push', isCustom: true },
+  { id: 'a', name: 'Bench Press', bodyPart: 'chest', isCustom: false },
+  { id: 'b', name: 'Curl', bodyPart: 'arms', isCustom: false },
+  { id: 'c', name: 'Dip', bodyPart: 'chest', isCustom: false },
+  // Stored before body parts existed. The type says this can't happen; data
+  // written by an older version says otherwise.
+  { id: 'd', name: 'My Thing', isCustom: true } as Exercise,
 ];
 
 function entry(exerciseId: string, reps: number[]): WorkoutEntry {

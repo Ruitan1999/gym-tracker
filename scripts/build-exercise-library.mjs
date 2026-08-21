@@ -77,13 +77,29 @@ function titleCase(name) {
     .join(' ');
 }
 
-// The existing library keeps its ids: saved workouts reference them, and
-// renumbering would orphan every logged set.
-const existing = [...CURRENT.matchAll(
-  /\{ id: '([^']+)', name: '([^']+)', category: '([^']+)', isCustom: (\w+) \}/g,
-)].map(([, id, name, category]) => ({
-  id, name, category, bodyPart: bodyPartFor(name, category),
-}));
+/**
+ * The library's own entries — the ones predating the import — keep their ids,
+ * because saved workouts reference them and renumbering would orphan every
+ * logged set. Read from whichever shape the file is currently in, so this can
+ * be run again over its own output; the imported rows are left out and rebuilt
+ * from source.
+ */
+/** "Farmer\'s Walk" — a name is not simply everything up to the next quote. */
+const QUOTED = /\bname: (?:'((?:[^'\\]|\\.)*)'|"((?:[^"\\]|\\.)*)")/;
+const unescape = (s) => s.replace(/\\(.)/g, '$1');
+
+const existing = [];
+for (const raw of CURRENT.split('\n')) {
+  const id = raw.match(/\bid: '([^']+)'/)?.[1];
+  const name = raw.match(QUOTED);
+  if (!id || !name || id.startsWith('ex-gv-')) continue;
+  const label = unescape(name[1] ?? name[2]);
+  const bodyPart =
+    raw.match(/\bbodyPart: '(\w+)'/)?.[1] ??
+    bodyPartFor(label, raw.match(/\bcategory: '(\w+)'/)?.[1]);
+  existing.push({ id, name: label, bodyPart });
+}
+if (existing.length === 0) throw new Error('Parsed no existing exercises — check the regexes.');
 
 const seen = new Set(existing.map((e) => e.name.toLowerCase()));
 const byName = new Map(existing.map((e) => [e.name.toLowerCase(), e]));
@@ -191,7 +207,7 @@ ${ownWithImage.map((id) => `  '${id}',`).join('\n')}
 
 const all = [...existing, ...added];
 const line = (e) =>
-  `  { id: '${e.id}', name: ${JSON.stringify(e.name)}, category: '${e.category}', bodyPart: '${e.bodyPart}', isCustom: false },`;
+  `  { id: '${e.id}', name: ${JSON.stringify(e.name)}, bodyPart: '${e.bodyPart}', isCustom: false },`;
 
 fs.writeFileSync(
   OUT,
@@ -215,5 +231,4 @@ const tally = (key) =>
     .join(', ');
 
 console.log(`kept ${existing.length}, added ${added.length}, total ${all.length}`);
-console.log('category:', tally('category'));
 console.log('bodyPart:', tally('bodyPart'));

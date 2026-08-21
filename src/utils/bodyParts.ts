@@ -1,6 +1,19 @@
 import type { BodyPart, Exercise, Workout } from '../types';
 
-/** Ordered biggest-first for the legend, so the headline muscle leads. */
+/** Roughly head to toe, with cardio — which belongs to no one part — last. */
+export const BODY_PART_ORDER: BodyPart[] = [
+  'chest',
+  'back',
+  'shoulders',
+  'arms',
+  'forearms',
+  'core',
+  'legs',
+  'calves',
+  'neck',
+  'cardio',
+];
+
 export const BODY_PART_LABELS: Record<BodyPart, string> = {
   chest: 'CHEST',
   back: 'BACK',
@@ -12,6 +25,33 @@ export const BODY_PART_LABELS: Record<BodyPart, string> = {
   calves: 'CALVES',
   neck: 'NECK',
   cardio: 'CARDIO',
+};
+
+/** Three letters, because the badge they sit in is a fixed width. */
+export const BODY_PART_CODE: Record<BodyPart, string> = {
+  chest: 'CHS',
+  back: 'BCK',
+  shoulders: 'SHD',
+  arms: 'ARM',
+  forearms: 'FRM',
+  core: 'COR',
+  legs: 'LEG',
+  calves: 'CLF',
+  neck: 'NCK',
+  cardio: 'CRD',
+};
+
+export const BODY_PART_ACCENT: Record<BodyPart, string> = {
+  chest: 'var(--color-volt)',
+  back: 'var(--color-steel)',
+  shoulders: 'var(--color-ember)',
+  arms: 'var(--color-blood)',
+  forearms: 'var(--color-volt-dim)',
+  core: 'var(--color-rust)',
+  legs: 'var(--color-done)',
+  calves: 'var(--color-done-deep)',
+  neck: 'var(--color-text-muted)',
+  cardio: 'var(--color-volt-deep)',
 };
 
 /**

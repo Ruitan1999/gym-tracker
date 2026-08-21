@@ -1,13 +1,16 @@
 export interface Exercise {
   id: string;
   name: string;
-  category: ExerciseCategory;
-  /** Absent on exercises saved before body parts existed, and on custom ones. */
-  bodyPart?: BodyPart;
+  bodyPart: BodyPart;
   isCustom: boolean;
 }
 
-export type ExerciseCategory = 'push' | 'pull' | 'legs' | 'core' | 'cardio';
+/**
+ * What exercises were filed under before body parts: a movement pattern, which
+ * says how a session is programmed rather than what it works. Only still here
+ * so libraries stored under it can be carried across.
+ */
+export type LegacyExerciseCategory = 'push' | 'pull' | 'legs' | 'core' | 'cardio';
 
 export type BodyPart =
   | 'chest'

@@ -20,7 +20,7 @@ describe('storage', () => {
 
     it('returns stored data when localStorage has valid data', () => {
       const stored: AppData = {
-        exercises: [{ id: 'custom-1', name: 'Custom Ex', category: 'push', isCustom: true }],
+        exercises: [{ id: 'custom-1', name: 'Custom Ex', bodyPart: 'chest', isCustom: true }],
         workouts: [],
         groups: [],
         preferences: { weightUnit: 'lb', quickReps: [5, 8, 10], weightStepKg: 2.5, weightStepLb: 5 },
@@ -101,8 +101,8 @@ describe('storage', () => {
     it('round-trips: saveAppData then loadAppData returns the same data', () => {
       const data: AppData = {
         exercises: [
-          { id: 'ex-1', name: 'Squat', category: 'legs', isCustom: false },
-          { id: 'ex-2', name: 'My Exercise', category: 'core', isCustom: true },
+          { id: 'ex-1', name: 'Squat', bodyPart: 'legs', isCustom: false },
+          { id: 'ex-2', name: 'My Exercise', bodyPart: 'core', isCustom: true },
         ],
         workouts: [
           {

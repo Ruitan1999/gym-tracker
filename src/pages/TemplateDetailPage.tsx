@@ -4,10 +4,8 @@ import PageShell from '../components/layout/PageShell';
 import ConfirmModal from '../components/shared/ConfirmModal';
 import ActionSheet from '../components/shared/ActionSheet';
 import RenameModal from '../components/shared/RenameModal';
-import ExerciseSelect, {
-  CATEGORY_ACCENT,
-  CATEGORY_CODE,
-} from '../components/shared/ExerciseSelect';
+import ExerciseSelect from '../components/shared/ExerciseSelect';
+import { BODY_PART_ACCENT, BODY_PART_CODE } from '../utils/bodyParts';
 import { useAppContext } from '../context/AppContext';
 import { useDragReorder } from '../utils/useDragReorder';
 import type { WorkoutGroup } from '../types';
@@ -228,12 +226,12 @@ function TemplateEditor({ group }: { group: WorkoutGroup }) {
                         <span
                           className="caps-tight text-[9px] px-2 py-0.5 shrink-0"
                           style={{
-                            color: CATEGORY_ACCENT[exercise.category],
-                            border: `1px solid ${CATEGORY_ACCENT[exercise.category]}`,
+                            color: BODY_PART_ACCENT[exercise.bodyPart],
+                            border: `1px solid ${BODY_PART_ACCENT[exercise.bodyPart]}`,
                             borderRadius: '2px',
                           }}
                         >
-                          {CATEGORY_CODE[exercise.category]}
+                          {BODY_PART_CODE[exercise.bodyPart]}
                         </span>
                       )}
                     </div>

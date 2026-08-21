@@ -85,7 +85,7 @@ describe('AppContext', () => {
         result.current.addExercise({
           id: 'custom-1',
           name: 'Custom Exercise',
-          category: 'core',
+          bodyPart: 'core',
           isCustom: true,
         });
       });

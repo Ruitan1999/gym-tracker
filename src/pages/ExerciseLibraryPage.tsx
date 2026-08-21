@@ -1,31 +1,14 @@
 import { useRef, useState } from 'react';
 import PageShell from '../components/layout/PageShell';
 import { useAppContext } from '../context/AppContext';
-import type { ExerciseCategory } from '../types';
-
-const CATEGORIES: ExerciseCategory[] = ['push', 'pull', 'legs', 'core', 'cardio'];
-
-const CATEGORY_LABELS: Record<ExerciseCategory, string> = {
-  push: 'PUSH',
-  pull: 'PULL',
-  legs: 'LEGS',
-  core: 'CORE',
-  cardio: 'CARDIO',
-};
-
-const CATEGORY_ACCENT: Record<ExerciseCategory, string> = {
-  push: 'var(--color-volt)',
-  pull: 'var(--color-ember)',
-  legs: 'var(--color-rust)',
-  core: 'var(--color-volt)',
-  cardio: 'var(--color-ember)',
-};
+import type { BodyPart } from '../types';
+import { BODY_PART_ORDER, BODY_PART_LABELS, BODY_PART_ACCENT } from '../utils/bodyParts';
 
 export default function ExerciseLibraryPage() {
   const { appData, addExercise, deleteExercise } = useAppContext();
 
   const [newName, setNewName] = useState('');
-  const [newCategory, setNewCategory] = useState<ExerciseCategory>('push');
+  const [newCategory, setNewCategory] = useState<BodyPart>('chest');
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
   const nameInputRef = useRef<HTMLInputElement>(null);
 
@@ -41,19 +24,19 @@ export default function ExerciseLibraryPage() {
     addExercise({
       id: crypto.randomUUID(),
       name: trimmed,
-      category: newCategory,
+      bodyPart: newCategory,
       isCustom: true,
     });
     setNewName('');
   }
 
-  function toggleCategory(cat: ExerciseCategory) {
+  function toggleCategory(cat: BodyPart) {
     setCollapsed((prev) => ({ ...prev, [cat]: !prev[cat] }));
   }
 
-  const exercisesByCategory = CATEGORIES.map((cat) => ({
+  const exercisesByCategory = BODY_PART_ORDER.map((cat) => ({
     category: cat,
-    exercises: appData.exercises.filter((e) => e.category === cat),
+    exercises: appData.exercises.filter((e) => e.bodyPart === cat),
   }));
 
   return (
@@ -84,7 +67,7 @@ export default function ExerciseLibraryPage() {
               }}
             />
             <div className="grid grid-cols-5 gap-1">
-              {CATEGORIES.map((cat) => {
+              {BODY_PART_ORDER.map((cat) => {
                 const active = newCategory === cat;
                 return (
                   <button
@@ -93,14 +76,14 @@ export default function ExerciseLibraryPage() {
                     onClick={() => setNewCategory(cat)}
                     className="h-11 caps-tight text-[10px] press"
                     style={{
-                      background: active ? CATEGORY_ACCENT[cat] : 'transparent',
+                      background: active ? BODY_PART_ACCENT[cat] : 'transparent',
                       color: active ? '#ffffff' : 'var(--color-text)',
-                      border: `1px solid ${active ? CATEGORY_ACCENT[cat] : 'var(--color-line-2)'}`,
+                      border: `1px solid ${active ? BODY_PART_ACCENT[cat] : 'var(--color-line-2)'}`,
                       borderRadius: '2px',
                       fontWeight: 600,
                     }}
                   >
-                    {CATEGORY_LABELS[cat]}
+                    {BODY_PART_LABELS[cat]}
                   </button>
                 );
               })}
@@ -127,12 +110,12 @@ export default function ExerciseLibraryPage() {
             >
               <span
                 className="caps text-[10px]"
-                style={{ color: CATEGORY_ACCENT[category] }}
+                style={{ color: BODY_PART_ACCENT[category] }}
               >
                 {String(idx + 1).padStart(2, '0')}
               </span>
               <span className="caps text-[10px]" style={{ color: 'var(--color-text)' }}>
-                {CATEGORY_LABELS[category]}
+                {BODY_PART_LABELS[category]}
               </span>
               <span className="flex-1 h-px" style={{ background: 'var(--color-line)' }} />
               <span className="font-mono text-[10px]" style={{ color: 'var(--color-text-faint)' }}>
@@ -191,7 +174,7 @@ export default function ExerciseLibraryPage() {
                 className="caps-tight text-[10px] py-4"
                 style={{ color: 'var(--color-text-faint)' }}
               >
-                — EMPTY CATEGORY —
+                — NOTHING HERE —
               </p>
             )}
           </section>
