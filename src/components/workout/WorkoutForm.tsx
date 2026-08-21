@@ -245,6 +245,18 @@ export default function WorkoutForm({
     });
   }
 
+  /**
+   * A finished session opens its own page, so the work just done is the thing
+   * on screen rather than something to go looking for.
+   *
+   * Replacing rather than pushing: the session form is finished with, and
+   * leaving it in the history would put a spent, empty form behind the back
+   * button instead of the home page.
+   */
+  function navigateToSession(workoutId: string) {
+    navigate(`/history/${workoutId}`, { replace: true });
+  }
+
   function discardWorkout() {
     localStorage.removeItem(DRAFT_KEY);
     setEntries([]);
@@ -383,7 +395,7 @@ export default function WorkoutForm({
     });
     localStorage.removeItem(DRAFT_KEY);
     setPendingWorkout(null);
-    navigateHomeAndScrollTop();
+    navigateToSession(workout.id);
   }
 
   function commitPending(templateName?: string) {
@@ -448,7 +460,7 @@ export default function WorkoutForm({
       if (!notes) delete (updated as Partial<Workout>).notes;
       updateWorkout(updated);
       localStorage.removeItem(DRAFT_KEY);
-      navigateHomeAndScrollTop();
+      navigateToSession(updated.id);
       return;
     }
     const savedEntries = entries;

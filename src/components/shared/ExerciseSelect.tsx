@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { useAppContext } from '../../context/AppContext';
 import type { ExerciseCategory } from '../../types';
+import { exerciseImageUrl, MEDIA_ATTRIBUTION } from '../../utils/exerciseImage';
 
 interface ExerciseSelectProps {
   onSelect: (exerciseId: string) => void;
@@ -387,12 +388,7 @@ export default function ExerciseSelect({
                           borderTop: i === 0 ? '1px solid var(--color-line)' : undefined,
                         }}
                       >
-                        <span
-                          className="font-mono text-[10px] w-8"
-                          style={{ color: 'var(--color-text-faint)' }}
-                        >
-                          {String(i + 1).padStart(2, '0')}
-                        </span>
+                        <ExerciseThumb id={ex.id} />
                         <span
                           className="flex-1 text-[15px]"
                           style={{ color: 'var(--color-text)', fontWeight: 500 }}
@@ -476,12 +472,7 @@ export default function ExerciseSelect({
                               borderBottom: i < list.length - 1 ? '1px solid var(--color-line)' : undefined,
                             }}
                           >
-                            <span
-                              className="font-mono text-[10px] w-6"
-                              style={{ color: 'var(--color-text-faint)' }}
-                            >
-                              {String(i + 1).padStart(2, '0')}
-                            </span>
+                            <ExerciseThumb id={ex.id} />
                             <span
                               className="flex-1 text-[15px]"
                               style={{ color: 'var(--color-text)' }}
@@ -507,9 +498,49 @@ export default function ExerciseSelect({
               })}
             </div>
           )}
+          {/* Required wherever the exercise images are shown. */}
+          <p
+            className="caps-tight text-[9px] pt-5 pb-1 text-center"
+            style={{ color: 'var(--color-text-faint)' }}
+          >
+            {MEDIA_ATTRIBUTION}
+          </p>
         </div>
       </div>
     </>
+  );
+}
+
+const THUMB = 40;
+
+/**
+ * Keeps its slot whether or not there is a picture, so a list mixing the two
+ * doesn't go ragged down the left edge. Lazy, because a category can run to
+ * several hundred rows.
+ */
+function ExerciseThumb({ id }: { id: string }) {
+  const src = exerciseImageUrl(id);
+  const shared = {
+    width: THUMB,
+    height: THUMB,
+    borderRadius: '2px',
+    background: 'var(--color-line-2)',
+  } as const;
+
+  if (!src) return <span className="shrink-0" style={{ ...shared, opacity: 0.4 }} aria-hidden />;
+
+  return (
+    <img
+      src={src}
+      alt=""
+      aria-hidden
+      loading="lazy"
+      decoding="async"
+      width={THUMB}
+      height={THUMB}
+      className="shrink-0"
+      style={{ ...shared, objectFit: 'cover' }}
+    />
   );
 }
 

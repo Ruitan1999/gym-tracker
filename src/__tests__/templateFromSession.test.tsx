@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { MemoryRouter, Route, Routes } from 'react-router-dom';
+import { MemoryRouter, Route, Routes, useNavigate } from 'react-router-dom';
 import { AppProvider } from '../context/AppContext';
 import LogWorkoutPage from '../pages/LogWorkoutPage';
 import type { WorkoutEntry, WorkoutGroup } from '../types';
@@ -79,6 +79,19 @@ function renderHome() {
   );
 }
 
+/** Stands in for the session page, with the back button it really has. */
+function BackProbe() {
+  const navigate = useNavigate();
+  return (
+    <div>
+      SESSION PAGE
+      <button type="button" onClick={() => navigate(-1)}>
+        BACK
+      </button>
+    </div>
+  );
+}
+
 function savedGroups(): WorkoutGroup[] {
   const raw = localStorage.getItem(STORAGE_KEY);
   return raw ? ((JSON.parse(raw).groups ?? []) as WorkoutGroup[]) : [];
@@ -96,6 +109,30 @@ function save() {
 describe('Finishing a session that started from a template', () => {
   beforeEach(() => {
     localStorage.clear();
+  });
+
+  it('opens the finished session, leaving home behind the back button', () => {
+    seed();
+    seedDraft([PUSH, BENCH], 'g1');
+    render(
+      <MemoryRouter initialEntries={['/', '/workout/new']} initialIndex={1}>
+        <AppProvider>
+          <Routes>
+            <Route path="/" element={<div>HOME</div>} />
+            <Route path="/workout/new" element={<LogWorkoutPage />} />
+            <Route path="/history/:id" element={<BackProbe />} />
+          </Routes>
+        </AppProvider>
+      </MemoryRouter>,
+    );
+
+    save();
+    expect(screen.getByText('SESSION PAGE')).toBeDefined();
+
+    // The spent form is replaced rather than stacked, so back reaches home
+    // instead of an empty session form.
+    fireEvent.click(screen.getByRole('button', { name: 'BACK' }));
+    expect(screen.getByText('HOME')).toBeDefined();
   });
 
   it('saves without prompting when the exercises are untouched', () => {
