@@ -1,0 +1,134 @@
+/**
+ * Regenerates src/data/defaultExercises.ts.
+ *
+ * The bulk of the library comes from hasaneyldrm/exercises-dataset, whose
+ * exercise DATA is MIT licensed. Only the data is used here — the repository's
+ * images and GIFs belong to Gym visual and are not ours to ship.
+ *
+ *   node scripts/build-exercise-library.mjs <path-to>/data/exercises.json
+ *
+ * The generated file is the source of truth; this script exists so the mapping
+ * can be re-run and argued with rather than hand-audited once.
+ */
+import fs from 'node:fs';
+import path from 'node:path';
+
+const OUT = path.join(process.cwd(), 'src/data/defaultExercises.ts');
+const CURRENT = fs.readFileSync(OUT, 'utf8');
+
+/** The dataset's `target` is the only field that lines up with our categories. */
+const TARGET_TO_CATEGORY = {
+  pectorals: 'push', delts: 'push', triceps: 'push', 'serratus anterior': 'push',
+  biceps: 'pull', 'upper back': 'pull', lats: 'pull', traps: 'pull',
+  forearms: 'pull', 'levator scapulae': 'pull',
+  glutes: 'legs', quads: 'legs', hamstrings: 'legs', calves: 'legs',
+  adductors: 'legs', abductors: 'legs',
+  abs: 'core', spine: 'core',
+  'cardiovascular system': 'cardio',
+};
+
+const BODY_PART_FROM_DATASET = {
+  chest: 'chest', back: 'back', shoulders: 'shoulders', 'upper arms': 'arms',
+  'lower arms': 'forearms', waist: 'core', 'upper legs': 'legs',
+  'lower legs': 'calves', neck: 'neck', cardio: 'cardio',
+};
+
+/** First match wins, so the specific cases have to come before the loose ones. */
+const BODY_PART_RULES = [
+  [/wrist/, 'forearms'],
+  [/calf|calves/, 'calves'],
+  [/treadmill|rowing machine|stationary bike|elliptical|stair climber|jump rope|battle ropes|box jump|burpee|kettlebell swing|assault bike|sled/, 'cardio'],
+  // Before the generic curl/bench rules below, which would otherwise claim
+  // these for arms and chest respectively.
+  [/leg curl|hamstring curl/, 'legs'],
+  [/close-grip/, 'arms'],
+  [/back extension|reverse hyper|superman/, 'back'],
+  [/row|pull-up|chin-up|pulldown|pullover|shrug|rack pull/, 'back'],
+  [/reverse pec deck|face pull/, 'shoulders'],
+  [/overhead press|shoulder press|lateral raise|front raise|arnold|pike push-up|landmine press/, 'shoulders'],
+  [/bench press|fly|pec deck|chest press|push-up|dip/, 'chest'],
+  [/curl|tricep|skull crusher|close-grip/, 'arms'],
+  [/squat|deadlift|lunge|leg press|leg extension|hip thrust|glute|step-up|good morning|pull-through|hamstring|adductor|abductor|sissy/, 'legs'],
+  [/plank|crunch|sit-up|leg raise|knee raise|russian twist|ab wheel|v-up|toe touch|pallof|woodchop|dragon flag|l-sit|flutter|hollow|bird dog|dead bug|mountain climber/, 'core'],
+];
+
+const CATEGORY_FALLBACK = { push: 'chest', pull: 'back', legs: 'legs', core: 'core', cardio: 'cardio' };
+
+function bodyPartFor(name, category) {
+  const lower = name.toLowerCase();
+  for (const [re, part] of BODY_PART_RULES) if (re.test(lower)) return part;
+  return CATEGORY_FALLBACK[category];
+}
+
+const KEEP_CASE = {
+  ez: 'EZ', tbar: 'T-Bar', iii: 'III', ii: 'II', iv: 'IV', v: 'V', l: 'L',
+  rdl: 'RDL', ghd: 'GHD', bosu: 'BOSU',
+};
+
+function titleCase(name) {
+  return name
+    .split(' ')
+    .map((word) => {
+      const bare = word.replace(/[^a-z]/gi, '').toLowerCase();
+      if (KEEP_CASE[bare]) return word.replace(/[a-z]+/i, KEEP_CASE[bare]);
+      // Hyphenated words get each side capitalised: "close-grip" -> "Close-Grip".
+      return word.replace(/(^|[-/])([a-z])/g, (_, sep, ch) => sep + ch.toUpperCase());
+    })
+    .join(' ');
+}
+
+// The existing library keeps its ids: saved workouts reference them, and
+// renumbering would orphan every logged set.
+const existing = [...CURRENT.matchAll(
+  /\{ id: '([^']+)', name: '([^']+)', category: '([^']+)', isCustom: (\w+) \}/g,
+)].map(([, id, name, category]) => ({
+  id, name, category, bodyPart: bodyPartFor(name, category),
+}));
+
+const seen = new Set(existing.map((e) => e.name.toLowerCase()));
+
+const source = JSON.parse(fs.readFileSync(process.argv[2], 'utf8'));
+const added = [];
+for (const row of source) {
+  // A handful of source rows carry a "(male)"/"(female)" suffix. The movement
+  // is the same either way, so it is noise in a picker; dedupe absorbs the
+  // few that collide once it is gone.
+  const name = titleCase(row.name.replace(/\s*\((male|female)\)\s*$/i, '').trim());
+  if (seen.has(name.toLowerCase())) continue;
+  const category = TARGET_TO_CATEGORY[row.target];
+  const bodyPart = BODY_PART_FROM_DATASET[row.body_part];
+  if (!category || !bodyPart) {
+    throw new Error(`Unmapped record ${row.id}: target=${row.target} body_part=${row.body_part}`);
+  }
+  seen.add(name.toLowerCase());
+  added.push({ id: `ex-gv-${row.id}`, name, category, bodyPart });
+}
+
+const all = [...existing, ...added];
+const line = (e) =>
+  `  { id: '${e.id}', name: ${JSON.stringify(e.name)}, category: '${e.category}', bodyPart: '${e.bodyPart}', isCustom: false },`;
+
+fs.writeFileSync(
+  OUT,
+  `import type { Exercise } from '../types';
+
+// Generated by scripts/build-exercise-library.mjs — edit that, not this.
+//
+// The ${added.length} entries prefixed ex-gv- come from the MIT-licensed exercise data in
+// hasaneyldrm/exercises-dataset. Its images and GIFs are Gym visual's and are
+// deliberately not used here.
+export const defaultExercises: Exercise[] = [
+${all.map(line).join('\n')}
+];
+`,
+);
+
+const tally = (key) =>
+  Object.entries(all.reduce((a, e) => ({ ...a, [e[key]]: (a[e[key]] ?? 0) + 1 }), {}))
+    .sort((a, b) => b[1] - a[1])
+    .map(([k, v]) => `${k} ${v}`)
+    .join(', ');
+
+console.log(`kept ${existing.length}, added ${added.length}, total ${all.length}`);
+console.log('category:', tally('category'));
+console.log('bodyPart:', tally('bodyPart'));

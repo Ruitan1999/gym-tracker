@@ -30,7 +30,10 @@ describe('storage', () => {
 
       const data = loadAppData();
 
-      expect(data.exercises).toEqual(stored.exercises);
+      // The stored library is kept and the shipped one folded in around it,
+      // so an old account still picks up exercises added since.
+      expect(data.exercises).toContainEqual(stored.exercises[0]);
+      expect(data.exercises.length).toBeGreaterThan(stored.exercises.length);
       expect(data.preferences.weightUnit).toBe('lb');
     });
 
@@ -124,7 +127,12 @@ describe('storage', () => {
       saveAppData(data);
       const loaded = loadAppData();
 
-      expect(loaded).toEqual(data);
+      // Everything but the library round-trips untouched; the library comes
+      // back with the shipped exercises merged in.
+      expect({ ...loaded, exercises: [] }).toEqual({ ...data, exercises: [] });
+      for (const exercise of data.exercises) {
+        expect(loaded.exercises).toContainEqual(exercise);
+      }
     });
   });
 });

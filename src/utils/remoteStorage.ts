@@ -3,6 +3,7 @@ import { db } from '../firebase/config';
 import type { AppData } from '../types';
 import { DEFAULT_PREFERENCES } from '../types';
 import { defaultExercises } from '../data/defaultExercises';
+import { mergeExerciseLibrary } from './exerciseLibrary';
 
 function getDefaultAppData(): AppData {
   return {
@@ -29,7 +30,7 @@ export async function loadRemoteAppData(uid: string): Promise<{ data: AppData; e
   return {
     existed: true,
     data: {
-      exercises: raw.exercises ?? defaultExercises,
+      exercises: mergeExerciseLibrary(raw.exercises),
       workouts: raw.workouts ?? [],
       groups: raw.groups ?? [],
       preferences: { ...DEFAULT_PREFERENCES, ...(raw.preferences ?? {}) },

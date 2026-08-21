@@ -1,6 +1,7 @@
 import type { AppData } from '../types';
 import { DEFAULT_PREFERENCES } from '../types';
 import { defaultExercises } from '../data/defaultExercises';
+import { mergeExerciseLibrary } from './exerciseLibrary';
 
 const STORAGE_KEY = 'gym-tracker-data';
 
@@ -30,7 +31,7 @@ export function loadAppData(): AppData {
     }
     const parsed = JSON.parse(raw) as Partial<AppData>;
     return {
-      exercises: parsed.exercises ?? defaultExercises,
+      exercises: mergeExerciseLibrary(parsed.exercises),
       workouts: parsed.workouts ?? [],
       groups: parsed.groups ?? [],
       preferences: { ...DEFAULT_PREFERENCES, ...(parsed.preferences ?? {}) },
