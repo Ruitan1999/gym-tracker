@@ -55,6 +55,21 @@ export default function NumberInput({
     }
   }
 
+  /**
+   * A field reading zero is a field with nothing in it yet, so tapping in
+   * empties it rather than leaving a digit to type around — otherwise reaching
+   * for 60 gives you 060, or 0.60 if the caret landed left of the zero.
+   *
+   * Nothing is lost by clearing: the placeholder still reads 0, and leaving the
+   * field empty is already treated as zero.
+   */
+  function handleFocus() {
+    if (rawValue !== '' && parseFloat(rawValue) === 0) {
+      isTypingRef.current = true;
+      setRawValue('');
+    }
+  }
+
   function handleBlur() {
     isTypingRef.current = false;
 
@@ -81,6 +96,7 @@ export default function NumberInput({
         inputMode="decimal"
         value={rawValue}
         onChange={handleChange}
+        onFocus={handleFocus}
         onBlur={handleBlur}
         placeholder={placeholder}
         className="font-mono w-full h-12 px-3 bg-transparent outline-none"
@@ -112,6 +128,7 @@ export default function NumberInput({
         inputMode="decimal"
         value={rawValue}
         onChange={handleChange}
+        onFocus={handleFocus}
         onBlur={handleBlur}
         placeholder={placeholder}
         className="font-mono w-full h-12 px-3 outline-none focus:border-[var(--color-volt)] transition-colors"
