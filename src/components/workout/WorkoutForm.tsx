@@ -565,7 +565,7 @@ export default function WorkoutForm({
                       {g.name}
                     </div>
                     <div
-                      className="caps-tight text-[9px] mt-0.5"
+                      className="caps-tight text-[9px] mt-1.5"
                       style={{ color: 'var(--color-text-faint)' }}
                     >
                       {exCount} EXERCISE{exCount === 1 ? '' : 'S'}
