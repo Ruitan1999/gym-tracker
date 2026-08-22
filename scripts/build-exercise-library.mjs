@@ -77,6 +77,10 @@ function titleCase(name) {
     .join(' ');
 }
 
+/** "Farmer\'s Walk" — a name is not simply everything up to the next quote. */
+const QUOTED = /\bname: (?:'((?:[^'\\]|\\.)*)'|"((?:[^"\\]|\\.)*)")/;
+const unescape = (s) => s.replace(/\\(.)/g, '$1');
+
 /**
  * The library's own entries — the ones predating the import — keep their ids,
  * because saved workouts reference them and renumbering would orphan every
@@ -84,10 +88,6 @@ function titleCase(name) {
  * be run again over its own output; the imported rows are left out and rebuilt
  * from source.
  */
-/** "Farmer\'s Walk" — a name is not simply everything up to the next quote. */
-const QUOTED = /\bname: (?:'((?:[^'\\]|\\.)*)'|"((?:[^"\\]|\\.)*)")/;
-const unescape = (s) => s.replace(/\\(.)/g, '$1');
-
 const existing = [];
 for (const raw of CURRENT.split('\n')) {
   const id = raw.match(/\bid: '([^']+)'/)?.[1];
@@ -148,7 +148,34 @@ const EQUIPMENT_PREFERENCE = [
   'barbell', 'body weight', 'dumbbell', 'cable', 'leverage machine',
   'smith machine', 'ez barbell', 'kettlebell', 'weighted', 'band',
 ];
-const words = (s) => new Set(s.toLowerCase().match(/[a-z]+/g) ?? []);
+
+/**
+ * Named outright where the two vocabularies don't overlap enough for the word
+ * matching below to find each other — the source calls a machine a lever, and
+ * spells a rollout "rollerout".
+ *
+ * Only movements that genuinely are the same. Where the source simply has no
+ * equivalent — a sled push, a stair climber, a pec deck — the exercise keeps no
+ * picture, because a wrong one is worse than none.
+ */
+const ALIASES = {
+  "farmer's walk": 'farmers walk',
+  'battle ropes': 'battling ropes',
+  'machine shoulder press': 'lever shoulder press v. 3',
+  'machine row': 'lever high row',
+  'ab wheel rollout': 'wheel rollerout',
+  'single-leg leg press': 'lever horizontal one leg press',
+  'flutter kick': 'flutter kicks',
+  'smith machine squat': 'smith squat',
+  // A chest-supported row is a row done lying on an incline bench.
+  'chest-supported row': 'dumbbell incline row',
+  // Both are rear-delt flyes; only the machine differs.
+  'reverse pec deck': 'band reverse fly',
+  'glute kickback machine': 'cable kickback',
+};
+
+// Apostrophes split "farmer's" into two words and lose the match.
+const words = (s) => new Set(s.toLowerCase().replace(/'/g, '').match(/[a-z]+/g) ?? []);
 const isSubset = (a, b) => [...a].every((w) => b.has(w));
 
 /** Field by field: `<` on arrays compares them as strings and misorders 10 vs 2. */
@@ -160,6 +187,16 @@ function isBetter(a, b) {
 }
 
 const sourceWords = source.map((row) => ({ row, words: words(row.name) }));
+
+const bare = (n) => n.toLowerCase().replace(/\s*\((male|female)\)\s*$/i, '').trim();
+const sourceByName = new Map(source.map((row) => [bare(row.name), row]));
+for (const [ours, theirs] of Object.entries(ALIASES)) {
+  const row = sourceByName.get(theirs);
+  if (!row) throw new Error(`Alias target missing from the source data: "${theirs}"`);
+  const mine = existing.find((e) => e.name.toLowerCase() === ours);
+  if (!mine) throw new Error(`Alias source missing from our library: "${ours}"`);
+  media.set(mine.id, row.image);
+}
 
 for (const exercise of existing) {
   if (media.has(exercise.id)) continue;
