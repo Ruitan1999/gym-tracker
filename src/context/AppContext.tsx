@@ -4,10 +4,11 @@ import {
   useState,
   useEffect,
   useCallback,
+  useMemo,
   useRef,
   type ReactNode,
 } from 'react';
-import type { AppData, Workout, Exercise, UserPreferences, WorkoutGroup } from '../types';
+import type { AppData, Workout, Exercise, BodyPart, UserPreferences, WorkoutGroup } from '../types';
 import type { SessionSavedStats } from '../components/shared/SessionSavedBanner';
 import { loadAppData, saveAppData, clearLocalAppData, hasLocalAppData } from '../utils/storage';
 import { loadRemoteAppData, saveRemoteAppData } from '../utils/remoteStorage';
@@ -32,6 +33,7 @@ interface AppContextValue {
   deleteWorkout: (id: string) => void;
   addExercise: (exercise: Exercise) => void;
   renameExercise: (id: string, name: string) => void;
+  updateCustomExercise: (id: string, patch: { bodyPart?: BodyPart; image?: string | null }) => void;
   deleteExercise: (id: string) => boolean;
   addGroup: (group: WorkoutGroup) => void;
   updateGroup: (group: WorkoutGroup) => void;
@@ -43,6 +45,8 @@ interface AppContextValue {
   refreshAppData: () => Promise<void>;
   /** Admin-set pictures, which win over anything shipped with the app. */
   libraryImages: Record<string, string>;
+  /** Every picture in effect for this account: admin-set, plus the owner's own. */
+  exerciseImages: Record<string, string>;
   libraryOverrides: LibraryOverrides;
   /** Re-reads the admin layer after it has been changed. */
   reloadLibrary: () => Promise<void>;
@@ -207,6 +211,35 @@ export function AppProvider({
     });
   }, []);
 
+  /**
+   * Body part and picture for an exercise the owner made up themselves.
+   *
+   * Only theirs: for a shipped one the merge takes the library's body part on
+   * every load, so a change here would quietly undo itself — that one belongs
+   * on the admin screen, where it reaches everybody.
+   */
+  const updateCustomExercise = useCallback(
+    (id: string, patch: { bodyPart?: BodyPart; image?: string | null }) => {
+      setAppData((prev) => {
+        const target = prev.exercises.find((e) => e.id === id);
+        if (!target?.isCustom) return prev;
+
+        const images = { ...(prev.exerciseImages ?? {}) };
+        if (patch.image === null) delete images[id];
+        else if (patch.image) images[id] = patch.image;
+
+        return {
+          ...prev,
+          exercises: prev.exercises.map((e) =>
+            e.id === id && patch.bodyPart ? { ...e, bodyPart: patch.bodyPart } : e,
+          ),
+          exerciseImages: images,
+        };
+      });
+    },
+    [],
+  );
+
   const deleteExercise = useCallback((id: string): boolean => {
     let blocked = false;
     setAppData((prev) => {
@@ -218,14 +251,27 @@ export function AppProvider({
       // Remembered, or the next load folds it straight back in.
       const tombstones = prev.deletedExerciseIds ?? [];
       const remember = isShippedExercise(id) && !tombstones.includes(id);
+      const images = { ...(prev.exerciseImages ?? {}) };
+      delete images[id];
       return {
         ...prev,
         exercises: prev.exercises.filter((e) => e.id !== id),
+        exerciseImages: images,
         ...(remember ? { deletedExerciseIds: [...tombstones, id] } : {}),
       };
     });
     return !blocked;
   }, []);
+
+  /**
+   * What every screen should actually draw. The owner's own pictures win: the
+   * admin layer only knows about exercises everybody has, so anywhere the two
+   * overlap it is this account that set the more specific one.
+   */
+  const exerciseImages = useMemo(
+    () => ({ ...libraryImages, ...(appData.exerciseImages ?? {}) }),
+    [libraryImages, appData.exerciseImages],
+  );
 
   const updatePreferences = useCallback((preferences: UserPreferences) => {
     setAppData((prev) => ({ ...prev, preferences }));
@@ -297,6 +343,7 @@ export function AppProvider({
         deleteWorkout,
         addExercise,
         renameExercise,
+        updateCustomExercise,
         deleteExercise,
         addGroup,
         updateGroup,
@@ -307,6 +354,7 @@ export function AppProvider({
         showSessionSaved,
         refreshAppData,
         libraryImages,
+        exerciseImages,
         libraryOverrides,
         reloadLibrary,
       }}

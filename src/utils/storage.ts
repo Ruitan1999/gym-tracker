@@ -40,6 +40,7 @@ export function loadAppData(): AppData {
       }),
       deletedExerciseIds: parsed.deletedExerciseIds ?? [],
       renamedExerciseIds: parsed.renamedExerciseIds ?? [],
+      exerciseImages: parsed.exerciseImages ?? {},
       workouts: parsed.workouts ?? [],
       groups: parsed.groups ?? [],
       preferences: { ...DEFAULT_PREFERENCES, ...(parsed.preferences ?? {}) },

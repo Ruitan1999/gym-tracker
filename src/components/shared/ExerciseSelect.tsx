@@ -26,7 +26,7 @@ export default function ExerciseSelect({
   addedIds,
   manageHistory = true,
 }: ExerciseSelectProps) {
-  const { appData, addExercise, libraryImages } = useAppContext();
+  const { appData, addExercise, exerciseImages } = useAppContext();
   const added = useMemo(() => new Set(addedIds ?? []), [addedIds]);
   const [filter, setFilter] = useState('');
   const [choosingCategoryFor, setChoosingCategoryFor] = useState<string | null>(null);
@@ -348,7 +348,7 @@ export default function ExerciseSelect({
                           borderTop: i === 0 ? '1px solid var(--color-line)' : undefined,
                         }}
                       >
-                        <ExerciseThumb id={ex.id} images={libraryImages} />
+                        <ExerciseThumb id={ex.id} images={exerciseImages} />
                         <span
                           className="flex-1 text-[15px]"
                           style={{ color: 'var(--color-text)', fontWeight: 500 }}
@@ -403,7 +403,7 @@ export default function ExerciseSelect({
                               borderBottom: i < list.length - 1 ? '1px solid var(--color-line)' : undefined,
                             }}
                           >
-                            <ExerciseThumb id={ex.id} images={libraryImages} />
+                            <ExerciseThumb id={ex.id} images={exerciseImages} />
                             <span
                               className="flex-1 text-[15px]"
                               style={{ color: 'var(--color-text)' }}

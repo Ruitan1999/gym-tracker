@@ -43,7 +43,7 @@ export default function EntryCard({
   onReorderKeyDown,
   isDragging = false,
 }: EntryCardProps) {
-  const { appData, renameExercise, libraryImages } = useAppContext();
+  const { appData, renameExercise, exerciseImages } = useAppContext();
   const exercise = appData.exercises.find((e) => e.id === exerciseId);
   const [showRemoveConfirm, setShowRemoveConfirm] = useState(false);
   const [showRename, setShowRename] = useState(false);
@@ -245,9 +245,9 @@ export default function EntryCard({
           />
           {/* The picture rides along in both states, so folding a card changes
               what it is asking of you rather than what it looks like. */}
-          {exercise && imageForExercise(exercise.id, libraryImages) && (
+          {exercise && imageForExercise(exercise.id, exerciseImages) && (
             <img
-              src={imageForExercise(exercise.id, libraryImages)!}
+              src={imageForExercise(exercise.id, exerciseImages)!}
               alt=""
               aria-hidden
               loading="lazy"

@@ -104,3 +104,22 @@ export async function uploadExerciseImage(exerciseId: string, file: File): Promi
   await uploadBytes(target, blob, { contentType: 'image/jpeg' });
   return getDownloadURL(target);
 }
+
+/**
+ * A picture for one of the owner's own exercises.
+ *
+ * Kept under their uid rather than alongside the shared ones: nobody else has
+ * the exercise, so nobody else should be carrying the picture — and it means
+ * the write rule is the one they already have for their own data.
+ */
+export async function uploadOwnExerciseImage(
+  uid: string,
+  exerciseId: string,
+  file: File,
+): Promise<string> {
+  if (!storage) throw new Error('Firebase Storage is not configured');
+  const blob = await prepareImage(file);
+  const target = ref(storage, `users/${uid}/${IMAGE_PATH}/${exerciseId}.jpg`);
+  await uploadBytes(target, blob, { contentType: 'image/jpeg' });
+  return getDownloadURL(target);
+}

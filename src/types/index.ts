@@ -83,5 +83,11 @@ export interface AppData {
    * library's, so an admin correction elsewhere doesn't undo it.
    */
   renamedExerciseIds?: string[];
+  /**
+   * Pictures this owner set themselves, id -> URL. Their own exercises can't
+   * get one any other way, since the shipped library and the admin layer only
+   * know about exercises everybody has.
+   */
+  exerciseImages?: Record<string, string>;
   dataVersion: number;
 }

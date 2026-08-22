@@ -39,6 +39,7 @@ export async function loadRemoteAppData(uid: string): Promise<{ data: AppData; e
       }),
       deletedExerciseIds: raw.deletedExerciseIds ?? [],
       renamedExerciseIds: raw.renamedExerciseIds ?? [],
+      exerciseImages: raw.exerciseImages ?? {},
       workouts: raw.workouts ?? [],
       groups: raw.groups ?? [],
       preferences: { ...DEFAULT_PREFERENCES, ...(raw.preferences ?? {}) },

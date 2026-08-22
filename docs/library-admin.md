@@ -80,9 +80,19 @@ service firebase.storage {
       allow read: if true;
       allow write: if request.auth != null && request.auth.uid == '<your uid>';
     }
+    // Pictures people set on their own exercises. Nobody else has the
+    // exercise, so nobody else needs the picture.
+    match /users/{uid}/library-images/{image} {
+      allow read, write: if request.auth != null && request.auth.uid == uid;
+    }
   }
 }
 ```
+
+The second block is not admin-only — it's what lets *anyone* put a picture on
+an exercise they made up themselves, from the Exercise Index. Without it that
+upload fails while the admin screen keeps working, which is a confusing pair of
+symptoms to debug.
 
 Check `VITE_FIREBASE_STORAGE_BUCKET` is set in Vercel too — it's in the same
 Firebase config block as the other keys.

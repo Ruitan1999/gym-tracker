@@ -544,10 +544,6 @@ export default function WorkoutForm({
           <div className="flex flex-col gap-2">
             {groups.map((g) => {
               const exCount = g.exerciseIds.length;
-              const names = g.exerciseIds
-                .map((id) => appData.exercises.find((e) => e.id === id)?.name)
-                .filter(Boolean)
-                .join(', ');
               return (
                 <div key={g.id} className="card">
                   <button
@@ -567,11 +563,6 @@ export default function WorkoutForm({
                     >
                       {g.name}
                     </div>
-                    {names && (
-                      <div className="text-[12px] mt-1" style={{ color: 'var(--color-text-muted)' }}>
-                        {names}
-                      </div>
-                    )}
                   </button>
                   {/* The count sits down here so the name gets the full width. */}
                   <div className="flex items-center justify-between pl-3 pr-1 pb-1">
