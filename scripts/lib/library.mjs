@@ -190,3 +190,23 @@ ${entries.map(([id, file]) => `  '${id}': '${file}',`).join('\n')}
 `,
   );
 }
+
+/**
+ * Exercises claiming a picture that isn't on disk. A stale entry ships a URL
+ * that 404s, and nothing at runtime notices.
+ */
+export function missingImageFiles(exercises, ownImages) {
+  const gaps = [];
+  for (const exercise of exercises) {
+    const named = ownImages[exercise.id];
+    if (named) {
+      if (!fs.existsSync(path.join(PUBLIC_IMAGES, named))) gaps.push(exercise.id);
+      continue;
+    }
+    // Imported ones are resolved by convention rather than by lookup.
+    if (exercise.id.startsWith('ex-gv-') && !fs.existsSync(path.join(PUBLIC_IMAGES, `${exercise.id}.jpg`))) {
+      gaps.push(exercise.id);
+    }
+  }
+  return gaps;
+}

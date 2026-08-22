@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { exerciseImageUrl } from '../utils/exerciseImage';
 import { OWN_EXERCISE_IMAGES } from '../data/exerciseImages';
 import { defaultExercises } from '../data/defaultExercises';
+import { missingImageFiles } from '../../scripts/lib/library.mjs';
 
 describe('exerciseImageUrl', () => {
   it('resolves an imported exercise by convention', () => {
@@ -32,5 +33,14 @@ describe('exerciseImageUrl', () => {
     for (const id of Object.keys(OWN_EXERCISE_IMAGES)) {
       expect(known.has(id)).toBe(true);
     }
+  });
+});
+
+describe('the shipped image files', () => {
+  it('exist for every exercise that claims one', () => {
+    // A map entry whose file was deleted ships a broken image, and nothing
+    // else notices: the app just asks for a URL that 404s. Covers both the
+    // listed pictures and the imported ones resolved by convention.
+    expect(missingImageFiles(defaultExercises, OWN_EXERCISE_IMAGES)).toEqual([]);
   });
 });

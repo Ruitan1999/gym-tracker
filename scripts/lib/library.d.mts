@@ -35,3 +35,8 @@ export declare function writeLibrary(
 export declare const PUBLIC_IMAGES: string;
 export declare const DROP_DIR: string;
 export declare const OVERRIDES: string;
+
+export declare function missingImageFiles(
+  exercises: LibraryEntry[],
+  ownImages: Record<string, string>,
+): string[];

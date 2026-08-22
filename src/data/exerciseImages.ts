@@ -16,7 +16,6 @@ export const OWN_EXERCISE_IMAGES: Readonly<Record<string, string>> = {
   'ex-cardio-008': 'ex-cardio-008.jpg',
   'ex-cardio-009': 'ex-cardio-009.jpg',
   'ex-cardio-010': 'ex-cardio-010.jpg',
-  'ex-cardio-012': 'ex-cardio-012.png',
   'ex-cardio-014': 'ex-cardio-014.jpg',
   'ex-core-001': 'ex-core-001.jpg',
   'ex-core-002': 'ex-core-002.jpg',
