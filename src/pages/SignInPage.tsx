@@ -3,7 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import SiteHeader from '../components/layout/SiteHeader';
 
 export default function SignInPage() {
-  const { signInWithGoogle, signInWithEmail, signUpWithEmail, signInAnon, sendPasswordReset, configured } = useAuth();
+  const { signInWithGoogle, signInWithEmail, signUpWithEmail, signInAnon, sendPasswordReset, configured, authError, clearAuthError } = useAuth();
   const [mode, setMode] = useState<'signin' | 'signup'>('signin');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -51,6 +51,7 @@ export default function SignInPage() {
   const handleProvider = async (fn: () => Promise<void>) => {
     setError(null);
     setInfo(null);
+    clearAuthError();
     setBusy(true);
     try {
       await fn();
@@ -224,6 +225,23 @@ export default function SignInPage() {
         >
           CONTINUE AS GUEST
         </button>
+
+        {/* A redirect that came back and failed leaves nothing on screen but
+            this page again, which reads as though nothing happened. */}
+        {!error && authError && (
+          <p
+            className="text-[12px] p-3"
+            role="alert"
+            style={{
+              color: 'var(--color-rust)',
+              border: '1px solid var(--color-rust)',
+              background: 'rgba(211, 78, 54, 0.06)',
+              borderRadius: '2px',
+            }}
+          >
+            {authError}
+          </p>
+        )}
 
         {error && (
           <p
