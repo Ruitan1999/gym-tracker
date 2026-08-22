@@ -1,7 +1,7 @@
 import type { AppData } from '../types';
 import { DEFAULT_PREFERENCES } from '../types';
 import { defaultExercises } from '../data/defaultExercises';
-import { mergeExerciseLibrary } from './exerciseLibrary';
+import { mergeExerciseLibrary, loggedExerciseIds } from './exerciseLibrary';
 
 const STORAGE_KEY = 'gym-tracker-data';
 
@@ -12,6 +12,7 @@ function getDefaultAppData(): AppData {
     groups: [],
     preferences: { ...DEFAULT_PREFERENCES },
     deletedExerciseIds: [],
+    renamedExerciseIds: [],
     dataVersion: 1,
   };
 }
@@ -32,8 +33,13 @@ export function loadAppData(): AppData {
     }
     const parsed = JSON.parse(raw) as Partial<AppData>;
     return {
-      exercises: mergeExerciseLibrary(parsed.exercises, parsed.deletedExerciseIds),
+      exercises: mergeExerciseLibrary(parsed.exercises, {
+        deleted: parsed.deletedExerciseIds,
+        renamed: parsed.renamedExerciseIds,
+        keep: loggedExerciseIds(parsed.workouts),
+      }),
       deletedExerciseIds: parsed.deletedExerciseIds ?? [],
+      renamedExerciseIds: parsed.renamedExerciseIds ?? [],
       workouts: parsed.workouts ?? [],
       groups: parsed.groups ?? [],
       preferences: { ...DEFAULT_PREFERENCES, ...(parsed.preferences ?? {}) },

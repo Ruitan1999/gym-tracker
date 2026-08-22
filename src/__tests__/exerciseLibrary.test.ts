@@ -21,14 +21,25 @@ describe('mergeExerciseLibrary', () => {
     }
   });
 
-  it('keeps a renamed exercise renamed', () => {
+  it('keeps a rename this owner actually made', () => {
     const renamed: Exercise = { ...defaultExercises[0], name: 'My Own Name' };
 
-    const merged = mergeExerciseLibrary([renamed]);
+    const merged = mergeExerciseLibrary([renamed], { renamed: [renamed.id] });
 
     expect(merged.find((e) => e.id === renamed.id)!.name).toBe('My Own Name');
     // And exactly once — the shipped copy must not come back alongside it.
     expect(merged.filter((e) => e.id === renamed.id)).toHaveLength(1);
+  });
+
+  it('takes the library\'s name back where the owner never renamed anything', () => {
+    // Every account holds a full copy of the library, so a stored name is not
+    // evidence of a rename. Treating it as one is what stopped a correction to
+    // the library from ever reaching anybody.
+    const stale: Exercise = { ...defaultExercises[0], name: 'Old Shipped Name' };
+
+    const merged = mergeExerciseLibrary([stale]);
+
+    expect(merged.find((e) => e.id === stale.id)!.name).toBe(defaultExercises[0].name);
   });
 
   it('keeps custom exercises, and keeps them first', () => {

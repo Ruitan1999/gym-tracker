@@ -130,12 +130,10 @@ describe('storage', () => {
       // Everything but the library round-trips untouched; the library comes
       // back with the shipped exercises merged in, alongside the (empty) list
       // of shipped ones this owner has deleted.
-      expect({ ...loaded, exercises: [], deletedExerciseIds: undefined }).toEqual({
-        ...data,
-        exercises: [],
-        deletedExerciseIds: undefined,
-      });
+      const ignoring = { exercises: [], deletedExerciseIds: undefined, renamedExerciseIds: undefined };
+      expect({ ...loaded, ...ignoring }).toEqual({ ...data, ...ignoring });
       expect(loaded.deletedExerciseIds).toEqual([]);
+      expect(loaded.renamedExerciseIds).toEqual([]);
       for (const exercise of data.exercises) {
         expect(loaded.exercises).toContainEqual(exercise);
       }

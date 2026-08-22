@@ -17,4 +17,15 @@ export function exerciseImageUrl(id: string): string | null {
   return null;
 }
 
+/**
+ * The same question, but honouring a picture an admin has set for everyone.
+ * Components have the map to hand from the app context.
+ */
+export function imageForExercise(
+  id: string,
+  adminImages: Record<string, string>,
+): string | null {
+  return adminImages[id] ?? exerciseImageUrl(id);
+}
+
 export const MEDIA_ATTRIBUTION = '© Gym visual — gymvisual.com';

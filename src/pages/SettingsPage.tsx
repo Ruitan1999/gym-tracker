@@ -7,6 +7,8 @@ import { useAppContext } from '../context/AppContext';
 import { useMaybeAuth } from '../context/AuthContext';
 import { DEFAULT_PREFERENCES } from '../types';
 import { MEDIA_ATTRIBUTION } from '../utils/exerciseImage';
+import { isAdmin } from '../utils/admin';
+import { Link } from 'react-router-dom';
 
 export default function SettingsPage() {
   const navigate = useNavigate();
@@ -283,6 +285,32 @@ export default function SettingsPage() {
             </Section>
           </>
         ) : null}
+
+        {isAdmin(auth?.user?.uid) && (
+          <Section label="ADMIN">
+            <Link
+              to="/admin/library"
+              className="w-full h-14 px-4 flex items-center justify-between card press"
+              style={{ color: 'var(--color-text)' }}
+            >
+              <span className="caps-tight text-[11px]" style={{ fontWeight: 700 }}>
+                EXERCISE LIBRARY
+              </span>
+              <span className="caps-tight text-[9px]" style={{ color: 'var(--color-text-faint)' }}>
+                EVERYONE SEES THIS →
+              </span>
+            </Link>
+          </Section>
+        )}
+
+        {auth?.user?.uid && (
+          <p
+            className="caps-tight text-[8px] text-center"
+            style={{ color: 'var(--color-text-faint)' }}
+          >
+            ACCOUNT {auth.user.uid}
+          </p>
+        )}
 
         {/* The exercise illustrations are licensed, not ours; the credit has to
             be carried wherever they are shown, and once here covers the app. */}

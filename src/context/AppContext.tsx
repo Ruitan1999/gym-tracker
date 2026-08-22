@@ -11,7 +11,17 @@ import type { AppData, Workout, Exercise, UserPreferences, WorkoutGroup } from '
 import type { SessionSavedStats } from '../components/shared/SessionSavedBanner';
 import { loadAppData, saveAppData, clearLocalAppData, hasLocalAppData } from '../utils/storage';
 import { loadRemoteAppData, saveRemoteAppData } from '../utils/remoteStorage';
-import { isShippedExercise } from '../utils/exerciseLibrary';
+import {
+  isShippedExercise,
+  mergeExerciseLibrary,
+  loggedExerciseIds,
+} from '../utils/exerciseLibrary';
+import { loadLibraryOverrides } from '../utils/remoteLibrary';
+import {
+  applyLibraryOverrides,
+  EMPTY_OVERRIDES,
+  type LibraryOverrides,
+} from '../utils/libraryOverrides';
 
 interface AppContextValue {
   appData: AppData;
@@ -31,6 +41,11 @@ interface AppContextValue {
   showToast: (message: string) => void;
   showSessionSaved: (stats: SessionSavedStats) => void;
   refreshAppData: () => Promise<void>;
+  /** Admin-set pictures, which win over anything shipped with the app. */
+  libraryImages: Record<string, string>;
+  libraryOverrides: LibraryOverrides;
+  /** Re-reads the admin layer after it has been changed. */
+  reloadLibrary: () => Promise<void>;
 }
 
 const AppContext = createContext<AppContextValue | null>(null);
@@ -53,6 +68,8 @@ export function AppProvider({
   const [saveError, setSaveError] = useState(false);
   const hasLoadedRemoteRef = useRef(false);
   const skipNextSaveRef = useRef(false);
+  const [libraryImages, setLibraryImages] = useState<Record<string, string>>({});
+  const [libraryOverrides, setLibraryOverrides] = useState<LibraryOverrides>(EMPTY_OVERRIDES);
 
   useEffect(() => {
     let cancelled = false;
@@ -68,9 +85,21 @@ export function AppProvider({
     setLoading(true);
     (async () => {
       try {
-        const { data, existed } = await loadRemoteAppData(uid);
+        const [{ data, existed }, overrides] = await Promise.all([
+          loadRemoteAppData(uid),
+          loadLibraryOverrides(),
+        ]);
+        const applied = applyLibraryOverrides(overrides);
 
-        let finalData = data;
+        let finalData = {
+          ...data,
+          exercises: mergeExerciseLibrary(data.exercises, {
+            deleted: data.deletedExerciseIds,
+            renamed: data.renamedExerciseIds,
+            shipped: applied.exercises,
+            keep: loggedExerciseIds(data.workouts),
+          }),
+        };
         if (!existed && hasLocalAppData()) {
           const local = loadAppData();
           finalData = local;
@@ -80,6 +109,8 @@ export function AppProvider({
 
         if (!cancelled) {
           skipNextSaveRef.current = true;
+          setLibraryOverrides(overrides);
+          setLibraryImages(applied.images);
           setAppData(finalData);
           hasLoadedRemoteRef.current = true;
           setLoading(false);
@@ -164,10 +195,16 @@ export function AppProvider({
   // Workouts and templates both reference an exercise by id, so a rename
   // follows through to everything already logged under the old name.
   const renameExercise = useCallback((id: string, name: string) => {
-    setAppData((prev) => ({
-      ...prev,
-      exercises: prev.exercises.map((e) => (e.id === id ? { ...e, name } : e)),
-    }));
+    setAppData((prev) => {
+      // Remembered, or the library's own name wins it back on the next load.
+      const renamed = prev.renamedExerciseIds ?? [];
+      const remember = isShippedExercise(id) && !renamed.includes(id);
+      return {
+        ...prev,
+        exercises: prev.exercises.map((e) => (e.id === id ? { ...e, name } : e)),
+        ...(remember ? { renamedExerciseIds: [...renamed, id] } : {}),
+      };
+    });
   }, []);
 
   const deleteExercise = useCallback((id: string): boolean => {
@@ -212,6 +249,22 @@ export function AppProvider({
     }));
   }, []);
 
+  const reloadLibrary = useCallback(async () => {
+    const overrides = await loadLibraryOverrides();
+    const applied = applyLibraryOverrides(overrides);
+    setLibraryOverrides(overrides);
+    setLibraryImages(applied.images);
+    setAppData((prev) => ({
+      ...prev,
+      exercises: mergeExerciseLibrary(prev.exercises, {
+        deleted: prev.deletedExerciseIds,
+        renamed: prev.renamedExerciseIds,
+        shipped: applied.exercises,
+        keep: loggedExerciseIds(prev.workouts),
+      }),
+    }));
+  }, []);
+
   const refreshAppData = useCallback(async () => {
     if (!uid) return;
     try {
@@ -253,6 +306,9 @@ export function AppProvider({
         showToast,
         showSessionSaved,
         refreshAppData,
+        libraryImages,
+        libraryOverrides,
+        reloadLibrary,
       }}
     >
       {children}

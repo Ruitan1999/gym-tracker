@@ -4,7 +4,7 @@ import SetRow from './SetRow';
 import ConfirmModal from '../shared/ConfirmModal';
 import RenameModal from '../shared/RenameModal';
 import ActionSheet from '../shared/ActionSheet';
-import { exerciseImageUrl } from '../../utils/exerciseImage';
+import { imageForExercise } from '../../utils/exerciseImage';
 import { BODY_PART_LABELS, BODY_PART_ACCENT } from '../../utils/bodyParts';
 import type { WorkoutSet } from '../../types';
 
@@ -43,7 +43,7 @@ export default function EntryCard({
   onReorderKeyDown,
   isDragging = false,
 }: EntryCardProps) {
-  const { appData, renameExercise } = useAppContext();
+  const { appData, renameExercise, libraryImages } = useAppContext();
   const exercise = appData.exercises.find((e) => e.id === exerciseId);
   const [showRemoveConfirm, setShowRemoveConfirm] = useState(false);
   const [showRename, setShowRename] = useState(false);
@@ -245,9 +245,9 @@ export default function EntryCard({
           />
           {/* The picture rides along in both states, so folding a card changes
               what it is asking of you rather than what it looks like. */}
-          {exercise && exerciseImageUrl(exercise.id) && (
+          {exercise && imageForExercise(exercise.id, libraryImages) && (
             <img
-              src={exerciseImageUrl(exercise.id)!}
+              src={imageForExercise(exercise.id, libraryImages)!}
               alt=""
               aria-hidden
               loading="lazy"

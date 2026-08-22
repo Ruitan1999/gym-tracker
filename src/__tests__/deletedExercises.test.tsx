@@ -11,19 +11,19 @@ const shipped = defaultExercises[0];
 
 describe('mergeExerciseLibrary with deletions remembered', () => {
   it('leaves out a shipped exercise that was deleted', () => {
-    const merged = mergeExerciseLibrary([], [shipped.id]);
+    const merged = mergeExerciseLibrary([], { deleted: [shipped.id] });
     expect(merged.some((e) => e.id === shipped.id)).toBe(false);
     expect(merged.length).toBe(defaultExercises.length - 1);
   });
 
   it('does not bring it back alongside a stored library either', () => {
     const custom: Exercise = { id: 'c1', name: 'Mine', bodyPart: 'core', isCustom: true };
-    const merged = mergeExerciseLibrary([custom], [shipped.id]);
+    const merged = mergeExerciseLibrary([custom], { deleted: [shipped.id] });
     expect(merged.some((e) => e.id === shipped.id)).toBe(false);
   });
 
   it('keeps everything else', () => {
-    const merged = mergeExerciseLibrary([], [shipped.id]);
+    const merged = mergeExerciseLibrary([], { deleted: [shipped.id] });
     for (const e of defaultExercises.slice(1)) {
       expect(merged.some((x) => x.id === e.id)).toBe(true);
     }

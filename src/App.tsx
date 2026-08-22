@@ -19,6 +19,7 @@ import ExerciseLibraryPage from './pages/ExerciseLibraryPage';
 import GroupsPage from './pages/GroupsPage';
 import TemplateDetailPage from './pages/TemplateDetailPage';
 import SettingsPage from './pages/SettingsPage';
+import AdminLibraryPage from './pages/AdminLibraryPage';
 
 // Only the chart pages are worth splitting — they pull in the charting library,
 // which dwarfs the app. Every other page is a couple of kilobytes, and splitting
@@ -69,6 +70,7 @@ function AppRoutes() {
           <Route path="/groups" element={<GroupsPage />} />
           <Route path="/groups/:id" element={<TemplateDetailPage />} />
           <Route path="/settings" element={<SettingsPage />} />
+          <Route path="/admin/library" element={<AdminLibraryPage />} />
         </Routes>
       </Suspense>
       </RouteErrorBoundary>

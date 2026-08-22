@@ -78,5 +78,10 @@ export interface AppData {
    * it straight back in on the next load.
    */
   deletedExerciseIds?: string[];
+  /**
+   * Shipped exercises this owner has renamed. Their name wins over the
+   * library's, so an admin correction elsewhere doesn't undo it.
+   */
+  renamedExerciseIds?: string[];
   dataVersion: number;
 }

@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { useAppContext } from '../../context/AppContext';
 
-import { exerciseImageUrl, MEDIA_ATTRIBUTION } from '../../utils/exerciseImage';
+import { imageForExercise, MEDIA_ATTRIBUTION } from '../../utils/exerciseImage';
 import { BODY_PART_ORDER, BODY_PART_CODE, BODY_PART_ACCENT } from '../../utils/bodyParts';
 
 interface ExerciseSelectProps {
@@ -26,7 +26,7 @@ export default function ExerciseSelect({
   addedIds,
   manageHistory = true,
 }: ExerciseSelectProps) {
-  const { appData, addExercise } = useAppContext();
+  const { appData, addExercise, libraryImages } = useAppContext();
   const added = useMemo(() => new Set(addedIds ?? []), [addedIds]);
   const [filter, setFilter] = useState('');
   const [choosingCategoryFor, setChoosingCategoryFor] = useState<string | null>(null);
@@ -348,7 +348,7 @@ export default function ExerciseSelect({
                           borderTop: i === 0 ? '1px solid var(--color-line)' : undefined,
                         }}
                       >
-                        <ExerciseThumb id={ex.id} />
+                        <ExerciseThumb id={ex.id} images={libraryImages} />
                         <span
                           className="flex-1 text-[15px]"
                           style={{ color: 'var(--color-text)', fontWeight: 500 }}
@@ -403,7 +403,7 @@ export default function ExerciseSelect({
                               borderBottom: i < list.length - 1 ? '1px solid var(--color-line)' : undefined,
                             }}
                           >
-                            <ExerciseThumb id={ex.id} />
+                            <ExerciseThumb id={ex.id} images={libraryImages} />
                             <span
                               className="flex-1 text-[15px]"
                               style={{ color: 'var(--color-text)' }}
@@ -449,8 +449,8 @@ const THUMB = 40;
  * doesn't go ragged down the left edge. Lazy, because a category can run to
  * several hundred rows.
  */
-function ExerciseThumb({ id }: { id: string }) {
-  const src = exerciseImageUrl(id);
+function ExerciseThumb({ id, images }: { id: string; images: Record<string, string> }) {
+  const src = imageForExercise(id, images);
   const shared = {
     width: THUMB,
     height: THUMB,
