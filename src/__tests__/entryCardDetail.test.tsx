@@ -83,6 +83,18 @@ describe('An exercise card', () => {
     expect(screen.queryByText('DONE')).toBeNull();
   });
 
+  it('carries no complete toggle while folded', () => {
+    seedLibrary();
+    renderCard('ex-gv-0001', true);
+    expect(screen.queryByRole('button', { name: /Mark exercise/ })).toBeNull();
+  });
+
+  it('still offers one when open, so a card can be un-marked', () => {
+    seedLibrary();
+    renderCard('ex-gv-0001', false, true);
+    expect(screen.getByRole('button', { name: 'Mark exercise not complete' })).toBeDefined();
+  });
+
   it('still names the muscle group for an exercise with no image', () => {
     seedLibrary();
     const { container } = renderCard('custom-1', true);

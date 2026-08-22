@@ -221,40 +221,9 @@ export default function EntryCard({
           transition: 'background-color 200ms ease, box-shadow 200ms ease',
         }}
       >
-        {/* Collapsed cards keep a compact toggle here; expanded cards get the
-            full-width one under the stat strip, where the sets just ended. */}
-        {collapsed && (
-          <button
-            type="button"
-            onClick={onToggleDone}
-            aria-pressed={!!done}
-            aria-label={done ? 'Mark exercise not complete' : 'Mark exercise complete'}
-            className="flex items-center justify-center shrink-0 press"
-            style={{
-              width: '38px',
-              borderRight: '1px solid var(--color-line)',
-            }}
-          >
-            <span
-              aria-hidden
-              className="flex items-center justify-center"
-              style={{
-                width: '20px',
-                height: '20px',
-                borderRadius: '3px',
-                border: `1.5px solid ${done ? 'var(--color-done)' : 'var(--color-line-2)'}`,
-                background: done ? 'var(--color-done)' : 'transparent',
-                transition: 'background-color 150ms ease, border-color 150ms ease',
-              }}
-            >
-              {done && (
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth={3} strokeLinecap="square" className="w-3 h-3">
-                  <path d="M4 12l5 5L20 6" />
-                </svg>
-              )}
-            </span>
-          </button>
-        )}
+        {/* No toggle on a folded card: the green edge, the tint and the DONE
+            label already carry the state, and marking one either way is a
+            question for the card you have open. */}
         <button
           type="button"
           onClick={onToggleCollapsed}
