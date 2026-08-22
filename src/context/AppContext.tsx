@@ -11,6 +11,7 @@ import type { AppData, Workout, Exercise, UserPreferences, WorkoutGroup } from '
 import type { SessionSavedStats } from '../components/shared/SessionSavedBanner';
 import { loadAppData, saveAppData, clearLocalAppData, hasLocalAppData } from '../utils/storage';
 import { loadRemoteAppData, saveRemoteAppData } from '../utils/remoteStorage';
+import { isShippedExercise } from '../utils/exerciseLibrary';
 
 interface AppContextValue {
   appData: AppData;
@@ -177,7 +178,14 @@ export function AppProvider({
         blocked = true;
         return prev;
       }
-      return { ...prev, exercises: prev.exercises.filter((e) => e.id !== id) };
+      // Remembered, or the next load folds it straight back in.
+      const tombstones = prev.deletedExerciseIds ?? [];
+      const remember = isShippedExercise(id) && !tombstones.includes(id);
+      return {
+        ...prev,
+        exercises: prev.exercises.filter((e) => e.id !== id),
+        ...(remember ? { deletedExerciseIds: [...tombstones, id] } : {}),
+      };
     });
     return !blocked;
   }, []);

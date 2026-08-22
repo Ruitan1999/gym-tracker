@@ -11,6 +11,7 @@ function getDefaultAppData(): AppData {
     workouts: [],
     groups: [],
     preferences: { ...DEFAULT_PREFERENCES },
+    deletedExerciseIds: [],
     dataVersion: 1,
   };
 }
@@ -31,7 +32,8 @@ export function loadAppData(): AppData {
     }
     const parsed = JSON.parse(raw) as Partial<AppData>;
     return {
-      exercises: mergeExerciseLibrary(parsed.exercises),
+      exercises: mergeExerciseLibrary(parsed.exercises, parsed.deletedExerciseIds),
+      deletedExerciseIds: parsed.deletedExerciseIds ?? [],
       workouts: parsed.workouts ?? [],
       groups: parsed.groups ?? [],
       preferences: { ...DEFAULT_PREFERENCES, ...(parsed.preferences ?? {}) },

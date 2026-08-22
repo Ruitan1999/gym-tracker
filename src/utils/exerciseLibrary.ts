@@ -43,14 +43,31 @@ function withBodyPart(stored: StoredExercise): Exercise {
  * list simply won a `??`. Merging keeps the stored entry wherever there is one,
  * since that is where a rename lives, and appends the rest.
  */
-export function mergeExerciseLibrary(stored: Exercise[] | undefined | null): Exercise[] {
-  if (!stored || stored.length === 0) return defaultExercises;
+export function mergeExerciseLibrary(
+  stored: Exercise[] | undefined | null,
+  deletedIds: string[] = [],
+): Exercise[] {
+  const deleted = new Set(deletedIds);
+  if (!stored || stored.length === 0) {
+    return deleted.size === 0
+      ? defaultExercises
+      : defaultExercises.filter((e) => !deleted.has(e.id));
+  }
 
   const storedIds = new Set(stored.map((e) => e.id));
   const merged = stored.map((entry) => withBodyPart(entry as StoredExercise));
 
   for (const shipped of defaultExercises) {
-    if (!storedIds.has(shipped.id)) merged.push(shipped);
+    if (storedIds.has(shipped.id) || deleted.has(shipped.id)) continue;
+    merged.push(shipped);
   }
   return merged;
+}
+
+/**
+ * Deleting one of ours has to be remembered; deleting one of the owner's own
+ * does not, because nothing will ever put it back.
+ */
+export function isShippedExercise(id: string): boolean {
+  return shippedById.has(id);
 }

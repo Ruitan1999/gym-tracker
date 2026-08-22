@@ -11,6 +11,7 @@ function getDefaultAppData(): AppData {
     workouts: [],
     groups: [],
     preferences: { ...DEFAULT_PREFERENCES },
+    deletedExerciseIds: [],
     dataVersion: 1,
   };
 }
@@ -30,7 +31,8 @@ export async function loadRemoteAppData(uid: string): Promise<{ data: AppData; e
   return {
     existed: true,
     data: {
-      exercises: mergeExerciseLibrary(raw.exercises),
+      exercises: mergeExerciseLibrary(raw.exercises, raw.deletedExerciseIds),
+      deletedExerciseIds: raw.deletedExerciseIds ?? [],
       workouts: raw.workouts ?? [],
       groups: raw.groups ?? [],
       preferences: { ...DEFAULT_PREFERENCES, ...(raw.preferences ?? {}) },

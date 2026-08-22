@@ -4,6 +4,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import { AppProvider, useAppContext } from './context/AppContext';
 import SaveErrorBanner from './components/layout/SaveErrorBanner';
 import RouteErrorBoundary from './components/layout/RouteErrorBoundary';
+import UpdateBanner from './components/layout/UpdateBanner';
 import { lazyWithRetry, tidyReloadMarker } from './utils/lazyWithRetry';
 import BottomNav from './components/layout/BottomNav';
 import Toast from './components/shared/Toast';
@@ -145,6 +146,9 @@ export default function App() {
 
   return (
     <AuthProvider>
+      {/* Above the auth split: being on a stale build is not a signed-in
+          concern, and the sign-in page can be the stale thing. */}
+      <UpdateBanner />
       {sessionSaved && (
         <SessionSavedBanner stats={sessionSaved} onClose={() => setSessionSaved(null)} />
       )}

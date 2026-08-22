@@ -3,8 +3,26 @@ import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 
 // https://vite.dev/config/
+// Stamped into the bundle and written alongside it, so a running app can ask
+// the server what is deployed and notice it is behind.
+const BUILD_ID = Date.now().toString(36);
+
 export default defineConfig({
-  plugins: [react(), tailwindcss()],
+  define: { __BUILD_ID__: JSON.stringify(BUILD_ID) },
+  plugins: [
+    react(),
+    tailwindcss(),
+    {
+      name: 'emit-build-id',
+      generateBundle() {
+        this.emitFile({
+          type: 'asset',
+          fileName: 'version.json',
+          source: JSON.stringify({ build: BUILD_ID }),
+        });
+      },
+    },
+  ],
   build: {
     rollupOptions: {
       output: {

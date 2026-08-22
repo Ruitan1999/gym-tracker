@@ -72,5 +72,11 @@ export interface AppData {
   workouts: Workout[];
   groups: WorkoutGroup[];
   preferences: UserPreferences;
+  /**
+   * Shipped exercises the owner has deleted. Without this the library can't
+   * tell one they threw away from one they have simply never seen, and folds
+   * it straight back in on the next load.
+   */
+  deletedExerciseIds?: string[];
   dataVersion: number;
 }
