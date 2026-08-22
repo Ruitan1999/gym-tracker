@@ -38,25 +38,25 @@ function renderCard(exerciseId: string, collapsed: boolean) {
   );
 }
 
+const image = (c: HTMLElement) => c.querySelector('img[src*="exercise-images"]');
+
 describe('An expanded exercise card', () => {
   beforeEach(() => localStorage.clear());
 
-  it('shows the muscle group and the exercise image', () => {
+  it('shows the muscle group and the exercise image in its header', () => {
     seedLibrary();
     const { container } = renderCard('ex-gv-0001', false);
 
-    expect(screen.getByText('MUSCLE GROUP')).toBeDefined();
     expect(screen.getByText('CORE')).toBeDefined();
-    const img = container.querySelector('img[src*="exercise-images"]');
-    expect(img?.getAttribute('src')).toBe('/exercise-images/ex-gv-0001.jpg');
+    expect(image(container)?.getAttribute('src')).toBe('/exercise-images/ex-gv-0001.jpg');
   });
 
-  it('keeps all of that out of the way while folded', () => {
+  it('keeps both out of the way while folded', () => {
     seedLibrary();
     const { container } = renderCard('ex-gv-0001', true);
 
-    expect(screen.queryByText('MUSCLE GROUP')).toBeNull();
-    expect(container.querySelector('img[src*="exercise-images"]')).toBeNull();
+    expect(screen.queryByText('CORE')).toBeNull();
+    expect(image(container)).toBeNull();
   });
 
   it('still names the muscle group for an exercise with no image', () => {
@@ -64,18 +64,13 @@ describe('An expanded exercise card', () => {
     const { container } = renderCard('custom-1', false);
 
     expect(screen.getByText('SHOULDERS')).toBeDefined();
-    expect(container.querySelector('img[src*="exercise-images"]')).toBeNull();
+    expect(image(container)).toBeNull();
   });
 
-  it('credits the images wherever one is shown', () => {
+  it('leaves the folded summary line alone', () => {
     seedLibrary();
-    renderCard('ex-gv-0001', false);
-    expect(screen.getByText(/Gym visual/i)).toBeDefined();
-  });
-
-  it('does not credit anything when there is no image', () => {
-    seedLibrary();
-    renderCard('custom-1', false);
-    expect(screen.queryByText(/Gym visual/i)).toBeNull();
+    renderCard('ex-gv-0001', true);
+    // Folded, the row still reports the sets rather than the muscle group.
+    expect(screen.getByText(/1×8/)).toBeDefined();
   });
 });

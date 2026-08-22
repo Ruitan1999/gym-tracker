@@ -6,6 +6,7 @@ import WeightStepper from '../components/workout/WeightStepper';
 import { useAppContext } from '../context/AppContext';
 import { useMaybeAuth } from '../context/AuthContext';
 import { DEFAULT_PREFERENCES } from '../types';
+import { MEDIA_ATTRIBUTION } from '../utils/exerciseImage';
 
 export default function SettingsPage() {
   const navigate = useNavigate();
@@ -283,6 +284,14 @@ export default function SettingsPage() {
           </>
         ) : null}
 
+        {/* The exercise illustrations are licensed, not ours; the credit has to
+            be carried wherever they are shown, and once here covers the app. */}
+        <p
+          className="caps-tight text-[9px] pt-2 pb-6 text-center"
+          style={{ color: 'var(--color-text-faint)' }}
+        >
+          EXERCISE ILLUSTRATIONS {MEDIA_ATTRIBUTION}
+        </p>
       </div>
     </PageShell>
   );

@@ -4,9 +4,12 @@ import SetRow from './SetRow';
 import ConfirmModal from '../shared/ConfirmModal';
 import RenameModal from '../shared/RenameModal';
 import ActionSheet from '../shared/ActionSheet';
-import { exerciseImageUrl, MEDIA_ATTRIBUTION } from '../../utils/exerciseImage';
+import { exerciseImageUrl } from '../../utils/exerciseImage';
 import { BODY_PART_LABELS, BODY_PART_ACCENT } from '../../utils/bodyParts';
 import type { WorkoutSet } from '../../types';
+
+/** Big enough to make out at a glance without pushing the title off-centre. */
+const THUMB = 52;
 
 interface EntryCardProps {
   exerciseId: string;
@@ -281,6 +284,28 @@ export default function EntryCard({
             style={{ background: 'var(--color-line)' }}
             aria-hidden
           />
+          {/* Open, the card is the exercise you are about to do, so the header
+              carries what it looks like. Folded, it is one row in a list you
+              scroll between sets, and a picture on every row is in the way. */}
+          {!collapsed && exercise && exerciseImageUrl(exercise.id) && (
+            <img
+              src={exerciseImageUrl(exercise.id)!}
+              alt=""
+              aria-hidden
+              loading="lazy"
+              decoding="async"
+              width={THUMB}
+              height={THUMB}
+              className="shrink-0"
+              style={{
+                width: THUMB,
+                height: THUMB,
+                objectFit: 'cover',
+                borderRadius: '2px',
+                background: 'var(--color-line-2)',
+              }}
+            />
+          )}
           <div className="flex-1 min-w-0">
             <h3
               className="font-display leading-tight truncate"
@@ -305,6 +330,19 @@ export default function EntryCard({
                 {done && <span style={{ fontWeight: 700 }}>DONE · </span>}
                 {sets.length}×{totalReps} · {topWeightStr}KG
               </div>
+            )}
+            {!collapsed && exercise && (
+              <span
+                className="caps-tight text-[9px] inline-block mt-1.5 px-1.5 py-0.5"
+                style={{
+                  color: BODY_PART_ACCENT[exercise.bodyPart],
+                  border: `1px solid ${BODY_PART_ACCENT[exercise.bodyPart]}`,
+                  borderRadius: '2px',
+                  fontWeight: 700,
+                }}
+              >
+                {BODY_PART_LABELS[exercise.bodyPart]}
+              </span>
             )}
           </div>
           <span
@@ -345,60 +383,6 @@ export default function EntryCard({
 
       {collapsed ? null : (
         <>
-      {/* What the exercise is, for the moment you open it and have to do it.
-          Only worth the room while the card is open — folded, the name is the
-          whole point of the row. */}
-      {exercise && (
-        <div
-          className="flex items-center gap-3 px-4 py-3"
-          style={{ borderTop: '1px solid var(--color-line)' }}
-        >
-          {exerciseImageUrl(exercise.id) && (
-            <img
-              src={exerciseImageUrl(exercise.id)!}
-              alt=""
-              aria-hidden
-              loading="lazy"
-              decoding="async"
-              width={72}
-              height={72}
-              className="shrink-0"
-              style={{
-                width: 72,
-                height: 72,
-                objectFit: 'cover',
-                borderRadius: '2px',
-                background: 'var(--color-line-2)',
-              }}
-            />
-          )}
-          <div className="min-w-0">
-            <div className="caps-tight text-[9px]" style={{ color: 'var(--color-text-faint)' }}>
-              MUSCLE GROUP
-            </div>
-            <div
-              className="caps-tight text-[10px] inline-block mt-1 px-2 py-0.5"
-              style={{
-                color: BODY_PART_ACCENT[exercise.bodyPart],
-                border: `1px solid ${BODY_PART_ACCENT[exercise.bodyPart]}`,
-                borderRadius: '2px',
-                fontWeight: 700,
-              }}
-            >
-              {BODY_PART_LABELS[exercise.bodyPart]}
-            </div>
-            {exerciseImageUrl(exercise.id) && (
-              <div
-                className="caps-tight text-[8px] mt-1.5"
-                style={{ color: 'var(--color-text-faint)' }}
-              >
-                {MEDIA_ATTRIBUTION}
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
       {/* Sets */}
       <div className="relative">
         {sets.map((set, i) => {
