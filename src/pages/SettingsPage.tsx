@@ -7,7 +7,7 @@ import { useAppContext } from '../context/AppContext';
 import { useMaybeAuth } from '../context/AuthContext';
 import { DEFAULT_PREFERENCES } from '../types';
 import { MEDIA_ATTRIBUTION } from '../utils/exerciseImage';
-import { isAdmin } from '../utils/admin';
+import { isAdmin, adminConfigured } from '../utils/admin';
 import { Link } from 'react-router-dom';
 
 export default function SettingsPage() {
@@ -18,6 +18,18 @@ export default function SettingsPage() {
   const [addingRep, setAddingRep] = useState(false);
   const [newRep, setNewRep] = useState<number | ''>('');
   const [accountBusy, setAccountBusy] = useState(false);
+  const [copiedId, setCopiedId] = useState(false);
+
+  async function copyAccountId(uid: string) {
+    try {
+      await navigator.clipboard.writeText(uid);
+      setCopiedId(true);
+      setTimeout(() => setCopiedId(false), 2000);
+    } catch {
+      // No clipboard permission, or an insecure origin. The id is on screen
+      // either way, so there is nothing to report.
+    }
+  }
 
   async function handleLogout() {
     if (!auth) return;
@@ -304,12 +316,26 @@ export default function SettingsPage() {
         )}
 
         {auth?.user?.uid && (
-          <p
-            className="caps-tight text-[8px] text-center"
-            style={{ color: 'var(--color-text-faint)' }}
-          >
-            ACCOUNT {auth.user.uid}
-          </p>
+          <div className="text-center">
+            {/* Setting up an admin means retyping this into a deploy config, so
+                it is a button rather than 28 characters to copy by hand. */}
+            <button
+              type="button"
+              onClick={() => copyAccountId(auth.user!.uid)}
+              className="caps-tight text-[8px] press"
+              style={{ color: 'var(--color-text-faint)' }}
+            >
+              {copiedId ? 'ACCOUNT ID COPIED' : `ACCOUNT ${auth.user.uid}`}
+            </button>
+            {!isAdmin(auth.user.uid) && (
+              <p
+                className="caps-tight text-[8px] mt-1"
+                style={{ color: 'var(--color-text-faint)' }}
+              >
+                {adminConfigured() ? 'ADMIN · ANOTHER ACCOUNT' : 'ADMIN · NOT SET IN THIS BUILD'}
+              </p>
+            )}
+          </div>
         )}
 
         {/* The exercise illustrations are licensed, not ours; the credit has to

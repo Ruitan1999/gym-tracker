@@ -14,3 +14,14 @@ const ADMIN_UIDS = (import.meta.env.VITE_ADMIN_UIDS ?? '')
 export function isAdmin(uid: string | null | undefined): boolean {
   return !!uid && ADMIN_UIDS.includes(uid);
 }
+
+/**
+ * Whether this build was given any admin at all.
+ *
+ * The uid is baked in at build time, so a missing one and a mistyped one look
+ * identical from the outside — the screen simply isn't there. Settings tells
+ * the two apart rather than leaving it to guesswork.
+ */
+export function adminConfigured(): boolean {
+  return ADMIN_UIDS.length > 0;
+}
