@@ -134,31 +134,6 @@ export default function ExerciseSelect({
     }
   }
 
-  const recentExerciseIds = useMemo(() => {
-    const seen = new Set<string>();
-    const recent: string[] = [];
-    const sorted = [...appData.workouts].sort(
-      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-    );
-    for (const w of sorted.slice(0, 10)) {
-      for (const entry of w.entries) {
-        if (!seen.has(entry.exerciseId)) {
-          seen.add(entry.exerciseId);
-          recent.push(entry.exerciseId);
-        }
-      }
-      if (recent.length >= 10) break;
-    }
-    return recent;
-  }, [appData.workouts]);
-
-  const recentExercises = useMemo(
-    () => recentExerciseIds
-      .map((id) => appData.exercises.find((e) => e.id === id))
-      .filter(Boolean),
-    [recentExerciseIds, appData.exercises]
-  );
-
   const isSearching = filter.length > 0;
 
   const searchResults = useMemo(() => {
@@ -402,35 +377,6 @@ export default function ExerciseSelect({
             </div>
           ) : (
             <div className="flex flex-col gap-6">
-              {recentExercises.length > 0 && (
-                <div>
-                  <div className="caps text-[10px] mb-2.5 flex items-center gap-3">
-                    <span style={{ color: 'var(--color-text)' }}>00</span>
-                    <span style={{ color: 'var(--color-text)' }}>RECENT</span>
-                    <span className="flex-1 h-px" style={{ background: 'var(--color-line)' }} />
-                  </div>
-                  <div className="flex flex-wrap gap-1.5">
-                    {recentExercises.map((ex) => ex && (
-                      <button
-                        key={ex.id}
-                        type="button"
-                        onClick={() => onSelect(ex.id)}
-                        className="h-10 px-3 text-[13px] press"
-                        style={{
-                          background: added.has(ex.id) ? 'var(--color-done-tint)' : 'transparent',
-                          color: added.has(ex.id) ? 'var(--color-done-deep)' : 'var(--color-text)',
-                          border: `1px solid ${added.has(ex.id) ? 'var(--color-done)' : 'var(--color-volt)'}`,
-                          borderRadius: '2px',
-                          fontWeight: 500,
-                        }}
-                      >
-                        {added.has(ex.id) ? '✓ ' : ''}{ex.name}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-
               {BODY_PART_ORDER.map((cat, idx) => {
                 const list = groupedByCategory[cat];
                 if (list.length === 0) return null;
