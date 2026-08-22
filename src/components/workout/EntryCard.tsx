@@ -200,16 +200,6 @@ export default function EntryCard({
     [sets, onSetsChange],
   );
 
-  const totalReps = sets.reduce((acc, s) => acc + (s.reps || 0), 0);
-  const topSet = sets.reduce<WorkoutSet | null>((best, s) => {
-    if (s.weightKg <= 0 || s.reps <= 0) return best;
-    if (!best) return s;
-    if (s.weightKg > best.weightKg) return s;
-    if (s.weightKg === best.weightKg && s.reps > best.reps) return s;
-    return best;
-  }, null);
-  const topWeightStr = topSet ? String(topSet.weightKg) : '0';
-
   return (
     <div
       ref={cardRef}
@@ -284,10 +274,9 @@ export default function EntryCard({
             style={{ background: 'var(--color-line)' }}
             aria-hidden
           />
-          {/* Open, the card is the exercise you are about to do, so the header
-              carries what it looks like. Folded, it is one row in a list you
-              scroll between sets, and a picture on every row is in the way. */}
-          {!collapsed && exercise && exerciseImageUrl(exercise.id) && (
+          {/* The picture rides along in both states, so folding a card changes
+              what it is asking of you rather than what it looks like. */}
+          {exercise && exerciseImageUrl(exercise.id) && (
             <img
               src={exerciseImageUrl(exercise.id)!}
               alt=""
@@ -319,30 +308,30 @@ export default function EntryCard({
             >
               {exercise?.name ?? 'Unknown Exercise'}
             </h3>
-            {collapsed && (
-              <div
-                className="caps-tight text-[9px] truncate mt-0.5"
-                style={{
-                  color: done ? 'var(--color-done-deep)' : 'var(--color-text-faint)',
-                  fontVariantNumeric: 'tabular-nums',
-                }}
-              >
-                {done && <span style={{ fontWeight: 700 }}>DONE · </span>}
-                {sets.length}×{totalReps} · {topWeightStr}KG
+            {exercise && (
+              <div className="flex items-center gap-1.5 mt-1.5 min-w-0">
+                {/* Folded, there is no complete button on show, so this is the
+                    only place the card can say it is finished. */}
+                {collapsed && done && (
+                  <span
+                    className="caps-tight text-[9px] shrink-0"
+                    style={{ color: 'var(--color-done-deep)', fontWeight: 700 }}
+                  >
+                    DONE
+                  </span>
+                )}
+                <span
+                  className="caps-tight text-[9px] inline-block px-1.5 py-0.5 shrink-0"
+                  style={{
+                    color: BODY_PART_ACCENT[exercise.bodyPart],
+                    border: `1px solid ${BODY_PART_ACCENT[exercise.bodyPart]}`,
+                    borderRadius: '2px',
+                    fontWeight: 700,
+                  }}
+                >
+                  {BODY_PART_LABELS[exercise.bodyPart]}
+                </span>
               </div>
-            )}
-            {!collapsed && exercise && (
-              <span
-                className="caps-tight text-[9px] inline-block mt-1.5 px-1.5 py-0.5"
-                style={{
-                  color: BODY_PART_ACCENT[exercise.bodyPart],
-                  border: `1px solid ${BODY_PART_ACCENT[exercise.bodyPart]}`,
-                  borderRadius: '2px',
-                  fontWeight: 700,
-                }}
-              >
-                {BODY_PART_LABELS[exercise.bodyPart]}
-              </span>
             )}
           </div>
           <span

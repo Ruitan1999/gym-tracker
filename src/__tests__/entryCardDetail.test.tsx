@@ -20,18 +20,21 @@ function seedLibrary() {
   );
 }
 
-function renderCard(exerciseId: string, collapsed: boolean) {
+function renderCard(exerciseId: string, collapsed: boolean, done = false) {
   return render(
     <AppProvider>
       <EntryCard
         index={0}
         exerciseId={exerciseId}
-        sets={[{ setNumber: 1, reps: 8, weightKg: 60 }]}
+        sets={[
+          { setNumber: 1, reps: 8, weightKg: 60 },
+          { setNumber: 2, reps: 8, weightKg: 60 },
+        ]}
         onSetsChange={() => {}}
         onRemove={() => {}}
         collapsed={collapsed}
         onToggleCollapsed={() => {}}
-        done={false}
+        done={done}
         onToggleDone={() => {}}
       />
     </AppProvider>,
@@ -40,37 +43,51 @@ function renderCard(exerciseId: string, collapsed: boolean) {
 
 const image = (c: HTMLElement) => c.querySelector('img[src*="exercise-images"]');
 
-describe('An expanded exercise card', () => {
+describe('An exercise card', () => {
   beforeEach(() => localStorage.clear());
 
-  it('shows the muscle group and the exercise image in its header', () => {
+  it('shows the image and muscle group while folded', () => {
     seedLibrary();
-    const { container } = renderCard('ex-gv-0001', false);
+    const { container } = renderCard('ex-gv-0001', true);
 
     expect(screen.getByText('CORE')).toBeDefined();
     expect(image(container)?.getAttribute('src')).toBe('/exercise-images/ex-gv-0001.jpg');
   });
 
-  it('keeps both out of the way while folded', () => {
+  it('shows the same two when open', () => {
     seedLibrary();
-    const { container } = renderCard('ex-gv-0001', true);
+    const { container } = renderCard('ex-gv-0001', false);
 
-    expect(screen.queryByText('CORE')).toBeNull();
-    expect(image(container)).toBeNull();
+    expect(screen.getByText('CORE')).toBeDefined();
+    expect(image(container)).toBeTruthy();
+  });
+
+  it('no longer reports sets or weight on the folded row', () => {
+    seedLibrary();
+    renderCard('ex-gv-0001', true);
+
+    expect(screen.queryByText(/2×16/)).toBeNull();
+    expect(screen.queryByText(/60KG/)).toBeNull();
+  });
+
+  it('says so on the folded row once the exercise is done', () => {
+    seedLibrary();
+    renderCard('ex-gv-0001', true, true);
+    expect(screen.getByText('DONE')).toBeDefined();
+  });
+
+  it('leaves that to the complete button when open', () => {
+    seedLibrary();
+    renderCard('ex-gv-0001', false, true);
+    // Open, the card has a full-width button carrying the same state.
+    expect(screen.queryByText('DONE')).toBeNull();
   });
 
   it('still names the muscle group for an exercise with no image', () => {
     seedLibrary();
-    const { container } = renderCard('custom-1', false);
+    const { container } = renderCard('custom-1', true);
 
     expect(screen.getByText('SHOULDERS')).toBeDefined();
     expect(image(container)).toBeNull();
-  });
-
-  it('leaves the folded summary line alone', () => {
-    seedLibrary();
-    renderCard('ex-gv-0001', true);
-    // Folded, the row still reports the sets rather than the muscle group.
-    expect(screen.getByText(/1×8/)).toBeDefined();
   });
 });
