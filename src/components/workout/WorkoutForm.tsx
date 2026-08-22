@@ -545,14 +545,15 @@ export default function WorkoutForm({
             {groups.map((g) => {
               const exCount = g.exerciseIds.length;
               return (
-                <div key={g.id} className="card">
+                <div key={g.id} className="card relative">
                   <button
                     type="button"
                     onClick={() => handleStartFromGroup(g)}
-                    className="w-full text-left press px-3 pt-3"
+                    className="w-full text-left press px-3 pt-3 pb-2.5"
                   >
+                    {/* Padded clear of the menu, which is out of the flow. */}
                     <div
-                      className="font-display truncate"
+                      className="font-display truncate pr-11"
                       style={{
                         fontWeight: 700,
                         fontSize: '1rem',
@@ -563,35 +564,35 @@ export default function WorkoutForm({
                     >
                       {g.name}
                     </div>
-                  </button>
-                  {/* The count sits down here so the name gets the full width. */}
-                  <div className="flex items-center justify-between pl-3 pr-1 pb-1">
-                    <span
-                      className="caps-tight text-[9px]"
+                    <div
+                      className="caps-tight text-[9px] mt-0.5"
                       style={{ color: 'var(--color-text-faint)' }}
                     >
                       {exCount} EXERCISE{exCount === 1 ? '' : 'S'}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => setMenuForGroup(g)}
-                      aria-label={`Actions for ${g.name}`}
-                      aria-haspopup="menu"
-                      className="w-10 h-10 flex items-center justify-center press shrink-0"
-                      style={{ color: 'var(--color-text-faint)' }}
+                    </div>
+                  </button>
+                  {/* Positioned rather than laid out: given a row of its own, a
+                      44px tap target sets the row's height and pushes the count
+                      a long way clear of the name. */}
+                  <button
+                    type="button"
+                    onClick={() => setMenuForGroup(g)}
+                    aria-label={`Actions for ${g.name}`}
+                    aria-haspopup="menu"
+                    className="absolute top-0 right-0 w-11 h-11 flex items-center justify-center press"
+                    style={{ color: 'var(--color-text-faint)' }}
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                      className="w-4 h-4"
                     >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 24 24"
-                        fill="currentColor"
-                        className="w-4 h-4"
-                      >
-                        <circle cx="12" cy="5" r="1.75" />
-                        <circle cx="12" cy="12" r="1.75" />
-                        <circle cx="12" cy="19" r="1.75" />
-                      </svg>
-                    </button>
-                  </div>
+                      <circle cx="12" cy="5" r="1.75" />
+                      <circle cx="12" cy="12" r="1.75" />
+                      <circle cx="12" cy="19" r="1.75" />
+                    </svg>
+                  </button>
                 </div>
               );
             })}
