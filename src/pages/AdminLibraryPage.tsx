@@ -6,7 +6,7 @@ import { useMaybeAuth } from '../context/AuthContext';
 import { isAdmin } from '../utils/admin';
 import { imageForExercise } from '../utils/exerciseImage';
 import { BODY_PART_ORDER, BODY_PART_LABELS, BODY_PART_ACCENT } from '../utils/bodyParts';
-import { saveLibraryOverrides, uploadExerciseImage } from '../utils/remoteLibrary';
+import { saveLibraryOverrides, uploadExerciseImage, describeFailure } from '../utils/remoteLibrary';
 import type { BodyPart, Exercise } from '../types';
 
 type Filter = 'all' | 'no-image';
@@ -66,7 +66,7 @@ export default function AdminLibraryPage() {
       setEditing(null);
     } catch (err) {
       console.error('Library edit failed:', err);
-      showToast('Could not save — check the rules for library/overrides.');
+      showToast(describeFailure(err, 'Saving'));
     } finally {
       setBusy(false);
     }
@@ -215,7 +215,7 @@ function EditSheet({
       setPreview(url);
     } catch (err) {
       console.error('Image upload failed:', err);
-      setError("Upload failed — check Storage is enabled and its rules let you write.");
+      setError(describeFailure(err, 'The upload'));
     } finally {
       setUploading(false);
     }

@@ -7,5 +7,17 @@ service cloud.firestore {
     match /users/{userId} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
     }
+
+    // Corrections to the shipped exercise library, written from the admin
+    // screen. Read by everyone, signed in or not, because every app needs them
+    // at startup; it holds exercise names and picture URLs, nothing personal.
+    //
+    // Deploying this file REPLACES the live rules, so the uid below has to be a
+    // real one or the admin screen stops saving. See docs/library-admin.md.
+    match /library/{document} {
+      allow read: if true;
+      allow write: if request.auth != null
+                   && request.auth.uid == 'REPLACE_WITH_ADMIN_UID';
+    }
   }
 }

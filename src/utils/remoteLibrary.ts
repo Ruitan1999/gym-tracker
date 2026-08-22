@@ -8,6 +8,36 @@ const DOC = ['library', 'overrides'] as const;
 const IMAGE_PATH = 'library-images';
 
 /**
+ * Turns a failure into something worth reading on a phone.
+ *
+ * Setting this up means getting two sets of security rules right, and every way
+ * of getting them wrong produces the same silence. The Firebase error code is
+ * the one thing that separates "your rules rejected this" from "you are
+ * offline", so it goes on screen rather than only into the console.
+ */
+export function describeFailure(err: unknown, subject: string): string {
+  const code = (err as { code?: unknown })?.code;
+  switch (typeof code === 'string' ? code : '') {
+    case 'permission-denied':
+    case 'storage/unauthorized':
+      return `${subject} was refused by the security rules. Check the uid in them matches the account id at the bottom of Settings.`;
+    case 'unauthenticated':
+    case 'storage/unauthenticated':
+      return `${subject} needs you signed in. Sign out and back in, then try again.`;
+    case 'unavailable':
+    case 'storage/retry-limit-exceeded':
+      return `${subject} couldn't reach Firebase. Check your connection and try again.`;
+    case 'storage/unknown':
+    case 'storage/object-not-found':
+      return `${subject} failed — Storage may not be turned on for this project yet.`;
+    default:
+      return typeof code === 'string' && code
+        ? `${subject} failed (${code}).`
+        : `${subject} failed.`;
+  }
+}
+
+/**
  * The admin layer, or nothing at all.
  *
  * Never throws: the shipped library has to work whatever the network or the
