@@ -1,19 +1,19 @@
-import { OWN_EXERCISE_IMAGE_IDS } from '../data/exerciseImages';
+import { OWN_EXERCISE_IMAGES } from '../data/exerciseImages';
 
 /**
  * Where an exercise's picture lives, or null for the ones without.
  *
- * The files are named by exercise id, so this is a rule rather than a table —
- * a lookup of 1,300 entries would ride along in the bundle for the sake of
- * something the filename already says.
+ * Imported exercises are found by convention — the file is named after the id —
+ * so 1,300 of them cost nothing to look up. Everything else, including anything
+ * an admin has added or replaced, is listed by name so any image format works.
  *
- * Images are © Gym visual (https://gymvisual.com/) and carry their own terms;
- * the attribution has to travel with them wherever they are shown.
+ * Images from the upstream dataset are © Gym visual (https://gymvisual.com/)
+ * and carry their own terms; the attribution has to travel with them.
  */
 export function exerciseImageUrl(id: string): string | null {
-  if (id.startsWith('ex-gv-') || OWN_EXERCISE_IMAGE_IDS.has(id)) {
-    return `/exercise-images/${id}.jpg`;
-  }
+  const named = OWN_EXERCISE_IMAGES[id];
+  if (named) return `/exercise-images/${named}`;
+  if (id.startsWith('ex-gv-')) return `/exercise-images/${id}.jpg`;
   return null;
 }
 
