@@ -250,7 +250,11 @@ export default function EntryCard({
               src={imageForExercise(exercise.id, exerciseImages)!}
               alt=""
               aria-hidden
-              loading="lazy"
+              // A session is a handful of cards, not a catalog, and each
+              // picture is a few kB — deferring them only buys pop-in as you
+              // scroll down your own workout.
+              loading="eager"
+              fetchPriority="high"
               decoding="async"
               width={THUMB}
               height={THUMB}

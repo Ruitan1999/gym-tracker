@@ -12,6 +12,8 @@ import SaveTemplatePrompt from './SaveTemplatePrompt';
 import heroIllustration from '../../assets/healthy-habit.svg';
 import type { Workout, WorkoutEntry, WorkoutGroup, WorkoutSet } from '../../types';
 import { useDragReorder } from '../../utils/useDragReorder';
+import { imageForExercise } from '../../utils/exerciseImage';
+import { prefetchImages } from '../../utils/prefetchImages';
 
 interface WorkoutFormProps {
   existingWorkout?: Workout;
@@ -74,6 +76,7 @@ export default function WorkoutForm({
     updateGroup,
     deleteGroup,
     showSessionSaved,
+    exerciseImages,
   } = useAppContext();
   const navigate = useNavigate();
   const location = useLocation();
@@ -214,6 +217,16 @@ export default function WorkoutForm({
   }, [isEdit, date, name, entries, notes, collapsedIds, hasAnyInput, sourceGroupId]);
 
   const groups = appData.groups ?? [];
+
+  // Every picture a template could ask for, fetched while its card is still
+  // sitting there — so starting one has nothing left to wait on.
+  useEffect(() => {
+    if (groups.length === 0) return;
+    const ids = new Set(groups.flatMap((g) => g.exerciseIds));
+    return prefetchImages([...ids].map((id) => imageForExercise(id, exerciseImages)));
+    // groups is rebuilt each render; its contents are what matter.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [appData.groups, exerciseImages]);
   // Undefined once the template has been deleted mid-session, which just falls
   // back to the ordinary save-as-template flow.
   const sourceGroup = sourceGroupId ? groups.find((g) => g.id === sourceGroupId) : undefined;
