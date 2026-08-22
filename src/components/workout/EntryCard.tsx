@@ -268,7 +268,7 @@ export default function EntryCard({
             <h3
               className="font-display leading-tight truncate"
               style={{
-                fontSize: '1.0625rem',
+                fontSize: '0.9375rem',
                 fontWeight: 700,
                 letterSpacing: '-0.02em',
                 fontVariationSettings: '"wdth" 95',
@@ -279,16 +279,6 @@ export default function EntryCard({
             </h3>
             {exercise && (
               <div className="flex items-center gap-1.5 mt-1.5 min-w-0">
-                {/* Folded, there is no complete button on show, so this is the
-                    only place the card can say it is finished. */}
-                {collapsed && done && (
-                  <span
-                    className="caps-tight text-[9px] shrink-0"
-                    style={{ color: 'var(--color-done-deep)', fontWeight: 700 }}
-                  >
-                    DONE
-                  </span>
-                )}
                 <span
                   className="caps-tight text-[9px] inline-block px-1.5 py-0.5 shrink-0"
                   style={{
@@ -300,6 +290,16 @@ export default function EntryCard({
                 >
                   {BODY_PART_LABELS[exercise.bodyPart]}
                 </span>
+                {/* Folded, there is no complete button on show, so this is the
+                    only place the card can say it is finished. */}
+                {collapsed && done && (
+                  <span
+                    className="caps-tight text-[9px] shrink-0"
+                    style={{ color: 'var(--color-done-deep)', fontWeight: 700 }}
+                  >
+                    DONE
+                  </span>
+                )}
               </div>
             )}
           </div>

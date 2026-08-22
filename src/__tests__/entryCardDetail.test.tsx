@@ -70,10 +70,15 @@ describe('An exercise card', () => {
     expect(screen.queryByText(/60KG/)).toBeNull();
   });
 
-  it('says so on the folded row once the exercise is done', () => {
+  it('says so on the folded row once the exercise is done, after the group', () => {
     seedLibrary();
     renderCard('ex-gv-0001', true, true);
-    expect(screen.getByText('DONE')).toBeDefined();
+
+    const done = screen.getByText('DONE');
+    const group = screen.getByText('CORE');
+    expect(done).toBeDefined();
+    // DOCUMENT_POSITION_PRECEDING: the group comes first in the row.
+    expect(done.compareDocumentPosition(group) & Node.DOCUMENT_POSITION_PRECEDING).toBeTruthy();
   });
 
   it('leaves that to the complete button when open', () => {
