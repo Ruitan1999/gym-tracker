@@ -8,6 +8,7 @@ import BodyMap from '../components/workout/BodyMap';
 import ExerciseThumb from '../components/shared/ExerciseThumb';
 import { imageForExercise } from '../utils/exerciseImage';
 import { workedBodyParts } from '../utils/bodyParts';
+import { sessionDurationMs, formatDuration } from '../utils/duration';
 import type { WorkoutGroup } from '../types';
 
 function formatDate(dateStr: string): string {
@@ -89,6 +90,9 @@ export default function WorkoutDetailPage() {
     { weight: 0, exercise: '' }
   );
 
+  const durationMs = sessionDurationMs(workout.startedAt, workout.createdAt);
+  const durationLabel = durationMs === null ? null : formatDuration(durationMs);
+
   const ratingMatch = workout.notes?.match(/^Rating: (\d+)/);
   const rating = ratingMatch ? parseInt(ratingMatch[1]) : null;
   const notesText = workout.notes?.replace(/^Rating: \d+\n?/, '').trim() || null;
@@ -128,9 +132,13 @@ export default function WorkoutDetailPage() {
           >
             {workout.name || formatDate(workout.date)}
           </p>
-          {workout.name && (
+          {/* Alongside the date rather than in a stat tile: how long it took
+              is when it happened, not what was lifted. */}
+          {(workout.name || durationLabel) && (
             <p className="text-[13px] mt-0.5" style={{ color: 'var(--color-text-muted)' }}>
-              {formatDate(workout.date)}
+              {workout.name ? formatDate(workout.date) : null}
+              {workout.name && durationLabel ? ' · ' : null}
+              {durationLabel}
             </p>
           )}
         </div>

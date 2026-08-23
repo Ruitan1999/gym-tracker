@@ -14,6 +14,7 @@ import type { Workout, WorkoutEntry, WorkoutGroup, WorkoutSet } from '../../type
 import { useDragReorder } from '../../utils/useDragReorder';
 import { imageForExercise } from '../../utils/exerciseImage';
 import { prefetchImages } from '../../utils/prefetchImages';
+import SessionClock from './SessionClock';
 
 interface WorkoutFormProps {
   existingWorkout?: Workout;
@@ -41,6 +42,8 @@ interface Draft {
   collapsedIds: string[];
   /** The template this session was started from, if any. */
   sourceGroupId?: string;
+  /** When the clock started, so it survives a reload mid-session. */
+  startedAt?: string;
 }
 
 /**
@@ -109,6 +112,9 @@ export default function WorkoutForm({
   );
   const [hasStartedSession, setHasStartedSession] = useState(
     () => (existingWorkout?.entries?.length ?? draft?.entries?.length ?? 0) > 0,
+  );
+  const [startedAt, setStartedAt] = useState<string | null>(
+    () => (isEdit ? (existingWorkout?.startedAt ?? null) : (draft?.startedAt ?? null)),
   );
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
   const [pendingWorkout, setPendingWorkout] = useState<Workout | null>(null);
@@ -212,9 +218,10 @@ export default function WorkoutForm({
       notes,
       collapsedIds: [...collapsedIds],
       ...(sourceGroupId ? { sourceGroupId } : {}),
+      ...(startedAt ? { startedAt } : {}),
     };
     localStorage.setItem(DRAFT_KEY, JSON.stringify(payload));
-  }, [isEdit, date, name, entries, notes, collapsedIds, hasAnyInput, sourceGroupId]);
+  }, [isEdit, date, name, entries, notes, collapsedIds, hasAnyInput, sourceGroupId, startedAt]);
 
   const groups = appData.groups ?? [];
 
@@ -277,6 +284,7 @@ export default function WorkoutForm({
     setNotes('');
     setCollapsedIds(new Set());
     setSourceGroupId(null);
+    setStartedAt(null);
     setShowCancelConfirm(false);
     navigateHomeAndScrollTop();
   }
@@ -304,6 +312,12 @@ export default function WorkoutForm({
     setEntries((prev) => [...prev, newEntry]);
     setShowExerciseSelect(false);
     setScrollToEntryId(newEntry.id);
+    beginSession();
+  }
+
+  /** The clock starts once and is never restarted by a later exercise. */
+  function beginSession() {
+    if (!isEdit) setStartedAt((prev) => prev ?? new Date().toISOString());
   }
 
   function toggleCollapsed(entryId: string) {
@@ -349,7 +363,12 @@ export default function WorkoutForm({
           : [{ setNumber: 1, reps: 0, weightKg: 0 }],
       };
     });
-    const collapsed = newEntries.length > 1 ? newEntries.slice(1).map((e) => e.id) : [];
+    // All folded, including the first. Opening one was a guess at where the
+    // session would start, and a template is a set of exercises rather than an
+    // order to do them in.
+    const collapsed = newEntries.map((e) => e.id);
+
+    const begunAt = startedAt ?? new Date().toISOString();
 
     if (!isFocusedRoute) {
       const draftPayload: Draft = {
@@ -359,6 +378,7 @@ export default function WorkoutForm({
         notes: '',
         collapsedIds: collapsed,
         sourceGroupId: group.id,
+        startedAt: begunAt,
       };
       localStorage.setItem(DRAFT_KEY, JSON.stringify(draftPayload));
       navigate('/workout/new');
@@ -367,10 +387,9 @@ export default function WorkoutForm({
 
     onNameChange(group.name);
     setSourceGroupId(group.id);
+    setStartedAt(begunAt);
     setEntries(newEntries);
-    if (collapsed.length > 0) {
-      setCollapsedIds(new Set(collapsed));
-    }
+    setCollapsedIds(new Set(collapsed));
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
         const main = document.querySelector('main');
@@ -483,6 +502,7 @@ export default function WorkoutForm({
       ...(trimmedName ? { name: trimmedName } : {}),
       entries: savedEntries,
       ...(notes ? { notes } : {}),
+      ...(startedAt ? { startedAt } : {}),
       createdAt: new Date().toISOString(),
     };
 
@@ -611,6 +631,15 @@ export default function WorkoutForm({
             })}
           </div>
         </section>
+      )}
+
+      {showActiveSession && entries.length > 0 && startedAt && !isEdit && (
+        <div className="flex items-center justify-between">
+          <span className="caps-tight text-[9px]" style={{ color: 'var(--color-text-faint)' }}>
+            SESSION TIME
+          </span>
+          <SessionClock startedAt={startedAt} />
+        </div>
       )}
 
       {showActiveSession && entries.length > 0 && (

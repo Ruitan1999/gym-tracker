@@ -43,7 +43,13 @@ export interface Workout {
   name?: string;
   entries: WorkoutEntry[];
   notes?: string;
-  createdAt: string; // ISO datetime
+  /**
+   * When the session began — the first exercise added, or the moment a
+   * template was started. Absent on anything logged before sessions were
+   * timed, and on a workout entered after the fact.
+   */
+  startedAt?: string; // ISO datetime
+  createdAt: string; // ISO datetime — when it was saved, so the finish time
 }
 
 export interface UserPreferences {

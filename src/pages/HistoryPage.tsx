@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useRef, useState, type TouchEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { Dumbbell } from 'lucide-react';
 import { useAppContext } from '../context/AppContext';
@@ -34,8 +34,20 @@ interface MonthDay {
 
 export default function HistoryPage() {
   const { appData } = useAppContext();
+  /** 0 is this month; every step back is a month earlier. */
+  const [monthOffset, setMonthOffset] = useState(0);
+  const touchStart = useRef<{ x: number; y: number } | null>(null);
 
-  const { groupedWorkouts, totalSessions, heaviestLift, currentStreak, monthLabel, monthDays, monthTrainedCount } = useMemo(() => {
+  const {
+    groupedWorkouts,
+    totalSessions,
+    heaviestLift,
+    currentStreak,
+    monthLabel,
+    monthDays,
+    monthTrainedCount,
+    earliestOffset,
+  } = useMemo(() => {
     const sorted = [...appData.workouts].sort((a, b) => {
       const byCreated = (b.createdAt ?? '').localeCompare(a.createdAt ?? '');
       return byCreated !== 0 ? byCreated : b.date.localeCompare(a.date);
@@ -70,7 +82,7 @@ export default function HistoryPage() {
 
     // Month calendar — grid starting Monday of first week, through Sunday of last week
     const year = today.getFullYear();
-    const month = today.getMonth();
+    const month = today.getMonth() + monthOffset;
     const first = new Date(year, month, 1);
     const last = new Date(year, month + 1, 0);
     const firstDow = first.getDay();
@@ -94,7 +106,7 @@ export default function HistoryPage() {
         trained: dateSet.has(iso),
         isToday: iso === todayIso,
         isFuture: d.getTime() > today.getTime(),
-        isCurrentMonth: d.getMonth() === month,
+        isCurrentMonth: d.getMonth() === first.getMonth() && d.getFullYear() === first.getFullYear(),
       });
     }
 
@@ -102,6 +114,17 @@ export default function HistoryPage() {
       .toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
       .toUpperCase();
     const trainedInMonth = days.filter((d) => d.isCurrentMonth && d.trained).length;
+
+    // How far back there is anything to look at. Past the first session the
+    // calendar is just empty grids, which is not browsing, it is falling off
+    // the end.
+    let oldest = 0;
+    if (sorted.length > 0) {
+      const last = sorted[sorted.length - 1].date;
+      const [oy, om] = last.split('-').map(Number);
+      oldest =
+        (oy - today.getFullYear()) * 12 + (om - 1 - today.getMonth());
+    }
 
     return {
       groupedWorkouts: groups,
@@ -111,8 +134,25 @@ export default function HistoryPage() {
       monthLabel: label,
       monthDays: days,
       monthTrainedCount: trainedInMonth,
+      earliestOffset: Math.min(0, oldest),
     };
-  }, [appData.workouts]);
+  }, [appData.workouts, monthOffset]);
+
+  // Swiping the calendar steps a month, but only when the gesture is clearly
+  // sideways — otherwise it would fight scrolling the page.
+  function onTouchStart(e: TouchEvent) {
+    touchStart.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+  }
+  function onTouchEnd(e: TouchEvent) {
+    const from = touchStart.current;
+    if (!from) return;
+    touchStart.current = null;
+    const dx = e.changedTouches[0].clientX - from.x;
+    const dy = e.changedTouches[0].clientY - from.y;
+    if (Math.abs(dx) < 48 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
+    if (dx > 0) setMonthOffset((m) => Math.max(earliestOffset, m - 1));
+    else setMonthOffset((m) => Math.min(0, m + 1));
+  }
 
   if (appData.workouts.length === 0) {
     return (
@@ -145,14 +185,39 @@ export default function HistoryPage() {
       </section>
 
       {/* Month calendar */}
-      <section className="card p-4 mb-6">
-        <div className="flex items-center justify-between mb-3">
-          <div className="caps-tight text-[9px]" style={{ color: 'var(--color-text-faint)' }}>
+      <section
+        className="card p-4 mb-6"
+        onTouchStart={onTouchStart}
+        onTouchEnd={onTouchEnd}
+      >
+        <div className="flex items-center gap-2 mb-3">
+          <MonthStep
+            label="Previous month"
+            glyph="‹"
+            disabled={monthOffset <= earliestOffset}
+            onClick={() => setMonthOffset((m) => m - 1)}
+          />
+          <button
+            type="button"
+            onClick={() => setMonthOffset(0)}
+            disabled={monthOffset === 0}
+            className="flex-1 min-w-0 text-center caps-tight text-[9px] press disabled:opacity-100"
+            style={{ color: 'var(--color-text-faint)' }}
+          >
             {monthLabel}
-          </div>
-          <div className="caps-tight text-[9px]" style={{ color: 'var(--color-text-faint)' }}>
-            {String(monthTrainedCount).padStart(2, '0')} DAY{monthTrainedCount === 1 ? '' : 'S'} TRAINED
-          </div>
+            {monthOffset !== 0 && (
+              <span style={{ color: 'var(--color-volt)' }}> · TODAY</span>
+            )}
+          </button>
+          <MonthStep
+            label="Next month"
+            glyph="›"
+            disabled={monthOffset >= 0}
+            onClick={() => setMonthOffset((m) => Math.min(0, m + 1))}
+          />
+        </div>
+        <div className="caps-tight text-[9px] text-center mb-3" style={{ color: 'var(--color-text-faint)' }}>
+          {String(monthTrainedCount).padStart(2, '0')} DAY{monthTrainedCount === 1 ? '' : 'S'} TRAINED
         </div>
 
         <div className="grid grid-cols-7 gap-1 mb-1.5">
@@ -199,6 +264,31 @@ export default function HistoryPage() {
         ))}
       </div>
     </PageShell>
+  );
+}
+
+function MonthStep({
+  label,
+  glyph,
+  disabled,
+  onClick,
+}: {
+  label: string;
+  glyph: string;
+  disabled: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      aria-label={label}
+      className="w-9 h-9 shrink-0 flex items-center justify-center press disabled:opacity-25"
+      style={{ color: 'var(--color-text)', fontSize: '18px', lineHeight: 1 }}
+    >
+      {glyph}
+    </button>
   );
 }
 
