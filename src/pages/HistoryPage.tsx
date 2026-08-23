@@ -232,6 +232,7 @@ export default function HistoryPage() {
       {/* Month calendar */}
       <section
         ref={calendarRef}
+        aria-label="Training calendar"
         className="card p-4 mb-6"
         style={{ touchAction: 'pan-y' }}
       >
@@ -242,33 +243,18 @@ export default function HistoryPage() {
             disabled={monthOffset <= earliestOffset}
             onClick={() => step(-1)}
           />
-          <button
-            type="button"
-            onClick={() => setMonthOffset(0)}
-            disabled={monthOffset === 0}
-            className="flex-1 min-w-0 text-center press disabled:opacity-100"
+          <h2
+            className="font-display flex-1 min-w-0 text-center truncate"
+            style={{
+              fontSize: '1.0625rem',
+              fontWeight: 700,
+              letterSpacing: '-0.01em',
+              fontVariationSettings: '"wdth" 95',
+              color: 'var(--color-text)',
+            }}
           >
-            <span
-              className="font-display block truncate"
-              style={{
-                fontSize: '1.0625rem',
-                fontWeight: 700,
-                letterSpacing: '-0.01em',
-                fontVariationSettings: '"wdth" 95',
-                color: 'var(--color-text)',
-              }}
-            >
-              {monthLabel}
-            </span>
-            {monthOffset !== 0 && (
-              <span
-                className="caps-tight text-[9px] block mt-0.5"
-                style={{ color: 'var(--color-volt)', fontWeight: 700 }}
-              >
-                ← BACK TO TODAY
-              </span>
-            )}
-          </button>
+            {monthLabel}
+          </h2>
           <MonthStep
             label="Next month"
             icon={<ChevronRight className="w-5 h-5" strokeWidth={2.25} />}
@@ -296,12 +282,22 @@ export default function HistoryPage() {
         </div>
 
         {/* Under the grid it counts, rather than above it competing with the
-            month for the top of the card. */}
-        <div
-          className="caps-tight text-[9px] mt-3"
-          style={{ color: 'var(--color-text-faint)' }}
-        >
-          {String(monthTrainedCount).padStart(2, '0')} DAY{monthTrainedCount === 1 ? '' : 'S'} TRAINED
+            month for the top of the card. The way back sits opposite it, out
+            of the way until there is somewhere to go back from. */}
+        <div className="flex items-center justify-between gap-3 mt-3 min-h-[16px]">
+          <span className="caps-tight text-[9px]" style={{ color: 'var(--color-text-faint)' }}>
+            {String(monthTrainedCount).padStart(2, '0')} DAY{monthTrainedCount === 1 ? '' : 'S'} TRAINED
+          </span>
+          {monthOffset !== 0 && (
+            <button
+              type="button"
+              onClick={() => setMonthOffset(0)}
+              className="caps-tight text-[9px] press shrink-0"
+              style={{ color: 'var(--color-volt)', fontWeight: 700 }}
+            >
+              BACK TO TODAY →
+            </button>
+          )}
         </div>
       </section>
 

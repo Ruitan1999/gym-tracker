@@ -37,7 +37,10 @@ function renderPage() {
   );
 }
 
-const monthHeader = () => screen.getByRole('button', { name: /2026|2025/ });
+/** Scoped to the calendar: the session list below carries month headings too. */
+const calendar = () => within(screen.getByLabelText('Training calendar'));
+const monthHeader = () => calendar().getByRole('heading');
+const backToToday = () => calendar().queryByText(/BACK TO TODAY/);
 const click = (el: HTMLElement) => fireEvent.click(el);
 const prev = () => screen.getByLabelText('Previous month');
 const next = () => screen.getByLabelText('Next month');
@@ -71,12 +74,12 @@ describe('flicking back through the calendar', () => {
     seed(['2026-08-03', '2026-06-10', '2026-06-12', '2026-06-14']);
     renderPage();
 
-    expect(screen.getByText(/01 DAY TRAINED/)).toBeTruthy();
+    expect(calendar().getByText(/01 DAY TRAINED/)).toBeTruthy();
 
     click(prev());
     click(prev());
 
-    expect(screen.getByText(/03 DAYS TRAINED/)).toBeTruthy();
+    expect(calendar().getByText(/03 DAYS TRAINED/)).toBeTruthy();
   });
 
   it('crosses back over a year boundary', () => {
@@ -107,14 +110,14 @@ describe('flicking back through the calendar', () => {
     seed(['2026-08-03', '2026-05-10']);
     renderPage();
 
-    expect(monthHeader().textContent).not.toContain('TODAY');
+    expect(backToToday()).toBeNull();
 
     click(prev());
-    expect(monthHeader().textContent).toContain('TODAY');
+    expect(backToToday()).toBeTruthy();
 
-    click(monthHeader());
+    click(backToToday()!);
     expect(monthHeader().textContent).toContain('AUGUST 2026');
-    expect(monthHeader().textContent).not.toContain('TODAY');
+    expect(backToToday()).toBeNull();
   });
 
   it('keeps the session list showing everything, whatever month is on the calendar', () => {
