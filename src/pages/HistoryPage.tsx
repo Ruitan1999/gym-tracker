@@ -1,6 +1,6 @@
-import { useMemo, useRef, useState, type TouchEvent } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
-import { Dumbbell } from 'lucide-react';
+import { Dumbbell, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useAppContext } from '../context/AppContext';
 import PageShell from '../components/layout/PageShell';
 import EmptyState from '../components/shared/EmptyState';
@@ -36,7 +36,7 @@ export default function HistoryPage() {
   const { appData } = useAppContext();
   /** 0 is this month; every step back is a month earlier. */
   const [monthOffset, setMonthOffset] = useState(0);
-  const touchStart = useRef<{ x: number; y: number } | null>(null);
+  const calendarRef = useRef<HTMLElement>(null);
 
   const {
     groupedWorkouts,
@@ -138,21 +138,66 @@ export default function HistoryPage() {
     };
   }, [appData.workouts, monthOffset]);
 
-  // Swiping the calendar steps a month, but only when the gesture is clearly
-  // sideways — otherwise it would fight scrolling the page.
-  function onTouchStart(e: TouchEvent) {
-    touchStart.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-  }
-  function onTouchEnd(e: TouchEvent) {
-    const from = touchStart.current;
-    if (!from) return;
-    touchStart.current = null;
-    const dx = e.changedTouches[0].clientX - from.x;
-    const dy = e.changedTouches[0].clientY - from.y;
-    if (Math.abs(dx) < 48 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
-    if (dx > 0) setMonthOffset((m) => Math.max(earliestOffset, m - 1));
-    else setMonthOffset((m) => Math.min(0, m + 1));
-  }
+  const step = useCallback(
+    (by: number) => setMonthOffset((m) => Math.min(0, Math.max(earliestOffset, m + by))),
+    [earliestOffset],
+  );
+
+  /**
+   * Swiping the calendar steps a month.
+   *
+   * The axis is decided during the gesture and then locked: a sideways swipe
+   * has its default prevented so the page does not scroll underneath it, and
+   * anything vertical is left alone entirely. Reading only the end of the
+   * gesture, as this did before, is too late — the scrolling has happened by
+   * then, so a swipe both moved the month and dragged the page.
+   *
+   * Native listeners rather than React's, because preventDefault needs a
+   * non-passive touchmove and React does not attach one.
+   */
+  useEffect(() => {
+    const node = calendarRef.current;
+    if (!node) return;
+
+    let start: { x: number; y: number } | null = null;
+    let axis: 'none' | 'x' | 'y' = 'none';
+
+    const onStart = (e: globalThis.TouchEvent) => {
+      if (e.touches.length !== 1) return;
+      start = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+      axis = 'none';
+    };
+
+    const onMove = (e: globalThis.TouchEvent) => {
+      if (!start) return;
+      const dx = e.touches[0].clientX - start.x;
+      const dy = e.touches[0].clientY - start.y;
+      if (axis === 'none' && (Math.abs(dx) > 8 || Math.abs(dy) > 8)) {
+        axis = Math.abs(dx) > Math.abs(dy) * 1.2 ? 'x' : 'y';
+      }
+      if (axis === 'x') e.preventDefault();
+    };
+
+    const onEnd = (e: globalThis.TouchEvent) => {
+      const from = start;
+      start = null;
+      if (!from || axis !== 'x') return;
+      const dx = e.changedTouches[0].clientX - from.x;
+      if (Math.abs(dx) < 40) return;
+      step(dx > 0 ? -1 : 1);
+    };
+
+    node.addEventListener('touchstart', onStart, { passive: true });
+    node.addEventListener('touchmove', onMove, { passive: false });
+    node.addEventListener('touchend', onEnd, { passive: true });
+    node.addEventListener('touchcancel', onEnd, { passive: true });
+    return () => {
+      node.removeEventListener('touchstart', onStart);
+      node.removeEventListener('touchmove', onMove);
+      node.removeEventListener('touchend', onEnd);
+      node.removeEventListener('touchcancel', onEnd);
+    };
+  }, [step]);
 
   if (appData.workouts.length === 0) {
     return (
@@ -186,38 +231,50 @@ export default function HistoryPage() {
 
       {/* Month calendar */}
       <section
+        ref={calendarRef}
         className="card p-4 mb-6"
-        onTouchStart={onTouchStart}
-        onTouchEnd={onTouchEnd}
+        style={{ touchAction: 'pan-y' }}
       >
-        <div className="flex items-center gap-2 mb-3">
+        <div className="flex items-center gap-1 mb-4">
           <MonthStep
             label="Previous month"
-            glyph="‹"
+            icon={<ChevronLeft className="w-5 h-5" strokeWidth={2.25} />}
             disabled={monthOffset <= earliestOffset}
-            onClick={() => setMonthOffset((m) => m - 1)}
+            onClick={() => step(-1)}
           />
           <button
             type="button"
             onClick={() => setMonthOffset(0)}
             disabled={monthOffset === 0}
-            className="flex-1 min-w-0 text-center caps-tight text-[9px] press disabled:opacity-100"
-            style={{ color: 'var(--color-text-faint)' }}
+            className="flex-1 min-w-0 text-center press disabled:opacity-100"
           >
-            {monthLabel}
+            <span
+              className="font-display block truncate"
+              style={{
+                fontSize: '1.0625rem',
+                fontWeight: 700,
+                letterSpacing: '-0.01em',
+                fontVariationSettings: '"wdth" 95',
+                color: 'var(--color-text)',
+              }}
+            >
+              {monthLabel}
+            </span>
             {monthOffset !== 0 && (
-              <span style={{ color: 'var(--color-volt)' }}> · TODAY</span>
+              <span
+                className="caps-tight text-[9px] block mt-0.5"
+                style={{ color: 'var(--color-volt)', fontWeight: 700 }}
+              >
+                ← BACK TO TODAY
+              </span>
             )}
           </button>
           <MonthStep
             label="Next month"
-            glyph="›"
+            icon={<ChevronRight className="w-5 h-5" strokeWidth={2.25} />}
             disabled={monthOffset >= 0}
-            onClick={() => setMonthOffset((m) => Math.min(0, m + 1))}
+            onClick={() => step(1)}
           />
-        </div>
-        <div className="caps-tight text-[9px] text-center mb-3" style={{ color: 'var(--color-text-faint)' }}>
-          {String(monthTrainedCount).padStart(2, '0')} DAY{monthTrainedCount === 1 ? '' : 'S'} TRAINED
         </div>
 
         <div className="grid grid-cols-7 gap-1 mb-1.5">
@@ -236,6 +293,15 @@ export default function HistoryPage() {
           {monthDays.map((d) => (
             <CalendarCell key={d.iso} {...d} />
           ))}
+        </div>
+
+        {/* Under the grid it counts, rather than above it competing with the
+            month for the top of the card. */}
+        <div
+          className="caps-tight text-[9px] mt-3"
+          style={{ color: 'var(--color-text-faint)' }}
+        >
+          {String(monthTrainedCount).padStart(2, '0')} DAY{monthTrainedCount === 1 ? '' : 'S'} TRAINED
         </div>
       </section>
 
@@ -269,12 +335,12 @@ export default function HistoryPage() {
 
 function MonthStep({
   label,
-  glyph,
+  icon,
   disabled,
   onClick,
 }: {
   label: string;
-  glyph: string;
+  icon: ReactNode;
   disabled: boolean;
   onClick: () => void;
 }) {
@@ -284,10 +350,10 @@ function MonthStep({
       onClick={onClick}
       disabled={disabled}
       aria-label={label}
-      className="w-9 h-9 shrink-0 flex items-center justify-center press disabled:opacity-25"
-      style={{ color: 'var(--color-text)', fontSize: '18px', lineHeight: 1 }}
+      className="w-11 h-11 shrink-0 flex items-center justify-center press disabled:opacity-20"
+      style={{ color: 'var(--color-text)' }}
     >
-      {glyph}
+      {icon}
     </button>
   );
 }
