@@ -62,7 +62,7 @@ export default function QuickRepChips({
               background: 'var(--color-volt)',
               color: '#ffffff',
               border: '1px solid var(--color-volt)',
-              borderRadius: '2px',
+              borderRadius: 'var(--radius)',
             }}
           >
             {current}
@@ -82,7 +82,7 @@ export default function QuickRepChips({
                 background: active ? 'var(--color-volt)' : 'transparent',
                 color: active ? '#ffffff' : 'var(--color-text)',
                 border: `1px solid ${active ? 'var(--color-volt)' : 'var(--color-line-2)'}`,
-                borderRadius: '2px',
+                borderRadius: 'var(--radius)',
                 fontVariantNumeric: 'tabular-nums',
               }}
             >
@@ -99,7 +99,7 @@ export default function QuickRepChips({
             background: 'transparent',
             color: 'var(--color-text-muted)',
             border: '1px dashed var(--color-line-3)',
-            borderRadius: '2px',
+            borderRadius: 'var(--radius)',
           }}
         >
           +
@@ -140,7 +140,7 @@ export default function QuickRepChips({
                   background: 'var(--color-ink)',
                   color: 'var(--color-text)',
                   border: '1px solid var(--color-line-2)',
-                  borderRadius: '2px',
+                  borderRadius: 'var(--radius)',
                   fontSize: '2rem',
                   fontWeight: 500,
                   padding: '0.5rem 0',
@@ -155,7 +155,7 @@ export default function QuickRepChips({
                 type="button"
                 onClick={() => setModalOpen(false)}
                 className="h-12 btn-ghost press caps-tight text-[11px]"
-                style={{ borderRadius: '2px' }}
+                style={{ borderRadius: 'var(--radius)' }}
               >
                 CANCEL
               </button>
@@ -163,7 +163,7 @@ export default function QuickRepChips({
                 type="button"
                 onClick={confirm}
                 className="h-12 btn-volt press caps-tight text-[11px]"
-                style={{ borderRadius: '2px' }}
+                style={{ borderRadius: 'var(--radius)' }}
               >
                 SET REPS
               </button>

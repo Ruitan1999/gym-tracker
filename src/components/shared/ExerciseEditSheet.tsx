@@ -97,7 +97,7 @@ export default function ExerciseEditSheet({
             disabled={uploading || busy}
             className="h-10 px-3 caps-tight text-[10px] press"
             style={{
-              borderRadius: '2px',
+              borderRadius: 'var(--radius)',
               border: '1px solid var(--color-volt)',
               color: 'var(--color-volt)',
               fontWeight: 700,
@@ -137,7 +137,7 @@ export default function ExerciseEditSheet({
             style={{
               background: 'var(--color-surface)',
               border: '1px solid var(--color-line-2)',
-              borderRadius: '2px',
+              borderRadius: 'var(--radius)',
               fontSize: '16px',
               color: 'var(--color-text)',
             }}
@@ -156,7 +156,7 @@ export default function ExerciseEditSheet({
                 onClick={() => setBodyPart(part)}
                 className="h-10 caps-tight text-[9px] press"
                 style={{
-                  borderRadius: '2px',
+                  borderRadius: 'var(--radius)',
                   background: bodyPart === part ? BODY_PART_ACCENT[part] : 'transparent',
                   color: bodyPart === part ? '#ffffff' : 'var(--color-text)',
                   border: `1px solid ${bodyPart === part ? BODY_PART_ACCENT[part] : 'var(--color-line-2)'}`,
@@ -174,7 +174,7 @@ export default function ExerciseEditSheet({
             type="button"
             onClick={onClose}
             className="h-12 btn-ghost press caps-tight text-[11px]"
-            style={{ borderRadius: '2px' }}
+            style={{ borderRadius: 'var(--radius)' }}
           >
             CANCEL
           </button>
@@ -185,7 +185,7 @@ export default function ExerciseEditSheet({
               onSave({ name: name.trim(), bodyPart, ...(uploadedUrl ? { image: uploadedUrl } : {}) })
             }
             className="h-12 btn-volt press caps-tight text-[11px] disabled:opacity-40"
-            style={{ borderRadius: '2px' }}
+            style={{ borderRadius: 'var(--radius)' }}
           >
             {busy ? savingLabel : saveLabel}
           </button>
@@ -197,7 +197,7 @@ export default function ExerciseEditSheet({
             onClick={() => setConfirmRemove(true)}
             disabled={busy}
             className="h-11 press caps-tight text-[10px]"
-            style={{ borderRadius: '2px', color: 'var(--color-rust)', border: '1px solid var(--color-rust)' }}
+            style={{ borderRadius: 'var(--radius)', color: 'var(--color-rust)', border: '1px solid var(--color-rust)' }}
           >
             {remove.label}
           </button>

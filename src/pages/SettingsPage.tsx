@@ -118,7 +118,7 @@ export default function SettingsPage() {
             style={{
               background: '#ffffff',
               border: '1px solid var(--color-line-2)',
-              borderRadius: '2px',
+              borderRadius: 'var(--radius)',
               color: 'var(--color-text)',
             }}
           >
@@ -155,7 +155,7 @@ export default function SettingsPage() {
                 style={{
                   background: '#ffffff',
                   border: '1px solid var(--color-line-2)',
-                  borderRadius: '2px',
+                  borderRadius: 'var(--radius)',
                 }}
               >
                 <span
@@ -192,7 +192,7 @@ export default function SettingsPage() {
                 style={{
                   color: 'var(--color-text)',
                   border: '1px dashed var(--color-line-3)',
-                  borderRadius: '2px',
+                  borderRadius: 'var(--radius)',
                 }}
               >
                 ＋ ADD VALUE
@@ -214,7 +214,7 @@ export default function SettingsPage() {
                 type="button"
                 onClick={commitNewRep}
                 className="h-12 px-4 btn-volt press caps-tight text-[10px]"
-                style={{ borderRadius: '2px' }}
+                style={{ borderRadius: 'var(--radius)' }}
               >
                 ADD
               </button>
@@ -225,7 +225,7 @@ export default function SettingsPage() {
                   setNewRep('');
                 }}
                 className="h-12 px-3 btn-ghost press caps-tight text-[10px]"
-                style={{ borderRadius: '2px' }}
+                style={{ borderRadius: 'var(--radius)' }}
               >
                 CANCEL
               </button>
@@ -262,7 +262,7 @@ export default function SettingsPage() {
                 style={{
                   background: '#ffffff',
                   border: '1px solid var(--color-line-2)',
-                  borderRadius: '2px',
+                  borderRadius: 'var(--radius)',
                   color: 'var(--color-text)',
                   opacity: accountBusy ? 0.5 : 1,
                 }}
@@ -280,7 +280,7 @@ export default function SettingsPage() {
                 style={{
                   background: '#c0392b',
                   border: '1px solid #c0392b',
-                  borderRadius: '2px',
+                  borderRadius: 'var(--radius)',
                   color: '#ffffff',
                   fontWeight: 600,
                   opacity: accountBusy ? 0.5 : 1,

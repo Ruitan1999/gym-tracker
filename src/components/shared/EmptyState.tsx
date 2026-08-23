@@ -14,7 +14,7 @@ export default function EmptyState({ message, description, action }: EmptyStateP
         style={{
           border: '1px solid var(--color-line-2)',
           background: 'var(--color-elev)',
-          borderRadius: '2px',
+          borderRadius: 'var(--radius)',
           color: 'var(--color-text-faint)',
         }}
       >

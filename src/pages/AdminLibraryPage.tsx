@@ -88,7 +88,7 @@ export default function AdminLibraryPage() {
               onClick={() => setFilter(f)}
               className="h-10 px-3 caps-tight text-[10px] press"
               style={{
-                borderRadius: '2px',
+                borderRadius: 'var(--radius)',
                 background: filter === f ? 'var(--color-volt)' : 'transparent',
                 color: filter === f ? '#ffffff' : 'var(--color-text)',
                 border: `1px solid ${filter === f ? 'var(--color-volt)' : 'var(--color-line-2)'}`,
@@ -109,7 +109,7 @@ export default function AdminLibraryPage() {
           style={{
             background: 'var(--color-surface)',
             border: '1px solid var(--color-line-2)',
-            borderRadius: '2px',
+            borderRadius: 'var(--radius)',
             fontSize: '16px',
             color: 'var(--color-text)',
           }}

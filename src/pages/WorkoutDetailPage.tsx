@@ -161,7 +161,7 @@ export default function WorkoutDetailPage() {
             style={{
               background: 'var(--color-elev)',
               border: '1px solid var(--color-volt)',
-              borderRadius: '2px',
+              borderRadius: 'var(--radius)',
             }}
           >
             <div
@@ -224,7 +224,7 @@ export default function WorkoutDetailPage() {
                   rating <= 3 ? 'var(--color-rust)' : rating <= 6 ? 'var(--color-ember)' : 'var(--color-text)',
                 fontSize: '1.5rem',
                 fontWeight: 500,
-                borderRadius: '2px',
+                borderRadius: 'var(--radius)',
                 fontVariantNumeric: 'tabular-nums',
               }}
             >
@@ -366,7 +366,7 @@ export default function WorkoutDetailPage() {
           type="button"
           onClick={() => setShowSaveTemplate(true)}
           className="h-12 btn-ghost press caps-tight text-[11px]"
-          style={{ borderRadius: '2px' }}
+          style={{ borderRadius: 'var(--radius)' }}
         >
           SAVE AS TEMPLATE →
         </button>
@@ -380,7 +380,7 @@ export default function WorkoutDetailPage() {
             background: 'transparent',
             color: 'var(--color-rust)',
             border: '1px solid var(--color-rust)',
-            borderRadius: '2px',
+            borderRadius: 'var(--radius)',
           }}
         >
           ✕ DELETE SESSION

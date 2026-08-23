@@ -52,7 +52,7 @@ export default function SiteHeader() {
                   type="button"
                   onClick={() => navigate('/login')}
                   className="h-9 px-4 btn-volt press caps-tight text-[10px] inline-flex items-center"
-                  style={{ borderRadius: '2px' }}
+                  style={{ borderRadius: 'var(--radius)' }}
                 >
                   GET STARTED →
                 </button>

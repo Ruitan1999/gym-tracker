@@ -227,7 +227,7 @@ export default function ExerciseSelect({
             style={{
               background: 'var(--color-ink)',
               border: '1px solid var(--color-line-2)',
-              borderRadius: '2px',
+              borderRadius: 'var(--radius)',
               fontSize: '16px',
               letterSpacing: '0.02em',
               color: 'var(--color-text)',
@@ -254,9 +254,9 @@ export default function ExerciseSelect({
                       className="w-full press flex items-center justify-center gap-2 h-14"
                       style={{
                         color: 'var(--color-volt)',
-                        background: 'rgba(243, 91, 38, 0.08)',
+                        background: 'var(--color-volt-tint)',
                         border: '1.5px dashed var(--color-volt)',
-                        borderRadius: '2px',
+                        borderRadius: 'var(--radius)',
                       }}
                     >
                       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="square" className="w-5 h-5">
@@ -298,7 +298,7 @@ export default function ExerciseSelect({
                             style={{
                               background: '#ffffff',
                               border: `1px solid ${BODY_PART_ACCENT[cat]}`,
-                              borderRadius: '2px',
+                              borderRadius: 'var(--radius)',
                             }}
                           >
                             <span
@@ -317,7 +317,7 @@ export default function ExerciseSelect({
                               style={{
                                 color: BODY_PART_ACCENT[cat],
                                 border: `1px solid ${BODY_PART_ACCENT[cat]}`,
-                                borderRadius: '2px',
+                                borderRadius: 'var(--radius)',
                               }}
                             >
                               {BODY_PART_CODE[cat]}
@@ -364,7 +364,7 @@ export default function ExerciseSelect({
                             style={{
                               color: BODY_PART_ACCENT[ex.bodyPart],
                               border: `1px solid ${BODY_PART_ACCENT[ex.bodyPart]}`,
-                              borderRadius: '2px',
+                              borderRadius: 'var(--radius)',
                             }}
                           >
                             {BODY_PART_CODE[ex.bodyPart]}
@@ -462,7 +462,7 @@ function AddedTag() {
         color: 'var(--color-done-deep)',
         background: 'var(--color-done-tint)',
         border: '1px solid var(--color-done)',
-        borderRadius: '2px',
+        borderRadius: 'var(--radius)',
       }}
     >
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3} strokeLinecap="square" className="w-2.5 h-2.5">

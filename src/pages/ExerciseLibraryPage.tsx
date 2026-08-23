@@ -90,7 +90,7 @@ export default function ExerciseLibraryPage() {
           type="button"
           onClick={() => setSheet({ mode: 'add', id: crypto.randomUUID() })}
           className="h-12 btn-volt press caps-tight text-[11px]"
-          style={{ borderRadius: '2px' }}
+          style={{ borderRadius: 'var(--radius)' }}
         >
           ＋ ADD CUSTOM EXERCISE
         </button>

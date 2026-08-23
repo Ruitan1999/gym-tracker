@@ -136,7 +136,7 @@ export default function NumberInput({
           background: 'var(--color-ink)',
           color: 'var(--color-text)',
           border: '1px solid var(--color-line-2)',
-          borderRadius: '2px',
+          borderRadius: 'var(--radius)',
           fontSize: '1rem',
           fontVariantNumeric: 'tabular-nums',
         }}

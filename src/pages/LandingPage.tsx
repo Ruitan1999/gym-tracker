@@ -76,7 +76,7 @@ export default function LandingPage() {
                 type="button"
                 onClick={goSignIn}
                 className="h-12 px-6 btn-volt press caps-tight text-[11px] inline-flex items-center"
-                style={{ borderRadius: '2px' }}
+                style={{ borderRadius: 'var(--radius)' }}
               >
                 START TRAINING →
               </button>
@@ -84,7 +84,7 @@ export default function LandingPage() {
                 type="button"
                 onClick={goSignIn}
                 className="h-12 px-5 btn-ghost press caps-tight text-[11px] inline-flex items-center"
-                style={{ borderRadius: '2px' }}
+                style={{ borderRadius: 'var(--radius)' }}
               >
                 SIGN IN
               </button>
@@ -98,7 +98,7 @@ export default function LandingPage() {
           <div className="sm:col-span-5">
             <div
               className="p-5 sm:p-6 space-y-4"
-              style={{ background: 'var(--color-surface)', border: '1px solid var(--color-line)', borderRadius: '2px' }}
+              style={{ background: 'var(--color-surface)', border: '1px solid var(--color-line)', borderRadius: 'var(--radius)' }}
             >
               <div className="flex items-center justify-between">
                 <span className="caps-tight text-[10px]" style={{ color: 'var(--color-text-faint)' }}>
@@ -321,7 +321,7 @@ export default function LandingPage() {
               type="button"
               onClick={goSignIn}
               className="h-11 px-5 btn-volt press caps-tight text-[11px] inline-flex items-center"
-              style={{ borderRadius: '2px' }}
+              style={{ borderRadius: 'var(--radius)' }}
             >
               CREATE ACCOUNT →
             </button>
@@ -329,7 +329,7 @@ export default function LandingPage() {
               type="button"
               onClick={goSignIn}
               className="h-11 px-4 press caps-tight text-[11px] inline-flex items-center"
-              style={{ border: '1px solid rgba(255,255,255,0.35)', color: 'var(--color-ink)', borderRadius: '2px' }}
+              style={{ border: '1px solid rgba(255,255,255,0.35)', color: 'var(--color-ink)', borderRadius: 'var(--radius)' }}
             >
               SIGN IN
             </button>
@@ -423,7 +423,7 @@ function LandingCalendarCell({ day, trained, today, past }: LandingCell) {
               ? 'var(--color-text)'
               : 'var(--color-line-2)'
         }`,
-        borderRadius: '2px',
+        borderRadius: 'var(--radius)',
         opacity: past ? 0.55 : 1,
       }}
     >
@@ -449,7 +449,7 @@ function Feature({ code, title, desc }: { code: string; title: string; desc: str
   return (
     <div
       className="p-5 h-full flex flex-col"
-      style={{ background: 'var(--color-surface)', border: '1px solid var(--color-line)', borderRadius: '2px' }}
+      style={{ background: 'var(--color-surface)', border: '1px solid var(--color-line)', borderRadius: 'var(--radius)' }}
     >
       <div className="caps-tight text-[10px] mb-6" style={{ color: 'var(--color-volt-ink)' }}>
         {code}

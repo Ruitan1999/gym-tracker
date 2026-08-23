@@ -60,7 +60,7 @@ export default function UpdateBanner() {
         style={{
           background: 'var(--color-ink)',
           border: '1px solid var(--color-volt)',
-          borderRadius: '2px',
+          borderRadius: 'var(--radius)',
           boxShadow: '0 10px 30px rgba(0,0,0,0.55)',
         }}
       >
@@ -80,7 +80,7 @@ export default function UpdateBanner() {
           type="button"
           onClick={reloadFresh}
           className="h-9 px-3 btn-volt press caps-tight text-[10px] shrink-0"
-          style={{ borderRadius: '2px' }}
+          style={{ borderRadius: 'var(--radius)' }}
         >
           RELOAD
         </button>

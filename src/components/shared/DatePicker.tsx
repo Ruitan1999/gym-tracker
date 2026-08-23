@@ -169,7 +169,7 @@ export default function DatePicker({ value, onChange }: DatePickerProps) {
                     background: value === today ? 'var(--color-volt)' : 'transparent',
                     color: value === today ? '#ffffff' : 'var(--color-text)',
                     border: `1px solid ${value === today ? 'var(--color-volt)' : 'var(--color-line-2)'}`,
-                    borderRadius: '2px',
+                    borderRadius: 'var(--radius)',
                   }}
                 >
                   Today
@@ -182,7 +182,7 @@ export default function DatePicker({ value, onChange }: DatePickerProps) {
                     background: value === yesterday ? 'var(--color-volt)' : 'transparent',
                     color: value === yesterday ? '#ffffff' : 'var(--color-text)',
                     border: `1px solid ${value === yesterday ? 'var(--color-volt)' : 'var(--color-line-2)'}`,
-                    borderRadius: '2px',
+                    borderRadius: 'var(--radius)',
                   }}
                 >
                   Yesterday

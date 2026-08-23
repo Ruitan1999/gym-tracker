@@ -64,7 +64,7 @@ export default function RestTimer() {
           border: `1px solid ${isRunning ? 'var(--color-volt)' : 'var(--color-line-3)'}`,
           boxShadow: '0 6px 18px rgba(20, 20, 20, 0.12)',
           color: badgeColor,
-          borderRadius: '2px',
+          borderRadius: 'var(--radius)',
           animation: isRunning ? 'pulse-volt 1.8s ease-in-out infinite' : undefined,
         }}
       >
@@ -197,7 +197,7 @@ export default function RestTimer() {
                     background: active ? 'var(--color-volt)' : 'transparent',
                     color: active ? '#ffffff' : 'var(--color-text)',
                     border: `1px solid ${active ? 'var(--color-volt)' : 'var(--color-line-2)'}`,
-                    borderRadius: '2px',
+                    borderRadius: 'var(--radius)',
                     fontVariantNumeric: 'tabular-nums',
                   }}
                 >
@@ -212,7 +212,7 @@ export default function RestTimer() {
               type="button"
               onClick={stopTimer}
               className="w-full h-12 btn-ghost press caps-tight text-[11px]"
-              style={{ borderRadius: '2px' }}
+              style={{ borderRadius: 'var(--radius)' }}
             >
               {hasFinished ? 'DISMISS' : 'STOP'}
             </button>

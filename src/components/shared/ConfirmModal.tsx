@@ -47,7 +47,7 @@ export default function ConfirmModal({
             type="button"
             onClick={onClose}
             className="h-12 btn-ghost press caps-tight text-[11px]"
-            style={{ borderRadius: '2px' }}
+            style={{ borderRadius: 'var(--radius)' }}
           >
             {cancelLabel}
           </button>
@@ -56,7 +56,7 @@ export default function ConfirmModal({
             onClick={onConfirm}
             className="h-12 press caps-tight text-[11px]"
             style={{
-              borderRadius: '2px',
+              borderRadius: 'var(--radius)',
               background: destructive ? 'var(--color-rust)' : 'var(--color-volt)',
               color: '#ffffff',
             }}

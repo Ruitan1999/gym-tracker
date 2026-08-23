@@ -263,7 +263,7 @@ export default function EntryCard({
                 width: THUMB,
                 height: THUMB,
                 objectFit: 'cover',
-                borderRadius: '2px',
+                borderRadius: 'var(--radius)',
                 background: 'var(--color-line-2)',
               }}
             />
@@ -288,7 +288,7 @@ export default function EntryCard({
                   style={{
                     color: BODY_PART_ACCENT[exercise.bodyPart],
                     border: `1px solid ${BODY_PART_ACCENT[exercise.bodyPart]}`,
-                    borderRadius: '2px',
+                    borderRadius: 'var(--radius)',
                     fontWeight: 700,
                   }}
                 >

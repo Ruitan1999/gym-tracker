@@ -73,7 +73,7 @@ export default function RenameModal({
           style={{
             background: 'var(--color-surface)',
             border: '1px solid var(--color-line-2)',
-            borderRadius: '2px',
+            borderRadius: 'var(--radius)',
             fontSize: '16px',
             color: 'var(--color-text)',
           }}
@@ -88,7 +88,7 @@ export default function RenameModal({
             type="button"
             onClick={onClose}
             className="h-12 btn-ghost press caps-tight text-[11px]"
-            style={{ borderRadius: '2px' }}
+            style={{ borderRadius: 'var(--radius)' }}
           >
             CANCEL
           </button>
@@ -98,7 +98,7 @@ export default function RenameModal({
             disabled={!canSave}
             className="h-12 press caps-tight text-[11px]"
             style={{
-              borderRadius: '2px',
+              borderRadius: 'var(--radius)',
               background: canSave ? 'var(--color-volt)' : 'var(--color-elev-2)',
               color: canSave ? '#ffffff' : 'var(--color-text-faint)',
               cursor: canSave ? undefined : 'not-allowed',

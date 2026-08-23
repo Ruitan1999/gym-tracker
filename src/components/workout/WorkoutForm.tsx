@@ -685,9 +685,9 @@ export default function WorkoutForm({
           className="press h-20 flex items-center justify-center gap-3"
           style={{
             color: 'var(--color-volt)',
-            background: 'rgba(243, 91, 38, 0.08)',
+            background: 'var(--color-volt-tint)',
             border: '1.5px dashed var(--color-volt)',
-            borderRadius: '2px',
+            borderRadius: 'var(--radius)',
           }}
         >
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="square" className="w-5 h-5">
@@ -722,18 +722,18 @@ export default function WorkoutForm({
               style={
                 sessionInProgress
                   ? {
-                      borderRadius: '2px',
+                      borderRadius: 'var(--radius)',
                       letterSpacing: '0.12em',
                       background: 'var(--color-steel)',
                       color: '#ffffff',
-                      boxShadow: '0 12px 32px -8px rgba(58, 111, 214, 0.35), 0 4px 12px -2px rgba(0, 0, 0, 0.08)',
+                      boxShadow: '0 12px 32px -8px var(--color-steel-glow), 0 4px 12px -2px rgba(0, 0, 0, 0.08)',
                     }
                   : {
-                      borderRadius: '2px',
+                      borderRadius: 'var(--radius)',
                       letterSpacing: '0.12em',
                       background: 'var(--color-volt)',
                       color: '#ffffff',
-                      boxShadow: '0 12px 32px -8px rgba(243, 91, 38, 0.35), 0 4px 12px -2px rgba(0, 0, 0, 0.08)',
+                      boxShadow: '0 12px 32px -8px var(--color-volt-glow), 0 4px 12px -2px rgba(0, 0, 0, 0.08)',
                     }
               }
             >
@@ -781,13 +781,13 @@ export default function WorkoutForm({
             style={
               sessionInProgress
                 ? {
-                    borderRadius: '2px',
+                    borderRadius: 'var(--radius)',
                     letterSpacing: '0.12em',
                     background: 'var(--color-steel)',
                     color: '#ffffff',
                   }
                 : {
-                    borderRadius: '2px',
+                    borderRadius: 'var(--radius)',
                     letterSpacing: '0.12em',
                     background: 'var(--color-volt)',
                     color: '#ffffff',
@@ -915,7 +915,7 @@ export default function WorkoutForm({
         )}
         <div
           aria-hidden
-          style={{ height: '2px', background: 'var(--color-line)', borderRadius: '2px' }}
+          style={{ height: '2px', background: 'var(--color-line)', borderRadius: 'var(--radius)' }}
         >
           <div
             style={{
@@ -935,14 +935,14 @@ export default function WorkoutForm({
           style={
             saveGated
               ? {
-                  borderRadius: '2px',
+                  borderRadius: 'var(--radius)',
                   letterSpacing: '0.12em',
                   background: 'var(--color-elev-2)',
                   color: 'var(--color-text-faint)',
                   border: '1px solid var(--color-line-2)',
                   cursor: 'not-allowed',
                 }
-              : { borderRadius: '2px', letterSpacing: '0.12em' }
+              : { borderRadius: 'var(--radius)', letterSpacing: '0.12em' }
           }
         >
           {isEdit ? 'Update Session →' : 'Save Session →'}
@@ -956,7 +956,7 @@ export default function WorkoutForm({
           onClick={handleCancel}
           className="w-full h-12 press caps-tight text-[11px]"
           style={{
-            borderRadius: '2px',
+            borderRadius: 'var(--radius)',
             letterSpacing: '0.12em',
             background: 'transparent',
             color: 'var(--color-text-muted)',

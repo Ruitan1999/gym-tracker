@@ -32,7 +32,7 @@ export default function SaveGroupModal({ defaultName = '', onSave, onClose }: Sa
         style={{
           background: 'var(--color-elev)',
           border: '1px solid var(--color-line-2)',
-          borderRadius: '2px',
+          borderRadius: 'var(--radius)',
           boxShadow: '0 20px 60px rgba(0,0,0,0.6)',
         }}
       >
@@ -69,7 +69,7 @@ export default function SaveGroupModal({ defaultName = '', onSave, onClose }: Sa
           style={{
             background: 'var(--color-ink)',
             border: '1px solid var(--color-line-2)',
-            borderRadius: '2px',
+            borderRadius: 'var(--radius)',
             fontSize: '16px',
             fontWeight: 500,
             color: 'var(--color-text)',
@@ -80,7 +80,7 @@ export default function SaveGroupModal({ defaultName = '', onSave, onClose }: Sa
             type="button"
             onClick={onClose}
             className="h-12 btn-ghost press caps-tight text-[11px]"
-            style={{ borderRadius: '2px' }}
+            style={{ borderRadius: 'var(--radius)' }}
           >
             CANCEL
           </button>
@@ -89,7 +89,7 @@ export default function SaveGroupModal({ defaultName = '', onSave, onClose }: Sa
             onClick={submit}
             disabled={!name.trim()}
             className="h-12 btn-volt press caps-tight text-[11px] disabled:opacity-40"
-            style={{ borderRadius: '2px' }}
+            style={{ borderRadius: 'var(--radius)' }}
           >
             COMMIT →
           </button>

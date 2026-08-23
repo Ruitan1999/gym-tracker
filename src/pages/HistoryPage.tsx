@@ -208,7 +208,7 @@ export default function HistoryPage() {
             <Link
               to="/"
               className="inline-flex items-center justify-center h-12 px-6 caps-tight text-[11px] btn-volt press"
-              style={{ borderRadius: '2px' }}
+              style={{ borderRadius: 'var(--radius)' }}
             >
               Start First Session →
             </Link>
@@ -385,7 +385,7 @@ function CalendarCell({
         aspectRatio: '1 / 1',
         background: bg,
         border: `1px solid ${border}`,
-        borderRadius: '2px',
+        borderRadius: 'var(--radius)',
         opacity: isPastMissed ? 0.55 : 1,
       }}
     >

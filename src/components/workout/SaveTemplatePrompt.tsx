@@ -101,7 +101,7 @@ export default function SaveTemplatePrompt({
               style={{
                 background: 'var(--color-ink)',
                 border: '1px solid var(--color-line-2)',
-                borderRadius: '2px',
+                borderRadius: 'var(--radius)',
               }}
             >
               <div
@@ -136,7 +136,7 @@ export default function SaveTemplatePrompt({
                   type="button"
                   onClick={onUpdateTemplate}
                   className="h-12 btn-volt press caps-tight text-[11px]"
-                  style={{ borderRadius: '2px' }}
+                  style={{ borderRadius: 'var(--radius)' }}
                 >
                   UPDATE TEMPLATE →
                 </button>
@@ -144,7 +144,7 @@ export default function SaveTemplatePrompt({
                   type="button"
                   onClick={() => setStep('name')}
                   className="h-12 btn-ghost press caps-tight text-[11px]"
-                  style={{ borderRadius: '2px' }}
+                  style={{ borderRadius: 'var(--radius)' }}
                 >
                   SAVE AS NEW TEMPLATE
                 </button>
@@ -153,7 +153,7 @@ export default function SaveTemplatePrompt({
                   onClick={onDismiss}
                   className="h-12 press caps-tight text-[11px]"
                   style={{
-                    borderRadius: '2px',
+                    borderRadius: 'var(--radius)',
                     background: 'transparent',
                     color: 'var(--color-text-muted)',
                   }}
@@ -167,7 +167,7 @@ export default function SaveTemplatePrompt({
                   type="button"
                   onClick={onDismiss}
                   className="h-12 btn-ghost press caps-tight text-[11px]"
-                  style={{ borderRadius: '2px' }}
+                  style={{ borderRadius: 'var(--radius)' }}
                 >
                   NOT NOW
                 </button>
@@ -175,7 +175,7 @@ export default function SaveTemplatePrompt({
                   type="button"
                   onClick={() => setStep('name')}
                   className="h-12 btn-volt press caps-tight text-[11px]"
-                  style={{ borderRadius: '2px' }}
+                  style={{ borderRadius: 'var(--radius)' }}
                 >
                   SAVE TEMPLATE →
                 </button>
@@ -226,7 +226,7 @@ export default function SaveTemplatePrompt({
               style={{
                 background: 'var(--color-ink)',
                 border: '1px solid var(--color-line-2)',
-                borderRadius: '2px',
+                borderRadius: 'var(--radius)',
                 fontSize: '16px',
                 fontWeight: 500,
                 color: 'var(--color-text)',
@@ -237,7 +237,7 @@ export default function SaveTemplatePrompt({
                 type="button"
                 onClick={() => setStep('ask')}
                 className="h-12 btn-ghost press caps-tight text-[11px]"
-                style={{ borderRadius: '2px' }}
+                style={{ borderRadius: 'var(--radius)' }}
               >
                 ← BACK
               </button>
@@ -246,7 +246,7 @@ export default function SaveTemplatePrompt({
                 onClick={submit}
                 disabled={!name.trim()}
                 className="h-12 btn-volt press caps-tight text-[11px] disabled:opacity-40"
-                style={{ borderRadius: '2px' }}
+                style={{ borderRadius: 'var(--radius)' }}
               >
                 SAVE →
               </button>

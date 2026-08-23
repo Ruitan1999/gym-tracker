@@ -73,7 +73,7 @@ export default function SignInPage() {
             style={{
               background: 'var(--color-elev)',
               border: '1px solid var(--color-line-2)',
-              borderRadius: '2px',
+              borderRadius: 'var(--radius)',
             }}
           >
             <div className="caps-tight text-[9px]" style={{ color: 'var(--color-rust)' }}>
@@ -101,7 +101,7 @@ export default function SignInPage() {
   const inputStyle = {
     background: 'var(--color-ink)',
     border: '1px solid var(--color-line-2)',
-    borderRadius: '2px',
+    borderRadius: 'var(--radius)',
     color: 'var(--color-text)',
     fontSize: '16px',
   };
@@ -145,7 +145,7 @@ export default function SignInPage() {
           style={{
             background: 'transparent',
             border: '1px solid var(--color-line-2)',
-            borderRadius: '2px',
+            borderRadius: 'var(--radius)',
             color: 'var(--color-text)',
           }}
         >
@@ -190,7 +190,7 @@ export default function SignInPage() {
             type="submit"
             disabled={busy}
             className="w-full h-12 btn-volt press caps-tight text-[11px] disabled:opacity-40"
-            style={{ borderRadius: '2px' }}
+            style={{ borderRadius: 'var(--radius)' }}
           >
             {mode === 'signin' ? 'SIGN IN →' : 'CREATE ACCOUNT →'}
           </button>
@@ -236,7 +236,7 @@ export default function SignInPage() {
               color: 'var(--color-rust)',
               border: '1px solid var(--color-rust)',
               background: 'rgba(211, 78, 54, 0.06)',
-              borderRadius: '2px',
+              borderRadius: 'var(--radius)',
             }}
           >
             {authError}
@@ -251,7 +251,7 @@ export default function SignInPage() {
               color: 'var(--color-rust)',
               border: '1px solid var(--color-rust)',
               background: 'rgba(211, 78, 54, 0.06)',
-              borderRadius: '2px',
+              borderRadius: 'var(--radius)',
             }}
           >
             {error}
@@ -266,7 +266,7 @@ export default function SignInPage() {
               color: 'var(--color-text)',
               border: '1px solid var(--color-line-2)',
               background: 'var(--color-elev)',
-              borderRadius: '2px',
+              borderRadius: 'var(--radius)',
             }}
           >
             {info}

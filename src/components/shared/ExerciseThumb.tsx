@@ -15,7 +15,7 @@ export default function ExerciseThumb({
   const shared = {
     width: size,
     height: size,
-    borderRadius: '2px',
+    borderRadius: 'var(--radius)',
     background: 'var(--color-line-2)',
   } as const;
 

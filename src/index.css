@@ -2,8 +2,11 @@
 
 /* ————————————————————————————————————————————————————————————————
    LIFTGAUGE · design tokens · LIGHT
-   Warm paper base, deep chartreuse accent, tabular monospace data,
-   hairline dividers, zero-shadow surfaces.
+   Cool paper base, blue accent, tabular monospace data, hairline dividers,
+   zero-shadow surfaces.
+
+   The accent tokens are still called "volt" — the name is the role (the one
+   colour that means "act on this"), not the hue.
    ———————————————————————————————————————————————————————————————— */
 
 @theme {
@@ -18,20 +21,31 @@
   --color-text: #0a0a0a;
   --color-text-muted: #595959;
   --color-text-faint: #9a9a9a;
-  --color-volt: #ff5722;
-  --color-volt-dim: #ff7a4a;
-  --color-volt-deep: #c8410f;
-  --color-volt-ink: #c8410f;
+  --color-volt: #2563eb;
+  --color-volt-dim: #2f7ae5;
+  --color-volt-deep: #1d4ed8;
+  --color-volt-ink: #1d4ed8;
+  /* The accent behind something rather than on it: tinted panels and the
+     glow under a raised button. Both were written out as raw rgba at each
+     call site, which is how they stayed orange when the accent moved. */
+  --color-volt-tint: rgba(37, 99, 235, 0.08);
+  --color-volt-wash: rgba(37, 99, 235, 0.06);
+  --color-volt-glow: rgba(37, 99, 235, 0.32);
   --color-rust: #c44a10;
   --color-blood: #c0253f;
   --color-ember: #b47a00;
-  --color-steel: #3a6fd6;
+  /* Was a blue, which the accent now is. Moved rather than dropped: it marks
+     a session already under way, and that has to read as "not this button". */
+  --color-steel: #7c3aed;
+  --color-steel-glow: rgba(124, 58, 237, 0.32);
 
-  /* completion — green carries "done" so orange stays purely an action colour */
+  /* completion — green carries "done" so the accent stays purely an action colour */
   --color-done: #3f8a57;
   --color-done-deep: #2f6b41;
   --color-done-tint: #eaf3ec;
   --color-done-line: #cfe4d5;
+
+  --radius: 16px;
 
   --font-display: "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
@@ -96,18 +110,18 @@ body {
 .card {
   background: var(--color-surface);
   border: 1px solid var(--color-line);
-  border-radius: 2px;
+  border-radius: var(--radius);
 }
 .card-elev {
   background: var(--color-elev);
   border: 1px solid var(--color-line);
-  border-radius: 2px;
+  border-radius: var(--radius);
 }
 
 .card-ghost {
   background: var(--color-elev);
   border: 1px dashed var(--color-line-2);
-  border-radius: 2px;
+  border-radius: var(--radius);
 }
 
 .btn-volt {
@@ -160,8 +174,8 @@ input[type=number] { appearance: textfield; }
 }
 
 @keyframes pulse-volt {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 87, 34, 0.5); }
-  50% { box-shadow: 0 0 0 10px rgba(255, 87, 34, 0); }
+  0%, 100% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.5); }
+  50% { box-shadow: 0 0 0 10px rgba(37, 99, 235, 0); }
 }
 
 @keyframes tick-in {

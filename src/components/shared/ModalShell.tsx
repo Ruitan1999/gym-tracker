@@ -73,7 +73,7 @@ export default function ModalShell({ onDismiss, label, children }: ModalShellPro
           style={{
             background: 'var(--color-elev)',
             border: '1px solid var(--color-line-2)',
-            borderRadius: '2px',
+            borderRadius: 'var(--radius)',
             boxShadow: '0 20px 60px rgba(0,0,0,0.6)',
           }}
           onClick={(e) => e.stopPropagation()}

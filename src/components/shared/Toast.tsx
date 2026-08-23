@@ -19,7 +19,7 @@ export default function Toast({ message, onClose, duration = 2500 }: ToastProps)
         style={{
           background: 'var(--color-ink)',
           border: '1px solid var(--color-volt)',
-          borderRadius: '2px',
+          borderRadius: 'var(--radius)',
           boxShadow: '0 10px 30px rgba(0,0,0,0.55)',
         }}
       >

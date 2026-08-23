@@ -44,7 +44,7 @@ export default function SessionSavedBanner({ stats, onClose, duration = 2800 }: 
         style={{
           background: 'var(--color-ink)',
           border: '1px solid var(--color-line)',
-          borderRadius: '2px',
+          borderRadius: 'var(--radius)',
           boxShadow: '0 18px 44px rgba(0,0,0,0.55)',
         }}
       >
@@ -56,7 +56,7 @@ export default function SessionSavedBanner({ stats, onClose, duration = 2800 }: 
               height: 36,
               background: 'var(--color-done)',
               color: '#ffffff',
-              borderRadius: '2px',
+              borderRadius: 'var(--radius)',
             }}
           >
             <svg

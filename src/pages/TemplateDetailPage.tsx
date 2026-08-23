@@ -101,9 +101,9 @@ function TemplateEditor({ group }: { group: WorkoutGroup }) {
       className="press w-full h-14 flex items-center justify-center gap-2.5"
       style={{
         color: 'var(--color-volt)',
-        background: 'rgba(255, 87, 34, 0.06)',
+        background: 'var(--color-volt-wash)',
         border: '1.5px dashed var(--color-volt)',
-        borderRadius: '2px',
+        borderRadius: 'var(--radius)',
       }}
     >
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="square" className="w-4 h-4">
@@ -167,7 +167,7 @@ function TemplateEditor({ group }: { group: WorkoutGroup }) {
             style={{
               background: 'var(--color-elev)',
               border: '1px dashed var(--color-line-2)',
-              borderRadius: '2px',
+              borderRadius: 'var(--radius)',
             }}
           >
             <p
@@ -228,7 +228,7 @@ function TemplateEditor({ group }: { group: WorkoutGroup }) {
                           style={{
                             color: BODY_PART_ACCENT[exercise.bodyPart],
                             border: `1px solid ${BODY_PART_ACCENT[exercise.bodyPart]}`,
-                            borderRadius: '2px',
+                            borderRadius: 'var(--radius)',
                           }}
                         >
                           {BODY_PART_CODE[exercise.bodyPart]}

@@ -62,7 +62,7 @@ export default class RouteErrorBoundary extends Component<Props, State> {
           type="button"
           onClick={reloadFresh}
           className="h-12 px-6 btn-volt press caps-tight text-[11px]"
-          style={{ borderRadius: '2px' }}
+          style={{ borderRadius: 'var(--radius)' }}
         >
           RELOAD →
         </button>

@@ -46,7 +46,7 @@ export default function WeightStepper({ label, value, onChange, step, unit }: We
         className="flex items-stretch"
         style={{
           border: '1px solid var(--color-line-2)',
-          borderRadius: '2px',
+          borderRadius: 'var(--radius)',
           background: 'var(--color-ink)',
         }}
       >
