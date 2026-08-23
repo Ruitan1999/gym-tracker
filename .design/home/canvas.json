@@ -1,0 +1,53 @@
+{
+  "artboards": [
+    { "file": "Current.dc.html", "x": 0, "y": 0, "w": 390, "h": 844, "title": "Today · as it is now" },
+    { "file": "Main.dc.html", "x": 490, "y": 0, "w": 390, "h": 844, "title": "A · Pick up where you left off" },
+    { "file": "OptionB.dc.html", "x": 980, "y": 0, "w": 390, "h": 844, "title": "B · Streak first" },
+    { "file": "OptionC.dc.html", "x": 1470, "y": 0, "w": 390, "h": 844, "title": "C · Beat last time" }
+  ],
+  "annotations": [
+    {
+      "id": "brief",
+      "x": 0,
+      "y": -230,
+      "w": 880,
+      "text": "Three ways to make the home page more engaging, against what is there today.\n\nEach one answers \"why open this app right now\" differently: A says because your next session is ready, B says because your streak is at stake, C says because there is a number to beat. They are not variations on a theme — pick the motivation first, and the layout follows.\n\nEverything is drawn on the real tokens: #047857 accent, 16px radius, Bricolage Grotesque over JetBrains Mono, the existing card and button anatomy. Numbers are sample data."
+    },
+    {
+      "id": "now",
+      "x": 0,
+      "y": 900,
+      "w": 390,
+      "text": "As it is now.\n\nThe greeting and the momentum panel take the top third, then templates, then the button. Nothing on the screen is specific to today — the same page greets you whether you trained yesterday or three weeks ago, and the first concrete thing is a template name with a count."
+    },
+    {
+      "id": "a-note",
+      "x": 490,
+      "y": 900,
+      "w": 390,
+      "text": "A · Pick up where you left off\n\nThe session you would most likely repeat becomes the page: the actual exercises, the weights you last hit, one button. Momentum drops to a single row of day dots at the bottom.\n\nWhy: the common case is repeating a template, and this removes every step between opening the app and starting.\n\nTradeoff: it assumes you use templates. Without one it needs a real fallback, and it pushes stats almost out of sight."
+    },
+    {
+      "id": "b-note",
+      "x": 980,
+      "y": 900,
+      "w": 390,
+      "text": "B · Streak first\n\nThe streak becomes the whole top of the screen, with the best-ever mark as the thing to chase and an explicit \"train today to keep it\".\n\nWhy: a streak you can lose is the strongest reason to come back on a day you cannot be bothered.\n\nTradeoff: it cuts the other way when the streak breaks — the home page turns into a reminder of a bad month. It needs a deliberate, kind broken state, and that is real work. The dark block is also the only place in the app with a dark panel."
+    },
+    {
+      "id": "c-note",
+      "x": 1470,
+      "y": 900,
+      "w": 390,
+      "text": "C · Beat last time\n\nLeads with one concrete target: the lift you are due, what you did last time, and the next step up.\n\nWhy: progression is the reason people log at all, and a number to beat is sharper than a streak.\n\nTradeoff: it needs history to say anything, so it is empty for a new account and awkward when you turn up to train something else. The suggested weight also has to come from a rule you would need to define — the +2.5 shown here is a guess, not a computed target."
+    },
+    {
+      "id": "mix",
+      "x": 1960,
+      "y": 0,
+      "w": 300,
+      "text": "These mix.\n\nA's next-session card with B's streak strip above it is a real fourth option, and probably the one I would build — the target line from C works as a single row inside A's card rather than as its own screen.\n\nSay which motivation feels right and I will draw the combination properly rather than guessing at it."
+    }
+  ],
+  "launch": { "view": "canvas" }
+}

@@ -39,3 +39,8 @@ firebase-debug.log
 # bundle that is republished from them.
 .design/*.html
 !.design/*.dc.html
+
+# Seeded design canvases are ~2MB build output; the artboards beside them are the source.
+.design/**/*-layouts.html
+.design/**/*-options.html
+.design/**/__pycache__/

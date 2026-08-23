@@ -1,0 +1,90 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=JetBrains+Mono:wght@400;500;700&display=swap">
+  <style>
+    body { margin: 0; background: #f5f5f4; color: #0a0a0a;
+           font-family: "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif;
+           -webkit-font-smoothing: antialiased; letter-spacing: -0.01em; }
+    a { color: #036349; } a:hover { color: #024e3a; }
+    .mono { font-family: "JetBrains Mono", ui-monospace, Menlo, monospace; font-variant-numeric: tabular-nums; }
+    .caps { font-family: "JetBrains Mono", ui-monospace, Menlo, monospace;
+            text-transform: uppercase; letter-spacing: 0.08em; font-weight: 500; }
+  </style>
+</helmet>
+<div style="width: 390px; height: 844px; background: #f5f5f4; display: flex; flex-direction: column; overflow: hidden;">
+  <div style="background: #ffffff; border-bottom: 1px solid #ececec; padding: 14px 16px 12px; display: flex; align-items: center; justify-content: space-between; flex: 0 0 auto;">
+    <span style="font-size: 20px; font-weight: 700; letter-spacing: -0.03em;">Today</span>
+    <span style="width: 32px; height: 32px; border-radius: 16px; background: #f4f4f4; display: flex; align-items: center; justify-content: center;">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#595959" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+    </span>
+  </div>
+  <div style="flex: 0 1 auto; min-height: 0; overflow: hidden; padding: 16px 16px 16px; display: flex; flex-direction: column; gap: 14px;">
+
+    <div style="background:#ffffff;border:1px solid #ececec;border-radius:16px;padding:18px 16px;background:#0a0a0a;border-color:#0a0a0a;display:flex;flex-direction:column;gap:16px;">
+      <div style="display:flex;align-items:flex-end;gap:12px;">
+        <div class="mono" style="font-size:64px;line-height:0.85;font-weight:500;color:#ffffff;">3</div>
+        <div style="padding-bottom:6px;">
+          <div class="caps" style="font-size:10px;color:#ffffff;font-weight:700;">WEEK STREAK</div>
+          <div class="caps" style="font-size:9px;color:#9a9a9a;margin-top:3px;">BEST EVER &middot; 7</div>
+        </div>
+      </div>
+      <div style="height:6px;border-radius:16px;background:#3a3a3a;overflow:hidden;">
+        <div style="width:25%;height:100%;background:#047857;"></div>
+      </div>
+      <div class="caps" style="font-size:9px;color:#9a9a9a;">4 MORE WEEKS TO BEAT YOUR BEST</div>
+    </div>
+
+    <div style="background:#ffffff;border:1px solid #ececec;border-radius:16px;padding:14px 16px;display:flex;flex-direction:column;gap:12px;">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;">
+        <span class="caps" style="font-size:9px;color:#9a9a9a;">THIS WEEK</span>
+        <span class="caps" style="font-size:9px;color:#047857;font-weight:700;">TRAIN TODAY TO KEEP IT</span>
+      </div>
+      <div style="display:flex;gap:5px;"><div style="flex:1 1 0;display:flex;flex-direction:column;align-items:center;gap:5px;"><div style="width:100%;height:34px;border-radius:12px;background:#047857;border:1.5px solid transparent;box-sizing:border-box;"></div><span class="caps" style="font-size:8px;color:#9a9a9a;">M</span></div><div style="flex:1 1 0;display:flex;flex-direction:column;align-items:center;gap:5px;"><div style="width:100%;height:34px;border-radius:12px;background:#ececec;border:1.5px solid transparent;box-sizing:border-box;"></div><span class="caps" style="font-size:8px;color:#9a9a9a;">T</span></div><div style="flex:1 1 0;display:flex;flex-direction:column;align-items:center;gap:5px;"><div style="width:100%;height:34px;border-radius:12px;background:#047857;border:1.5px solid transparent;box-sizing:border-box;"></div><span class="caps" style="font-size:8px;color:#9a9a9a;">W</span></div><div style="flex:1 1 0;display:flex;flex-direction:column;align-items:center;gap:5px;"><div style="width:100%;height:34px;border-radius:12px;background:#ececec;border:1.5px solid transparent;box-sizing:border-box;"></div><span class="caps" style="font-size:8px;color:#9a9a9a;">T</span></div><div style="flex:1 1 0;display:flex;flex-direction:column;align-items:center;gap:5px;"><div style="width:100%;height:34px;border-radius:12px;background:#047857;border:1.5px solid transparent;box-sizing:border-box;"></div><span class="caps" style="font-size:8px;color:#9a9a9a;">F</span></div><div style="flex:1 1 0;display:flex;flex-direction:column;align-items:center;gap:5px;"><div style="width:100%;height:34px;border-radius:12px;background:#ececec;border:1.5px solid #047857;box-sizing:border-box;"></div><span class="caps" style="font-size:8px;color:#9a9a9a;">S</span></div><div style="flex:1 1 0;display:flex;flex-direction:column;align-items:center;gap:5px;"><div style="width:100%;height:34px;border-radius:12px;background:#ececec;border:1.5px solid transparent;box-sizing:border-box;"></div><span class="caps" style="font-size:8px;color:#9a9a9a;">S</span></div></div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <span class="caps" style="font-size:9px;color:#9a9a9a;">START FROM</span>
+      <div style="display:flex;gap:8px;">
+        <div style="flex:1 1 0;background:#ffffff;border:1px solid #ececec;border-radius:16px;padding:12px;">
+          <div style="font-size:15px;font-weight:700;letter-spacing:-0.02em;">Push Day A</div>
+          <div class="caps" style="font-size:8px;color:#9a9a9a;margin-top:2px;">06 EXERCISES</div>
+        </div>
+        <div style="flex:1 1 0;background:#ffffff;border:1px solid #ececec;border-radius:16px;padding:12px;">
+          <div style="font-size:15px;font-weight:700;letter-spacing:-0.02em;">Leg Day</div>
+          <div class="caps" style="font-size:8px;color:#9a9a9a;margin-top:2px;">05 EXERCISES</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <div style="padding: 0 16px 12px; flex: 0 0 auto; margin-top: auto;">
+    <button style="width: 100%; height: 52px; border: none; border-radius: 16px; background: #047857; color: #ffffff;
+                   font-family: inherit; font-weight: 700; font-size: 12px; letter-spacing: 0.08em;
+                   text-transform: uppercase;">START WORKOUT &rarr;</button>
+  </div>
+  <div style="background: #ffffff; border-top: 1px solid #ececec; padding: 10px 8px 14px; display: flex; flex: 0 0 auto;">
+      <div style="flex: 1 1 0; display: flex; flex-direction: column; align-items: center; gap: 4px;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#047857" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8h2v8H6zM16 8h2v8h-2zM8 11h8v2H8z"/></svg>
+        <span class="caps" style="font-size: 8px; color: #047857;">Log</span>
+      </div><div style="flex: 1 1 0; display: flex; flex-direction: column; align-items: center; gap: 4px;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9a9a9a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h11a2 2 0 0 1 2 2v14H7a2 2 0 0 1-2-2z"/></svg>
+        <span class="caps" style="font-size: 8px; color: #9a9a9a;">Book</span>
+      </div><div style="flex: 1 1 0; display: flex; flex-direction: column; align-items: center; gap: 4px;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9a9a9a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V10M10 19V5M16 19v-6"/></svg>
+        <span class="caps" style="font-size: 8px; color: #9a9a9a;">Stats</span>
+      </div><div style="flex: 1 1 0; display: flex; flex-direction: column; align-items: center; gap: 4px;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9a9a9a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6M4 12h2M18 12h2M12 4v2M12 18v2"/></svg>
+        <span class="caps" style="font-size: 8px; color: #9a9a9a;">Set</span>
+      </div>
+  </div>
+</div>
+</x-dc>
+</body>
+</html>
