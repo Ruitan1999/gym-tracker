@@ -1,0 +1,34 @@
+{
+  "artboards": [
+    { "file": "Main.dc.html", "x": 0, "y": 0, "w": 420, "h": 600, "title": "Blue 01 · Cobalt (live now)" },
+    { "file": "Blue02.dc.html", "x": 520, "y": 0, "w": 420, "h": 600, "title": "Blue 02 · Electric" },
+    { "file": "Blue03.dc.html", "x": 1040, "y": 0, "w": 420, "h": 600, "title": "Blue 03 · Deep" },
+    { "file": "Green01.dc.html", "x": 0, "y": 760, "w": 420, "h": 600, "title": "Green 01 · Emerald" },
+    { "file": "Green02.dc.html", "x": 520, "y": 760, "w": 420, "h": 600, "title": "Green 02 · Forest" },
+    { "file": "Green03.dc.html", "x": 1040, "y": 760, "w": 420, "h": 600, "title": "Green 03 · Teal" }
+  ],
+  "annotations": [
+    {
+      "id": "how-to-read",
+      "x": 0,
+      "y": -210,
+      "w": 940,
+      "text": "Six candidates on the app's real controls — the primary button, the load stepper, the calendar week, the top-lift number and the BACK TO TODAY link.\n\nEach card measures itself: white text on the colour, and the colour as text on the page background. 4.5 is the AA floor. The swatch at the top of every board is a live control — drop your own hex in and the numbers re-measure."
+    },
+    {
+      "id": "green-caveat",
+      "x": 1560,
+      "y": 760,
+      "w": 300,
+      "text": "The catch with green.\n\n#3f8a57 already means \"set completed\" everywhere in the app — the done rail, the tinted card, the tick.\n\nA green accent puts \"act on this\" and \"already finished\" in the same family. Emerald sits furthest away; Forest sits closest and is the one I'd expect to actually confuse.\n\nGoing green properly means moving the done colour too — probably to a blue-grey."
+    },
+    {
+      "id": "blue-note",
+      "x": 1560,
+      "y": 0,
+      "w": 300,
+      "text": "Blue has no such conflict — nothing else in the app is blue since the in-progress marker moved to violet.\n\nAll three clear AA comfortably. It is a preference call between energy (Electric) and legibility (Deep)."
+    }
+  ],
+  "launch": { "view": "canvas" }
+}

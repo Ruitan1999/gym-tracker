@@ -34,3 +34,8 @@ firebase-debug.log
 *.njsproj
 *.sln
 *.sw?
+
+# Design canvas: the sources are kept, the seeded page is a 2 MB generated
+# bundle that is republished from them.
+.design/*.html
+!.design/*.dc.html

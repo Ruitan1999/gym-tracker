@@ -1,0 +1,126 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=JetBrains+Mono:wght@400;500;700&display=swap">
+  <style>
+    body { margin: 0; background: #f5f5f4; color: #0a0a0a;
+           font-family: "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif;
+           -webkit-font-smoothing: antialiased; letter-spacing: -0.01em; }
+    a { color: #1d4ed8; } a:hover { color: #1e40af; }
+    .mono { font-family: "JetBrains Mono", ui-monospace, Menlo, monospace; font-variant-numeric: tabular-nums; }
+    .caps { font-family: "JetBrains Mono", ui-monospace, Menlo, monospace;
+            text-transform: uppercase; letter-spacing: 0.08em; font-weight: 500; }
+  </style>
+</helmet>
+<div style="width: 420px; box-sizing: border-box; padding: 24px; display: flex; flex-direction: column; gap: 18px; background: #f5f5f4;">
+
+  <div style="display: flex; flex-direction: column; gap: 6px;">
+    <div class="caps" style="font-size: 9px; color: #9a9a9a;">NAME</div>
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <span style="width: 30px; height: 30px; border-radius: 16px; background: {{accent}}; flex: 0 0 auto;"></span>
+      <span style="font-size: 19px; font-weight: 700; letter-spacing: -0.02em;">Green 02 · Forest</span>
+    </div>
+    <div class="mono" style="font-size: 12px; color: #595959;">{{hex}} &middot; Classic gym green.</div>
+  </div>
+
+  <div style="background: #ffffff; border: 1px solid #ececec; border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 14px;">
+    <div class="caps" style="font-size: 9px; color: #9a9a9a;">ON THE REAL CONTROLS</div>
+
+    <button style="height: 48px; border: none; border-radius: 16px; background: {{accent}}; color: #ffffff;
+                   font-family: inherit; font-weight: 700; font-size: 11px; letter-spacing: 0.08em;
+                   text-transform: uppercase; cursor: pointer;">START TRAINING &rarr;</button>
+
+    <div style="display: flex; align-items: stretch; border: 1px solid #d4d4d4; border-radius: 16px; overflow: hidden; background: #ffffff;">
+      <div style="flex: 1 1 auto; display: flex; align-items: center; padding-left: 14px; gap: 6px;">
+        <span class="mono" style="font-size: 20px; font-weight: 500;">60</span>
+        <span class="caps" style="font-size: 10px; color: #9a9a9a;">KG</span>
+      </div>
+      <div style="width: 48px; height: 48px; display: flex; align-items: center; justify-content: center;
+                  border-left: 1px solid #d4d4d4; color: #0a0a0a; font-size: 20px;">&minus;</div>
+      <div style="width: 48px; height: 48px; display: flex; align-items: center; justify-content: center;
+                  border-left: 1px solid #d4d4d4; background: {{accent}}; color: #ffffff; font-size: 20px;">+</div>
+    </div>
+
+    <div style="display: flex; gap: 6px;">
+      <sc-for list="{{days}}" as="d" hint-placeholder-count="7">
+        <div class="mono" style="flex: 1 1 0; height: 40px; border-radius: 16px; display: flex;
+                                 align-items: center; justify-content: center; font-size: 12px;
+                                 background: {{d.bg}}; color: {{d.fg}};">{{d.n}}</div>
+      </sc-for>
+    </div>
+
+    <div style="display: flex; align-items: baseline; gap: 10px; padding-top: 2px;">
+      <span class="mono" style="font-size: 26px; font-weight: 500; color: {{accent}};">102.5</span>
+      <span class="caps" style="font-size: 9px; color: #9a9a9a;">TOP LIFT</span>
+      <span class="caps" style="font-size: 9px; color: {{accent}}; margin-left: auto; font-weight: 700;">BACK TO TODAY &rarr;</span>
+    </div>
+  </div>
+
+  <div style="background: #ffffff; border: 1px solid #ececec; border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 10px;">
+    <div class="caps" style="font-size: 9px; color: #9a9a9a;">CONTRAST</div>
+    <div style="display: flex; gap: 10px;">
+      <div style="flex: 1 1 0; display: flex; flex-direction: column; gap: 3px;">
+        <span class="mono" style="font-size: 18px; font-weight: 500;">{{onWhite}}</span>
+        <span class="caps" style="font-size: 8px; color: #9a9a9a;">WHITE TEXT ON IT</span>
+      </div>
+      <div style="flex: 1 1 0; display: flex; flex-direction: column; gap: 3px;">
+        <span class="mono" style="font-size: 18px; font-weight: 500;">{{onBg}}</span>
+        <span class="caps" style="font-size: 8px; color: #9a9a9a;">AS TEXT ON PAGE</span>
+      </div>
+    </div>
+    <div class="caps" style="font-size: 9px; font-weight: 700; color: {{verdictColor}};">{{verdict}}</div>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 5px;">
+    <div class="caps" style="font-size: 9px; color: #9a9a9a;">Also the closest to the done-green — a finished set and a live button start to look alike.</div>
+    <p style="margin: 0; font-size: 13px; line-height: 1.45; color: #595959; text-wrap: pretty;">Also the closest to the done-green — a finished set and a live button start to look alike.</p>
+  </div>
+
+</div>
+</x-dc>
+<script data-dc-script data-props='{"accent":{"editor":"color","default":"#15803d","options":["#2563eb","#0057ff","#047857","#15803d"]},"$preview":{"width":420,"height":600}}'>
+class Component extends DCLogic {
+  lum(hex) {
+    const h = String(hex || "#000000").replace("#", "");
+    const p = [0, 2, 4].map((i) => parseInt(h.slice(i, i + 2), 16) / 255);
+    const f = (c) => (c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4));
+    return 0.2126 * f(p[0]) + 0.7152 * f(p[1]) + 0.0722 * f(p[2]);
+  }
+  ratio(a, b) {
+    const x = this.lum(a), y = this.lum(b);
+    const hi = Math.max(x, y), lo = Math.min(x, y);
+    return (hi + 0.05) / (lo + 0.05);
+  }
+  renderVals() {
+    const accent = this.props.accent ?? "#15803d";
+    const onWhite = this.ratio(accent, "#ffffff");
+    const onBg = this.ratio(accent, "#f5f5f4");
+    const pass = onWhite >= 4.5 && onBg >= 4.5;
+    return {
+      accent,
+      hex: String(accent).toUpperCase(),
+      onWhite: onWhite.toFixed(2),
+      onBg: onBg.toFixed(2),
+      verdict: pass ? "PASSES AA BOTH WAYS" : "BELOW AA",
+      verdictColor: pass ? "#3f8a57" : "#c0253f",
+      days: [
+        { n: "17", on: false }, { n: "18", on: true }, { n: "19", on: false },
+        { n: "20", on: true },  { n: "21", on: true }, { n: "22", on: false },
+        { n: "23", on: false },
+      ].map((d) => ({
+        n: d.n,
+        bg: d.on ? accent : "#ececec",
+        fg: d.on ? "#ffffff" : "#9a9a9a",
+      })),
+    };
+  }
+}
+</script>
+</body>
+</html>
