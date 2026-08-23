@@ -15,6 +15,7 @@ import { useDragReorder } from '../../utils/useDragReorder';
 import { imageForExercise } from '../../utils/exerciseImage';
 import { prefetchImages } from '../../utils/prefetchImages';
 import SessionClock from './SessionClock';
+import { ratingColor } from '../../utils/rating';
 
 interface WorkoutFormProps {
   existingWorkout?: Workout;
@@ -852,8 +853,7 @@ export default function WorkoutForm({
             <div className="grid grid-cols-10 gap-1">
               {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((n) => {
                 const isSelected = currentRating === n;
-                const color =
-                  n <= 3 ? 'var(--color-steel)' : n <= 6 ? 'var(--color-ember)' : n <= 8 ? 'var(--color-volt)' : 'var(--color-rust)';
+const color = ratingColor(n)!;
                 return (
                   <button
                     key={n}
@@ -867,6 +867,7 @@ export default function WorkoutForm({
                       background: isSelected ? color : 'transparent',
                       color: isSelected ? '#ffffff' : 'var(--color-text-muted)',
                       border: `1px solid ${isSelected ? color : 'var(--color-line-2)'}`,
+                      borderRadius: 'var(--radius)',
                       fontWeight: 500,
                       fontVariantNumeric: 'tabular-nums',
                     }}

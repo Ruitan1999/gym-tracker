@@ -47,6 +47,9 @@ export default function WeightStepper({ label, value, onChange, step, unit }: We
         style={{
           border: '1px solid var(--color-line-2)',
           borderRadius: 'var(--radius)',
+          // The steppers butt against the edge; without this their square
+          // corners sit outside the container's rounded ones.
+          overflow: 'hidden',
           background: 'var(--color-ink)',
         }}
       >

@@ -249,7 +249,7 @@ export default function ProgressPage() {
     <PageShell title="Progress">
       <div className="flex flex-col gap-5">
         {hasGroups && (
-          <div className="flex self-start" role="tablist" aria-label="View mode">
+          <div className="flex self-start gap-1.5" role="tablist" aria-label="View mode">
             <ToggleBtn
               active={viewMode === 'all'}
               onClick={() => handleSetViewMode('all')}
@@ -282,6 +282,7 @@ export default function ProgressPage() {
                       color: 'var(--color-text)',
                       border: '1px solid var(--color-line-2)',
                       background: 'var(--color-surface)',
+                      borderRadius: 'var(--radius)',
                     }}
                   >
                     <span aria-hidden>←</span>
@@ -389,6 +390,7 @@ function ToggleBtn({
         color: active ? '#ffffff' : 'var(--color-text-muted)',
         border: '1px solid',
         borderColor: active ? 'var(--color-text)' : 'var(--color-line-2)',
+        borderRadius: 'var(--radius)',
       }}
     >
       {label}

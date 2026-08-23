@@ -140,7 +140,7 @@ export default function ExerciseDetailPage() {
                 contentStyle={{
                   background: 'var(--color-surface)',
                   border: '1px solid var(--color-line-2)',
-                  borderRadius: 2,
+                  borderRadius: 'var(--radius)',
                   fontFamily: 'var(--font-mono)',
                   fontSize: 11,
                 }}
@@ -187,7 +187,7 @@ export default function ExerciseDetailPage() {
                 contentStyle={{
                   background: 'var(--color-surface)',
                   border: '1px solid var(--color-line-2)',
-                  borderRadius: 2,
+                  borderRadius: 'var(--radius)',
                   fontFamily: 'var(--font-mono)',
                   fontSize: 11,
                 }}

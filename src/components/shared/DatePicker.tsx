@@ -243,6 +243,7 @@ export default function DatePicker({ value, onChange }: DatePickerProps) {
                       onClick={() => selectDate(cell.dateStr)}
                       className="h-10 font-mono text-[13px] flex items-center justify-center press"
                       style={{
+                        borderRadius: 'var(--radius)',
                         background: isSelected ? 'var(--color-volt)' : 'var(--color-elev)',
                         color: isSelected
                           ? '#ffffff'

@@ -121,7 +121,7 @@ export default function SetRow({
               boxShadow: `inset 0 0 0 1px ${accent.line}`,
               fontSize: '12px',
               fontWeight: 700,
-              borderRadius: 2,
+              borderRadius: 'var(--radius)',
               fontVariantNumeric: 'tabular-nums',
             }}
           >
@@ -226,7 +226,7 @@ export default function SetRow({
             className="press w-full flex items-center gap-3 py-2 px-3"
             style={{
               border: '1px solid var(--color-line)',
-              borderRadius: 2,
+              borderRadius: 'var(--radius)',
               background: 'transparent',
             }}
           >

@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useAppContext } from '../../context/AppContext';
 import type { Workout } from '../../types';
+import { ratingColor as ratingColorFor, parseRating } from '../../utils/rating';
 
 interface WorkoutCardProps {
   workout: Workout;
@@ -45,18 +46,8 @@ export default function WorkoutCard({ workout }: WorkoutCardProps) {
       ? exerciseNames.join(' ')
       : `${exerciseNames[0]} ${exerciseNames[1]} +${exerciseNames.length - 2}`;
 
-  const ratingMatch = workout.notes?.match(/^Rating: (\d+)/);
-  const rating = ratingMatch ? parseInt(ratingMatch[1], 10) : null;
-  const ratingColor =
-    rating == null
-      ? null
-      : rating <= 3
-      ? 'var(--color-steel)'
-      : rating <= 6
-      ? 'var(--color-ember)'
-      : rating <= 8
-      ? 'var(--color-volt)'
-      : 'var(--color-rust)';
+  const rating = parseRating(workout.notes);
+  const ratingColor = ratingColorFor(rating);
 
   const time = formatTime(workout.createdAt);
 
@@ -131,6 +122,7 @@ export default function WorkoutCard({ workout }: WorkoutCardProps) {
               style={{
                 color: ratingColor,
                 border: `1px solid ${ratingColor}`,
+                borderRadius: 'var(--radius)',
                 fontWeight: 500,
                 fontVariantNumeric: 'tabular-nums',
               }}
