@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import PageShell from '../components/layout/PageShell';
-import ExerciseEditSheet, { SheetThumb } from '../components/shared/ExerciseEditSheet';
+import ExerciseEditSheet from '../components/shared/ExerciseEditSheet';
+import ExerciseThumb from '../components/shared/ExerciseThumb';
 import { useAppContext } from '../context/AppContext';
 import { useMaybeAuth } from '../context/AuthContext';
 import type { BodyPart, Exercise } from '../types';
@@ -276,7 +277,7 @@ function Row({
       >
         {String(index + 1).padStart(2, '0')}
       </span>
-      <SheetThumb src={src} size={36} />
+      <ExerciseThumb src={src} size={36} />
       <span className="flex-1 min-w-0">
         <span className="block truncate text-[15px]" style={{ color: 'var(--color-text)' }}>
           {name}

@@ -5,6 +5,8 @@ import PageShell from '../components/layout/PageShell';
 import ConfirmModal from '../components/shared/ConfirmModal';
 import RenameModal from '../components/shared/RenameModal';
 import BodyMap from '../components/workout/BodyMap';
+import ExerciseThumb from '../components/shared/ExerciseThumb';
+import { imageForExercise } from '../utils/exerciseImage';
 import { workedBodyParts } from '../utils/bodyParts';
 import type { WorkoutGroup } from '../types';
 
@@ -22,7 +24,7 @@ function formatDate(dateStr: string): string {
 export default function WorkoutDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { appData, deleteWorkout, addGroup, showToast } = useAppContext();
+  const { appData, deleteWorkout, addGroup, showToast, exerciseImages } = useAppContext();
 
   const workout = appData.workouts.find((w) => w.id === id);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -243,29 +245,37 @@ export default function WorkoutDetailPage() {
           const entryVolume = entry.sets.reduce((s, set) => s + set.reps * set.weightKg, 0);
           return (
             <section key={entry.id} className="card p-4">
-              <div className="flex items-baseline justify-between mb-3">
-                <div className="flex items-baseline gap-2">
-                  <span
-                    className="font-mono text-[11px]"
-                    style={{ color: 'var(--color-text)' }}
-                  >
-                    {String(idx + 1).padStart(2, '0')}
-                  </span>
-                  <span style={{ color: 'var(--color-text-muted)' }}>/</span>
-                  <h3
-                    className="font-display"
-                    style={{
-                      fontSize: '1.0625rem',
-                      fontWeight: 600,
-                      letterSpacing: '-0.02em',
-                      color: 'var(--color-text)',
-                    }}
-                  >
-                    {exercise?.name ?? 'Unknown Exercise'}
-                  </h3>
+              <div className="flex items-center gap-3 mb-3">
+                <ExerciseThumb
+                  src={exercise ? imageForExercise(exercise.id, exerciseImages) : null}
+                  size={40}
+                />
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-baseline gap-2">
+                    <span
+                      className="font-mono text-[11px] shrink-0"
+                      style={{ color: 'var(--color-text)' }}
+                    >
+                      {String(idx + 1).padStart(2, '0')}
+                    </span>
+                    <span className="shrink-0" style={{ color: 'var(--color-text-muted)' }}>
+                      /
+                    </span>
+                    <h3
+                      className="font-display truncate"
+                      style={{
+                        fontSize: '1.0625rem',
+                        fontWeight: 600,
+                        letterSpacing: '-0.02em',
+                        color: 'var(--color-text)',
+                      }}
+                    >
+                      {exercise?.name ?? 'Unknown Exercise'}
+                    </h3>
+                  </div>
                 </div>
                 <span
-                  className="caps-tight text-[9px] font-mono"
+                  className="caps-tight text-[9px] font-mono shrink-0"
                   style={{ color: 'var(--color-text-faint)' }}
                 >
                   {Math.round(entryVolume)} kg

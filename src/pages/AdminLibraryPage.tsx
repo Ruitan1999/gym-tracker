@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import PageShell from '../components/layout/PageShell';
-import ExerciseEditSheet, { SheetThumb } from '../components/shared/ExerciseEditSheet';
+import ExerciseEditSheet from '../components/shared/ExerciseEditSheet';
+import ExerciseThumb from '../components/shared/ExerciseThumb';
 import { useAppContext } from '../context/AppContext';
 import { useMaybeAuth } from '../context/AuthContext';
 import { isAdmin } from '../utils/admin';
@@ -123,7 +124,7 @@ export default function AdminLibraryPage() {
                 className="w-full text-left flex items-center gap-3 py-2.5 press"
                 style={{ borderBottom: '1px solid var(--color-line)' }}
               >
-                <SheetThumb src={imageForExercise(exercise.id, libraryImages)} />
+                <ExerciseThumb src={imageForExercise(exercise.id, libraryImages)} />
                 <span className="flex-1 min-w-0">
                   <span
                     className="block truncate text-[14px]"

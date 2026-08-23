@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react';
 import ConfirmModal from './ConfirmModal';
+import ExerciseThumb from './ExerciseThumb';
 import { BODY_PART_ORDER, BODY_PART_LABELS, BODY_PART_ACCENT } from '../../utils/bodyParts';
 import type { BodyPart } from '../../types';
 
@@ -89,7 +90,7 @@ export default function ExerciseEditSheet({
         </div>
 
         <div className="flex items-center gap-3">
-          <SheetThumb src={preview} />
+          <ExerciseThumb src={preview} />
           <button
             type="button"
             onClick={() => fileRef.current?.click()}
@@ -219,13 +220,5 @@ export default function ExerciseEditSheet({
         />
       )}
     </>
-  );
-}
-
-export function SheetThumb({ src, size = 44 }: { src: string | null; size?: number }) {
-  const shared = { width: size, height: size, borderRadius: '2px', background: 'var(--color-line-2)' } as const;
-  if (!src) return <span className="shrink-0" style={{ ...shared, opacity: 0.4 }} aria-hidden />;
-  return (
-    <img src={src} alt="" aria-hidden loading="lazy" className="shrink-0" style={{ ...shared, objectFit: 'cover' }} />
   );
 }

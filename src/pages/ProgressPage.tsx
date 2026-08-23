@@ -4,13 +4,14 @@ import { LineChart, Line, ResponsiveContainer } from 'recharts';
 import { useAppContext } from '../context/AppContext';
 import PageShell from '../components/layout/PageShell';
 import EmptyState from '../components/shared/EmptyState';
+import ExerciseThumb from '../components/shared/ExerciseThumb';
+import { imageForExercise } from '../utils/exerciseImage';
 import { getMaxWeightData } from '../utils/chartHelpers';
 import { kgToLb } from '../utils/conversions';
 import type { Exercise } from '../types';
 
 interface ExerciseSummary {
   exercise: Exercise;
-  sessions: number;
   latestMax: number;
   bestMax: number;
   trend: number;
@@ -43,7 +44,7 @@ function loadView(): ProgressView {
 }
 
 export default function ProgressPage() {
-  const { appData } = useAppContext();
+  const { appData, exerciseImages } = useAppContext();
   const navigate = useNavigate();
   const unit = appData.preferences.weightUnit;
   const groups = appData.groups ?? [];
@@ -80,7 +81,6 @@ export default function ProgressPage() {
       const bestMax = points.reduce((m, p) => (p.value > m ? p.value : m), 0);
       result.push({
         exercise,
-        sessions: points.length,
         latestMax,
         bestMax,
         trend: latestMax - prevMax,
@@ -153,8 +153,9 @@ export default function ProgressPage() {
         <button
           type="button"
           onClick={() => navigate(`/progress/${s.exercise.id}`)}
-          className="w-full text-left card press flex items-center gap-3 px-4 py-3 min-h-[64px]"
+          className="w-full text-left card press flex items-center gap-3 px-3 py-3 min-h-[64px]"
         >
+          <ExerciseThumb src={imageForExercise(s.exercise.id, exerciseImages)} size={40} />
           <div className="flex-1 min-w-0">
             <p
               className="font-display truncate leading-tight"
@@ -172,7 +173,7 @@ export default function ProgressPage() {
               className="caps-tight text-[9px] mt-1"
               style={{ color: 'var(--color-text-faint)' }}
             >
-              {String(s.sessions).padStart(2, '0')} SESSION{s.sessions === 1 ? '' : 'S'} · BEST {display(s.bestMax)} {unit.toUpperCase()}
+              BEST {display(s.bestMax)} {unit.toUpperCase()}
             </div>
           </div>
 

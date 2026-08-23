@@ -2,6 +2,7 @@ import { useState, useMemo, useEffect, useRef } from 'react';
 import { useAppContext } from '../../context/AppContext';
 
 import { imageForExercise, MEDIA_ATTRIBUTION } from '../../utils/exerciseImage';
+import ExerciseThumb from './ExerciseThumb';
 import { BODY_PART_ORDER, BODY_PART_CODE, BODY_PART_ACCENT } from '../../utils/bodyParts';
 
 interface ExerciseSelectProps {
@@ -348,7 +349,7 @@ export default function ExerciseSelect({
                           borderTop: i === 0 ? '1px solid var(--color-line)' : undefined,
                         }}
                       >
-                        <ExerciseThumb id={ex.id} images={exerciseImages} />
+                        <PickerThumb id={ex.id} images={exerciseImages} />
                         <span
                           className="flex-1 text-[15px]"
                           style={{ color: 'var(--color-text)', fontWeight: 500 }}
@@ -403,7 +404,7 @@ export default function ExerciseSelect({
                               borderBottom: i < list.length - 1 ? '1px solid var(--color-line)' : undefined,
                             }}
                           >
-                            <ExerciseThumb id={ex.id} images={exerciseImages} />
+                            <PickerThumb id={ex.id} images={exerciseImages} />
                             <span
                               className="flex-1 text-[15px]"
                               style={{ color: 'var(--color-text)' }}
@@ -449,30 +450,8 @@ const THUMB = 40;
  * doesn't go ragged down the left edge. Lazy, because a category can run to
  * several hundred rows.
  */
-function ExerciseThumb({ id, images }: { id: string; images: Record<string, string> }) {
-  const src = imageForExercise(id, images);
-  const shared = {
-    width: THUMB,
-    height: THUMB,
-    borderRadius: '2px',
-    background: 'var(--color-line-2)',
-  } as const;
-
-  if (!src) return <span className="shrink-0" style={{ ...shared, opacity: 0.4 }} aria-hidden />;
-
-  return (
-    <img
-      src={src}
-      alt=""
-      aria-hidden
-      loading="lazy"
-      decoding="async"
-      width={THUMB}
-      height={THUMB}
-      className="shrink-0"
-      style={{ ...shared, objectFit: 'cover' }}
-    />
-  );
+function PickerThumb({ id, images }: { id: string; images: Record<string, string> }) {
+  return <ExerciseThumb src={imageForExercise(id, images)} size={THUMB} />;
 }
 
 function AddedTag() {
