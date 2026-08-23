@@ -6,12 +6,12 @@ import { missingImageFiles } from '../../scripts/lib/library.mjs';
 
 describe('exerciseImageUrl', () => {
   it('resolves an imported exercise by convention', () => {
-    expect(exerciseImageUrl('ex-gv-0001')).toBe('/exercise-images/ex-gv-0001.jpg');
+    expect(exerciseImageUrl('ex-gv-0001')).toBe('/assets/exercise-images/ex-gv-0001.jpg');
   });
 
   it('resolves a listed one by its filename, whatever the format', () => {
     const [id, file] = Object.entries(OWN_EXERCISE_IMAGES)[0];
-    expect(exerciseImageUrl(id)).toBe(`/exercise-images/${file}`);
+    expect(exerciseImageUrl(id)).toBe(`/assets/exercise-images/${file}`);
   });
 
   it('lets a listed file win over the convention', () => {
@@ -19,7 +19,7 @@ describe('exerciseImageUrl', () => {
     // still be pointed at the .jpg that is no longer there.
     const listed = Object.keys(OWN_EXERCISE_IMAGES);
     for (const id of listed) {
-      expect(exerciseImageUrl(id)).toBe(`/exercise-images/${OWN_EXERCISE_IMAGES[id]}`);
+      expect(exerciseImageUrl(id)).toBe(`/assets/exercise-images/${OWN_EXERCISE_IMAGES[id]}`);
     }
   });
 

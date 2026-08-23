@@ -24,9 +24,17 @@ anything much larger is wasted, since the app never shows one above 72px.
 `npm run library` lists every exercise still without a picture, with its id.
 
 `library/images/` is an inbox, not the store: once applied, the picture lives
-in `public/exercise-images/` and stays there. Taking a file back out of the
+in `public/assets/exercise-images/` and stays there. Taking a file back out of the
 inbox does not remove it. To drop a picture entirely, delete it from
-`public/exercise-images/` and re-run.
+`public/assets/exercise-images/` and re-run.
+
+**Replacing a picture keeps the filename, and the filename is cached for a
+year.** Everything under `/assets/` is served immutable, which is what makes
+these load instantly on every visit after the first. The cost is that swapping
+`ex-legs-028.jpg` for a different image leaves anyone who has already seen it
+looking at the old one until their cache expires. To make a replacement reach
+people, give it a new name: drop it in as `ex-legs-028-v2.jpg` and the
+generator records the new filename against the same exercise.
 
 ## Editing, adding and removing
 

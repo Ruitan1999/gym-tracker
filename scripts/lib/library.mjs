@@ -16,7 +16,7 @@ export const BODY_PARTS = [
 export const ROOT = process.cwd();
 export const LIBRARY_TS = path.join(ROOT, 'src/data/defaultExercises.ts');
 export const IMAGES_TS = path.join(ROOT, 'src/data/exerciseImages.ts');
-export const PUBLIC_IMAGES = path.join(ROOT, 'public/exercise-images');
+export const PUBLIC_IMAGES = path.join(ROOT, 'public/assets/exercise-images');
 export const DROP_DIR = path.join(ROOT, 'library/images');
 export const OVERRIDES = path.join(ROOT, 'library/overrides.json');
 

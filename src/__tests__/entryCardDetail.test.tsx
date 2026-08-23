@@ -51,7 +51,7 @@ describe('An exercise card', () => {
     const { container } = renderCard('ex-gv-0001', true);
 
     expect(screen.getByText('CORE')).toBeDefined();
-    expect(image(container)?.getAttribute('src')).toBe('/exercise-images/ex-gv-0001.jpg');
+    expect(image(container)?.getAttribute('src')).toBe('/assets/exercise-images/ex-gv-0001.jpg');
   });
 
   it('shows the same two when open', () => {
