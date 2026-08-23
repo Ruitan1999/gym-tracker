@@ -38,14 +38,14 @@ function readRetry(): RetryState | null {
 }
 
 /** True once reloading has been tried and clearly isn't working. */
-function retriesExhausted(): boolean {
+export function retriesExhausted(): boolean {
   const state = readRetry();
   if (!state) return false;
   if (Date.now() - state.at >= RETRY_WINDOW_MS) return false;
   return state.count >= MAX_RETRIES;
 }
 
-function markRetry(): void {
+export function markRetry(): void {
   const previous = readRetry();
   const stillInWindow = !!previous && Date.now() - previous.at < RETRY_WINDOW_MS;
   const next: RetryState = {
@@ -59,7 +59,7 @@ function markRetry(): void {
   }
 }
 
-function clearRetry(): void {
+export function clearRetry(): void {
   try {
     localStorage.removeItem(RETRY_KEY);
   } catch {
