@@ -2,7 +2,7 @@
 
 /* ————————————————————————————————————————————————————————————————
    LIFTGAUGE · design tokens · LIGHT
-   Cool paper base, teal accent, tabular monospace data, hairline dividers,
+   Cool paper base, emerald accent, tabular monospace data, hairline dividers,
    zero-shadow surfaces.
 
    The accent tokens are still called "volt" — the name is the role (the one
@@ -21,26 +21,24 @@
   --color-text: #0a0a0a;
   --color-text-muted: #595959;
   --color-text-faint: #9a9a9a;
-  /* A shade deeper than the teal this was picked from (#0d9488): that one
-     came in at 3.74 against white and 3.43 as text, both under the 4.5 floor,
-     so every button label and every accent-coloured line sat below AA. This
-     is the nearest teal that clears both. */
-  --color-volt: #0f7d73;
-  --color-volt-dim: #0f8b80;
-  --color-volt-deep: #0b6b62;
-  --color-volt-ink: #0b6b62;
+  /* Emerald, exactly as picked: 5.48 against white and 5.03 as text, so it
+     clears AA as a fill and as type without being nudged. */
+  --color-volt: #047857;
+  --color-volt-dim: #068a66;
+  --color-volt-deep: #036349;
+  --color-volt-ink: #036349;
   /* The accent behind something rather than on it: tinted panels and the
      glow under a raised button. Both were written out as raw rgba at each
      call site, which is how they stayed orange when the accent moved. */
-  --color-volt-tint: rgba(15, 125, 115, 0.08);
-  --color-volt-wash: rgba(15, 125, 115, 0.06);
-  --color-volt-glow: rgba(15, 125, 115, 0.32);
+  --color-volt-tint: rgba(4, 120, 87, 0.08);
+  --color-volt-wash: rgba(4, 120, 87, 0.06);
+  --color-volt-glow: rgba(4, 120, 87, 0.32);
   --color-rust: #c44a10;
   --color-blood: #c0253f;
   --color-ember: #b47a00;
-  /* Moved off blue when the accent was blue, and kept clear of the teal it is
-     now: it marks a session already under way, which has to read as "not this
-     button". */
+  /* Moved off blue when the accent was blue, and still clear of the emerald
+     it is now: it marks a session already under way, which has to read as
+     "not this button". */
   --color-steel: #7c3aed;
   --color-steel-glow: rgba(124, 58, 237, 0.32);
 
@@ -179,8 +177,8 @@ input[type=number] { appearance: textfield; }
 }
 
 @keyframes pulse-volt {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(15, 125, 115, 0.5); }
-  50% { box-shadow: 0 0 0 10px rgba(15, 125, 115, 0); }
+  0%, 100% { box-shadow: 0 0 0 0 rgba(4, 120, 87, 0.5); }
+  50% { box-shadow: 0 0 0 10px rgba(4, 120, 87, 0); }
 }
 
 @keyframes tick-in {
