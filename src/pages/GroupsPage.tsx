@@ -107,29 +107,38 @@ export default function GroupsPage() {
                     className="flex-1 min-w-0 text-left press flex items-center px-3.5 py-3"
                   >
                     <span className="flex-1 min-w-0">
-                      <span
-                        className="font-display block truncate"
-                        style={{
-                          fontSize: '1.0625rem',
-                          fontWeight: 700,
-                          letterSpacing: '-0.02em',
-                          fontVariationSettings: '"wdth" 95',
-                          color: 'var(--color-text)',
-                        }}
-                      >
-                        {g.name}
+                      <span className="flex items-baseline gap-1.5">
+                        <span
+                          className="font-display truncate"
+                          style={{
+                            fontSize: '1.0625rem',
+                            fontWeight: 700,
+                            letterSpacing: '-0.02em',
+                            fontVariationSettings: '"wdth" 95',
+                            color: 'var(--color-text)',
+                          }}
+                        >
+                          {g.name}
+                        </span>
+                        <span
+                          className="font-mono text-[12px] shrink-0"
+                          style={{ color: 'var(--color-text-faint)' }}
+                        >
+                          ({names.length})
+                        </span>
                       </span>
-                      <span
-                        className="caps-tight text-[9px] block truncate mt-0.5"
-                        style={{ color: 'var(--color-text-faint)' }}
-                      >
-                        {names.length === 0
-                          ? 'EMPTY — TAP TO ADD EXERCISES'
-                          : `${String(names.length).padStart(2, '0')} EXERCISE${names.length === 1 ? '' : 'S'}`}
-                      </span>
-                      <span className="block mt-2">
-                        <ExerciseStrip exerciseIds={g.exerciseIds} />
-                      </span>
+                      {names.length === 0 ? (
+                        <span
+                          className="caps-tight text-[9px] block truncate mt-0.5"
+                          style={{ color: 'var(--color-text-faint)' }}
+                        >
+                          EMPTY — TAP TO ADD EXERCISES
+                        </span>
+                      ) : (
+                        <span className="block mt-2">
+                          <ExerciseStrip exerciseIds={g.exerciseIds} max={8} />
+                        </span>
+                      )}
                     </span>
                   </button>
 

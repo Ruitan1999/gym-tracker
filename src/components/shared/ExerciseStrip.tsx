@@ -1,8 +1,8 @@
 import { useAppContext } from '../../context/AppContext';
 import { imageForExercise } from '../../utils/exerciseImage';
 
-/** Enough to recognise a template at a glance without becoming a list. */
-const MAX_THUMBS = 5;
+/** Enough to recognise something at a glance without becoming a list. */
+const DEFAULT_MAX = 5;
 const SIZE = 30;
 
 /**
@@ -17,14 +17,21 @@ const SIZE = 30;
  * says nothing, so a template whose exercises have none renders nothing at all
  * and the card looks as it did before.
  */
-export default function ExerciseStrip({ exerciseIds }: { exerciseIds: string[] }) {
+export default function ExerciseStrip({
+  exerciseIds,
+  max = DEFAULT_MAX,
+}: {
+  exerciseIds: string[];
+  /** Raise it where the strip has a row to itself rather than sharing one. */
+  max?: number;
+}) {
   const { exerciseImages } = useAppContext();
 
   const pictures: string[] = [];
   for (const id of exerciseIds) {
     const src = imageForExercise(id, exerciseImages);
     if (src) pictures.push(src);
-    if (pictures.length === MAX_THUMBS) break;
+    if (pictures.length === max) break;
   }
   if (pictures.length === 0) return null;
 

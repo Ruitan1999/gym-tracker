@@ -586,29 +586,33 @@ export default function WorkoutForm({
                     onClick={() => handleStartFromGroup(g)}
                     className="w-full text-left press px-3 pt-3 pb-2.5"
                   >
-                    {/* Padded clear of the menu, which is out of the flow. */}
-                    <div
-                      className="font-display truncate pr-11"
-                      style={{
-                        fontWeight: 700,
-                        fontSize: '1rem',
-                        letterSpacing: '-0.02em',
-                        fontVariationSettings: '"wdth" 95',
-                        color: 'var(--color-text)',
-                      }}
-                    >
-                      {g.name}
+                    {/* Padded clear of the menu, which is out of the flow. The
+                        count sits outside the truncating name so a long one
+                        cannot cut it off. */}
+                    <div className="flex items-baseline gap-1.5 pr-11">
+                      <span
+                        className="font-display truncate"
+                        style={{
+                          fontWeight: 700,
+                          fontSize: '1rem',
+                          letterSpacing: '-0.02em',
+                          fontVariationSettings: '"wdth" 95',
+                          color: 'var(--color-text)',
+                        }}
+                      >
+                        {g.name}
+                      </span>
+                      <span
+                        className="font-mono text-[12px] shrink-0"
+                        style={{ color: 'var(--color-text-faint)' }}
+                      >
+                        ({exCount})
+                      </span>
                     </div>
                     {/* The line-up is what tells two templates apart; the
                         names alone read the same. */}
-                    <div className="flex items-center justify-between gap-3 mt-2">
-                      <ExerciseStrip exerciseIds={g.exerciseIds} />
-                      <span
-                        className="caps-tight text-[9px] shrink-0 ml-auto"
-                        style={{ color: 'var(--color-text-faint)' }}
-                      >
-                        {exCount} EXERCISE{exCount === 1 ? '' : 'S'}
-                      </span>
+                    <div className="mt-2">
+                      <ExerciseStrip exerciseIds={g.exerciseIds} max={8} />
                     </div>
                   </button>
                   {/* Positioned rather than laid out: given a row of its own, a
