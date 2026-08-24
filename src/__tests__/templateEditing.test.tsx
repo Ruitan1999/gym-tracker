@@ -158,6 +158,18 @@ describe('editing a template', () => {
     expect(storedName()).toBe('Push Day B');
   });
 
+  it('opens the name for editing with the cursor at the end, not everything selected', () => {
+    renderPage();
+
+    fireEvent.click(screen.getByText('Push Day A'));
+    const field = screen.getByLabelText('Template name') as HTMLInputElement;
+
+    // A tap-to-edit is usually a small correction, not a full retype — a
+    // select-all would make the very next keystroke wipe the name out.
+    expect(field.selectionStart).toBe(field.value.length);
+    expect(field.selectionEnd).toBe(field.value.length);
+  });
+
   it('puts the old name back on cancel', () => {
     renderPage();
 

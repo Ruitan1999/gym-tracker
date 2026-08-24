@@ -225,7 +225,12 @@ function TemplateEditor({ group, isNew }: { group: WorkoutGroup; isNew: boolean 
                   setEditingName(false);
                 }
               }}
-              onFocus={(e) => e.currentTarget.select()}
+              onFocus={(e) => {
+                // Cursor at the end, not a select-all: a tap-to-edit name is
+                // usually a small correction, not a full replacement.
+                const end = e.currentTarget.value.length;
+                e.currentTarget.setSelectionRange(end, end);
+              }}
               aria-label="Template name"
               enterKeyHint="done"
               className="font-display mt-1 w-full outline-none bg-transparent"
