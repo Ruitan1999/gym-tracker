@@ -71,6 +71,12 @@ export interface WorkoutGroup {
   name: string;
   exerciseIds: string[];
   createdAt: string;
+  /**
+   * The weekdays this template is trained on, Monday-first: 0 is Monday and 6
+   * is Sunday. Absent or empty means it isn't on the calendar at all, which is
+   * every template that existed before schedules did.
+   */
+  days?: number[];
 }
 
 export interface AppData {

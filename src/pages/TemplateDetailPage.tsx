@@ -10,7 +10,9 @@ import { useAppContext } from '../context/AppContext';
 import { useDragReorder } from '../utils/useDragReorder';
 import type { WorkoutGroup } from '../types';
 import ExerciseThumb from '../components/shared/ExerciseThumb';
+import DaySchedulePicker from '../components/workout/DaySchedulePicker';
 import { imageForExercise } from '../utils/exerciseImage';
+import { DAY_LETTERS, DAY_NAMES, scheduledDays } from '../utils/schedule';
 
 export default function TemplateDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -73,6 +75,8 @@ function TemplateEditor({ group, isNew }: { group: WorkoutGroup; isNew: boolean 
   const [draftName, setDraftName] = useState(group.name);
   const [editingName, setEditingName] = useState(false);
   const [exitingKey, setExitingKey] = useState<string | null>(null);
+  const [days, setDays] = useState<number[]>(() => scheduledDays(group));
+  const [pickingDays, setPickingDays] = useState(false);
 
   const groupRef = useRef(group);
   groupRef.current = group;
@@ -90,15 +94,18 @@ function TemplateEditor({ group, isNew }: { group: WorkoutGroup; isNew: boolean 
   const editedIds = slots.map((s) => s.exerciseId);
   // A template being created always has something to decide about, even empty:
   // there has to be a visible way to abandon it.
+  const savedDays = scheduledDays(group);
   const dirty =
     isNew ||
     draftName.trim() !== group.name ||
     editedIds.length !== group.exerciseIds.length ||
-    editedIds.some((id, i) => id !== group.exerciseIds[i]);
+    editedIds.some((id, i) => id !== group.exerciseIds[i]) ||
+    days.length !== savedDays.length ||
+    days.some((d, i) => d !== savedDays[i]);
 
   function saveChanges() {
     if (isNew) {
-      addGroup({ ...groupRef.current, name: draftName, exerciseIds: editedIds });
+      addGroup({ ...groupRef.current, name: draftName, exerciseIds: editedIds, days });
       showToast('Template created');
       navigate(`/groups/${groupRef.current.id}`, { replace: true });
       return;
@@ -107,6 +114,7 @@ function TemplateEditor({ group, isNew }: { group: WorkoutGroup; isNew: boolean 
       ...groupRef.current,
       name: draftName.trim() || groupRef.current.name,
       exerciseIds: editedIds,
+      days,
     });
     showToast('Template updated');
   }
@@ -118,6 +126,7 @@ function TemplateEditor({ group, isNew }: { group: WorkoutGroup; isNew: boolean 
     }
     setSlots(group.exerciseIds.map(makeSlot));
     setDraftName(group.name);
+    setDays(scheduledDays(group));
     setEditingName(false);
   }
 
@@ -254,6 +263,55 @@ function TemplateEditor({ group, isNew }: { group: WorkoutGroup; isNew: boolean 
             {dirty && <span style={{ color: 'var(--color-volt)' }}> · UNSAVED</span>}
           </div>
         </header>
+
+        {/* The days this one is trained on. It sits above the line-up because
+            it is what decides when the template is offered, not what is in it. */}
+        <button
+          type="button"
+          onClick={() => setPickingDays(true)}
+          aria-label={
+            days.length === 0
+              ? 'Set the days this template is trained on'
+              : `Workout days: ${days.map((d) => DAY_NAMES[d]).join(', ')}`
+          }
+          className="w-full text-left press p-3.5"
+          style={{
+            background: 'var(--color-volt-wash)',
+            border: '1px solid rgba(4, 120, 87, 0.18)',
+            borderRadius: 'var(--radius)',
+          }}
+        >
+          <div className="flex items-center justify-between mb-2.5">
+            <span className="caps-tight text-[9px]" style={{ color: 'var(--color-volt)' }}>
+              WORKOUT DAYS
+            </span>
+            <span className="caps-tight text-[9px]" style={{ color: 'var(--color-text-faint)' }}>
+              {days.length === 0 ? 'SET →' : 'EDIT →'}
+            </span>
+          </div>
+          <div className="flex items-center gap-1.5" aria-hidden>
+            {DAY_LETTERS.map((letter, day) => {
+              const on = days.includes(day);
+              return (
+                <span
+                  key={day}
+                  className="caps-tight text-[12px] flex items-center justify-center shrink-0"
+                  style={{
+                    width: 30,
+                    height: 30,
+                    borderRadius: 'var(--radius)',
+                    background: on ? 'var(--color-volt)' : 'var(--color-surface)',
+                    border: on ? 'none' : '1px solid var(--color-line-2)',
+                    color: on ? '#ffffff' : 'var(--color-text-faint)',
+                    fontWeight: on ? 700 : 400,
+                  }}
+                >
+                  {letter}
+                </span>
+              );
+            })}
+          </div>
+        </button>
 
         {slots.length === 0 ? (
           <div
@@ -408,6 +466,18 @@ function TemplateEditor({ group, isNew }: { group: WorkoutGroup; isNew: boolean 
           addedIds={addedIds}
           onSelect={handlePick}
           onClose={() => setShowPicker(false)}
+        />
+      )}
+
+      {pickingDays && (
+        <DaySchedulePicker
+          templateName={draftName}
+          days={days}
+          onDone={(next) => {
+            setDays(next);
+            setPickingDays(false);
+          }}
+          onClose={() => setPickingDays(false)}
         />
       )}
 

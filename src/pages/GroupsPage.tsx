@@ -9,6 +9,7 @@ import { useAppContext } from '../context/AppContext';
 import { useDragReorder } from '../utils/useDragReorder';
 import type { WorkoutGroup } from '../types';
 import ExerciseStrip from '../components/shared/ExerciseStrip';
+import { dayCodeLabel } from '../utils/schedule';
 
 export default function GroupsPage() {
   const { appData, updateGroup, deleteGroup, reorderGroups } = useAppContext();
@@ -107,6 +108,16 @@ export default function GroupsPage() {
                     className="flex-1 min-w-0 text-left press flex items-center px-3.5 py-3"
                   >
                     <span className="flex-1 min-w-0">
+                      {/* Above the name, as on the home screen: the days are
+                          what decide when this one comes round. */}
+                      {dayCodeLabel(g) && (
+                        <span
+                          className="caps-tight text-[9px] block truncate"
+                          style={{ color: 'var(--color-volt)' }}
+                        >
+                          {dayCodeLabel(g)}
+                        </span>
+                      )}
                       <span className="flex items-baseline gap-1.5">
                         <span
                           className="font-display truncate"
