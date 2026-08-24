@@ -15,7 +15,20 @@ import { imageForExercise } from '../utils/exerciseImage';
 export default function TemplateDetailPage() {
   const { id } = useParams<{ id: string }>();
   const { appData } = useAppContext();
-  const group = (appData.groups ?? []).find((g) => g.id === id);
+  const isNew = id === 'new';
+  const groups = appData.groups ?? [];
+
+  // A template being created exists only here until it is saved, so backing
+  // out of one leaves nothing behind. It used to be written the moment the
+  // button was pressed, which left an empty "Template 4" every time.
+  const [draft] = useState<WorkoutGroup>(() => ({
+    id: crypto.randomUUID(),
+    name: `Template ${groups.length + 1}`,
+    exerciseIds: [],
+    createdAt: new Date().toISOString(),
+  }));
+
+  const group = isNew ? draft : groups.find((g) => g.id === id);
 
   if (!group) {
     return (
@@ -31,7 +44,7 @@ export default function TemplateDetailPage() {
   }
 
   // Remount on a different template so the slot keys below re-seed cleanly.
-  return <TemplateEditor key={group.id} group={group} />;
+  return <TemplateEditor key={group.id} group={group} isNew={isNew} />;
 }
 
 /**
@@ -47,8 +60,8 @@ interface Slot {
 let slotCounter = 0;
 const makeSlot = (exerciseId: string): Slot => ({ key: `slot-${++slotCounter}`, exerciseId });
 
-function TemplateEditor({ group }: { group: WorkoutGroup }) {
-  const { appData, updateGroup, deleteGroup, exerciseImages } = useAppContext();
+function TemplateEditor({ group, isNew }: { group: WorkoutGroup; isNew: boolean }) {
+  const { appData, addGroup, updateGroup, deleteGroup, exerciseImages, showToast } = useAppContext();
   const navigate = useNavigate();
 
   const [slots, setSlots] = useState<Slot[]>(() => group.exerciseIds.map(makeSlot));
@@ -56,15 +69,49 @@ function TemplateEditor({ group }: { group: WorkoutGroup }) {
   const [showMenu, setShowMenu] = useState(false);
   const [renaming, setRenaming] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [confirmLeave, setConfirmLeave] = useState(false);
+  const [draftName, setDraftName] = useState(group.name);
   const [exitingKey, setExitingKey] = useState<string | null>(null);
 
   const groupRef = useRef(group);
   groupRef.current = group;
 
-  const commit = useCallback((next: Slot[]) => {
-    setSlots(next);
-    updateGroup({ ...groupRef.current, exerciseIds: next.map((s) => s.exerciseId) });
-  }, [updateGroup]);
+  /**
+   * Editing the line-up is local until it is saved.
+   *
+   * It used to write through on every add, removal and reorder, so there was
+   * nothing to cancel — pulling an exercise out to see how it read had already
+   * changed the template, and the only way back was to put it in again in the
+   * right place.
+   */
+  const commit = useCallback((next: Slot[]) => setSlots(next), []);
+
+  const editedIds = slots.map((s) => s.exerciseId);
+  // A template being created always has something to decide about, even empty:
+  // there has to be a visible way to abandon it.
+  const dirty =
+    isNew ||
+    editedIds.length !== group.exerciseIds.length ||
+    editedIds.some((id, i) => id !== group.exerciseIds[i]);
+
+  function saveChanges() {
+    if (isNew) {
+      addGroup({ ...groupRef.current, name: draftName, exerciseIds: editedIds });
+      showToast('Template created');
+      navigate(`/groups/${groupRef.current.id}`, { replace: true });
+      return;
+    }
+    updateGroup({ ...groupRef.current, exerciseIds: editedIds });
+    showToast('Template updated');
+  }
+
+  function discardChanges() {
+    if (isNew) {
+      navigate(-1);
+      return;
+    }
+    setSlots(group.exerciseIds.map(makeSlot));
+  }
 
   const {
     registerItem,
@@ -121,6 +168,7 @@ function TemplateEditor({ group }: { group: WorkoutGroup }) {
     <PageShell
       title="Template"
       showBack
+      onBack={dirty ? () => setConfirmLeave(true) : undefined}
       disableRefresh={draggingId !== null}
       rightAction={
         <button
@@ -155,11 +203,12 @@ function TemplateEditor({ group }: { group: WorkoutGroup }) {
               lineHeight: 1.02,
             }}
           >
-            {group.name}
+            {isNew ? draftName : group.name}
           </h2>
           <div className="caps-tight text-[9px] mt-1.5" style={{ color: 'var(--color-text-faint)' }}>
             {String(slots.length).padStart(2, '0')} EXERCISE{slots.length === 1 ? '' : 'S'}
             {slots.length > 1 && ' · HOLD TO REORDER'}
+            {dirty && <span style={{ color: 'var(--color-volt)' }}> · UNSAVED</span>}
           </div>
         </header>
 
@@ -265,7 +314,58 @@ function TemplateEditor({ group }: { group: WorkoutGroup }) {
         )}
 
         {addButton}
+
+        {/* Only present when there is something to decide about. Sticky rather
+            than in the flow: the list can be long, and the two are needed from
+            wherever the last change was made. */}
+        {dirty && (
+          <div
+            className="sticky bottom-0 grid grid-cols-2 gap-2 pt-3 pb-3"
+            style={{
+              background: 'var(--color-bg)',
+              borderTop: '1px solid var(--color-line)',
+              marginBottom: 'calc(-0.75rem)',
+            }}
+          >
+            <button
+              type="button"
+              onClick={discardChanges}
+              className="h-12 btn-ghost press caps-tight text-[11px]"
+              style={{ borderRadius: 'var(--radius)' }}
+            >
+              CANCEL
+            </button>
+            <button
+              type="button"
+              onClick={saveChanges}
+              className="h-12 btn-volt press caps-tight text-[11px]"
+              style={{ borderRadius: 'var(--radius)' }}
+            >
+              {isNew ? 'CREATE TEMPLATE →' : 'SAVE CHANGES →'}
+            </button>
+          </div>
+        )}
       </div>
+
+      {confirmLeave && (
+        <ConfirmModal
+          eyebrow="UNSAVED CHANGES"
+          title="Leave without saving?"
+          message={
+            isNew
+              ? 'This template has not been created yet, so it will not be kept.'
+              : 'The exercises you added, removed or reordered go back to how the template was.'
+          }
+          confirmLabel="DISCARD →"
+          cancelLabel="KEEP EDITING"
+          destructive
+          onConfirm={() => {
+            setConfirmLeave(false);
+            navigate(-1);
+          }}
+          onClose={() => setConfirmLeave(false)}
+        />
+      )}
 
       {showPicker && (
         <ExerciseSelect
@@ -307,7 +407,8 @@ function TemplateEditor({ group }: { group: WorkoutGroup }) {
           title="Rename template"
           initialValue={group.name}
           onSave={(name) => {
-            updateGroup({ ...group, name });
+            if (isNew) setDraftName(name);
+            else updateGroup({ ...group, name });
             setRenaming(false);
           }}
           onClose={() => setRenaming(false)}

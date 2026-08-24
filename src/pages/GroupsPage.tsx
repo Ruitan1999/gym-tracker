@@ -11,7 +11,7 @@ import type { WorkoutGroup } from '../types';
 import ExerciseStrip from '../components/shared/ExerciseStrip';
 
 export default function GroupsPage() {
-  const { appData, addGroup, updateGroup, deleteGroup, reorderGroups } = useAppContext();
+  const { appData, updateGroup, deleteGroup, reorderGroups } = useAppContext();
   const navigate = useNavigate();
   const groups = appData.groups ?? [];
 
@@ -32,14 +32,9 @@ export default function GroupsPage() {
   });
 
   function createTemplate() {
-    const group: WorkoutGroup = {
-      id: crypto.randomUUID(),
-      name: `Template ${groups.length + 1}`,
-      exerciseIds: [],
-      createdAt: new Date().toISOString(),
-    };
-    addGroup(group);
-    navigate(`/groups/${group.id}`);
+    // Nothing is written until it is saved, so backing out leaves no empty
+    // template behind.
+    navigate('/groups/new');
   }
 
   const newTemplateButton = (

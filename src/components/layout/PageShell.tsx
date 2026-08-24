@@ -11,6 +11,8 @@ interface PageShellProps {
   rightAction?: ReactNode;
   children: ReactNode;
   showBack?: boolean;
+  /** Replaces going back a page — for a screen with something to lose. */
+  onBack?: () => void;
   topSlot?: ReactNode;
   onRefresh?: () => Promise<void>;
   hideTitle?: boolean;
@@ -20,7 +22,7 @@ interface PageShellProps {
 const PULL_THRESHOLD = 72;
 const MAX_PULL = 120;
 
-export default function PageShell({ title, onTitlePress, titlePressLabel, eyebrow, rightAction, children, showBack, topSlot, onRefresh, hideTitle, disableRefresh }: PageShellProps) {
+export default function PageShell({ title, onTitlePress, titlePressLabel, eyebrow, rightAction, children, showBack, onBack, topSlot, onRefresh, hideTitle, disableRefresh }: PageShellProps) {
   const navigate = useNavigate();
   const { refreshAppData } = useAppContext();
   const mainRef = useRef<HTMLElement | null>(null);
@@ -108,7 +110,7 @@ export default function PageShell({ title, onTitlePress, titlePressLabel, eyebro
             <div className="flex items-center gap-3 min-w-0">
               <button
                 type="button"
-                onClick={() => navigate(-1)}
+                onClick={onBack ?? (() => navigate(-1))}
                 aria-label="Go back"
                 className="w-10 h-10 -ml-2 flex items-center justify-center press"
                 style={{ color: 'var(--color-text)' }}
