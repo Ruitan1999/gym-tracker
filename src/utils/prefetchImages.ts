@@ -42,8 +42,7 @@ export function prefetchImages(urls: (string | null)[], limit = 24): () => void 
 
   const wanted: string[] = [];
   for (const url of urls) {
-    if (!url || asked.has(url)) continue;
-    asked.add(url);
+    if (!url || asked.has(url) || wanted.includes(url)) continue;
     wanted.push(url);
     if (wanted.length >= limit) break;
   }
@@ -51,6 +50,12 @@ export function prefetchImages(urls: (string | null)[], limit = 24): () => void 
 
   return schedule(() => {
     for (const url of wanted) {
+      // Marked here rather than when this was scheduled. An effect that
+      // re-runs cancels the scheduled fetch first, and a URL marked at
+      // schedule time would then be skipped by the re-run as already handled
+      // — leaving it never fetched by anybody.
+      if (asked.has(url)) continue;
+      asked.add(url);
       // Assigning src is enough: the response lands in the HTTP cache, which
       // is what the <img> that renders next will read from.
       const img = new Image();

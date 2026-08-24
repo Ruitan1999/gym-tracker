@@ -83,6 +83,20 @@ describe('prefetchImages', () => {
     expect(created).toHaveLength(0);
   });
 
+  it('still fetches after a cancelled attempt for the same pictures', () => {
+    // What an effect does on a dependency change: cleanup, then run again.
+    // If the first attempt marked these as asked-for and the cancel did not
+    // take it back, the second attempt finds nothing to do and the pictures
+    // are never fetched at all.
+    const cancel = prefetchImages(['/a.jpg', '/b.jpg']);
+    cancel();
+
+    prefetchImages(['/a.jpg', '/b.jpg']);
+    vi.runAllTimers();
+
+    expect(created.map((i) => i.src)).toEqual(['/a.jpg', '/b.jpg']);
+  });
+
   it('does no work at all for an empty list', () => {
     const cancel = prefetchImages([null, null]);
     vi.runAllTimers();
