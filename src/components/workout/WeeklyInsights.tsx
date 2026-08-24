@@ -1,8 +1,8 @@
 import { useMemo } from 'react';
 import { Dumbbell } from 'lucide-react';
 import { useAppContext } from '../../context/AppContext';
-import { useMaybeAuth } from '../../context/AuthContext';
 import { weeklyStreak } from '../../utils/streak';
+import { scheduledDaysThisWeek } from '../../utils/schedule';
 
 function isoDate(d: Date): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
@@ -15,21 +15,8 @@ const STREAK_GOAL_WEEKS = 12;
 // than 22. Past 2 the icon's inner gaps close up and it goes solid.
 const ICON_STROKE = 2;
 
-function deriveName(user: { isAnonymous?: boolean; displayName?: string | null; email?: string | null } | null): string {
-  if (!user || user.isAnonymous) return 'friend';
-  if (user.displayName) return user.displayName.split(' ')[0];
-  if (user.email) {
-    const local = user.email.split('@')[0].split(/[._-]/)[0];
-    return local.charAt(0).toUpperCase() + local.slice(1);
-  }
-  return 'friend';
-}
-
 export default function WeeklyInsights() {
   const { appData } = useAppContext();
-  const auth = useMaybeAuth();
-  const name = deriveName(auth?.user ?? null);
-
   const { streak, weekDays, totalSessions, weekCount } = useMemo(() => {
     const dateSet = new Set(appData.workouts.map((w) => w.date));
     const today = new Date();
@@ -42,16 +29,22 @@ export default function WeeklyInsights() {
     const monday = new Date(today);
     monday.setDate(today.getDate() - mondayOffset);
 
+    const planned = scheduledDaysThisWeek(appData.groups ?? []);
+
     const days = Array.from({ length: 7 }, (_, i) => {
       const d = new Date(monday);
       d.setDate(monday.getDate() + i);
       const iso = isoDate(d);
+      const isFuture = d.getTime() > today.getTime();
       return {
         iso,
         letter: ['M', 'T', 'W', 'T', 'F', 'S', 'S'][i],
         trained: dateSet.has(iso),
         isToday: iso === isoDate(today),
-        isFuture: d.getTime() > today.getTime(),
+        isFuture,
+        // Only ahead of today: a scheduled day already gone is either trained
+        // or missed, and both of those the strip already says.
+        scheduled: isFuture && planned.has(i),
       };
     });
 
@@ -61,29 +54,11 @@ export default function WeeklyInsights() {
       totalSessions: appData.workouts.length,
       weekCount: days.filter((d) => d.trained).length,
     };
-  }, [appData.workouts]);
+  }, [appData.workouts, appData.groups]);
 
   const streakPct = Math.min(streak / STREAK_GOAL_WEEKS, 1);
 
   return (
-    <>
-      <div className="mb-4">
-        <div className="caps-tight text-[10px]" style={{ color: 'var(--color-text-faint)' }}>
-          WELCOME, {name.toUpperCase()}
-        </div>
-        <h1
-          className="font-display leading-tight mt-0.5"
-          style={{
-            fontSize: '1.625rem',
-            fontWeight: 700,
-            letterSpacing: '-0.03em',
-            fontVariationSettings: '"wdth" 90',
-            color: 'var(--color-text)',
-          }}
-        >
-          Let's get training today.
-        </h1>
-      </div>
     <section
       className="card p-4 mb-4"
       style={{ background: '#ffffff', border: '1px solid var(--color-line)' }}
@@ -111,7 +86,6 @@ export default function WeeklyInsights() {
         ))}
       </div>
     </section>
-    </>
   );
 }
 
@@ -207,21 +181,27 @@ function DayBox({
   trained,
   isToday,
   isFuture,
+  scheduled = false,
 }: {
   letter: string;
   trained: boolean;
   isToday: boolean;
   isFuture: boolean;
+  scheduled?: boolean;
 }) {
   const isPastMissed = !trained && !isFuture && !isToday;
   const bg = trained ? 'var(--color-volt)' : '#ffffff';
   const border = trained
     ? 'var(--color-volt)'
+    : scheduled
+    ? 'rgba(4, 120, 87, 0.5)'
     : isToday
     ? 'var(--color-text)'
     : 'var(--color-line-2)';
   const textColor = trained
     ? '#ffffff'
+    : scheduled
+    ? 'var(--color-volt)'
     : isPastMissed
     ? 'var(--color-text-faint)'
     : 'var(--color-text)';
@@ -232,7 +212,7 @@ function DayBox({
         className="w-full flex items-center justify-center aspect-square md:aspect-[2/1]"
         style={{
           background: bg,
-          border: `1px solid ${border}`,
+          border: `1px ${scheduled && !trained ? 'dashed' : 'solid'} ${border}`,
           borderRadius: 'var(--radius)',
           color: trained ? '#ffffff' : 'var(--color-text-faint)',
           opacity: isPastMissed ? 0.5 : 1,

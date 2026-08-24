@@ -3,6 +3,8 @@ import { useLocation, useParams } from 'react-router-dom';
 import PageShell from '../components/layout/PageShell';
 import WorkoutForm, { loadDraft } from '../components/workout/WorkoutForm';
 import WeeklyInsights from '../components/workout/WeeklyInsights';
+import HomeGreeting from '../components/workout/HomeGreeting';
+import NextUpCard from '../components/workout/NextUpCard';
 import TodayWork from '../components/workout/TodayWork';
 import RenameModal from '../components/shared/RenameModal';
 import { useAppContext } from '../context/AppContext';
@@ -63,6 +65,8 @@ function SessionPage({
       topSlot={
         !isSession ? (
           <>
+            <HomeGreeting />
+            <NextUpCard />
             <WeeklyInsights />
             <TodayWork />
           </>

@@ -13,7 +13,17 @@ import heroIllustration from '../../assets/healthy-habit.svg';
 import type { Workout, WorkoutEntry, WorkoutGroup, WorkoutSet } from '../../types';
 import { useDragReorder } from '../../utils/useDragReorder';
 import { imageForExercise } from '../../utils/exerciseImage';
+import { dayCodeLabel } from '../../utils/schedule';
 import { prefetchImages } from '../../utils/prefetchImages';
+import {
+  DRAFT_KEY,
+  type Draft,
+  loadDraft,
+  draftFromTemplate,
+  lastSetsFor,
+  saveDraft,
+  todayString,
+} from '../../utils/templateSession';
 import SessionClock from './SessionClock';
 import ExerciseStrip from '../shared/ExerciseStrip';
 import { ratingColor } from '../../utils/rating';
@@ -26,28 +36,6 @@ interface WorkoutFormProps {
   onNameChange: (name: string) => void;
 }
 
-function todayString(): string {
-  const d = new Date();
-  const yyyy = d.getFullYear();
-  const mm = String(d.getMonth() + 1).padStart(2, '0');
-  const dd = String(d.getDate()).padStart(2, '0');
-  return `${yyyy}-${mm}-${dd}`;
-}
-
-const DRAFT_KEY = 'liftgauge.workoutDraft.v1';
-
-interface Draft {
-  date: string;
-  name?: string;
-  entries: WorkoutEntry[];
-  notes: string;
-  collapsedIds: string[];
-  /** The template this session was started from, if any. */
-  sourceGroupId?: string;
-  /** When the clock started, so it survives a reload mid-session. */
-  startedAt?: string;
-}
-
 /**
  * Ordered, because a template hands its exercises to the next session in this
  * order — moving one is a change to what the template will produce.
@@ -56,15 +44,7 @@ function sameExerciseIds(a: string[], b: string[]): boolean {
   return a.length === b.length && a.every((id, i) => id === b[i]);
 }
 
-export function loadDraft(): Draft | null {
-  try {
-    const raw = localStorage.getItem(DRAFT_KEY);
-    if (!raw) return null;
-    return JSON.parse(raw) as Draft;
-  } catch {
-    return null;
-  }
-}
+export { loadDraft };
 
 export default function WorkoutForm({
   existingWorkout,
@@ -240,22 +220,13 @@ export default function WorkoutForm({
   // back to the ordinary save-as-template flow.
   const sourceGroup = sourceGroupId ? groups.find((g) => g.id === sourceGroupId) : undefined;
 
+  // The session being edited is not its own history: what it holds right now is
+  // what is on screen, so "last time" has to mean the one before it.
   function getLastWorkoutSets(exerciseId: string): WorkoutSet[] | null {
-    const sorted = [...appData.workouts].sort(
-      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-    );
-    for (const w of sorted) {
-      if (existingWorkout && w.id === existingWorkout.id) continue;
-      const entry = w.entries.find((e) => e.exerciseId === exerciseId);
-      if (entry && entry.sets.length > 0) {
-        return entry.sets.map((s, i) => ({
-          setNumber: i + 1,
-          reps: s.reps,
-          weightKg: s.weightKg,
-        }));
-      }
-    }
-    return null;
+    const earlier = existingWorkout
+      ? appData.workouts.filter((w) => w.id !== existingWorkout.id)
+      : appData.workouts;
+    return lastSetsFor(earlier, exerciseId);
   }
 
   function navigateHomeAndScrollTop() {
@@ -355,34 +326,13 @@ export default function WorkoutForm({
   }
 
   function handleStartFromGroup(group: WorkoutGroup) {
-    const newEntries: WorkoutEntry[] = group.exerciseIds.map((exerciseId) => {
-      const lastSets = getLastWorkoutSets(exerciseId);
-      return {
-        id: crypto.randomUUID(),
-        exerciseId,
-        sets: lastSets
-          ? lastSets.map((_, j) => ({ setNumber: j + 1, reps: 0, weightKg: 0 }))
-          : [{ setNumber: 1, reps: 0, weightKg: 0 }],
-      };
-    });
-    // All folded, including the first. Opening one was a guess at where the
-    // session would start, and a template is a set of exercises rather than an
-    // order to do them in.
-    const collapsed = newEntries.map((e) => e.id);
-
     const begunAt = startedAt ?? new Date().toISOString();
+    const draftPayload = draftFromTemplate(group, appData.workouts, begunAt);
+    const newEntries = draftPayload.entries;
+    const collapsed = draftPayload.collapsedIds;
 
     if (!isFocusedRoute) {
-      const draftPayload: Draft = {
-        date: todayString(),
-        name: group.name,
-        entries: newEntries,
-        notes: '',
-        collapsedIds: collapsed,
-        sourceGroupId: group.id,
-        startedAt: begunAt,
-      };
-      localStorage.setItem(DRAFT_KEY, JSON.stringify(draftPayload));
+      saveDraft(draftPayload);
       navigate('/workout/new');
       return;
     }
@@ -579,13 +529,24 @@ export default function WorkoutForm({
           <div className="flex flex-col gap-2">
             {groups.map((g) => {
               const exCount = g.exerciseIds.length;
+              const days = dayCodeLabel(g);
               return (
                 <div key={g.id} className="card relative">
                   <button
                     type="button"
                     onClick={() => handleStartFromGroup(g)}
-                    className="w-full text-left press px-3 pt-3 pb-2.5"
+                    className="w-full text-left press px-3 pt-2.5 pb-2.5"
                   >
+                    {/* Above the name rather than beside it: the thumbnails
+                        below have the row to themselves. */}
+                    {days && (
+                      <div
+                        className="caps-tight text-[9px] pr-11"
+                        style={{ color: 'var(--color-volt)' }}
+                      >
+                        {days}
+                      </div>
+                    )}
                     {/* Padded clear of the menu, which is out of the flow. The
                         count sits outside the truncating name so a long one
                         cannot cut it off. */}
