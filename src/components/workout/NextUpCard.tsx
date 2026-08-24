@@ -64,134 +64,147 @@ export default function NextUpCard() {
   if (groups.length === 0) return null;
 
   // Trained today already: the card steps back rather than nagging for a second
-  // session, and points at what is next instead.
+  // session, and points at what is next instead. Still today's business, so it
+  // keeps the banner — deep green rather than the due colour, so the two never
+  // get mistaken for each other at a glance.
   if (loggedToday) {
     return (
       <Shell tone="done">
-        <Eyebrow left="DONE TODAY" leftColor="var(--color-done-deep)" right={
-          upcoming ? `NEXT · ${DAY_CODES[upcoming.day]}` : undefined
-        } />
-        <div className="flex items-center gap-2 mb-1.5">
-          <span
-            className="shrink-0 flex items-center justify-center"
+        <Ribbon
+          background="var(--color-done-deep)"
+          left="DONE TODAY"
+          right={upcoming ? `NEXT · ${DAY_CODES[upcoming.day]}` : undefined}
+        />
+        <div style={{ padding: '14px 16px 16px 16px' }}>
+          <div className="flex items-center gap-2 mb-1.5">
+            <span
+              className="shrink-0 flex items-center justify-center"
+              style={{
+                width: 30,
+                height: 30,
+                background: 'var(--color-done)',
+                borderRadius: '7px',
+                color: '#ffffff',
+              }}
+            >
+              <Dumbbell className="w-4 h-4" strokeWidth={ICON_STROKE} />
+            </span>
+            <Name>{loggedToday.name || 'Session logged'}</Name>
+          </div>
+          <div
+            className="font-mono text-[12px] mb-4"
+            style={{ color: 'var(--color-text-muted)' }}
+          >
+            {sessionSummary(loggedToday)}
+          </div>
+          <button
+            type="button"
+            onClick={() => navigate(`/history/${loggedToday.id}`)}
+            className="w-full h-12 press caps-tight text-[11px]"
             style={{
-              width: 30,
-              height: 30,
-              background: 'var(--color-done)',
-              borderRadius: '7px',
-              color: '#ffffff',
+              background: 'var(--color-surface)',
+              border: '1px solid var(--color-done-line)',
+              borderRadius: 'var(--radius)',
+              color: 'var(--color-text)',
+              fontWeight: 700,
+              letterSpacing: '0.12em',
             }}
           >
-            <Dumbbell className="w-4 h-4" strokeWidth={ICON_STROKE} />
-          </span>
-          <Name>{loggedToday.name || 'Session logged'}</Name>
+            VIEW SESSION →
+          </button>
         </div>
-        <div
-          className="font-mono text-[12px] mb-4"
-          style={{ color: 'var(--color-text-muted)' }}
-        >
-          {sessionSummary(loggedToday)}
-        </div>
-        <button
-          type="button"
-          onClick={() => navigate(`/history/${loggedToday.id}`)}
-          className="w-full h-12 press caps-tight text-[11px]"
-          style={{
-            background: 'var(--color-surface)',
-            border: '1px solid var(--color-done-line)',
-            borderRadius: 'var(--radius)',
-            color: 'var(--color-text)',
-            fontWeight: 700,
-            letterSpacing: '0.12em',
-          }}
-        >
-          VIEW SESSION →
-        </button>
       </Shell>
     );
   }
 
-  // Something is due today: this is the whole point of the card.
+  // Something is due today: this is the whole point of the card, and the
+  // banner is what makes that unmissable — the eyebrow it replaced was too
+  // easy to skip past now that the card itself is the only button.
   if (dueToday.length > 0) {
     const [first, ...alsoToday] = dueToday;
     return (
       <Shell tone="due">
-        {/* The whole card is the button, same as the templates list below it
-            — a dedicated START WORKOUT bar was one tap more than the card
-            already gave you. */}
         <button
           type="button"
           onClick={() => start(first)}
-          className="w-full text-left press"
+          className="w-full text-left press block"
         >
-          <Eyebrow
-            left="NEXT UP"
-            leftColor="var(--color-volt)"
-            right={dayLabel(today, 0)}
-          />
-          <TemplateLine group={first} />
-          <ExerciseStrip exerciseIds={first.exerciseIds} max={8} />
+          <Ribbon background="var(--color-volt)" left="NEXT UP" right={dayLabel(today, 0)} />
+          <div style={{ padding: '14px 16px 16px 16px' }}>
+            <TemplateLine group={first} />
+            <ExerciseStrip exerciseIds={first.exerciseIds} max={8} />
+          </div>
         </button>
 
         {/* Two templates can share a day. The second is offered underneath
             rather than beside, so there is still one obvious button. */}
-        {alsoToday.map((g) => (
-          <button
-            key={g.id}
-            type="button"
-            onClick={() => start(g)}
-            className="w-full h-11 mt-2.5 px-3 flex items-center justify-between gap-2 press"
-            style={{
-              background: 'var(--color-surface)',
-              border: '1px solid var(--color-line)',
-              borderRadius: 'var(--radius)',
-            }}
+        {alsoToday.length > 0 && (
+          <div
+            className="flex flex-col gap-2"
+            style={{ padding: '0 16px 16px 16px' }}
           >
-            <span className="flex items-center gap-2 min-w-0">
-              <span className="truncate" style={{ fontSize: '13px', fontWeight: 600 }}>
-                {g.name}
-              </span>
-              <span
-                className="font-mono text-[11px] shrink-0"
-                style={{ color: 'var(--color-text-faint)' }}
+            {alsoToday.map((g) => (
+              <button
+                key={g.id}
+                type="button"
+                onClick={() => start(g)}
+                className="w-full h-11 px-3 flex items-center justify-between gap-2 press"
+                style={{
+                  background: 'var(--color-surface)',
+                  border: '1px solid var(--color-line)',
+                  borderRadius: 'var(--radius)',
+                }}
               >
-                ({g.exerciseIds.length})
-              </span>
-            </span>
-            <span
-              className="caps-tight text-[9px] shrink-0"
-              style={{ color: 'var(--color-volt)' }}
-            >
-              ALSO TODAY →
-            </span>
-          </button>
-        ))}
+                <span className="flex items-center gap-2 min-w-0">
+                  <span className="truncate" style={{ fontSize: '13px', fontWeight: 600 }}>
+                    {g.name}
+                  </span>
+                  <span
+                    className="font-mono text-[11px] shrink-0"
+                    style={{ color: 'var(--color-text-faint)' }}
+                  >
+                    ({g.exerciseIds.length})
+                  </span>
+                </span>
+                <span
+                  className="caps-tight text-[9px] shrink-0"
+                  style={{ color: 'var(--color-volt)' }}
+                >
+                  ALSO TODAY →
+                </span>
+              </button>
+            ))}
+          </div>
+        )}
       </Shell>
     );
   }
 
   // Days are set, just not today's. A rest day is a real answer, so the card
-  // gives it — with a way through for anyone who wants to train anyway.
+  // gives it — quietly: a coloured banner here would claim an urgency the day
+  // doesn't have, so it stays plain text.
   if (upcoming) {
     return (
       <Shell tone="rest">
-        <Eyebrow
-          left="NEXT UP"
-          leftColor="var(--color-text-faint)"
-          right={dayLabel(upcoming.day, upcoming.daysAway)}
-        />
-        <TemplateLine group={upcoming.group} />
-        <div className="mb-4">
-          <ExerciseStrip exerciseIds={upcoming.group.exerciseIds} max={8} />
+        <div className="p-4">
+          <Eyebrow
+            left="NEXT UP"
+            leftColor="var(--color-text-faint)"
+            right={dayLabel(upcoming.day, upcoming.daysAway)}
+          />
+          <TemplateLine group={upcoming.group} />
+          <div className="mb-4">
+            <ExerciseStrip exerciseIds={upcoming.group.exerciseIds} max={8} />
+          </div>
+          <button
+            type="button"
+            onClick={() => start(upcoming.group)}
+            className="w-full h-12 btn-ghost press caps-tight text-[11px]"
+            style={{ borderRadius: 'var(--radius)', letterSpacing: '0.12em' }}
+          >
+            START EARLY →
+          </button>
         </div>
-        <button
-          type="button"
-          onClick={() => start(upcoming.group)}
-          className="w-full h-12 btn-ghost press caps-tight text-[11px]"
-          style={{ borderRadius: 'var(--radius)', letterSpacing: '0.12em' }}
-        >
-          START EARLY →
-        </button>
       </Shell>
     );
   }
@@ -200,22 +213,24 @@ export default function NextUpCard() {
   if (!hasAnySchedule(groups)) {
     return (
       <Shell tone="empty">
-        <Eyebrow left="NEXT UP" leftColor="var(--color-text-faint)" />
-        <Name>Give your week a shape</Name>
-        <p
-          className="mt-1.5 mb-4"
-          style={{ fontSize: '13px', color: 'var(--color-text-muted)', lineHeight: 1.45 }}
-        >
-          Pick the days you train a template and it waits for you here.
-        </p>
-        <button
-          type="button"
-          onClick={() => navigate('/groups')}
-          className="w-full h-12 btn-ghost press caps-tight text-[11px]"
-          style={{ borderRadius: 'var(--radius)', letterSpacing: '0.12em' }}
-        >
-          SET WORKOUT DAYS →
-        </button>
+        <div className="p-4">
+          <Eyebrow left="NEXT UP" leftColor="var(--color-text-faint)" />
+          <Name>Give your week a shape</Name>
+          <p
+            className="mt-1.5 mb-4"
+            style={{ fontSize: '13px', color: 'var(--color-text-muted)', lineHeight: 1.45 }}
+          >
+            Pick the days you train a template and it waits for you here.
+          </p>
+          <button
+            type="button"
+            onClick={() => navigate('/groups')}
+            className="w-full h-12 btn-ghost press caps-tight text-[11px]"
+            style={{ borderRadius: 'var(--radius)', letterSpacing: '0.12em' }}
+          >
+            SET WORKOUT DAYS →
+          </button>
+        </div>
       </Shell>
     );
   }
@@ -234,9 +249,60 @@ function Shell({ tone, children }: { tone: 'due' | 'rest' | 'done' | 'empty'; ch
       : { background: 'var(--color-surface)', border: '1px solid var(--color-line)' };
 
   return (
-    <section className="p-4 mb-4" style={{ ...style, borderRadius: 'var(--radius)' }}>
+    <section
+      className="mb-4 overflow-hidden"
+      style={{ ...style, borderRadius: 'var(--radius)' }}
+    >
       {children}
     </section>
+  );
+}
+
+/**
+ * A full-width band across the top of the card, for the two states that are
+ * about today. Left as plain text on the other states — a colour this bold
+ * would claim urgency days that aren't today don't have.
+ */
+function Ribbon({
+  background,
+  left,
+  right,
+}: {
+  background: string;
+  left: string;
+  right?: string;
+}) {
+  return (
+    <div
+      className="flex items-center justify-between"
+      style={{ background, padding: '10px 16px' }}
+    >
+      <span
+        className="font-mono"
+        style={{
+          fontWeight: 700,
+          textTransform: 'uppercase',
+          letterSpacing: '0.12em',
+          fontSize: '11px',
+          color: '#ffffff',
+        }}
+      >
+        {left}
+      </span>
+      {right && (
+        <span
+          className="font-mono"
+          style={{
+            textTransform: 'uppercase',
+            letterSpacing: '0.08em',
+            fontSize: '9px',
+            color: 'rgba(255,255,255,0.75)',
+          }}
+        >
+          {right}
+        </span>
+      )}
+    </div>
   );
 }
 
