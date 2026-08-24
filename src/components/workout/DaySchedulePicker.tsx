@@ -85,7 +85,7 @@ export default function DaySchedulePicker({
                   style={{
                     background: on ? 'var(--color-volt)' : 'var(--color-surface)',
                     border: `1px solid ${on ? 'var(--color-volt)' : 'var(--color-line-2)'}`,
-                    borderRadius: 'var(--radius)',
+                    borderRadius: '7px',
                     color: on ? '#ffffff' : 'var(--color-text)',
                     fontWeight: on ? 700 : 400,
                   }}

@@ -78,7 +78,7 @@ export default function NextUpCard() {
               width: 30,
               height: 30,
               background: 'var(--color-done)',
-              borderRadius: 'var(--radius)',
+              borderRadius: '7px',
               color: '#ffffff',
             }}
           >
@@ -116,27 +116,21 @@ export default function NextUpCard() {
     const [first, ...alsoToday] = dueToday;
     return (
       <Shell tone="due">
-        <Eyebrow
-          left="NEXT UP"
-          leftColor="var(--color-volt)"
-          right={dayLabel(today, 0)}
-        />
-        <TemplateLine group={first} />
-        <div className="mb-4">
-          <ExerciseStrip exerciseIds={first.exerciseIds} max={8} />
-        </div>
+        {/* The whole card is the button, same as the templates list below it
+            — a dedicated START WORKOUT bar was one tap more than the card
+            already gave you. */}
         <button
           type="button"
           onClick={() => start(first)}
-          className="w-full h-14 btn-volt press caps-tight text-[11px]"
-          style={{
-            borderRadius: 'var(--radius)',
-            letterSpacing: '0.12em',
-            boxShadow:
-              '0 12px 32px -8px var(--color-volt-glow), 0 4px 12px -2px rgba(0, 0, 0, 0.08)',
-          }}
+          className="w-full text-left press"
         >
-          START WORKOUT →
+          <Eyebrow
+            left="NEXT UP"
+            leftColor="var(--color-volt)"
+            right={dayLabel(today, 0)}
+          />
+          <TemplateLine group={first} />
+          <ExerciseStrip exerciseIds={first.exerciseIds} max={8} />
         </button>
 
         {/* Two templates can share a day. The second is offered underneath

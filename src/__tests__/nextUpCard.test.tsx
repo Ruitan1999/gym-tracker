@@ -77,14 +77,15 @@ describe('the day a template is due', () => {
 
     expect(screen.getByText('Push Day A')).toBeTruthy();
     expect(screen.getByText(/TODAY · THU/)).toBeTruthy();
-    expect(screen.getByRole('button', { name: /START WORKOUT/ })).toBeTruthy();
+    // The card itself is the button — there is no separate START WORKOUT bar.
+    expect(screen.getByRole('button', { name: /Push Day A/ })).toBeTruthy();
   });
 
   it('hands the session to the form when it is started', () => {
     seed({ groups: [push([3])] });
     renderCard();
 
-    fireEvent.click(screen.getByRole('button', { name: /START WORKOUT/ }));
+    fireEvent.click(screen.getByRole('button', { name: /Push Day A/ }));
 
     const draft = loadDraft();
     expect(draft?.name).toBe('Push Day A');
@@ -98,7 +99,7 @@ describe('the day a template is due', () => {
     seed({ groups: [push([3]), pull([3])] });
     renderCard();
 
-    expect(screen.getByRole('button', { name: /START WORKOUT/ })).toBeTruthy();
+    expect(screen.getByRole('button', { name: /Push Day A/ })).toBeTruthy();
     const also = screen.getByRole('button', { name: /Pull Day/ });
     expect(also.textContent).toContain('ALSO TODAY');
   });

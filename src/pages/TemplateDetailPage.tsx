@@ -299,7 +299,7 @@ function TemplateEditor({ group, isNew }: { group: WorkoutGroup; isNew: boolean 
                   style={{
                     width: 30,
                     height: 30,
-                    borderRadius: 'var(--radius)',
+                    borderRadius: '7px',
                     background: on ? 'var(--color-volt)' : 'var(--color-surface)',
                     border: on ? 'none' : '1px solid var(--color-line-2)',
                     color: on ? '#ffffff' : 'var(--color-text-faint)',

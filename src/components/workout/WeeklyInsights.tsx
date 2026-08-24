@@ -213,7 +213,7 @@ function DayBox({
         style={{
           background: bg,
           border: `1px ${scheduled && !trained ? 'dashed' : 'solid'} ${border}`,
-          borderRadius: 'var(--radius)',
+          borderRadius: '7px',
           color: trained ? '#ffffff' : 'var(--color-text-faint)',
           opacity: isPastMissed ? 0.5 : 1,
         }}
