@@ -8,6 +8,7 @@ import ConfirmModal from '../components/shared/ConfirmModal';
 import { useAppContext } from '../context/AppContext';
 import { useDragReorder } from '../utils/useDragReorder';
 import type { WorkoutGroup } from '../types';
+import TemplateThumbs from '../components/workout/TemplateThumbs';
 
 export default function GroupsPage() {
   const { appData, addGroup, updateGroup, deleteGroup, reorderGroups } = useAppContext();
@@ -132,6 +133,9 @@ export default function GroupsPage() {
                         {names.length === 0
                           ? 'EMPTY — TAP TO ADD EXERCISES'
                           : `${String(names.length).padStart(2, '0')} · ${preview}${rest > 0 ? ` +${rest}` : ''}`}
+                      </span>
+                      <span className="block mt-2">
+                        <TemplateThumbs exerciseIds={g.exerciseIds} />
                       </span>
                     </span>
                   </button>
