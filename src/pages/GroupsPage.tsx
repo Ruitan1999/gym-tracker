@@ -8,7 +8,7 @@ import ConfirmModal from '../components/shared/ConfirmModal';
 import { useAppContext } from '../context/AppContext';
 import { useDragReorder } from '../utils/useDragReorder';
 import type { WorkoutGroup } from '../types';
-import TemplateThumbs from '../components/workout/TemplateThumbs';
+import ExerciseStrip from '../components/shared/ExerciseStrip';
 
 export default function GroupsPage() {
   const { appData, addGroup, updateGroup, deleteGroup, reorderGroups } = useAppContext();
@@ -88,8 +88,6 @@ export default function GroupsPage() {
             const names = g.exerciseIds
               .map((id) => appData.exercises.find((e) => e.id === id)?.name)
               .filter(Boolean) as string[];
-            const preview = names.slice(0, 3).join(', ');
-            const rest = names.length - 3;
             const isDragging = draggingId === g.id;
 
             return (
@@ -132,10 +130,10 @@ export default function GroupsPage() {
                       >
                         {names.length === 0
                           ? 'EMPTY — TAP TO ADD EXERCISES'
-                          : `${String(names.length).padStart(2, '0')} · ${preview}${rest > 0 ? ` +${rest}` : ''}`}
+                          : `${String(names.length).padStart(2, '0')} EXERCISE${names.length === 1 ? '' : 'S'}`}
                       </span>
                       <span className="block mt-2">
-                        <TemplateThumbs exerciseIds={g.exerciseIds} />
+                        <ExerciseStrip exerciseIds={g.exerciseIds} />
                       </span>
                     </span>
                   </button>

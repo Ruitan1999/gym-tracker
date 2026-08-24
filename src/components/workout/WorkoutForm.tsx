@@ -15,7 +15,7 @@ import { useDragReorder } from '../../utils/useDragReorder';
 import { imageForExercise } from '../../utils/exerciseImage';
 import { prefetchImages } from '../../utils/prefetchImages';
 import SessionClock from './SessionClock';
-import TemplateThumbs from './TemplateThumbs';
+import ExerciseStrip from '../shared/ExerciseStrip';
 import { ratingColor } from '../../utils/rating';
 
 interface WorkoutFormProps {
@@ -602,7 +602,7 @@ export default function WorkoutForm({
                     {/* The line-up is what tells two templates apart; the
                         names alone read the same. */}
                     <div className="flex items-center justify-between gap-3 mt-2">
-                      <TemplateThumbs exerciseIds={g.exerciseIds} />
+                      <ExerciseStrip exerciseIds={g.exerciseIds} />
                       <span
                         className="caps-tight text-[9px] shrink-0 ml-auto"
                         style={{ color: 'var(--color-text-faint)' }}

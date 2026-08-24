@@ -6,17 +6,18 @@ const MAX_THUMBS = 5;
 const SIZE = 30;
 
 /**
- * The pictures of the exercises a template holds, as a strip.
+ * The pictures of the exercises something holds, as a strip.
  *
- * A template has no picture of its own, but its exercises do, and the line-up
- * is what actually distinguishes one from another — "Push Day A" and "Push Day
- * B" read identically as text.
+ * Neither a template nor a logged session has a picture of its own, but its
+ * exercises do, and the line-up is what actually distinguishes one from
+ * another — "Push Day A" and "Push Day B" read identically as text, and so do
+ * two Tuesdays.
  *
  * Only exercises that have a picture are drawn: a row of empty grey squares
  * says nothing, so a template whose exercises have none renders nothing at all
  * and the card looks as it did before.
  */
-export default function TemplateThumbs({ exerciseIds }: { exerciseIds: string[] }) {
+export default function ExerciseStrip({ exerciseIds }: { exerciseIds: string[] }) {
   const { exerciseImages } = useAppContext();
 
   const pictures: string[] = [];

@@ -9,6 +9,8 @@ import { BODY_PART_ACCENT, BODY_PART_CODE } from '../utils/bodyParts';
 import { useAppContext } from '../context/AppContext';
 import { useDragReorder } from '../utils/useDragReorder';
 import type { WorkoutGroup } from '../types';
+import ExerciseThumb from '../components/shared/ExerciseThumb';
+import { imageForExercise } from '../utils/exerciseImage';
 
 export default function TemplateDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -46,7 +48,7 @@ let slotCounter = 0;
 const makeSlot = (exerciseId: string): Slot => ({ key: `slot-${++slotCounter}`, exerciseId });
 
 function TemplateEditor({ group }: { group: WorkoutGroup }) {
-  const { appData, updateGroup, deleteGroup } = useAppContext();
+  const { appData, updateGroup, deleteGroup, exerciseImages } = useAppContext();
   const navigate = useNavigate();
 
   const [slots, setSlots] = useState<Slot[]>(() => group.exerciseIds.map(makeSlot));
@@ -211,6 +213,10 @@ function TemplateEditor({ group }: { group: WorkoutGroup }) {
                       >
                         {String(index + 1).padStart(2, '0')}
                       </span>
+                      <ExerciseThumb
+                        src={slot.exerciseId ? imageForExercise(slot.exerciseId, exerciseImages) : null}
+                        size={34}
+                      />
                       <span
                         className="self-stretch w-px shrink-0"
                         style={{ background: 'var(--color-line)' }}

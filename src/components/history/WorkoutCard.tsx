@@ -2,6 +2,9 @@ import { useNavigate } from 'react-router-dom';
 import { useAppContext } from '../../context/AppContext';
 import type { Workout } from '../../types';
 import { ratingColor as ratingColorFor, parseRating } from '../../utils/rating';
+import ExerciseStrip from '../shared/ExerciseStrip';
+import { workedBodyParts, BODY_PART_LABELS } from '../../utils/bodyParts';
+import type { BodyPart } from '../../types';
 
 interface WorkoutCardProps {
   workout: Workout;
@@ -34,17 +37,17 @@ export default function WorkoutCard({ workout }: WorkoutCardProps) {
     0,
   );
 
-  const exerciseNames = workout.entries.map((entry) => {
-    const exercise = appData.exercises.find((e) => e.id === entry.exerciseId);
-    return exercise?.name ?? 'Unknown';
-  });
-
-  const summary =
-    exerciseNames.length === 0
-      ? 'No exercises'
-      : exerciseNames.length <= 2
-      ? exerciseNames.join(' ')
-      : `${exerciseNames[0]} ${exerciseNames[1]} +${exerciseNames.length - 2}`;
+  // An unnamed session is titled by what it worked rather than by listing the
+  // exercises: the strip below already shows which ones they were.
+  const worked = workedBodyParts(workout, appData.exercises);
+  const title =
+    workout.name ||
+    (Object.entries(worked)
+      .sort(([, a], [, b]) => b - a)
+      .slice(0, 2)
+      .map(([part]) => BODY_PART_LABELS[part as BodyPart])
+      .join(' · ') ||
+      'Session');
 
   const rating = parseRating(workout.notes);
   const ratingColor = ratingColorFor(rating);
@@ -105,16 +108,8 @@ export default function WorkoutCard({ workout }: WorkoutCardProps) {
                 color: 'var(--color-text)',
               }}
             >
-              {workout.name || summary}
+              {title}
             </p>
-            {workout.name && (
-              <p
-                className="text-[12px] truncate mt-0.5"
-                style={{ color: 'var(--color-text-muted)' }}
-              >
-                {summary}
-              </p>
-            )}
           </div>
           {rating && ratingColor && (
             <span
@@ -130,6 +125,10 @@ export default function WorkoutCard({ workout }: WorkoutCardProps) {
               RPE {rating}
             </span>
           )}
+        </div>
+
+        <div className="mb-3">
+          <ExerciseStrip exerciseIds={workout.entries.map((e) => e.exerciseId)} />
         </div>
 
         <div className="grid grid-cols-3 gap-2">
