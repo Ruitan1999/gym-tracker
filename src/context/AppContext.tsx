@@ -18,7 +18,7 @@ import {
   loggedExerciseIds,
 } from '../utils/exerciseLibrary';
 import { loadLibraryOverrides } from '../utils/remoteLibrary';
-import { prefetchImages } from '../utils/prefetchImages';
+import { prefetchImages, awaitImages } from '../utils/prefetchImages';
 import { imageForExercise } from '../utils/exerciseImage';
 import { usedExerciseIds } from '../utils/warmExerciseImages';
 import {
@@ -64,6 +64,18 @@ interface AppProviderProps {
   showSessionSaved?: (stats: SessionSavedStats) => void;
 }
 
+/**
+ * The pictures the first screen puts on screen straight away: the strips on
+ * the template cards. Held for, rather than warmed behind, the loading screen.
+ */
+function firstScreenImages(data: AppData, images: Record<string, string>): (string | null)[] {
+  const ids = new Set<string>();
+  for (const group of data.groups ?? []) {
+    for (const id of (group.exerciseIds ?? []).slice(0, 8)) ids.add(id);
+  }
+  return [...ids].map((id) => imageForExercise(id, images));
+}
+
 export function AppProvider({
   children,
   uid = null,
@@ -84,7 +96,14 @@ export function AppProvider({
     if (!uid) {
       hasLoadedRemoteRef.current = false;
       skipNextSaveRef.current = true;
-      setAppData(loadAppData());
+      const local = loadAppData();
+      setAppData(local);
+      // Nothing to hold this screen for — local data is already in hand — so
+      // the pictures are warmed behind it rather than ahead of it.
+      prefetchImages(
+        usedExerciseIds(local).map((id) => imageForExercise(id, local.exerciseImages ?? {})),
+        160,
+      );
       setLoading(false);
       return;
     }
@@ -120,8 +139,19 @@ export function AppProvider({
           setLibraryImages(applied.images);
           setAppData(finalData);
           hasLoadedRemoteRef.current = true;
-          setLoading(false);
         }
+
+        // Both before the loading screen lifts, not after it: warming that
+        // starts once the home screen is already on screen only races the
+        // pictures it was meant to have ready.
+        const inEffect = { ...applied.images, ...(finalData.exerciseImages ?? {}) };
+        prefetchImages(
+          usedExerciseIds(finalData).map((id) => imageForExercise(id, inEffect)),
+          160,
+        );
+        await awaitImages(firstScreenImages(finalData, inEffect));
+
+        if (!cancelled) setLoading(false);
       } catch (err) {
         console.error('Failed to load remote data:', err);
         if (!cancelled) {
@@ -283,14 +313,13 @@ export function AppProvider({
    */
   const { groups: allGroups, workouts: allWorkouts } = appData;
   useEffect(() => {
-    if (loading) return;
     const ids = usedExerciseIds({ groups: allGroups, workouts: allWorkouts });
     if (ids.length === 0) return;
     return prefetchImages(
       ids.map((id) => imageForExercise(id, exerciseImages)),
       160,
     );
-  }, [loading, allGroups, allWorkouts, exerciseImages]);
+  }, [allGroups, allWorkouts, exerciseImages]);
 
   const updatePreferences = useCallback((preferences: UserPreferences) => {
     setAppData((prev) => ({ ...prev, preferences }));

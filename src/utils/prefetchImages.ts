@@ -69,3 +69,43 @@ export function prefetchImages(urls: (string | null)[], limit = 24): () => void 
 export function resetPrefetchCache(): void {
   asked.clear();
 }
+
+/**
+ * Waits for a small set of pictures to actually be in the browser, so a screen
+ * can be shown with them already on it rather than filling in afterwards.
+ *
+ * Bounded on purpose: a slow connection must delay the app briefly, never hold
+ * it. Whatever has not arrived by then carries on in the background and the
+ * screen shows it when it lands.
+ */
+export function awaitImages(urls: (string | null)[], timeoutMs = 1200): Promise<void> {
+  const wanted = [...new Set(urls.filter((u): u is string => !!u))];
+  if (wanted.length === 0 || typeof Image !== 'function' || savingData()) {
+    return Promise.resolve();
+  }
+
+  return new Promise<void>((resolve) => {
+    let left = wanted.length;
+    let done = false;
+    const finish = () => {
+      if (done) return;
+      done = true;
+      resolve();
+    };
+    const timer = setTimeout(finish, timeoutMs);
+    const one = () => {
+      if (--left <= 0) {
+        clearTimeout(timer);
+        finish();
+      }
+    };
+    for (const url of wanted) {
+      asked.add(url);
+      const img = new Image();
+      img.decoding = 'async';
+      img.onload = one;
+      img.onerror = one;
+      img.src = url;
+    }
+  });
+}

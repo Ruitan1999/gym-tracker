@@ -1,8 +1,8 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { prefetchImages, resetPrefetchCache } from '../utils/prefetchImages';
+import { prefetchImages, awaitImages, resetPrefetchCache } from '../utils/prefetchImages';
 
 /** Every Image the code under test constructed, in order. */
-let created: { src: string }[] = [];
+let created: { src: string; onload?: (() => void) | null; onerror?: (() => void) | null }[] = [];
 
 beforeEach(() => {
   resetPrefetchCache();
@@ -14,6 +14,8 @@ beforeEach(() => {
     'Image',
     class {
       decoding = '';
+      onload: (() => void) | null = null;
+      onerror: (() => void) | null = null;
       #src = '';
       get src() {
         return this.#src;
@@ -102,5 +104,31 @@ describe('prefetchImages', () => {
     vi.runAllTimers();
     expect(created).toHaveLength(0);
     expect(() => cancel()).not.toThrow();
+  });
+});
+
+describe('awaitImages', () => {
+  it('resolves once every picture has settled', async () => {
+    const p = awaitImages(['/a.jpg', '/b.jpg']);
+    created.forEach((i) => i.onload?.());
+    await expect(p).resolves.toBeUndefined();
+  });
+
+  it('resolves anyway when a picture never arrives', async () => {
+    const p = awaitImages(['/slow.jpg'], 500);
+    // Nothing settles; the clock is what lets the app get on with it.
+    vi.advanceTimersByTime(600);
+    await expect(p).resolves.toBeUndefined();
+  });
+
+  it('does not wait on a picture that fails', async () => {
+    const p = awaitImages(['/gone.jpg']);
+    created.forEach((i) => i.onerror?.());
+    await expect(p).resolves.toBeUndefined();
+  });
+
+  it('has nothing to wait for when there are no pictures', async () => {
+    await expect(awaitImages([null, null])).resolves.toBeUndefined();
+    expect(created).toHaveLength(0);
   });
 });
