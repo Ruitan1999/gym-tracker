@@ -136,7 +136,7 @@ export default function GroupsPage() {
                         </span>
                       ) : (
                         <span className="block mt-2">
-                          <ExerciseStrip exerciseIds={g.exerciseIds} max={8} />
+                          <ExerciseStrip exerciseIds={g.exerciseIds} max={6} />
                         </span>
                       )}
                     </span>

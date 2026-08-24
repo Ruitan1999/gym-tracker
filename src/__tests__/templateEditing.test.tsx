@@ -29,6 +29,11 @@ function storedIds(): string[] {
   return raw.groups?.[0]?.exerciseIds ?? [];
 }
 
+function storedName(): string {
+  const raw = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '{}');
+  return raw.groups?.[0]?.name ?? '';
+}
+
 function renderPage() {
   return render(
     <MemoryRouter initialEntries={[`/groups/${GROUP_ID}`]}>
@@ -137,6 +142,33 @@ describe('editing a template', () => {
 
     const after = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '{}');
     expect(after.groups).toHaveLength(2);
+  });
+
+  it('edits the name in place, and holds it until saved', () => {
+    renderPage();
+
+    fireEvent.click(screen.getByText('Push Day A'));
+    const field = screen.getByLabelText('Template name') as HTMLInputElement;
+    fireEvent.change(field, { target: { value: 'Push Day B' } });
+
+    expect(screen.getByText(/SAVE CHANGES/)).toBeTruthy();
+    expect(storedName()).toBe('Push Day A');
+
+    fireEvent.click(screen.getByText(/SAVE CHANGES/));
+    expect(storedName()).toBe('Push Day B');
+  });
+
+  it('puts the old name back on cancel', () => {
+    renderPage();
+
+    fireEvent.click(screen.getByText('Push Day A'));
+    fireEvent.change(screen.getByLabelText('Template name'), {
+      target: { value: 'Something Else' },
+    });
+    fireEvent.click(screen.getByText(/^CANCEL$/));
+
+    expect(screen.getByText('Push Day A')).toBeTruthy();
+    expect(storedName()).toBe('Push Day A');
   });
 
   it('asks before leaving with a change pending', () => {

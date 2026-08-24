@@ -71,6 +71,7 @@ function TemplateEditor({ group, isNew }: { group: WorkoutGroup; isNew: boolean 
   const [deleting, setDeleting] = useState(false);
   const [confirmLeave, setConfirmLeave] = useState(false);
   const [draftName, setDraftName] = useState(group.name);
+  const [editingName, setEditingName] = useState(false);
   const [exitingKey, setExitingKey] = useState<string | null>(null);
 
   const groupRef = useRef(group);
@@ -91,6 +92,7 @@ function TemplateEditor({ group, isNew }: { group: WorkoutGroup; isNew: boolean 
   // there has to be a visible way to abandon it.
   const dirty =
     isNew ||
+    draftName.trim() !== group.name ||
     editedIds.length !== group.exerciseIds.length ||
     editedIds.some((id, i) => id !== group.exerciseIds[i]);
 
@@ -101,7 +103,11 @@ function TemplateEditor({ group, isNew }: { group: WorkoutGroup; isNew: boolean 
       navigate(`/groups/${groupRef.current.id}`, { replace: true });
       return;
     }
-    updateGroup({ ...groupRef.current, exerciseIds: editedIds });
+    updateGroup({
+      ...groupRef.current,
+      name: draftName.trim() || groupRef.current.name,
+      exerciseIds: editedIds,
+    });
     showToast('Template updated');
   }
 
@@ -111,6 +117,8 @@ function TemplateEditor({ group, isNew }: { group: WorkoutGroup; isNew: boolean 
       return;
     }
     setSlots(group.exerciseIds.map(makeSlot));
+    setDraftName(group.name);
+    setEditingName(false);
   }
 
   const {
@@ -192,19 +200,54 @@ function TemplateEditor({ group, isNew }: { group: WorkoutGroup; isNew: boolean 
           <div className="caps-tight text-[9px]" style={{ color: 'var(--color-text-faint)' }}>
             TEMPLATE
           </div>
-          <h2
-            className="font-display mt-1"
-            style={{
-              fontSize: '1.75rem',
-              fontWeight: 800,
-              letterSpacing: '-0.035em',
-              fontVariationSettings: '"wdth" 92',
-              color: 'var(--color-text)',
-              lineHeight: 1.02,
-            }}
-          >
-            {isNew ? draftName : group.name}
-          </h2>
+          {/* Tap the name to change it, rather than going through a menu and
+              a dialog for one word. It joins the pending change like anything
+              else on the page. */}
+          {editingName ? (
+            <input
+              autoFocus
+              value={draftName}
+              onChange={(e) => setDraftName(e.target.value)}
+              onBlur={() => setEditingName(false)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') setEditingName(false);
+                if (e.key === 'Escape') {
+                  setDraftName(group.name);
+                  setEditingName(false);
+                }
+              }}
+              onFocus={(e) => e.currentTarget.select()}
+              aria-label="Template name"
+              enterKeyHint="done"
+              className="font-display mt-1 w-full outline-none bg-transparent"
+              style={{
+                fontSize: '1.75rem',
+                fontWeight: 800,
+                letterSpacing: '-0.035em',
+                fontVariationSettings: '"wdth" 92',
+                color: 'var(--color-text)',
+                lineHeight: 1.02,
+                borderBottom: '2px solid var(--color-volt)',
+              }}
+            />
+          ) : (
+            <h2
+              onClick={() => setEditingName(true)}
+              className="font-display mt-1 press"
+              style={{
+                fontSize: '1.75rem',
+                fontWeight: 800,
+                letterSpacing: '-0.035em',
+                fontVariationSettings: '"wdth" 92',
+                color: 'var(--color-text)',
+                lineHeight: 1.02,
+                borderBottom: '2px solid transparent',
+                cursor: 'text',
+              }}
+            >
+              {draftName}
+            </h2>
+          )}
           <div className="caps-tight text-[9px] mt-1.5" style={{ color: 'var(--color-text-faint)' }}>
             {String(slots.length).padStart(2, '0')} EXERCISE{slots.length === 1 ? '' : 'S'}
             {slots.length > 1 && ' · HOLD TO REORDER'}
@@ -315,18 +358,10 @@ function TemplateEditor({ group, isNew }: { group: WorkoutGroup; isNew: boolean 
 
         {addButton}
 
-        {/* Only present when there is something to decide about. Sticky rather
-            than in the flow: the list can be long, and the two are needed from
-            wherever the last change was made. */}
+        {/* In the flow under Add Exercise, at the end of the list it applies
+            to, rather than pinned over it. */}
         {dirty && (
-          <div
-            className="sticky bottom-0 grid grid-cols-2 gap-2 pt-3 pb-3"
-            style={{
-              background: 'var(--color-bg)',
-              borderTop: '1px solid var(--color-line)',
-              marginBottom: 'calc(-0.75rem)',
-            }}
-          >
+          <div className="grid grid-cols-2 gap-2">
             <button
               type="button"
               onClick={discardChanges}
@@ -405,10 +440,9 @@ function TemplateEditor({ group, isNew }: { group: WorkoutGroup; isNew: boolean 
         <RenameModal
           eyebrow="RENAME TEMPLATE"
           title="Rename template"
-          initialValue={group.name}
+          initialValue={draftName}
           onSave={(name) => {
-            if (isNew) setDraftName(name);
-            else updateGroup({ ...group, name });
+            setDraftName(name);
             setRenaming(false);
           }}
           onClose={() => setRenaming(false)}

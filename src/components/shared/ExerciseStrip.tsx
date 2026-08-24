@@ -39,8 +39,12 @@ export default function ExerciseStrip({
   // "+2" means two more exercises, which is what the number is read as.
   const remaining = exerciseIds.length - pictures.length;
 
+  // The row it sits in can be narrower than the thumbnails want — beside a
+  // menu column, say. The pictures clip rather than spilling over whatever is
+  // next to them, and the +N is a sibling so it survives the clipping.
   return (
-    <span className="flex items-center gap-1.5" aria-hidden>
+    <span className="flex items-center gap-1.5 min-w-0" aria-hidden>
+      <span className="flex items-center gap-1.5 min-w-0 overflow-hidden">
       {pictures.map((src, i) => (
         <img
           key={i}
@@ -60,6 +64,7 @@ export default function ExerciseStrip({
           }}
         />
       ))}
+      </span>
       {remaining > 0 && (
         <span
           className="caps-tight text-[9px] shrink-0 pl-0.5"
