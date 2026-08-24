@@ -74,6 +74,15 @@ describe('prefetchImages', () => {
     expect(created).toHaveLength(0);
   });
 
+  it('fetches nothing when the device has asked to save data', () => {
+    vi.stubGlobal('navigator', { connection: { saveData: true } });
+
+    prefetchImages(['/a.jpg', '/b.jpg']);
+    vi.runAllTimers();
+
+    expect(created).toHaveLength(0);
+  });
+
   it('does no work at all for an empty list', () => {
     const cancel = prefetchImages([null, null]);
     vi.runAllTimers();

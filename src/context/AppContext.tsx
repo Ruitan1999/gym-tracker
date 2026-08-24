@@ -18,6 +18,9 @@ import {
   loggedExerciseIds,
 } from '../utils/exerciseLibrary';
 import { loadLibraryOverrides } from '../utils/remoteLibrary';
+import { prefetchImages } from '../utils/prefetchImages';
+import { imageForExercise } from '../utils/exerciseImage';
+import { usedExerciseIds } from '../utils/warmExerciseImages';
 import {
   applyLibraryOverrides,
   EMPTY_OVERRIDES,
@@ -272,6 +275,22 @@ export function AppProvider({
     () => ({ ...libraryImages, ...(appData.exerciseImages ?? {}) }),
     [libraryImages, appData.exerciseImages],
   );
+
+  /**
+   * Fetches the pictures this account will see, once, as soon as its data is
+   * in. Without it every list pays for them the first time it is scrolled to,
+   * which reads as the app loading again after it had finished loading.
+   */
+  const { groups: allGroups, workouts: allWorkouts } = appData;
+  useEffect(() => {
+    if (loading) return;
+    const ids = usedExerciseIds({ groups: allGroups, workouts: allWorkouts });
+    if (ids.length === 0) return;
+    return prefetchImages(
+      ids.map((id) => imageForExercise(id, exerciseImages)),
+      160,
+    );
+  }, [loading, allGroups, allWorkouts, exerciseImages]);
 
   const updatePreferences = useCallback((preferences: UserPreferences) => {
     setAppData((prev) => ({ ...prev, preferences }));

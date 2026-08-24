@@ -24,6 +24,12 @@ function schedule(run: () => void): () => void {
   return () => clearTimeout(handle);
 }
 
+/** True when the device has asked for less data; warming is a courtesy. */
+function savingData(): boolean {
+  const c = (navigator as { connection?: { saveData?: boolean } }).connection;
+  return c?.saveData === true;
+}
+
 /**
  * Fetches up to `limit` of the given URLs when the browser is otherwise idle.
  *
@@ -32,6 +38,7 @@ function schedule(run: () => void): () => void {
  */
 export function prefetchImages(urls: (string | null)[], limit = 24): () => void {
   if (typeof Image !== 'function') return () => {};
+  if (savingData()) return () => {};
 
   const wanted: string[] = [];
   for (const url of urls) {

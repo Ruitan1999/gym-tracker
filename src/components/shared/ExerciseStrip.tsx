@@ -50,7 +50,9 @@ export default function ExerciseStrip({
           key={i}
           src={src}
           alt=""
-          loading="lazy"
+          // A handful per card, and already warmed at startup — deferring
+          // them only buys a blank square on the way in.
+          loading="eager"
           decoding="async"
           width={SIZE}
           height={SIZE}
