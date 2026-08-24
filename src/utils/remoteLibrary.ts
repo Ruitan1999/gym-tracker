@@ -65,7 +65,14 @@ export async function saveLibraryOverrides(overrides: LibraryOverrides): Promise
  * anywhere. A photo off a phone is several megabytes and would be handed to
  * every user of the app at full size for a 72px thumbnail.
  */
-export async function prepareImage(file: File, size = 180): Promise<Blob> {
+export interface PreparedImage {
+  blob: Blob;
+  /** The extension the blob was actually encoded as, not the one asked for. */
+  ext: 'webp' | 'jpg';
+  type: string;
+}
+
+export async function prepareImage(file: File, size = 180): Promise<PreparedImage> {
   const bitmap = await createImageBitmap(file);
   const canvas = document.createElement('canvas');
   canvas.width = size;
@@ -90,18 +97,29 @@ export async function prepareImage(file: File, size = 180): Promise<Blob> {
   );
   bitmap.close?.();
 
-  const blob = await new Promise<Blob | null>((resolve) =>
+  // WebP first: on these drawings it comes out around 40% smaller than JPEG
+  // for no visible difference at the size they are shown. toBlob falls back to
+  // PNG rather than failing on a browser that cannot encode it, so the type is
+  // checked rather than assumed.
+  const webp = await new Promise<Blob | null>((resolve) =>
+    canvas.toBlob(resolve, 'image/webp', 0.86),
+  );
+  if (webp && webp.type === 'image/webp') {
+    return { blob: webp, ext: 'webp', type: 'image/webp' };
+  }
+
+  const jpeg = await new Promise<Blob | null>((resolve) =>
     canvas.toBlob(resolve, 'image/jpeg', 0.85),
   );
-  if (!blob) throw new Error('Could not prepare the image');
-  return blob;
+  if (!jpeg) throw new Error('Could not prepare the image');
+  return { blob: jpeg, ext: 'jpg', type: 'image/jpeg' };
 }
 
 export async function uploadExerciseImage(exerciseId: string, file: File): Promise<string> {
   if (!storage) throw new Error('Firebase Storage is not configured');
-  const blob = await prepareImage(file);
-  const target = ref(storage, `${IMAGE_PATH}/${exerciseId}.jpg`);
-  await uploadBytes(target, blob, { contentType: 'image/jpeg' });
+  const { blob, ext, type } = await prepareImage(file);
+  const target = ref(storage, `${IMAGE_PATH}/${exerciseId}.${ext}`);
+  await uploadBytes(target, blob, { contentType: type });
   return getDownloadURL(target);
 }
 
@@ -118,8 +136,8 @@ export async function uploadOwnExerciseImage(
   file: File,
 ): Promise<string> {
   if (!storage) throw new Error('Firebase Storage is not configured');
-  const blob = await prepareImage(file);
-  const target = ref(storage, `users/${uid}/${IMAGE_PATH}/${exerciseId}.jpg`);
-  await uploadBytes(target, blob, { contentType: 'image/jpeg' });
+  const { blob, ext, type } = await prepareImage(file);
+  const target = ref(storage, `users/${uid}/${IMAGE_PATH}/${exerciseId}.${ext}`);
+  await uploadBytes(target, blob, { contentType: type });
   return getDownloadURL(target);
 }

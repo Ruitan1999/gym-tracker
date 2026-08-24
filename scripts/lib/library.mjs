@@ -131,7 +131,7 @@ export function syncImages(exercises, { log = () => {} } = {}) {
       log(`dropped  ${file} (no such exercise)`);
       continue;
     }
-    if (!id.startsWith('ex-gv-') || path.extname(file) !== '.jpg') own[id] = file;
+    if (!id.startsWith('ex-gv-') || path.extname(file) !== '.webp') own[id] = file;
   }
   return own;
 }
@@ -146,7 +146,7 @@ export function writeLibrary(exercises, ownImages, { imported = 0 } = {}) {
     (e) =>
       e.id.startsWith('ex-gv-') &&
       !ownImages[e.id] &&
-      !fs.existsSync(path.join(PUBLIC_IMAGES, `${e.id}.jpg`)),
+      !fs.existsSync(path.join(PUBLIC_IMAGES, `${e.id}.webp`)),
   );
   if (missing.length > 0) {
     throw new Error(
@@ -204,7 +204,7 @@ export function missingImageFiles(exercises, ownImages) {
       continue;
     }
     // Imported ones are resolved by convention rather than by lookup.
-    if (exercise.id.startsWith('ex-gv-') && !fs.existsSync(path.join(PUBLIC_IMAGES, `${exercise.id}.jpg`))) {
+    if (exercise.id.startsWith('ex-gv-') && !fs.existsSync(path.join(PUBLIC_IMAGES, `${exercise.id}.webp`))) {
       gaps.push(exercise.id);
     }
   }

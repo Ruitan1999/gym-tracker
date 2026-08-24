@@ -13,7 +13,7 @@ import { OWN_EXERCISE_IMAGES } from '../data/exerciseImages';
 export function exerciseImageUrl(id: string): string | null {
   const named = OWN_EXERCISE_IMAGES[id];
   if (named) return `/assets/exercise-images/${named}`;
-  if (id.startsWith('ex-gv-')) return `/assets/exercise-images/${id}.jpg`;
+  if (id.startsWith('ex-gv-')) return `/assets/exercise-images/${id}.webp`;
   return null;
 }
 

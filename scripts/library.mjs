@@ -32,7 +32,7 @@ const ownImages = syncImages(after, { log });
 writeLibrary(after, ownImages);
 
 const withImage = after.filter(
-  (e) => ownImages[e.id] || fs.existsSync(path.join(PUBLIC_IMAGES, `${e.id}.jpg`)),
+  (e) => ownImages[e.id] || fs.existsSync(path.join(PUBLIC_IMAGES, `${e.id}.webp`)),
 );
 const without = after.filter((e) => !withImage.includes(e));
 

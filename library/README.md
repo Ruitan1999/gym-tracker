@@ -21,6 +21,13 @@ library/images/ex-legs-028.jpg
 `.jpg`, `.jpeg`, `.png` and `.webp` all work. The source images are 180×180;
 anything much larger is wasted, since the app never shows one above 72px.
 
+Drop a `.jpg` or `.png` and it stays that format. Run `npm run library:compress`
+to re-encode everything in the store as WebP — around 40% smaller on these
+drawings with nothing visible to tell them apart at the size they are shown —
+then `npm run library` to update the filename map. `--check` reports the saving
+without touching anything. Pictures uploaded through the app are already
+encoded this way on the way in.
+
 `npm run library` lists every exercise still without a picture, with its id.
 
 `library/images/` is an inbox, not the store: once applied, the picture lives

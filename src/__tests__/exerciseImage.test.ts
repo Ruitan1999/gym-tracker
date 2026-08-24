@@ -6,7 +6,7 @@ import { missingImageFiles } from '../../scripts/lib/library.mjs';
 
 describe('exerciseImageUrl', () => {
   it('resolves an imported exercise by convention', () => {
-    expect(exerciseImageUrl('ex-gv-0001')).toBe('/assets/exercise-images/ex-gv-0001.jpg');
+    expect(exerciseImageUrl('ex-gv-0001')).toBe('/assets/exercise-images/ex-gv-0001.webp');
   });
 
   it('resolves a listed one by its filename, whatever the format', () => {
