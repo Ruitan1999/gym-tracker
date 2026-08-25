@@ -2,8 +2,8 @@
 
 /* ————————————————————————————————————————————————————————————————
    LIFTGAUGE · design tokens · LIGHT
-   Cool paper base, emerald accent, tabular monospace data, hairline dividers,
-   zero-shadow surfaces.
+   Cool paper base, royal-blue accent, tabular monospace data, hairline
+   dividers, zero-shadow surfaces.
 
    The accent tokens are still called "volt" — the name is the role (the one
    colour that means "act on this"), not the hue.
@@ -21,27 +21,29 @@
   --color-text: #0a0a0a;
   --color-text-muted: #595959;
   --color-text-faint: #9a9a9a;
-  /* Emerald, exactly as picked: 5.48 against white and 5.03 as text, so it
-     clears AA as a fill and as type without being nudged. */
-  --color-volt: #047857;
-  --color-volt-dim: #068a66;
-  --color-volt-deep: #036349;
-  --color-volt-ink: #036349;
+  /* Classic royal blue: 6.37 against white and 5.84 as text on the page, so
+     it clears AA as a fill and as type without being nudged. */
+  --color-volt: #1458cc;
+  --color-volt-dim: #206ae9;
+  --color-volt-deep: #0f449e;
+  --color-volt-ink: #0f449e;
   /* The accent behind something rather than on it: tinted panels and the
      glow under a raised button. Both were written out as raw rgba at each
      call site, which is how they stayed orange when the accent moved. */
-  --color-volt-tint: rgba(4, 120, 87, 0.08);
-  --color-volt-wash: rgba(4, 120, 87, 0.06);
-  --color-volt-glow: rgba(4, 120, 87, 0.32);
-  --color-volt-line: rgba(4, 120, 87, 0.18);
+  --color-volt-tint: rgba(20, 88, 204, 0.08);
+  --color-volt-wash: rgba(20, 88, 204, 0.06);
+  --color-volt-glow: rgba(20, 88, 204, 0.32);
+  --color-volt-line: rgba(20, 88, 204, 0.18);
   --color-rust: #c44a10;
   --color-blood: #c0253f;
   --color-ember: #b47a00;
-  /* Moved off blue when the accent was blue, and still clear of the emerald
-     it is now: it marks a session already under way, which has to read as
-     "not this button". */
-  --color-steel: #7c3aed;
-  --color-steel-glow: rgba(124, 58, 237, 0.32);
+  /* Pushed further toward magenta now the accent is blue again — the old
+     violet (hue 262) sat only 44° from this blue (hue 218), close enough to
+     risk the two reading as "the same button" at a glance. This clears 60°
+     of separation while staying in the same violet family, marking a
+     session already under way without being mistaken for the accent. */
+  --color-steel: #ab3aed;
+  --color-steel-glow: rgba(171, 58, 237, 0.32);
 
   /* completion — green carries "done" so the accent stays purely an action colour */
   --color-done: #3f8a57;
@@ -126,6 +128,24 @@ body {
   background: var(--color-elev);
   border: 1px dashed var(--color-line-2);
   border-radius: var(--radius);
+}
+
+/*
+ * A soft multi-hue wash behind the top of a page — deliberately not tied to
+ * the accent colour, since the point is a bit of atmosphere against the flat
+ * paper background, not another use of "act on this" blue. Sized to a fixed
+ * band rather than the page's full height, so it stays a hairline of colour
+ * at the top rather than tinting content the reader scrolls down to.
+ */
+.page-mesh {
+  background-repeat: no-repeat;
+  background-position: top;
+  background-size: 100% 340px;
+  background-image:
+    radial-gradient(42% 55% at 12% -5%, rgba(255, 182, 213, 0.22) 0%, rgba(255, 182, 213, 0) 70%),
+    radial-gradient(48% 60% at 42% -12%, rgba(255, 244, 163, 0.22) 0%, rgba(255, 244, 163, 0) 70%),
+    radial-gradient(48% 60% at 74% 5%, rgba(178, 255, 214, 0.22) 0%, rgba(178, 255, 214, 0) 70%),
+    radial-gradient(42% 58% at 102% 15%, rgba(200, 214, 255, 0.22) 0%, rgba(200, 214, 255, 0) 70%);
 }
 
 .btn-volt {

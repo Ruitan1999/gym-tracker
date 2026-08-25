@@ -62,6 +62,7 @@ function SessionPage({
       titlePressLabel={name ? 'Rename this session' : 'Name this session'}
       eyebrow={isEdit ? 'REVISE ENTRY' : undefined}
       showBack={isSession}
+      topGradient
       topSlot={
         !isSession ? (
           <>

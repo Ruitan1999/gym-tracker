@@ -17,12 +17,15 @@ interface PageShellProps {
   onRefresh?: () => Promise<void>;
   hideTitle?: boolean;
   disableRefresh?: boolean;
+  /** A soft wash behind the top of the page — the couple of screens that
+   * open the app get a bit of colour, rather than every page having it. */
+  topGradient?: boolean;
 }
 
 const PULL_THRESHOLD = 72;
 const MAX_PULL = 120;
 
-export default function PageShell({ title, onTitlePress, titlePressLabel, eyebrow, rightAction, children, showBack, onBack, topSlot, onRefresh, hideTitle, disableRefresh }: PageShellProps) {
+export default function PageShell({ title, onTitlePress, titlePressLabel, eyebrow, rightAction, children, showBack, onBack, topSlot, onRefresh, hideTitle, disableRefresh, topGradient }: PageShellProps) {
   const navigate = useNavigate();
   const { refreshAppData } = useAppContext();
   const mainRef = useRef<HTMLElement | null>(null);
@@ -214,7 +217,7 @@ export default function PageShell({ title, onTitlePress, titlePressLabel, eyebro
           </div>
         )}
         <div
-          className="px-4 pt-5 w-full max-w-[800px] mx-auto"
+          className={`px-4 pt-5 w-full max-w-[800px] mx-auto${topGradient ? ' page-mesh' : ''}`}
           style={
             disableRefresh
               ? undefined
