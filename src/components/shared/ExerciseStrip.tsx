@@ -61,7 +61,7 @@ export default function ExerciseStrip({
             width: SIZE,
             height: SIZE,
             objectFit: 'cover',
-            borderRadius: 'var(--radius)',
+            borderRadius: '10px',
             background: 'var(--color-line-2)',
           }}
         />

@@ -241,7 +241,7 @@ export default function NextUpCard() {
 function Shell({ tone, children }: { tone: 'due' | 'rest' | 'done' | 'empty'; children: React.ReactNode }) {
   const style =
     tone === 'due'
-      ? { background: 'var(--color-volt-wash)', border: '1px solid rgba(4, 120, 87, 0.18)' }
+      ? { background: 'var(--color-volt-wash)', border: '1px solid var(--color-volt-line)' }
       : tone === 'done'
       ? { background: 'var(--color-done-tint)', border: '1px solid var(--color-done-line)' }
       : tone === 'empty'

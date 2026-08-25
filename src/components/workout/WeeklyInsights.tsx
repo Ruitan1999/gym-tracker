@@ -194,7 +194,7 @@ function DayBox({
   const border = trained
     ? 'var(--color-volt)'
     : scheduled
-    ? 'rgba(4, 120, 87, 0.5)'
+    ? 'var(--color-volt-line)'
     : isToday
     ? 'var(--color-text)'
     : 'var(--color-line-2)';
@@ -213,7 +213,7 @@ function DayBox({
         style={{
           background: bg,
           border: `1px ${scheduled && !trained ? 'dashed' : 'solid'} ${border}`,
-          borderRadius: '7px',
+          borderRadius: 'var(--radius)',
           color: trained ? '#ffffff' : 'var(--color-text-faint)',
           opacity: isPastMissed ? 0.5 : 1,
         }}

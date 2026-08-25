@@ -282,7 +282,7 @@ function TemplateEditor({ group, isNew }: { group: WorkoutGroup; isNew: boolean 
           className="w-full text-left press p-3.5"
           style={{
             background: 'var(--color-volt-wash)',
-            border: '1px solid rgba(4, 120, 87, 0.18)',
+            border: '1px solid var(--color-volt-line)',
             borderRadius: 'var(--radius)',
           }}
         >
