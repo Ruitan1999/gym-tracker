@@ -51,9 +51,14 @@ export default function ExerciseStrip({
           src={src}
           alt=""
           // A handful per card, and already warmed at startup — deferring
-          // them only buys a blank square on the way in.
+          // them only buys a blank square on the way in. Sync rather than
+          // async decoding for the same reason: a card that remounts after a
+          // navigation (leaving and coming back to this screen) still has
+          // these bytes cached, but async decoding can still paint one frame
+          // blank before popping the picture in — sync waits the negligible
+          // decode time for an already-cached 30px image rather than flash it.
           loading="eager"
-          decoding="async"
+          decoding="sync"
           width={SIZE}
           height={SIZE}
           className="shrink-0"

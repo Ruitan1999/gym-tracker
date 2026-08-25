@@ -115,11 +115,20 @@ export async function prepareImage(file: File, size = 180): Promise<PreparedImag
   return { blob: jpeg, ext: 'jpg', type: 'image/jpeg' };
 }
 
+/**
+ * Without this, Storage serves an uploaded file with no caching at all — every
+ * request for it, including the exact same URL on a screen the owner just
+ * left and came back to, goes out over the network again. A day is long
+ * enough to make that disappear in normal use, short enough that replacing a
+ * picture is not stuck behind a stale copy for long.
+ */
+const IMAGE_CACHE_CONTROL = 'public, max-age=86400';
+
 export async function uploadExerciseImage(exerciseId: string, file: File): Promise<string> {
   if (!storage) throw new Error('Firebase Storage is not configured');
   const { blob, ext, type } = await prepareImage(file);
   const target = ref(storage, `${IMAGE_PATH}/${exerciseId}.${ext}`);
-  await uploadBytes(target, blob, { contentType: type });
+  await uploadBytes(target, blob, { contentType: type, cacheControl: IMAGE_CACHE_CONTROL });
   return getDownloadURL(target);
 }
 
@@ -138,6 +147,6 @@ export async function uploadOwnExerciseImage(
   if (!storage) throw new Error('Firebase Storage is not configured');
   const { blob, ext, type } = await prepareImage(file);
   const target = ref(storage, `users/${uid}/${IMAGE_PATH}/${exerciseId}.${ext}`);
-  await uploadBytes(target, blob, { contentType: type });
+  await uploadBytes(target, blob, { contentType: type, cacheControl: IMAGE_CACHE_CONTROL });
   return getDownloadURL(target);
 }
