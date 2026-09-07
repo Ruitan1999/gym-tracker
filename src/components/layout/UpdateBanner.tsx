@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { RUNNING_BUILD, fetchDeployedBuild } from '../../utils/buildVersion';
+import { RUNNING_BUILD, clearStaleReload, fetchDeployedBuild } from '../../utils/buildVersion';
 import { reloadFresh } from '../../utils/lazyWithRetry';
 
 /** Long enough that flicking between apps doesn't mean a request each time. */
@@ -31,19 +31,33 @@ export default function UpdateBanner() {
       checkedAt = now;
 
       const deployed = await fetchDeployedBuild();
-      if (cancelled || !deployed) return;
+      if (cancelled) return;
+      // Unreachable, or answered by something that isn't a version at all. Let
+      // the next return to the app try again rather than sitting out the gap on
+      // the strength of a question that was never answered.
+      if (!deployed) {
+        checkedAt = 0;
+        return;
+      }
       if (deployed !== RUNNING_BUILD) setStale(true);
+      // Confirmed current, so boot is free to heal the next stale document
+      // outright instead of finding a spent guard from this session.
+      else clearStaleReload();
     };
 
     document.addEventListener('visibilitychange', check);
     // Coming back from frozen doesn't always change visibility on its own.
     window.addEventListener('focus', check);
+    // A page handed back from the back/forward cache resumes mid-flight: it can
+    // raise neither of the above, and is exactly the stale case worth catching.
+    window.addEventListener('pageshow', check);
     check();
 
     return () => {
       cancelled = true;
       document.removeEventListener('visibilitychange', check);
       window.removeEventListener('focus', check);
+      window.removeEventListener('pageshow', check);
     };
   }, []);
 
