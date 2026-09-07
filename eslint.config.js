@@ -25,4 +25,16 @@ export default defineConfig([
       'react-refresh/only-export-components': 'off',
     },
   },
+  {
+    // The service worker is emitted as a plain file rather than bundled — it has
+    // to keep a fixed name at the root — so it's the one thing under src/ that
+    // isn't TypeScript. Lint it as what it is rather than leaving it unchecked.
+    files: ['src/sw.js'],
+    extends: [js.configs.recommended],
+    languageOptions: {
+      ecmaVersion: 2020,
+      sourceType: 'script',
+      globals: globals.serviceworker,
+    },
+  },
 ])

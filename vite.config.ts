@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs'
 import { defineConfig } from 'vitest/config'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
@@ -19,6 +20,14 @@ export default defineConfig({
           type: 'asset',
           fileName: 'version.json',
           source: JSON.stringify({ build: BUILD_ID }),
+        });
+        // Emitted rather than bundled: the worker decides how everything else is
+        // fetched, so it has to sit at the root under a name that never changes
+        // — a hashed filename would leave the old worker in charge.
+        this.emitFile({
+          type: 'asset',
+          fileName: 'sw.js',
+          source: readFileSync('src/sw.js', 'utf8').replace('__BUILD_ID__', BUILD_ID),
         });
       },
     },
