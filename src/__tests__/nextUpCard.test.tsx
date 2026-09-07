@@ -3,7 +3,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { AppProvider } from '../context/AppContext';
 import NextUpCard from '../components/workout/NextUpCard';
-import { loadDraft } from '../utils/templateSession';
+import { loadDraft, saveDraft, type Draft } from '../utils/templateSession';
 
 const STORAGE_KEY = 'gym-tracker-data';
 
@@ -135,6 +135,53 @@ describe('a day with nothing set for it', () => {
 
     fireEvent.click(screen.getByRole('button', { name: /START EARLY/ }));
     expect(loadDraft()?.sourceGroupId).toBe('pull');
+  });
+});
+
+describe('starting a template while a session is underway', () => {
+  /** Sets already logged, so there is real work to lose. */
+  const underway = (sourceGroupId: string): Draft => ({
+    date: '2026-08-27',
+    name: 'Pull Day',
+    entries: [{ id: 'live', exerciseId: 'b', sets: [{ setNumber: 1, reps: 8, weightKg: 40 }] }],
+    notes: '',
+    collapsedIds: [],
+    sourceGroupId,
+    startedAt: '2026-08-27T08:00:00Z',
+  });
+
+  it('asks before replacing it, and leaves it alone until then', () => {
+    seed({ groups: [push([3])] });
+    saveDraft(underway('pull'));
+    renderCard();
+
+    fireEvent.click(screen.getByRole('button', { name: /Push Day A/ }));
+
+    expect(screen.getByText(/Start "Push Day A" instead/)).toBeTruthy();
+    expect(loadDraft()?.sourceGroupId).toBe('pull');
+    expect(loadDraft()?.entries[0].sets[0].reps).toBe(8);
+  });
+
+  it('replaces it once that is confirmed', () => {
+    seed({ groups: [push([3])] });
+    saveDraft(underway('pull'));
+    renderCard();
+
+    fireEvent.click(screen.getByRole('button', { name: /Push Day A/ }));
+    fireEvent.click(screen.getByRole('button', { name: /DISCARD & START/ }));
+
+    expect(loadDraft()?.sourceGroupId).toBe('push');
+  });
+
+  it('reopens the same template as it stands rather than starting it over', () => {
+    seed({ groups: [push([3])] });
+    saveDraft(underway('push'));
+    renderCard();
+
+    fireEvent.click(screen.getByRole('button', { name: /Push Day A/ }));
+
+    expect(screen.queryByText(/instead/)).toBeNull();
+    expect(loadDraft()?.entries[0].sets[0].reps).toBe(8);
   });
 });
 

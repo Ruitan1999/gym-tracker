@@ -1,9 +1,16 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { Dumbbell } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAppContext } from '../../context/AppContext';
 import ExerciseStrip from '../shared/ExerciseStrip';
-import { draftFromTemplate, saveDraft, todayString } from '../../utils/templateSession';
+import ConfirmModal from '../shared/ConfirmModal';
+import {
+  draftFromTemplate,
+  draftHasProgress,
+  loadDraft,
+  saveDraft,
+  todayString,
+} from '../../utils/templateSession';
 import {
   DAY_CODES,
   DAY_NAMES,
@@ -41,6 +48,7 @@ function sessionSummary(workout: Workout): string {
 export default function NextUpCard() {
   const { appData } = useAppContext();
   const navigate = useNavigate();
+  const [pendingStart, setPendingStart] = useState<WorkoutGroup | null>(null);
 
   const groups = useMemo(() => appData.groups ?? [], [appData.groups]);
   const today = todayIndex();
@@ -56,7 +64,26 @@ export default function NextUpCard() {
   }, [appData.workouts]);
 
   function start(group: WorkoutGroup) {
+    const existing = loadDraft();
+    // A different template already has real work logged against it — jumping
+    // straight into this one would silently wipe that out.
+    if (draftHasProgress(existing) && existing?.sourceGroupId !== group.id) {
+      setPendingStart(group);
+      return;
+    }
+    // Same template, already underway: reopen it as it stands rather than
+    // regenerating a fresh draft that would reset the sets already logged.
+    if (draftHasProgress(existing) && existing?.sourceGroupId === group.id) {
+      navigate('/workout/new');
+      return;
+    }
     saveDraft(draftFromTemplate(group, appData.workouts));
+    navigate('/workout/new');
+  }
+
+  function confirmStart(group: WorkoutGroup) {
+    saveDraft(draftFromTemplate(group, appData.workouts));
+    setPendingStart(null);
     navigate('/workout/new');
   }
 
@@ -123,6 +150,7 @@ export default function NextUpCard() {
   if (dueToday.length > 0) {
     const [first, ...alsoToday] = dueToday;
     return (
+      <>
       <Shell tone="due">
         <button
           type="button"
@@ -177,6 +205,19 @@ export default function NextUpCard() {
           </div>
         )}
       </Shell>
+      {pendingStart && (
+        <ConfirmModal
+          eyebrow="WORKOUT IN PROGRESS"
+          title={`Start "${pendingStart.name}" instead?`}
+          message="Your current workout hasn't been saved yet — starting a new one will discard it."
+          confirmLabel="DISCARD & START →"
+          cancelLabel="KEEP CURRENT"
+          destructive
+          onConfirm={() => confirmStart(pendingStart)}
+          onClose={() => setPendingStart(null)}
+        />
+      )}
+      </>
     );
   }
 
@@ -185,6 +226,7 @@ export default function NextUpCard() {
   // doesn't have, so it stays plain text.
   if (upcoming) {
     return (
+      <>
       <Shell tone="rest">
         <div className="p-4">
           <Eyebrow
@@ -206,6 +248,19 @@ export default function NextUpCard() {
           </button>
         </div>
       </Shell>
+      {pendingStart && (
+        <ConfirmModal
+          eyebrow="WORKOUT IN PROGRESS"
+          title={`Start "${pendingStart.name}" instead?`}
+          message="Your current workout hasn't been saved yet — starting a new one will discard it."
+          confirmLabel="DISCARD & START →"
+          cancelLabel="KEEP CURRENT"
+          destructive
+          onConfirm={() => confirmStart(pendingStart)}
+          onClose={() => setPendingStart(null)}
+        />
+      )}
+      </>
     );
   }
 

@@ -99,6 +99,7 @@ export default function WorkoutForm({
     () => (isEdit ? (existingWorkout?.startedAt ?? null) : (draft?.startedAt ?? null)),
   );
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
+  const [pendingTemplateStart, setPendingTemplateStart] = useState<WorkoutGroup | null>(null);
   const [pendingWorkout, setPendingWorkout] = useState<Workout | null>(null);
   const [validationError, setValidationError] = useState('');
   const [collapsedIds, setCollapsedIds] = useState<Set<string>>(
@@ -326,16 +327,28 @@ export default function WorkoutForm({
   }
 
   function handleStartFromGroup(group: WorkoutGroup) {
+    if (!isFocusedRoute) {
+      // A different template already has real work logged against it —
+      // starting this one would silently overwrite that session.
+      if (hasAnyInput && sourceGroupId !== group.id) {
+        setPendingTemplateStart(group);
+        return;
+      }
+      // Same template, already underway: reopen it as it stands rather than
+      // regenerating a fresh draft that would reset the sets already logged.
+      if (hasAnyInput && sourceGroupId === group.id) {
+        navigate('/workout/new');
+        return;
+      }
+      saveDraft(draftFromTemplate(group, appData.workouts, new Date().toISOString()));
+      navigate('/workout/new');
+      return;
+    }
+
     const begunAt = startedAt ?? new Date().toISOString();
     const draftPayload = draftFromTemplate(group, appData.workouts, begunAt);
     const newEntries = draftPayload.entries;
     const collapsed = draftPayload.collapsedIds;
-
-    if (!isFocusedRoute) {
-      saveDraft(draftPayload);
-      navigate('/workout/new');
-      return;
-    }
 
     onNameChange(group.name);
     setSourceGroupId(group.id);
@@ -348,6 +361,12 @@ export default function WorkoutForm({
         if (main) main.scrollTo({ top: 0 });
       });
     });
+  }
+
+  function confirmStartFromGroup(group: WorkoutGroup) {
+    saveDraft(draftFromTemplate(group, appData.workouts, new Date().toISOString()));
+    setPendingTemplateStart(null);
+    navigate('/workout/new');
   }
 
   function exerciseIdsMatchExistingGroup(ids: string[]): boolean {
@@ -1023,6 +1042,19 @@ const color = ratingColor(n)!;
           destructive
           onConfirm={discardWorkout}
           onClose={() => setShowCancelConfirm(false)}
+        />
+      )}
+
+      {pendingTemplateStart && (
+        <ConfirmModal
+          eyebrow="WORKOUT IN PROGRESS"
+          title={`Start "${pendingTemplateStart.name}" instead?`}
+          message="Your current workout hasn't been saved yet — starting a new one will discard it."
+          confirmLabel="DISCARD & START →"
+          cancelLabel="KEEP CURRENT"
+          destructive
+          onConfirm={() => confirmStartFromGroup(pendingTemplateStart)}
+          onClose={() => setPendingTemplateStart(null)}
         />
       )}
     </div>

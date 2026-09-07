@@ -36,6 +36,16 @@ export function saveDraft(draft: Draft): void {
   localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
 }
 
+/**
+ * A draft only counts as a session worth protecting once something's actually
+ * been recorded — otherwise starting a different template has nothing to lose.
+ */
+export function draftHasProgress(draft: Draft | null): boolean {
+  if (!draft) return false;
+  const hasLoggedWork = draft.entries.some((e) => e.sets.some((s) => s.reps > 0 || s.weightKg > 0));
+  return hasLoggedWork || draft.notes.trim().length > 0;
+}
+
 export function todayString(now: Date = new Date()): string {
   return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(
     now.getDate(),
