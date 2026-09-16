@@ -43,7 +43,7 @@ export default function EntryCard({
   onReorderKeyDown,
   isDragging = false,
 }: EntryCardProps) {
-  const { appData, renameExercise, exerciseImages } = useAppContext();
+  const { appData, renameExercise, exerciseImages, showToast } = useAppContext();
   const exercise = appData.exercises.find((e) => e.id === exerciseId);
   const [showRemoveConfirm, setShowRemoveConfirm] = useState(false);
   const [showRename, setShowRename] = useState(false);
@@ -124,6 +124,13 @@ export default function EntryCard({
   }, [collapsed, scrollCardIntoView]);
 
   const stableKeysRef = useRef<string[]>([]);
+  // What the sets are right now, for the removal that commits after the row has
+  // finished animating out.
+  const setsRef = useRef(sets);
+  useEffect(() => {
+    setsRef.current = sets;
+  }, [sets]);
+
   while (stableKeysRef.current.length < sets.length) {
     stableKeysRef.current.push(`set-${++globalKeyCounter}`);
   }
@@ -155,19 +162,31 @@ export default function EntryCard({
       setExitingKey(key);
       window.setTimeout(() => {
         const idx = stableKeysRef.current.indexOf(key);
-        if (idx === -1) {
+        // Read the sets as they are now rather than as they were when the row
+        // was tapped. The removal lands 300ms later, after the row has animated
+        // out, and a lot can happen in 300ms mid-workout — another set added, a
+        // weight typed and committed as the tap blurred the field. Working from
+        // the older copy meant the index was resolved against one list and
+        // applied to another, which takes out the wrong row and loses whatever
+        // was entered in between.
+        const current = setsRef.current;
+        if (idx === -1 || idx >= current.length) {
           setExitingKey(null);
           return;
         }
         stableKeysRef.current.splice(idx, 1);
-        const updated = sets
+        const removed = current[idx];
+        const updated = current
           .filter((_, j) => j !== idx)
           .map((s, j) => ({ ...s, setNumber: j + 1 }));
         setExitingKey(null);
         onSetsChange(updated);
+        // The rows renumber as soon as one goes, and sets often read alike, so
+        // nothing on screen says which one left. This does.
+        showToast(`Set ${removed.setNumber} removed`);
       }, 300);
     },
-    [sets, onSetsChange, exitingKey],
+    [onSetsChange, exitingKey, showToast],
   );
 
   const handleRepsChange = useCallback(
