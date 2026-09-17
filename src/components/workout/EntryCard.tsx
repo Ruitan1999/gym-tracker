@@ -183,13 +183,14 @@ export default function EntryCard({
         onSetsChange(updated);
         // The rows renumber as soon as one goes, and sets often read alike, so
         // the list getting shorter is all that happens on screen. This says
-        // which set left, what was on it, and what is left standing — enough to
-        // tell "it took the wrong one" apart from "it took the right one and
-        // the numbering moved".
-        const left = updated.length
-          ? updated.map((s) => `${s.weightKg || 0}`).join(', ')
-          : 'none';
-        showToast(`Set ${removed.setNumber} (${removed.weightKg || 0}kg) removed · left: ${left}`);
+        // which set left and what was on it — enough to tell "it took the wrong
+        // one" apart from "it took the right one and the numbering moved".
+        const what =
+          removed.reps > 0 || removed.weightKg > 0
+            ? `${removed.reps || 0} × ${removed.weightKg || 0}kg`
+            : 'empty';
+        const left = updated.length === 1 ? '1 set left' : `${updated.length} sets left`;
+        showToast(`Set ${removed.setNumber} (${what}) removed · ${left}`);
       }, 300);
     },
     [onSetsChange, exitingKey, showToast],
