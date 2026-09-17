@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { useState } from 'react';
-import { render, screen, act } from '@testing-library/react';
+import { render, screen, act, fireEvent } from '@testing-library/react';
 import { AppProvider } from '../context/AppContext';
 import EntryCard from '../components/workout/EntryCard';
 import type { WorkoutSet } from '../types';
@@ -178,6 +178,62 @@ describe('removing a set', () => {
       // The tapped row went, and the edit survived rather than being rolled back.
       expect(weights[0]).toBeGreaterThan(20);
       expect(weights.slice(1)).toEqual([40, 60]);
+    });
+  });
+
+  /**
+   * A tap is settled where the finger comes up, not where it goes down. When
+   * the list moves in between — the card scrolling itself, the keyboard closing
+   * — the browser hands the click to whichever row is under the finger by then,
+   * and a set nobody pointed at is the one that goes.
+   */
+  describe('a tap that landed on this row without being pressed on it', () => {
+    it('does nothing rather than removing a set nobody aimed at', async () => {
+      const card = renderCard();
+
+      // A click arriving with no press behind it: the press happened on another
+      // row, which then scrolled out from under the finger.
+      act(() => {
+        fireEvent.click(screen.getByRole('button', { name: 'Remove set 3' }), { detail: 1 });
+      });
+      await act(async () => {
+        vi.advanceTimersByTime(600);
+        await Promise.resolve();
+      });
+
+      expect(card.changes).toHaveLength(0);
+      expect(card.weights()).toEqual([20, 40, 60, 80]);
+    });
+
+    it('still removes when the press and the tap are on the same row', async () => {
+      const card = renderCard();
+      const x = screen.getByRole('button', { name: 'Remove set 3' });
+
+      act(() => {
+        fireEvent.pointerDown(x);
+        fireEvent.click(x, { detail: 1 });
+      });
+      await act(async () => {
+        vi.advanceTimersByTime(600);
+        await Promise.resolve();
+      });
+
+      expect(card.weights()).toEqual([20, 40, 80]);
+    });
+
+    it('still removes when activated from a keyboard', async () => {
+      const card = renderCard();
+
+      // No pointer event at all, which is what detail 0 means.
+      act(() => {
+        fireEvent.click(screen.getByRole('button', { name: 'Remove set 3' }), { detail: 0 });
+      });
+      await act(async () => {
+        vi.advanceTimersByTime(600);
+        await Promise.resolve();
+      });
+
+      expect(card.weights()).toEqual([20, 40, 80]);
     });
   });
 });

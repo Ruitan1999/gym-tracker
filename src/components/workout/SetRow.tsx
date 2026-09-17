@@ -1,6 +1,7 @@
 import QuickRepChips from './QuickRepChips';
 import WeightStepper from './WeightStepper';
 import { useAppContext } from '../../context/AppContext';
+import { useAimedPress } from '../../utils/useAimedPress';
 
 // Pastel tints with the hue carried by the numeral rather than the fill — small
 // dark type on a pale ground reads better than white on a saturated block, and
@@ -85,6 +86,10 @@ export default function SetRow({
 
   const accent = setAccent(setNumber);
 
+  // Removing a set is the one thing here that cannot be taken back, so it only
+  // fires where it was aimed — see useAimedPress.
+  const removePress = useAimedPress(onRemove);
+
   return (
     <div
       data-set-row
@@ -97,7 +102,7 @@ export default function SetRow({
       {/* Top-right delete button */}
       <button
         type="button"
-        onClick={onRemove}
+        {...removePress}
         aria-label={`Remove set ${setNumber}`}
         className="absolute top-0 right-0 w-12 h-12 flex items-center justify-center press z-10"
         style={{ color: 'var(--color-text-faint)' }}
