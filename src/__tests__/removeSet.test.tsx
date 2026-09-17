@@ -245,19 +245,6 @@ describe('removing a set', () => {
       expect(card.weights()).toEqual([20, 40, 80]);
     });
 
-    it('does nothing while the list is still moving', async () => {
-      const card = renderCard();
-
-      act(() => {
-        fireEvent.scroll(window, {});
-      });
-      pressAndRelease('Remove set 3');
-      await settle();
-
-      expect(card.changes).toHaveLength(0);
-      expect(card.weights()).toEqual([20, 40, 60, 80]);
-    });
-
     it('removes once the page has held still', async () => {
       const card = renderCard();
 
@@ -272,6 +259,89 @@ describe('removing a set', () => {
       await settle();
 
       expect(card.weights()).toEqual([20, 40, 80]);
+    });
+
+    it('does nothing while the list is still moving', async () => {
+      const card = renderCard();
+
+      act(() => {
+        fireEvent.scroll(window, {});
+      });
+      pressAndRelease('Remove set 3');
+      await settle();
+
+      expect(card.changes).toHaveLength(0);
+      expect(card.weights()).toEqual([20, 40, 60, 80]);
+    });
+  });
+
+  /**
+   * With nothing filled in yet, the only thing telling two rows apart is the
+   * suggestion from last time underneath each one. Read off the row's position,
+   * those stay put while the sets move up past them, and the list comes back
+   * reading exactly as it did minus the bottom row — whichever row was removed.
+   */
+  describe('the suggestion under each row', () => {
+    const EMPTY: WorkoutSet[] = [
+      { setNumber: 1, reps: 0, weightKg: 0 },
+      { setNumber: 2, reps: 0, weightKg: 0 },
+      { setNumber: 3, reps: 0, weightKg: 0 },
+    ];
+    const LAST_TIME: WorkoutSet[] = [
+      { setNumber: 1, reps: 10, weightKg: 80 },
+      { setNumber: 2, reps: 10, weightKg: 120 },
+      { setNumber: 3, reps: 10, weightKg: 120 },
+    ];
+
+    function renderWithHistory() {
+      seed();
+      const changes: WorkoutSet[][] = [];
+      function Card() {
+        const [sets, setSets] = useState(EMPTY);
+        return (
+          <EntryCard
+            exerciseId="a"
+            sets={sets}
+            previousSets={LAST_TIME}
+            onSetsChange={(next) => {
+              setSets(next);
+              changes.push(next);
+            }}
+            onRemove={vi.fn()}
+          />
+        );
+      }
+      render(
+        <AppProvider>
+          <Card />
+        </AppProvider>,
+      );
+      return changes;
+    }
+
+    /** What each row offers from last time, top to bottom. */
+    const suggestions = () =>
+      Array.from(document.querySelectorAll('[data-set-row]')).map((row) => {
+        const match = row.textContent?.match(/(\d+)\s*×\s*([\d.]+)\s*KG/);
+        return match ? `${match[1]}x${match[2]}` : 'none';
+      });
+
+    it('goes with the set it belongs to when one is removed', async () => {
+      renderWithHistory();
+      expect(suggestions()).toEqual(['10x80', '10x120', '10x120']);
+
+      act(() => {
+        const button = screen.getByRole('button', { name: 'Remove set 1' });
+        fireEvent.pointerDown(button, { pointerId: 1, clientX: 100, clientY: 100 });
+        fireEvent.pointerUp(button, { pointerId: 1, clientX: 100, clientY: 100 });
+      });
+      await act(async () => {
+        vi.advanceTimersByTime(600);
+        await Promise.resolve();
+      });
+
+      // The row offering 80 was the one removed, so it is not still on top.
+      expect(suggestions()).toEqual(['10x120', '10x120']);
     });
   });
 });

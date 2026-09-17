@@ -43,7 +43,7 @@ export default function EntryCard({
   onReorderKeyDown,
   isDragging = false,
 }: EntryCardProps) {
-  const { appData, renameExercise, exerciseImages, showToast } = useAppContext();
+  const { appData, renameExercise, exerciseImages } = useAppContext();
   const exercise = appData.exercises.find((e) => e.id === exerciseId);
   const [showRemoveConfirm, setShowRemoveConfirm] = useState(false);
   const [showRename, setShowRename] = useState(false);
@@ -124,6 +124,18 @@ export default function EntryCard({
   }, [collapsed, scrollCardIntoView]);
 
   const stableKeysRef = useRef<string[]>([]);
+  /**
+   * Which of last time's sets each row is showing under it.
+   *
+   * Held per row rather than read off the row's position, because position is
+   * exactly what changes when a set is removed. Looked up by position, deleting
+   * the first set left the row that moved up into its place showing the
+   * suggestion that belonged to the set just deleted — so on a session with
+   * nothing filled in yet, where that line is the only thing telling two rows
+   * apart, the list came back reading the same as before minus the bottom row.
+   * Which is indistinguishable from having removed the last set.
+   */
+  const prevIndexRef = useRef<number[]>([]);
   // What the sets are right now, for the removal that commits after the row has
   // finished animating out.
   const setsRef = useRef(sets);
@@ -133,9 +145,15 @@ export default function EntryCard({
 
   while (stableKeysRef.current.length < sets.length) {
     stableKeysRef.current.push(`set-${++globalKeyCounter}`);
+    // A set added after a removal takes the next of last time's sets, not one
+    // already spoken for by a row above it.
+    prevIndexRef.current.push(
+      prevIndexRef.current.length === 0 ? 0 : Math.max(...prevIndexRef.current) + 1,
+    );
   }
   if (stableKeysRef.current.length > sets.length) {
     stableKeysRef.current.length = sets.length;
+    prevIndexRef.current.length = sets.length;
   }
 
   const handleAddSet = useCallback(() => {
@@ -175,26 +193,17 @@ export default function EntryCard({
           return;
         }
         stableKeysRef.current.splice(idx, 1);
-        const removed = current[idx];
+        // The suggestion under each row goes with the row it belonged to, so
+        // the ones left keep the sets they were matched against.
+        prevIndexRef.current.splice(idx, 1);
         const updated = current
           .filter((_, j) => j !== idx)
           .map((s, j) => ({ ...s, setNumber: j + 1 }));
         setExitingKey(null);
         onSetsChange(updated);
-        // The rows renumber as soon as one goes, and sets often read alike, so
-        // the list getting shorter is all that happens on screen. This says
-        // which set left, what was on it, and what is left standing — enough to
-        // tell "it took the wrong one" apart from "it took the right one and
-        // the numbering moved".
-        const what =
-          removed.reps > 0 || removed.weightKg > 0
-            ? `${removed.reps || 0} × ${removed.weightKg || 0}kg`
-            : 'empty';
-        const left = updated.length === 1 ? '1 set left' : `${updated.length} sets left`;
-        showToast(`Set ${removed.setNumber} (${what}) removed · ${left}`);
       }, 300);
     },
-    [onSetsChange, exitingKey, showToast],
+    [onSetsChange, exitingKey],
   );
 
   const handleRepsChange = useCallback(
@@ -382,7 +391,7 @@ export default function EntryCard({
               setNumber={set.setNumber}
               reps={set.reps}
               weightKg={set.weightKg}
-              previousSet={previousSets?.[i]}
+              previousSet={previousSets?.[prevIndexRef.current[i]]}
               onRepsChange={(v) => handleRepsChange(i, v)}
               onWeightChange={(v) => handleWeightChange(i, v)}
               onApplyPrevious={(r, w) => handleApplyPrevious(i, r, w)}
