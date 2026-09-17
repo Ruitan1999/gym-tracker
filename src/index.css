@@ -255,41 +255,9 @@ button, a { -webkit-tap-highlight-color: transparent; }
 }
 
 @keyframes set-exit {
-  /* Marked before it moves: with rows that often read alike, and the ones below
-     renumbering the moment this one leaves, a colour held while the row is
-     still solid is what tells you which one you took — the list simply getting
-     shorter does not. Only then does it slide and fold.
-     The height comes from the row itself, so a tall row folds rather than being
-     clipped to a cap and jumping the rest of the list up to meet it. */
-  0% {
-    opacity: 1;
-    transform: translateX(0);
-    max-height: var(--set-exit-height, 500px);
-    background-color: rgba(196, 74, 16, 0);
-  }
-  18% {
-    opacity: 1;
-    transform: translateX(0);
-    max-height: var(--set-exit-height, 500px);
-    background-color: rgba(196, 74, 16, 0.24);
-  }
-  55% {
-    opacity: 0.3;
-    transform: translateX(-28px);
-    max-height: var(--set-exit-height, 500px);
-    background-color: rgba(196, 74, 16, 0.24);
-  }
-  100% {
-    opacity: 0;
-    transform: translateX(-28px);
-    max-height: 0;
-    background-color: rgba(196, 74, 16, 0);
-    padding-top: 0;
-    padding-bottom: 0;
-    margin-top: 0;
-    margin-bottom: 0;
-    border-top-width: 0;
-  }
+  0% { opacity: 1; transform: translateX(0); max-height: 500px; }
+  40% { opacity: 0; transform: translateX(-32px); max-height: 500px; }
+  100% { opacity: 0; transform: translateX(-32px); max-height: 0; padding-top: 0; padding-bottom: 0; margin-top: 0; margin-bottom: 0; border-top-width: 0; }
 }
 .animate-set-exit {
   animation: set-exit 300ms cubic-bezier(0.4, 0, 0.2, 1) forwards;

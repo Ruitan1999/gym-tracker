@@ -1,4 +1,3 @@
-import { useLayoutEffect, useRef, useState } from 'react';
 import QuickRepChips from './QuickRepChips';
 import WeightStepper from './WeightStepper';
 import { useAppContext } from '../../context/AppContext';
@@ -91,30 +90,13 @@ export default function SetRow({
   // fires where it was aimed — see useAimedPress.
   const removePress = useAimedPress(onRemove);
 
-  // The row folds from its own height rather than a fixed cap, so a tall one
-  // collapses instead of being clipped to the cap the instant it starts.
-  const rowRef = useRef<HTMLDivElement>(null);
-  const [exitHeight, setExitHeight] = useState<number | null>(null);
-  useLayoutEffect(() => {
-    if (!exiting) {
-      setExitHeight(null);
-      return;
-    }
-    const height = rowRef.current?.getBoundingClientRect().height;
-    if (height) setExitHeight(height);
-  }, [exiting]);
-
   return (
     <div
-      ref={rowRef}
       data-set-row
       className={`relative${exiting ? ' animate-set-exit' : ''}${entering ? ' animate-set-enter' : ''}`}
       style={{
         borderTop: '1px solid var(--color-line)',
         background: setNumber % 2 === 0 ? 'rgba(10, 10, 10, 0.025)' : 'transparent',
-        ...(exitHeight
-          ? ({ '--set-exit-height': `${Math.ceil(exitHeight)}px` } as React.CSSProperties)
-          : null),
       }}
     >
       {/* Top-right delete button */}

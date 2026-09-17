@@ -183,8 +183,9 @@ export default function EntryCard({
         onSetsChange(updated);
         // The rows renumber as soon as one goes, and sets often read alike, so
         // the list getting shorter is all that happens on screen. This says
-        // which set left and what was on it — enough to tell "it took the wrong
-        // one" apart from "it took the right one and the numbering moved".
+        // which set left, what was on it, and what is left standing — enough to
+        // tell "it took the wrong one" apart from "it took the right one and
+        // the numbering moved".
         const what =
           removed.reps > 0 || removed.weightKg > 0
             ? `${removed.reps || 0} × ${removed.weightKg || 0}kg`

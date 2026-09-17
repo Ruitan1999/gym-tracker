@@ -5,10 +5,13 @@ import { useCallback, useRef } from 'react';
  *
  * Scrolling fires continuously while it runs, including through momentum, so
  * this is measured from the moment movement stops rather than from when it
- * started. Long enough to cover the reflow after a keyboard closes; short
- * enough that someone who scrolls to a row and then taps it is never waiting.
+ * started. It covers the reflow after a keyboard closes, and is short enough
+ * that someone who scrolls to a row and then taps it is never waiting.
  */
-const SETTLE_MS = 300;
+const SETTLE_MS = 250;
+
+/** A finger that travelled this far was scrolling, not pressing. */
+const MOVE_TOLERANCE_PX = 12;
 
 /** When the page last moved under whatever is on top of it. */
 let lastMovedAt = 0;
@@ -27,51 +30,67 @@ if (typeof window !== 'undefined') {
 }
 
 /**
- * A press that only counts where it was aimed, on a page that was holding
- * still.
+ * A press that acts on what the finger went down on.
  *
- * Two ways a tap ends up somewhere it was never pointed:
+ * A click is not decided where the finger lands — it is decided where the
+ * finger comes up, on whatever happens to be under it by then. Between those
+ * two moments the list moves for entirely ordinary reasons: a weight committing
+ * and reflowing the row, the keyboard closing, a card scrolling itself, the
+ * momentum of a flick still running. With rows as tall as these, a single
+ * scroll of travel is a whole set, so the delete that answers a tap can belong
+ * to a row nobody pointed at.
  *
- * A tap is settled where the finger comes up, not where it goes down. If the
- * page moves in between, the browser hands the click to whatever is under the
- * finger by then, and the control that was pressed never hears about it.
+ * Capturing the pointer settles that. From the moment the finger goes down,
+ * every event for it comes back to this control whatever moves underneath, so
+ * the row that was pressed is the row that acts — and it acts on release, so a
+ * finger that starts a scroll from here still scrolls rather than deleting.
  *
- * And if the page moves just before the finger lands — the keyboard closing
- * after a weight is typed, a card scrolling itself, momentum still running —
- * the press and the release both land on the row that slid into place, which
- * looks like a perfectly ordinary tap on a set nobody chose. With rows this
- * tall, one scroll of travel is a whole set.
- *
- * So a press is honoured only when it went down and came up on the same
- * control, and only when nothing had moved for a beat beforehand. A tap that
- * fails either test does nothing at all, and the next one — on a list now
- * holding still — does what was meant. For something that cannot be taken
- * back, doing nothing is the right answer to "we are not sure what you meant".
+ * The press also has to have begun on a page that had held still for a beat.
+ * Capture cannot help when the row slid under the finger before it landed:
+ * that press is honest but aimed at what was there a moment ago, and for
+ * something that cannot be taken back, doing nothing is the right answer.
  *
  * Activating from a keyboard sends a click with no pointer event at all, which
  * still counts — that is what `detail === 0` distinguishes.
  */
 export function useAimedPress(onPress: () => void) {
-  const trusted = useRef(false);
+  const press = useRef<{ id: number; x: number; y: number } | null>(null);
 
-  const onPointerDown = useCallback(() => {
-    trusted.current = Date.now() - lastMovedAt > SETTLE_MS;
+  const onPointerDown = useCallback((event: React.PointerEvent<HTMLElement>) => {
+    if (Date.now() - lastMovedAt <= SETTLE_MS) {
+      press.current = null;
+      return;
+    }
+    // Not available in every environment, and the guard below still holds
+    // without it — it just loses the protection against the page moving.
+    event.currentTarget.setPointerCapture?.(event.pointerId);
+    press.current = { id: event.pointerId, x: event.clientX, y: event.clientY };
   }, []);
 
-  const onPointerCancel = useCallback(() => {
-    trusted.current = false;
-  }, []);
-
-  const onClick = useCallback(
-    (event: React.MouseEvent) => {
-      const fromKeyboard = event.detail === 0;
-      const aimed = trusted.current;
-      trusted.current = false;
-      if (!aimed && !fromKeyboard) return;
+  const onPointerUp = useCallback(
+    (event: React.PointerEvent<HTMLElement>) => {
+      const started = press.current;
+      press.current = null;
+      if (!started || started.id !== event.pointerId) return;
+      const travelled = Math.hypot(event.clientX - started.x, event.clientY - started.y);
+      if (travelled > MOVE_TOLERANCE_PX) return;
       onPress();
     },
     [onPress],
   );
 
-  return { onPointerDown, onPointerCancel, onClick };
+  const onPointerCancel = useCallback(() => {
+    press.current = null;
+  }, []);
+
+  const onClick = useCallback(
+    (event: React.MouseEvent) => {
+      // The pointer path has already acted by now; this is here for the
+      // keyboard, which sends a click and nothing else.
+      if (event.detail === 0) onPress();
+    },
+    [onPress],
+  );
+
+  return { onPointerDown, onPointerUp, onPointerCancel, onClick };
 }
