@@ -8,6 +8,7 @@ import { useMaybeAuth } from '../context/AuthContext';
 import { DEFAULT_PREFERENCES } from '../types';
 import { MEDIA_ATTRIBUTION } from '../utils/exerciseImage';
 import { isAdmin, adminConfigured } from '../utils/admin';
+import { RUNNING_BUILD } from '../utils/buildVersion';
 import { Link } from 'react-router-dom';
 
 export default function SettingsPage() {
@@ -345,6 +346,10 @@ export default function SettingsPage() {
           style={{ color: 'var(--color-text-faint)' }}
         >
           EXERCISE ILLUSTRATIONS {MEDIA_ATTRIBUTION}
+          {/* An installed app can be running a build from days ago without
+              saying so — which makes "is this fixed yet" unanswerable. */}
+          <br />
+          BUILD {RUNNING_BUILD}
         </p>
       </div>
     </PageShell>
