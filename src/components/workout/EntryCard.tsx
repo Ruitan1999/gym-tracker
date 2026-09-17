@@ -43,7 +43,7 @@ export default function EntryCard({
   onReorderKeyDown,
   isDragging = false,
 }: EntryCardProps) {
-  const { appData, renameExercise, exerciseImages } = useAppContext();
+  const { appData, renameExercise, exerciseImages, showToast } = useAppContext();
   const exercise = appData.exercises.find((e) => e.id === exerciseId);
   const [showRemoveConfirm, setShowRemoveConfirm] = useState(false);
   const [showRename, setShowRename] = useState(false);
@@ -201,9 +201,10 @@ export default function EntryCard({
           .map((s, j) => ({ ...s, setNumber: j + 1 }));
         setExitingKey(null);
         onSetsChange(updated);
+        showToast('Set removed');
       }, 300);
     },
-    [onSetsChange, exitingKey],
+    [onSetsChange, exitingKey, showToast],
   );
 
   const handleRepsChange = useCallback(
