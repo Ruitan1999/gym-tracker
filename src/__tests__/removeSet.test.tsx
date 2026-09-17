@@ -236,4 +236,55 @@ describe('removing a set', () => {
       expect(card.weights()).toEqual([20, 40, 80]);
     });
   });
+
+  /**
+   * The other way a tap lands somewhere it was never pointed: the page moves
+   * just before the finger does, so press and release agree with each other and
+   * both are on the wrong row.
+   */
+  describe('a tap that lands while the page is still moving', () => {
+    const tap = (name: string) => {
+      const button = screen.getByRole('button', { name });
+      act(() => {
+        fireEvent.pointerDown(button);
+        fireEvent.click(button, { detail: 1 });
+      });
+    };
+
+    const settle = async () => {
+      await act(async () => {
+        vi.advanceTimersByTime(600);
+        await Promise.resolve();
+      });
+    };
+
+    it('does nothing while the list is still scrolling', async () => {
+      const card = renderCard();
+
+      act(() => {
+        fireEvent.scroll(window, {});
+      });
+      tap('Remove set 3');
+      await settle();
+
+      expect(card.changes).toHaveLength(0);
+      expect(card.weights()).toEqual([20, 40, 60, 80]);
+    });
+
+    it('removes once the page has held still', async () => {
+      const card = renderCard();
+
+      act(() => {
+        fireEvent.scroll(window, {});
+      });
+      await act(async () => {
+        vi.advanceTimersByTime(400);
+        await Promise.resolve();
+      });
+      tap('Remove set 3');
+      await settle();
+
+      expect(card.weights()).toEqual([20, 40, 80]);
+    });
+  });
 });
