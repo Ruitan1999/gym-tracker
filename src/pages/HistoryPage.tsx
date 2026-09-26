@@ -41,7 +41,7 @@ export default function HistoryPage() {
   const {
     groupedWorkouts,
     totalSessions,
-    heaviestLift,
+    sessionsThisMonth,
     currentStreak,
     monthLabel,
     monthDays,
@@ -64,21 +64,16 @@ export default function HistoryPage() {
       groups[groups.length - 1].workouts.push(workout);
     }
 
-    let heaviestKg = 0;
-    for (const w of sorted) {
-      for (const e of w.entries) {
-        for (const s of e.sets) {
-          if (s.reps > 0 && s.weightKg > heaviestKg) heaviestKg = s.weightKg;
-        }
-      }
-    }
-    const heaviestLiftStr = heaviestKg > 0 ? String(heaviestKg) : '—';
-
     const dateSet = new Set(sorted.map((w) => w.date));
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const todayIso = isoLocal(today);
     const streak = weeklyStreak(dateSet, today);
+
+    // Sessions logged in the month we are actually in, alongside the all-time
+    // total: one says how the month is going, the other what it adds up to.
+    const thisMonthPrefix = todayIso.slice(0, 7);
+    const sessionsThisMonth = sorted.filter((w) => w.date.startsWith(thisMonthPrefix)).length;
 
     // Month calendar — grid starting Monday of first week, through Sunday of last week
     const year = today.getFullYear();
@@ -129,7 +124,7 @@ export default function HistoryPage() {
     return {
       groupedWorkouts: groups,
       totalSessions: sorted.length,
-      heaviestLift: heaviestLiftStr,
+      sessionsThisMonth,
       currentStreak: streak,
       monthLabel: label,
       monthDays: days,
@@ -224,7 +219,12 @@ export default function HistoryPage() {
       <section className="card mb-4">
         <div className="grid grid-cols-3">
           <BigStat label="STREAK" value={currentStreak} unit={currentStreak === 1 ? 'WEEK' : 'WEEKS'} accent={currentStreak > 0} />
-          <BigStat label="TOP LIFT" value={heaviestLift} unit={heaviestLift === '—' ? undefined : 'KG'} divider />
+          <BigStat
+            label="THIS MONTH"
+            value={sessionsThisMonth}
+            unit={sessionsThisMonth === 1 ? 'SESSION' : 'SESSIONS'}
+            divider
+          />
           <BigStat label="SESSIONS" value={totalSessions} divider />
         </div>
       </section>
@@ -361,20 +361,30 @@ function CalendarCell({
   isFuture,
   isCurrentMonth,
 }: MonthDay) {
-  if (!isCurrentMonth) {
-    return <div style={{ aspectRatio: '1 / 1' }} />;
-  }
-
   const isPastMissed = !trained && !isFuture && !isToday;
-  const bg = trained ? 'var(--color-volt)' : '#ffffff';
+
+  /**
+   * Days either side of the month are shown rather than left blank, so every
+   * week reads as a whole week. Training runs in weeks, not months, and a week
+   * split across two of them was coming up half empty on both — with no way to
+   * see from either month whether the days in the gap had been trained.
+   *
+   * Held back to a quarter so the month it belongs to still owns the grid, and
+   * carrying its own state: a session in those days shows, faintly, rather than
+   * the week looking like it was missed.
+   */
+  const outside = !isCurrentMonth;
+  const bg = trained ? 'var(--color-volt)' : outside ? 'transparent' : '#ffffff';
   const border = trained
     ? 'var(--color-volt)'
-    : isToday
-      ? 'var(--color-text)'
-      : 'var(--color-line-2)';
+    : outside
+      ? 'transparent'
+      : isToday
+        ? 'var(--color-text)'
+        : 'var(--color-line-2)';
   const textColor = trained
     ? '#ffffff'
-    : isPastMissed
+    : isPastMissed || outside
       ? 'var(--color-text-faint)'
       : 'var(--color-text)';
 
@@ -386,7 +396,7 @@ function CalendarCell({
         background: bg,
         border: `1px solid ${border}`,
         borderRadius: 'var(--radius)',
-        opacity: isPastMissed ? 0.55 : 1,
+        opacity: outside ? 0.4 : isPastMissed ? 0.55 : 1,
       }}
     >
       {trained ? (

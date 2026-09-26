@@ -130,3 +130,49 @@ describe('flicking back through the calendar', () => {
     expect(within(container).getAllByText(/AUGUST 2026/).length).toBeGreaterThan(0);
   });
 });
+
+/**
+ * Training runs in weeks, not months. A week split across two of them was
+ * coming up half empty on both, with no way to tell from either month whether
+ * the days in the gap had been trained.
+ */
+describe('the days either side of the month', () => {
+  /** Every cell in the day grid, in order. */
+  const cells = () =>
+    Array.from(
+      screen.getByLabelText('Training calendar').querySelectorAll('.grid.grid-cols-7'),
+    )[1].children;
+
+  it('fills every week out to seven days', () => {
+    // August 2026 starts on a Saturday and ends on a Monday, so both ends of
+    // the grid need days from the months either side.
+    seed(['2026-08-03']);
+    renderPage();
+
+    expect(cells().length % 7).toBe(0);
+    // Saturday the 1st, so Monday to Friday before it come from July.
+    expect(cells()[0].textContent).toBe('27');
+    expect(cells()[cells().length - 1].textContent).toBe('6');
+  });
+
+  it('shows a session trained in the month next door', () => {
+    // August starts on a Saturday, so the grid opens with July 27–31 and the
+    // 31st is the fifth cell.
+    seed(['2026-08-03', '2026-07-31']);
+    renderPage();
+
+    // Trained days carry the icon instead of their number.
+    expect(cells()[4].querySelector('svg')).toBeTruthy();
+    expect(cells()[4].textContent).toBe('');
+    // The day before it was not trained, so it still reads as a number.
+    expect(cells()[3].textContent).toBe('30');
+  });
+
+  it('leaves the month\'s own count to the month', () => {
+    seed(['2026-08-03', '2026-07-31', '2026-09-01']);
+    renderPage();
+
+    // Either side of it is shown, but neither is August's to count.
+    expect(calendar().getByText(/01 DAY TRAINED/)).toBeTruthy();
+  });
+});
