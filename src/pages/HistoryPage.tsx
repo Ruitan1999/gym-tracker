@@ -219,12 +219,7 @@ export default function HistoryPage() {
       <section className="card mb-4">
         <div className="grid grid-cols-3">
           <BigStat label="STREAK" value={currentStreak} unit={currentStreak === 1 ? 'WEEK' : 'WEEKS'} accent={currentStreak > 0} />
-          <BigStat
-            label="THIS MONTH"
-            value={sessionsThisMonth}
-            unit={sessionsThisMonth === 1 ? 'SESSION' : 'SESSIONS'}
-            divider
-          />
+          <BigStat label="THIS MONTH" value={sessionsThisMonth} divider />
           <BigStat label="SESSIONS" value={totalSessions} divider />
         </div>
       </section>
@@ -460,7 +455,10 @@ function BigStat({
           {value}
         </div>
         {unit && (
-          <span className="caps-tight text-[9px]" style={{ color: accent ? 'var(--color-volt)' : 'var(--color-text-faint)' }}>
+          <span
+            className="caps-tight text-[9px] min-w-0 truncate"
+            style={{ color: accent ? 'var(--color-volt)' : 'var(--color-text-faint)' }}
+          >
             {unit}
           </span>
         )}
