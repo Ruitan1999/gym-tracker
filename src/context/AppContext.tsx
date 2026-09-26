@@ -10,7 +10,14 @@ import {
 } from 'react';
 import type { AppData, Workout, Exercise, BodyPart, UserPreferences, WorkoutGroup } from '../types';
 import type { SessionSavedStats } from '../components/shared/SessionSavedBanner';
-import { loadAppData, saveAppData, clearLocalAppData, hasLocalAppData } from '../utils/storage';
+import {
+  loadAppData,
+  saveAppData,
+  clearLocalAppData,
+  hasLocalAppData,
+  loadCachedAppData,
+  saveCachedAppData,
+} from '../utils/storage';
 import { loadRemoteAppData, saveRemoteAppData } from '../utils/remoteStorage';
 import {
   isShippedExercise,
@@ -87,16 +94,30 @@ export function AppProvider({
   const [saveError, setSaveError] = useState(false);
   const hasLoadedRemoteRef = useRef(false);
   const skipNextSaveRef = useRef(false);
+  /** Whether this launch put the cached copy on screen ahead of the fetch. */
+  const openedFromCacheRef = useRef(false);
+  /** Whether anything has been changed here since the launch began. */
+  const touchedSinceLoadRef = useRef(false);
+  /**
+   * The last data this provider put in place itself — the cache, the fetch, the
+   * copy it started with. Anything else in state came from the person using it,
+   * which is what tells a change apart from a load.
+   */
+  const lastAppliedRef = useRef<AppData | null>(null);
   const [libraryImages, setLibraryImages] = useState<Record<string, string>>({});
   const [libraryOverrides, setLibraryOverrides] = useState<LibraryOverrides>(EMPTY_OVERRIDES);
 
   useEffect(() => {
     let cancelled = false;
 
+    openedFromCacheRef.current = false;
+    touchedSinceLoadRef.current = false;
+
     if (!uid) {
       hasLoadedRemoteRef.current = false;
       skipNextSaveRef.current = true;
       const local = loadAppData();
+      lastAppliedRef.current = local;
       setAppData(local);
       // Nothing to hold this screen for — local data is already in hand — so
       // the pictures are warmed behind it rather than ahead of it.
@@ -111,6 +132,24 @@ export function AppProvider({
     setLoading(true);
     (async () => {
       try {
+        // What the device already has for this account. Opening on it means a
+        // relaunch — which the system forces every time the app has been in the
+        // background a while — puts the session back on screen at once instead
+        // of holding it behind a round trip. The fetch below still runs; it
+        // just no longer has the screen waiting on it.
+        const cached = loadCachedAppData(uid);
+        if (cached && !cancelled) {
+          skipNextSaveRef.current = true;
+          lastAppliedRef.current = cached;
+          setAppData(cached);
+          openedFromCacheRef.current = true;
+          setLoading(false);
+          prefetchImages(
+            usedExerciseIds(cached).map((id) => imageForExercise(id, cached.exerciseImages ?? {})),
+            160,
+          );
+        }
+
         const [{ data, existed }, overrides] = await Promise.all([
           loadRemoteAppData(uid),
           loadLibraryOverrides(),
@@ -137,19 +176,29 @@ export function AppProvider({
           skipNextSaveRef.current = true;
           setLibraryOverrides(overrides);
           setLibraryImages(applied.images);
-          setAppData(finalData);
+          // Anything touched while the fetch was in flight is newer than what
+          // came back, and this is a wholesale replace — so it stands, and the
+          // save below carries it up. Only an untouched screen is refreshed.
+          if (!touchedSinceLoadRef.current) {
+            lastAppliedRef.current = finalData;
+            setAppData(finalData);
+          }
+          saveCachedAppData(uid, finalData);
           hasLoadedRemoteRef.current = true;
         }
 
         // Both before the loading screen lifts, not after it: warming that
         // starts once the home screen is already on screen only races the
-        // pictures it was meant to have ready.
+        // pictures it was meant to have ready. Nothing to race when the app
+        // opened on its cache, so that wait is skipped.
         const inEffect = { ...applied.images, ...(finalData.exerciseImages ?? {}) };
         prefetchImages(
           usedExerciseIds(finalData).map((id) => imageForExercise(id, inEffect)),
           160,
         );
-        await awaitImages(firstScreenImages(finalData, inEffect));
+        if (!openedFromCacheRef.current) {
+          await awaitImages(firstScreenImages(finalData, inEffect));
+        }
 
         if (!cancelled) setLoading(false);
       } catch (err) {
@@ -173,7 +222,17 @@ export function AppProvider({
     }
 
     if (uid) {
-      if (!hasLoadedRemoteRef.current) return;
+      // Only a change counts: this effect also runs for the copies put in place
+      // by the launch itself, and treating those as changes would mean the
+      // fetch never got to refresh a screen nobody had touched.
+      if (appData !== lastAppliedRef.current) touchedSinceLoadRef.current = true;
+      if (!hasLoadedRemoteRef.current) {
+        // Written even before the fetch lands, so work done in that window is
+        // on the device rather than only in memory.
+        saveCachedAppData(uid, appData);
+        return;
+      }
+      saveCachedAppData(uid, appData);
       let cancelled = false;
       (async () => {
         const ok = await saveRemoteAppData(uid, appData);

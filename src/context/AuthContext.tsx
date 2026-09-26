@@ -22,6 +22,7 @@ import {
 } from 'firebase/auth';
 import { deleteDoc, doc } from 'firebase/firestore';
 import { auth, db, isFirebaseConfigured } from '../firebase/config';
+import { clearCachedAppData } from '../utils/storage';
 
 interface AuthContextValue {
   user: User | null;
@@ -177,7 +178,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       },
       logout: async () => {
         const a = requireAuth();
+        // The device's copy of this account's data goes with the session that
+        // put it there; it is a head start on the next launch, not a record to
+        // leave behind on a phone someone has signed out of.
+        const leaving = a.currentUser?.uid;
         await signOut(a);
+        if (leaving) clearCachedAppData(leaving);
       },
       deleteAccount: async () => {
         const a = requireAuth();
@@ -190,6 +196,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             console.error('Failed to delete user data:', err);
           }
         }
+        clearCachedAppData(current.uid);
         await deleteUser(current);
         try {
           await signOut(a);
