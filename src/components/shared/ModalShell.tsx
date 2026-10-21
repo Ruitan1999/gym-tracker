@@ -1,5 +1,5 @@
 import { createPortal } from 'react-dom';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 
 interface ModalShellProps {
@@ -51,6 +51,40 @@ function useVisualViewport(): { top: number; height: number } | null {
  */
 export default function ModalShell({ onDismiss, label, children }: ModalShellProps) {
   const viewport = useVisualViewport();
+  // The handler as it is right now, so the effect below can run once without
+  // tearing the history entry down and putting it back on every render.
+  const dismissRef = useRef(onDismiss);
+  dismissRef.current = onDismiss;
+
+  /**
+   * A back gesture closes the dialog rather than the page under it.
+   *
+   * Without this the system back walks off the screen while the dialog is
+   * still up, and whatever it was waiting for an answer about never gets one.
+   * On the prompt that follows a finished session that meant the session was
+   * left pending and never saved: the workout was gone, having been swiped
+   * away from the question that was about to commit it.
+   *
+   * An entry of its own is pushed to be popped, the way the exercise sheet
+   * does it, so the back lands here instead of on the route.
+   */
+  useEffect(() => {
+    if (!dismissRef.current) return;
+    let holdsEntry = true;
+    window.history.pushState({ modal: 'dialog' }, '');
+
+    const onPop = () => {
+      holdsEntry = false;
+      dismissRef.current?.();
+    };
+    window.addEventListener('popstate', onPop);
+    return () => {
+      window.removeEventListener('popstate', onPop);
+      // Closed by its own buttons: the entry pushed above is still sitting
+      // there and has to go, or the next back press only undoes this.
+      if (holdsEntry) window.history.back();
+    };
+  }, []);
 
   return createPortal(
     <div

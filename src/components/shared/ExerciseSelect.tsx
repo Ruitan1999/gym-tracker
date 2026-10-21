@@ -4,6 +4,8 @@ import { useAppContext } from '../../context/AppContext';
 import { imageForExercise, MEDIA_ATTRIBUTION } from '../../utils/exerciseImage';
 import ExerciseThumb from './ExerciseThumb';
 import { BODY_PART_ORDER, BODY_PART_CODE, BODY_PART_ACCENT } from '../../utils/bodyParts';
+import { searchExercises } from '../../utils/exerciseSearch';
+import type { BodyPart } from '../../types';
 
 interface ExerciseSelectProps {
   onSelect: (exerciseId: string) => void;
@@ -30,6 +32,15 @@ export default function ExerciseSelect({
   const { appData, addExercise, exerciseImages } = useAppContext();
   const added = useMemo(() => new Set(addedIds ?? []), [addedIds]);
   const [filter, setFilter] = useState('');
+  /**
+   * Which body part is open, or null for the list of body parts.
+   *
+   * Every exercise in the library, every body part at once, was one scroll
+   * hundreds long — and you already know whether you are about to train chest.
+   * So that is the question it asks first, and the list it then shows is the
+   * dozen or so that could possibly be the right answer.
+   */
+  const [openBodyPart, setOpenBodyPart] = useState<BodyPart | null>(null);
   const [choosingCategoryFor, setChoosingCategoryFor] = useState<string | null>(null);
   const [dragY, setDragY] = useState(0);
   const [closing, setClosing] = useState(false);
@@ -137,11 +148,10 @@ export default function ExerciseSelect({
 
   const isSearching = filter.length > 0;
 
-  const searchResults = useMemo(() => {
-    if (!isSearching) return [];
-    const lower = filter.toLowerCase();
-    return appData.exercises.filter((e) => e.name.toLowerCase().includes(lower));
-  }, [appData.exercises, filter, isSearching]);
+  const searchResults = useMemo(
+    () => (isSearching ? searchExercises(appData.exercises, filter) : []),
+    [appData.exercises, filter, isSearching],
+  );
 
   const groupedByCategory = useMemo(() => {
     const groups: Record<string, typeof appData.exercises> = {};
@@ -378,56 +388,116 @@ export default function ExerciseSelect({
             </div>
           ) : (
             <div className="flex flex-col gap-6">
-              {BODY_PART_ORDER.map((cat, idx) => {
-                const list = groupedByCategory[cat];
-                if (list.length === 0) return null;
-                return (
-                  <div key={cat}>
-                    <div className="caps text-[10px] mb-2 flex items-center gap-3">
-                      <span style={{ color: BODY_PART_ACCENT[cat] }}>
-                        {String(idx + 1).padStart(2, '0')}
-                      </span>
-                      <span style={{ color: 'var(--color-text)' }}>{cat.toUpperCase()}</span>
-                      <span className="flex-1 h-px" style={{ background: 'var(--color-line)' }} />
-                      <span className="font-mono text-[10px]" style={{ color: 'var(--color-text-faint)' }}>
-                        {String(list.length).padStart(2, '0')}
-                      </span>
-                    </div>
-                    <ul>
-                      {list.map((ex, i) => (
-                        <li key={ex.id}>
-                          <button
-                            type="button"
-                            onClick={() => onSelect(ex.id)}
-                            className="w-full text-left h-12 px-2 flex items-center gap-3 press"
-                            style={{
-                              borderBottom: i < list.length - 1 ? '1px solid var(--color-line)' : undefined,
-                            }}
-                          >
-                            <PickerThumb id={ex.id} images={exerciseImages} />
-                            <span
-                              className="flex-1 text-[15px]"
-                              style={{ color: 'var(--color-text)' }}
-                            >
-                              {ex.name}
-                            </span>
-                            {added.has(ex.id) ? (
-                              <AddedTag />
-                            ) : (
-                              <span
-                                className="text-[11px]"
-                                style={{ color: 'var(--color-text-muted)' }}
-                              >
-                                →
-                              </span>
-                            )}
-                          </button>
-                        </li>
-                      ))}
-                    </ul>
+              {openBodyPart === null ? (
+                /* Which part first: a dozen tiles instead of the whole library
+                   laid end to end. */
+                <div className="grid grid-cols-2 gap-2">
+                  {BODY_PART_ORDER.map((cat) => {
+                    const list = groupedByCategory[cat];
+                    if (list.length === 0) return null;
+                    return (
+                      <button
+                        key={cat}
+                        type="button"
+                        onClick={() => {
+                          setOpenBodyPart(cat);
+                          scrollRef.current?.scrollTo({ top: 0 });
+                        }}
+                        className="text-left px-3 py-3 press"
+                        style={{
+                          background: 'var(--color-surface)',
+                          border: '1px solid var(--color-line-2)',
+                          borderRadius: 'var(--radius)',
+                        }}
+                      >
+                        <span
+                          className="caps-tight text-[9px]"
+                          style={{ color: BODY_PART_ACCENT[cat] }}
+                        >
+                          {BODY_PART_CODE[cat]}
+                        </span>
+                        <span
+                          className="block font-display mt-1"
+                          style={{
+                            fontSize: '1.0625rem',
+                            fontWeight: 700,
+                            letterSpacing: '-0.02em',
+                            color: 'var(--color-text)',
+                          }}
+                        >
+                          {cat.charAt(0).toUpperCase() + cat.slice(1)}
+                        </span>
+                        <span
+                          className="block font-mono text-[11px] mt-0.5"
+                          style={{ color: 'var(--color-text-faint)' }}
+                        >
+                          {list.length} exercise{list.length === 1 ? '' : 's'}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div>
+                  <div className="flex items-center gap-3 mb-3">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setOpenBodyPart(null);
+                        scrollRef.current?.scrollTo({ top: 0 });
+                      }}
+                      className="h-9 px-3 caps-tight text-[10px] press"
+                      style={{
+                        color: 'var(--color-text)',
+                        border: '1px solid var(--color-line-2)',
+                        borderRadius: '7px',
+                      }}
+                    >
+                      ← ALL
+                    </button>
+                    <span
+                      className="caps text-[10px]"
+                      style={{ color: BODY_PART_ACCENT[openBodyPart] }}
+                    >
+                      {openBodyPart.toUpperCase()}
+                    </span>
+                    <span className="flex-1 h-px" style={{ background: 'var(--color-line)' }} />
+                    <span
+                      className="font-mono text-[10px]"
+                      style={{ color: 'var(--color-text-faint)' }}
+                    >
+                      {String(groupedByCategory[openBodyPart].length).padStart(2, '0')}
+                    </span>
                   </div>
-                );
-              })}
+                  <ul>
+                    {groupedByCategory[openBodyPart].map((ex, i, list) => (
+                      <li key={ex.id}>
+                        <button
+                          type="button"
+                          onClick={() => onSelect(ex.id)}
+                          className="w-full text-left h-12 px-2 flex items-center gap-3 press"
+                          style={{
+                            borderBottom:
+                              i < list.length - 1 ? '1px solid var(--color-line)' : undefined,
+                          }}
+                        >
+                          <PickerThumb id={ex.id} images={exerciseImages} />
+                          <span className="flex-1 text-[15px]" style={{ color: 'var(--color-text)' }}>
+                            {ex.name}
+                          </span>
+                          {added.has(ex.id) ? (
+                            <AddedTag />
+                          ) : (
+                            <span className="text-[11px]" style={{ color: 'var(--color-text-muted)' }}>
+                              →
+                            </span>
+                          )}
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </div>
           )}
           {/* Required wherever the exercise images are shown. */}

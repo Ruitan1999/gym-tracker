@@ -15,7 +15,7 @@ interface Props {
   duration?: number;
 }
 
-export default function SessionSavedBanner({ stats, onClose, duration = 2800 }: Props) {
+export default function SessionSavedBanner({ stats, onClose, duration = 2200 }: Props) {
   const [leaving, setLeaving] = useState(false);
 
   useEffect(() => {
@@ -29,15 +29,23 @@ export default function SessionSavedBanner({ stats, onClose, duration = 2800 }: 
 
   return (
     <div
+      /* Along the bottom, clear of the header: sitting at the top it covered
+         the back button for as long as it was up, so the way out of the
+         session it was congratulating you on was behind it. Tapping it sends
+         it away rather than waiting for it to go. */
       className="fixed left-4 right-4 z-50"
       style={{
-        top: 'calc(var(--safe-top) + 1rem)',
+        bottom: 'calc(60px + var(--safe-bottom) + 0.75rem)',
         animation: leaving
-          ? 'banner-out 220ms ease-in forwards'
-          : 'banner-in 320ms cubic-bezier(0.16, 1, 0.3, 1)',
+          ? 'banner-up-out 220ms ease-in forwards'
+          : 'banner-up-in 320ms cubic-bezier(0.16, 1, 0.3, 1)',
       }}
       role="status"
       aria-live="polite"
+      onClick={() => {
+        setLeaving(true);
+        window.setTimeout(onClose, 200);
+      }}
     >
       <div
         className="relative overflow-hidden"
