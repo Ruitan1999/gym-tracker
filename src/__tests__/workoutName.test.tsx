@@ -62,11 +62,11 @@ function renameTo(value: string) {
   fireEvent.click(screen.getByRole('button', { name: 'SAVE →' }));
 }
 
-// A line-up that matches no existing template gets the "save as template?"
-// prompt before the session is committed.
+// The session is written the moment this is pressed. Anything the app asks
+// about the template afterwards is asked elsewhere, and cannot change what was
+// saved.
 function saveSessionAndSkipTemplate() {
   fireEvent.click(screen.getByRole('button', { name: /Save Session →/ }));
-  fireEvent.click(screen.getByRole('button', { name: 'NOT NOW' }));
 }
 
 describe('Naming a session from its title', () => {

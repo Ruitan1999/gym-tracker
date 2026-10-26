@@ -82,7 +82,14 @@ export default function ModalShell({ onDismiss, label, children }: ModalShellPro
       window.removeEventListener('popstate', onPop);
       // Closed by its own buttons: the entry pushed above is still sitting
       // there and has to go, or the next back press only undoes this.
-      if (holdsEntry) window.history.back();
+      //
+      // Unless the dialog's answer navigated somewhere, in which case that
+      // entry is no longer what the page is standing on and going back would
+      // undo the navigation rather than the dialog — which is how answering
+      // the prompt after a session landed you back on the session you had
+      // just finished, clock still running.
+      const stillOurs = (window.history.state as { modal?: string } | null)?.modal === 'dialog';
+      if (holdsEntry && stillOurs) window.history.back();
     };
   }, []);
 

@@ -1,6 +1,8 @@
 import { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useAppContext } from '../context/AppContext';
+import SaveTemplatePrompt from '../components/workout/SaveTemplatePrompt';
+import { readTemplateOffer, type TemplateOffer } from '../utils/templateOffer';
 import PageShell from '../components/layout/PageShell';
 import ConfirmModal from '../components/shared/ConfirmModal';
 import RenameModal from '../components/shared/RenameModal';
@@ -25,11 +27,43 @@ function formatDate(dateStr: string): string {
 export default function WorkoutDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { appData, deleteWorkout, addGroup, showToast, exerciseImages } = useAppContext();
+  const location = useLocation();
+
+  const { appData, deleteWorkout, addGroup, updateGroup, showToast, exerciseImages } = useAppContext();
 
   const workout = appData.workouts.find((w) => w.id === id);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showSaveTemplate, setShowSaveTemplate] = useState(false);
+  /**
+   * Asked here rather than back on the session, because by the time this page
+   * is on screen the session is already saved. Answering it, or not, changes
+   * nothing about the workout — only what happens to the template.
+   */
+  const [offer, setOffer] = useState<TemplateOffer | null>(() =>
+    readTemplateOffer(location.state),
+  );
+
+  function keepTemplate(name: string) {
+    const group: WorkoutGroup = {
+      id: crypto.randomUUID(),
+      name,
+      exerciseIds: [...new Set(offer?.exerciseIds ?? [])],
+      createdAt: new Date().toISOString(),
+    };
+    addGroup(group);
+    setOffer(null);
+    showToast(`Template "${name}" saved`);
+  }
+
+  function updateSourceTemplate() {
+    if (!offer?.sourceGroupId) return;
+    const source = (appData.groups ?? []).find((g) => g.id === offer.sourceGroupId);
+    if (source) {
+      updateGroup({ ...source, exerciseIds: [...new Set(offer.exerciseIds)] });
+      showToast(`Template "${source.name}" updated`);
+    }
+    setOffer(null);
+  }
 
   function saveAsTemplate(name: string) {
     if (!workout) return;
@@ -386,6 +420,19 @@ export default function WorkoutDetailPage() {
           ✕ DELETE SESSION
         </button>
       </div>
+
+      {offer && (
+        <SaveTemplatePrompt
+          exerciseNames={offer.exerciseIds.map(
+            (id) => appData.exercises.find((e) => e.id === id)?.name ?? 'Exercise',
+          )}
+          defaultName={offer.defaultName ?? ''}
+          sourceTemplateName={offer.sourceGroupName}
+          onUpdateTemplate={offer.sourceGroupId ? updateSourceTemplate : undefined}
+          onSave={keepTemplate}
+          onDismiss={() => setOffer(null)}
+        />
+      )}
 
       {showSaveTemplate && (
         <RenameModal

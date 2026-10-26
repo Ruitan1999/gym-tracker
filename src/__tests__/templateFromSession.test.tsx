@@ -1,8 +1,9 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, within } from '@testing-library/react';
 import { MemoryRouter, Route, Routes, useNavigate } from 'react-router-dom';
 import { AppProvider } from '../context/AppContext';
 import LogWorkoutPage from '../pages/LogWorkoutPage';
+import WorkoutDetailPage from '../pages/WorkoutDetailPage';
 import type { WorkoutEntry, WorkoutGroup } from '../types';
 
 const STORAGE_KEY = 'gym-tracker-data';
@@ -57,6 +58,9 @@ function renderSession() {
         <Routes>
           <Route path="/" element={<LogWorkoutPage />} />
           <Route path="/workout/new" element={<LogWorkoutPage />} />
+          {/* Saving leaves for the session it just wrote, and the template
+              question is asked there, over a workout already in the book. */}
+          <Route path="/history/:id" element={<WorkoutDetailPage />} />
         </Routes>
       </AppProvider>
     </MemoryRouter>,
@@ -135,6 +139,18 @@ describe('Finishing a session that started from a template', () => {
     expect(screen.getByText('HOME')).toBeDefined();
   });
 
+  it('saves the moment it is pressed, whatever the template question', () => {
+    seed();
+    seedDraft([PUSH, BENCH, ROW], 'g1');
+    renderSession();
+
+    save();
+
+    // In the book already — the question below it is only about the template.
+    expect(savedWorkoutCount()).toBe(1);
+    expect(screen.getByText('Update Push Day A?')).toBeDefined();
+  });
+
   it('saves without prompting when the exercises are untouched', () => {
     seed();
     seedDraft([PUSH, BENCH], 'g1');
@@ -205,7 +221,10 @@ describe('Finishing a session that started from a template', () => {
     fireEvent.click(screen.getByRole('button', { name: /SAVE AS NEW TEMPLATE/ }));
     const input = screen.getByPlaceholderText('e.g. LEG DAY A') as HTMLInputElement;
     fireEvent.change(input, { target: { value: 'Push Day B' } });
-    fireEvent.click(screen.getByRole('button', { name: /^SAVE/ }));
+    // Scoped to the prompt: the page behind it offers a save-as-template of
+    // its own, which this is not.
+    const dialog = within(screen.getByRole('dialog'));
+    fireEvent.click(dialog.getByRole('button', { name: /^SAVE →/ }));
 
     const groups = savedGroups();
     expect(groups).toHaveLength(2);

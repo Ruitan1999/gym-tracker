@@ -8,13 +8,13 @@ import ConfirmModal from '../shared/ConfirmModal';
 import ActionSheet from '../shared/ActionSheet';
 import RenameModal from '../shared/RenameModal';
 import EntryCard from './EntryCard';
-import SaveTemplatePrompt from './SaveTemplatePrompt';
 import heroIllustration from '../../assets/healthy-habit.svg';
 import type { Workout, WorkoutEntry, WorkoutGroup, WorkoutSet } from '../../types';
 import { useDragReorder } from '../../utils/useDragReorder';
 import { imageForExercise } from '../../utils/exerciseImage';
 import { dayCodeLabel } from '../../utils/schedule';
 import { prefetchImages } from '../../utils/prefetchImages';
+import type { TemplateOffer } from '../../utils/templateOffer';
 import {
   DRAFT_KEY,
   type Draft,
@@ -57,7 +57,6 @@ export default function WorkoutForm({
     loading,
     addWorkout,
     updateWorkout,
-    addGroup,
     updateGroup,
     deleteGroup,
     showSessionSaved,
@@ -100,7 +99,6 @@ export default function WorkoutForm({
   );
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
   const [pendingTemplateStart, setPendingTemplateStart] = useState<WorkoutGroup | null>(null);
-  const [pendingWorkout, setPendingWorkout] = useState<Workout | null>(null);
   const [validationError, setValidationError] = useState('');
   const [collapsedIds, setCollapsedIds] = useState<Set<string>>(
     new Set(draft?.collapsedIds ?? []),
@@ -247,8 +245,11 @@ export default function WorkoutForm({
    * leaving it in the history would put a spent, empty form behind the back
    * button instead of the home page.
    */
-  function navigateToSession(workoutId: string) {
-    navigate(`/history/${workoutId}`, { replace: true });
+  function navigateToSession(workoutId: string, offer?: TemplateOffer) {
+    navigate(`/history/${workoutId}`, {
+      replace: true,
+      ...(offer ? { state: { offerTemplate: offer } } : {}),
+    });
   }
 
   function discardWorkout() {
@@ -378,7 +379,17 @@ export default function WorkoutForm({
     );
   }
 
-  function commitWorkout(workout: Workout, templateName?: string) {
+  /**
+   * Saves the session and leaves for it.
+   *
+   * The template question used to stand in front of this: the workout was held
+   * pending until the prompt was answered, so pressing Save Session saved
+   * nothing by itself and any way out of that prompt that wasn't one of its
+   * buttons lost the session. The session is finished the moment it is saved —
+   * what becomes of the template is a separate question, and it is now asked
+   * on the other side of the save, over the session it is about.
+   */
+  function commitWorkout(workout: Workout, offer?: TemplateOffer) {
     addWorkout(workout);
     const sets = workout.entries.reduce((a, e) => a + e.sets.length, 0);
     const reps = workout.entries.reduce(
@@ -394,43 +405,9 @@ export default function WorkoutForm({
       sets,
       reps,
       volumeKg,
-      ...(templateName ? { templateName } : {}),
     });
     localStorage.removeItem(DRAFT_KEY);
-    setPendingWorkout(null);
-    navigateToSession(workout.id);
-  }
-
-  function commitPending(templateName?: string) {
-    if (!pendingWorkout) return;
-    commitWorkout(pendingWorkout, templateName);
-  }
-
-  function handleTemplatePromptSave(name: string) {
-    if (!pendingWorkout) return;
-    const group: WorkoutGroup = {
-      id: crypto.randomUUID(),
-      name,
-      exerciseIds: pendingWorkout.entries.map((e) => e.exerciseId),
-      createdAt: new Date().toISOString(),
-    };
-    addGroup(group);
-    commitPending(name);
-  }
-
-  // Keeps the template's identity — its id, name and place in the list — and
-  // swaps in the exercises the session actually ended up with.
-  function handleTemplatePromptUpdate() {
-    if (!pendingWorkout || !sourceGroup) return;
-    updateGroup({
-      ...sourceGroup,
-      exerciseIds: pendingWorkout.entries.map((e) => e.exerciseId),
-    });
-    commitPending(sourceGroup.name);
-  }
-
-  function handleTemplatePromptDismiss() {
-    commitPending();
+    navigateToSession(workout.id, offer);
   }
 
   function handleSave() {
@@ -479,22 +456,24 @@ export default function WorkoutForm({
 
     const exerciseIds = savedEntries.map((e) => e.exerciseId);
 
-    // Started from a template: the only question worth asking is what should
-    // happen to that template, and only if the session drifted from it.
+    // Worth asking about the template, but only after the session is safe.
+    // Started from one, the question is what to do about the drift; started
+    // from nothing that matches, it is whether this line-up is worth keeping.
+    let offer: TemplateOffer | undefined;
     if (sourceGroup) {
-      if (sameExerciseIds(sourceGroup.exerciseIds, exerciseIds)) {
-        commitWorkout(workout);
-        return;
+      if (!sameExerciseIds(sourceGroup.exerciseIds, exerciseIds)) {
+        offer = {
+          exerciseIds,
+          defaultName: trimmedName,
+          sourceGroupId: sourceGroup.id,
+          sourceGroupName: sourceGroup.name,
+        };
       }
-      setPendingWorkout(workout);
-      return;
+    } else if (!exerciseIdsMatchExistingGroup(exerciseIds)) {
+      offer = { exerciseIds, defaultName: trimmedName };
     }
 
-    if (exerciseIdsMatchExistingGroup(exerciseIds)) {
-      commitWorkout(workout);
-      return;
-    }
-    setPendingWorkout(workout);
+    commitWorkout(workout, offer);
   }
 
   const showActiveSession = isEdit || isFocusedRoute;
@@ -956,18 +935,6 @@ const color = ratingColor(n)!;
         >
           CANCEL
         </button>
-      )}
-
-      {pendingWorkout && (
-        <SaveTemplatePrompt
-          exerciseNames={pendingWorkout.entries
-            .map((e) => appData.exercises.find((x) => x.id === e.exerciseId)?.name ?? 'Exercise')}
-          defaultName={pendingWorkout.name ?? ''}
-          sourceTemplateName={sourceGroup?.name}
-          onUpdateTemplate={handleTemplatePromptUpdate}
-          onSave={handleTemplatePromptSave}
-          onDismiss={handleTemplatePromptDismiss}
-        />
       )}
 
       {menuForGroup && (
