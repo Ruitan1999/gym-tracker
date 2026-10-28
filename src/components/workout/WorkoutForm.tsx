@@ -521,13 +521,9 @@ export default function WorkoutForm({
   // An empty session keeps its existing "add an exercise" validation instead.
   const saveGated = totalExercises > 0 && pendingCount > 0;
 
-  const hasFixedCta = showEmptyState && (groups.length > 0 || hasTodaysWorkout);
-
   return (
     <div
-      className={`flex flex-col gap-5 ${
-        hasFixedCta || (sessionLive && rest.phase !== 'idle') ? 'pb-32' : 'pb-8'
-      }`}
+      className={`flex flex-col gap-5 ${sessionLive && rest.phase !== 'idle' ? 'pb-32' : 'pb-8'}`}
     >
       {/* Groups picker */}
       {showGroupsPicker && (
@@ -720,50 +716,6 @@ export default function WorkoutForm({
             </div>
           </div>
         </button>
-      )}
-
-      {!loading && showEmptyState && (groups.length > 0 || hasTodaysWorkout) && createPortal(
-        <div
-          className="fixed left-0 right-0 z-40 px-4"
-          style={{ bottom: `calc(60px + var(--safe-bottom) + 28px)` }}
-        >
-          <div className="w-full max-w-[800px] mx-auto">
-            <button
-              type="button"
-              onClick={startExerciseSelection}
-              className="w-full h-14 press caps-tight text-[11px]"
-              style={
-                sessionInProgress
-                  ? {
-                      borderRadius: 'var(--radius)',
-                      letterSpacing: '0.12em',
-                      background: 'var(--color-steel)',
-                      color: '#ffffff',
-                      boxShadow: '0 12px 32px -8px var(--color-steel-glow), 0 4px 12px -2px rgba(0, 0, 0, 0.08)',
-                    }
-                  : {
-                      borderRadius: 'var(--radius)',
-                      letterSpacing: '0.12em',
-                      background: 'var(--color-volt)',
-                      color: '#ffffff',
-                      boxShadow: '0 12px 32px -8px var(--color-volt-glow), 0 4px 12px -2px rgba(0, 0, 0, 0.08)',
-                    }
-              }
-            >
-              {sessionInProgress ? (
-                <span className="inline-flex items-center">
-                  WORKOUT IN PROGRESS
-                  <span className="progress-dots" aria-hidden>
-                    <span /><span /><span />
-                  </span>
-                </span>
-              ) : (
-                'START WORKOUT →'
-              )}
-            </button>
-          </div>
-        </div>,
-        document.body,
       )}
 
       {!loading && showEmptyState && groups.length === 0 && !hasTodaysWorkout && createPortal(
