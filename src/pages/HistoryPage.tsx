@@ -1,12 +1,13 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
-import { Dumbbell, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Dumbbell, ChevronLeft,ChevronRight, Flame, CalendarDays, ClipboardList, Weight, type LucideIcon } from 'lucide-react';
 import { useAppContext } from '../context/AppContext';
 import PageShell from '../components/layout/PageShell';
 import EmptyState from '../components/shared/EmptyState';
 import WorkoutCard from '../components/history/WorkoutCard';
 import type { Workout } from '../types';
 import { weeklyStreak } from '../utils/streak';
+import { tonnageKg, formatTonnage } from '../utils/tonnage';
 
 function getMonthLabel(dateStr: string): string {
   const [year, month] = dateStr.split('-').map(Number);
@@ -34,6 +35,7 @@ interface MonthDay {
 
 export default function HistoryPage() {
   const { appData } = useAppContext();
+  const unit = appData.preferences.weightUnit;
   /** 0 is this month; every step back is a month earlier. */
   const [monthOffset, setMonthOffset] = useState(0);
   const calendarRef = useRef<HTMLElement>(null);
@@ -42,6 +44,8 @@ export default function HistoryPage() {
     groupedWorkouts,
     totalSessions,
     sessionsThisMonth,
+    lifetimeKg,
+    monthKg,
     currentStreak,
     monthLabel,
     monthDays,
@@ -74,6 +78,8 @@ export default function HistoryPage() {
     // total: one says how the month is going, the other what it adds up to.
     const thisMonthPrefix = todayIso.slice(0, 7);
     const sessionsThisMonth = sorted.filter((w) => w.date.startsWith(thisMonthPrefix)).length;
+
+    const tonnage = tonnageKg(sorted, thisMonthPrefix);
 
     // Month calendar — grid starting Monday of first week, through Sunday of last week
     const year = today.getFullYear();
@@ -125,6 +131,8 @@ export default function HistoryPage() {
       groupedWorkouts: groups,
       totalSessions: sorted.length,
       sessionsThisMonth,
+      lifetimeKg: tonnage.total,
+      monthKg: tonnage.thisMonth,
       currentStreak: streak,
       monthLabel: label,
       monthDays: days,
@@ -215,13 +223,24 @@ export default function HistoryPage() {
 
   return (
     <PageShell title="Log Book">
-      {/* Big stats */}
-      <section className="card mb-4">
-        <div className="grid grid-cols-3">
-          <BigStat label="STREAK" value={currentStreak} unit={currentStreak === 1 ? 'WEEK' : 'WEEKS'} accent={currentStreak > 0} />
-          <BigStat label="THIS MONTH" value={sessionsThisMonth} divider />
-          <BigStat label="SESSIONS" value={totalSessions} divider />
-        </div>
+      {/* Stat tiles */}
+      <section aria-label="Totals" className="grid grid-cols-2 gap-3 mb-4">
+        <StatTile icon={ClipboardList} label="WORKOUTS" value={totalSessions} />
+        <StatTile icon={CalendarDays} label="THIS MONTH" value={sessionsThisMonth} />
+        <StatTile
+          icon={Flame}
+          label="WEEK STREAK"
+          value={currentStreak}
+          unit={currentStreak === 1 ? 'WEEK' : 'WEEKS'}
+          accent={currentStreak > 0}
+        />
+        <StatTile
+          icon={Weight}
+          label="LIFTED IN TOTAL"
+          value={formatTonnage(lifetimeKg, unit)}
+          unit={unit.toUpperCase()}
+          sub={monthKg > 0 ? `${formatTonnage(monthKg, unit)} ${unit} this month` : undefined}
+        />
       </section>
 
       {/* Month calendar */}
@@ -412,36 +431,46 @@ function CalendarCell({
   );
 }
 
+// Tiles are half the page wide, so a long number steps down in size rather
+// than clipping. This is the rule that stops "THIS MONTH" style overflow.
 function adaptiveValueSize(value: string | number): string {
   const len = String(value).length;
-  if (len <= 3) return '1.75rem';
-  if (len === 4) return '1.5rem';
-  if (len === 5) return '1.25rem';
+  if (len <= 4) return '1.75rem';
+  if (len <= 6) return '1.5rem';
+  if (len <= 9) return '1.25rem';
   return '1.05rem';
 }
 
-function BigStat({
+function StatTile({
+  icon: Icon,
   label,
   value,
-  divider,
   accent = false,
   unit,
+  sub,
 }: {
+  icon: LucideIcon;
   label: string;
   value: string | number;
-  divider?: boolean;
   accent?: boolean;
   unit?: string;
+  sub?: string;
 }) {
+  const tint = accent ? 'var(--color-volt)' : 'var(--color-text-faint)';
   return (
-    <div
-      className="px-4 py-4"
-      style={divider ? { borderLeft: '1px solid var(--color-line)' } : undefined}
-    >
-      <div className="caps-tight text-[9px]" style={{ color: 'var(--color-text-faint)' }}>
-        {label}
+    <div className="card px-4 py-4 min-w-0">
+      <div className="flex items-center gap-1.5 min-w-0">
+        <Icon
+          aria-hidden="true"
+          color={tint}
+          strokeWidth={ICON_STROKE}
+          style={{ width: '0.85rem', height: '0.85rem', flexShrink: 0 }}
+        />
+        <div className="caps-tight text-[9px] min-w-0 truncate" style={{ color: 'var(--color-text-faint)' }}>
+          {label}
+        </div>
       </div>
-      <div className="flex items-baseline gap-1 mt-1.5 min-w-0">
+      <div className="flex items-baseline gap-1 mt-2.5 min-w-0">
         <div
           className="font-mono leading-none min-w-0 truncate"
           style={{
@@ -456,20 +485,21 @@ function BigStat({
         </div>
         {unit && (
           <span
-            className="caps-tight text-[9px] min-w-0 truncate"
+            className="caps-tight text-[9px] shrink-0"
             style={{ color: accent ? 'var(--color-volt)' : 'var(--color-text-faint)' }}
           >
             {unit}
           </span>
         )}
-        {accent && (
-          <Dumbbell
-            color="var(--color-volt)"
-            strokeWidth={ICON_STROKE}
-            style={{ width: '0.85rem', height: '0.85rem', flexShrink: 0 }}
-          />
-        )}
       </div>
+      {sub && (
+        <div
+          className="font-mono text-[10px] mt-2 truncate"
+          style={{ color: 'var(--color-text-faint)', fontVariantNumeric: 'tabular-nums' }}
+        >
+          {sub}
+        </div>
+      )}
     </div>
   );
 }
