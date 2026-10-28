@@ -1,14 +1,15 @@
-import type { BodyPart } from '../../src/types';
+import type { BodyPart, Equipment } from '../../src/types';
 
 export interface LibraryEntry {
   id: string;
   name: string;
   bodyPart: BodyPart;
+  equipment?: Equipment;
 }
 
 export interface Overrides {
-  edit: Record<string, { name?: string; bodyPart?: BodyPart }>;
-  add: { id: string; name: string; bodyPart: BodyPart }[];
+  edit: Record<string, { name?: string; bodyPart?: BodyPart; equipment?: Equipment }>;
+  add: { id: string; name: string; bodyPart: BodyPart; equipment?: Equipment }[];
   remove: string[];
 }
 

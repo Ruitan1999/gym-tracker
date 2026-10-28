@@ -7,6 +7,7 @@
  */
 import fs from 'node:fs';
 import path from 'node:path';
+import { EQUIPMENT } from './equipment.mjs';
 
 export const BODY_PARTS = [
   'chest', 'back', 'shoulders', 'arms', 'forearms',
@@ -34,7 +35,8 @@ export function parseLibrary(source = fs.readFileSync(LIBRARY_TS, 'utf8')) {
     const name = line.match(QUOTED);
     const bodyPart = line.match(/\bbodyPart: '(\w+)'/)?.[1];
     if (!id || !name || !bodyPart) continue;
-    rows.push({ id, name: unquote(name[1] ?? name[2]), bodyPart });
+    const equipment = line.match(/\bequipment: '(\w+)'/)?.[1];
+    rows.push({ id, name: unquote(name[1] ?? name[2]), bodyPart, ...(equipment ? { equipment } : {}) });
   }
   if (rows.length === 0) throw new Error(`Parsed no exercises from ${LIBRARY_TS}`);
   return rows;
@@ -63,8 +65,12 @@ export function applyOverrides(exercises, overrides, { log = () => {} } = {}) {
     if (change.bodyPart && !BODY_PARTS.includes(change.bodyPart)) {
       throw new Error(`overrides.edit["${id}"]: "${change.bodyPart}" is not a body part`);
     }
+    if (change.equipment && !EQUIPMENT.includes(change.equipment)) {
+      throw new Error(`overrides.edit["${id}"]: "${change.equipment}" is not one of ${EQUIPMENT.join(', ')}`);
+    }
     if (change.name) target.name = change.name;
     if (change.bodyPart) target.bodyPart = change.bodyPart;
+    if (change.equipment) target.equipment = change.equipment;
     log(`edited   ${id} -> ${target.name} [${target.bodyPart}]`);
   }
 
@@ -76,7 +82,13 @@ export function applyOverrides(exercises, overrides, { log = () => {} } = {}) {
     if (!BODY_PARTS.includes(entry.bodyPart)) {
       throw new Error(`overrides.add["${entry.id}"]: "${entry.bodyPart}" is not a body part`);
     }
-    const added = { id: entry.id, name: entry.name, bodyPart: entry.bodyPart };
+    if (entry.equipment && !EQUIPMENT.includes(entry.equipment)) {
+      throw new Error(`overrides.add["${entry.id}"]: "${entry.equipment}" is not one of ${EQUIPMENT.join(', ')}`);
+    }
+    const added = {
+      id: entry.id, name: entry.name, bodyPart: entry.bodyPart,
+      ...(entry.equipment ? { equipment: entry.equipment } : {}),
+    };
     exercises.push(added);
     byId.set(added.id, added);
     log(`added    ${added.id} -> ${added.name} [${added.bodyPart}]`);
@@ -137,7 +149,8 @@ export function syncImages(exercises, { log = () => {} } = {}) {
 }
 
 const line = (e) =>
-  `  { id: '${e.id}', name: ${JSON.stringify(e.name)}, bodyPart: '${e.bodyPart}', isCustom: false },`;
+  `  { id: '${e.id}', name: ${JSON.stringify(e.name)}, bodyPart: '${e.bodyPart}', ` +
+  `${e.equipment ? `equipment: '${e.equipment}', ` : ''}isCustom: false },`;
 
 export function writeLibrary(exercises, ownImages, { imported = 0 } = {}) {
   // The app finds an ex-gv- picture by convention rather than a lookup table,

@@ -2,8 +2,25 @@ export interface Exercise {
   id: string;
   name: string;
   bodyPart: BodyPart;
+  /**
+   * The kit it is done with. Only the shipped library carries it; custom
+   * exercises, and copies stored before it existed, have none.
+   */
+  equipment?: Equipment;
   isCustom: boolean;
 }
+
+/** A small fixed set, because a picker filter with thirty chips is no filter. */
+export type Equipment =
+  | 'machine'
+  | 'cable'
+  | 'dumbbell'
+  | 'barbell'
+  | 'bodyweight'
+  | 'smith'
+  | 'band'
+  | 'kettlebell'
+  | 'other';
 
 /**
  * What exercises were filed under before body parts: a movement pattern, which

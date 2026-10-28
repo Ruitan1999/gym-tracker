@@ -70,3 +70,14 @@ generator records the new filename against the same exercise.
 
 A typo in an id stops the script rather than being ignored, so a change that
 was meant to happen can't silently not happen.
+
+## Equipment
+
+Every entry carries an `equipment` tag (machine, cable, dumbbell, barbell, bodyweight,
+smith, band, kettlebell, other) that drives the picker's filter chips. Overrides
+accept `"equipment"` in `edit` and `add`. To (re)tag the whole library from the
+upstream dataset without touching images:
+
+```
+npm run library:equipment -- <path-to>/data/exercises.json
+```

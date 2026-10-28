@@ -15,6 +15,7 @@ import path from 'node:path';
 import {
   readOverrides, applyOverrides, syncImages, writeLibrary, PUBLIC_IMAGES,
 } from './lib/library.mjs';
+import { equipmentFromDataset, equipmentForHandWritten } from './lib/equipment.mjs';
 
 const OUT = path.join(process.cwd(), 'src/data/defaultExercises.ts');
 const CURRENT = fs.readFileSync(OUT, 'utf8');
@@ -100,7 +101,8 @@ for (const raw of CURRENT.split('\n')) {
   const bodyPart =
     raw.match(/\bbodyPart: '(\w+)'/)?.[1] ??
     bodyPartFor(label, raw.match(/\bcategory: '(\w+)'/)?.[1]);
-  existing.push({ id, name: label, bodyPart });
+  const equipment = raw.match(/\bequipment: '(\w+)'/)?.[1] ?? equipmentForHandWritten(label);
+  existing.push({ id, name: label, bodyPart, ...(equipment ? { equipment } : {}) });
 }
 if (existing.length === 0) throw new Error('Parsed no existing exercises — check the regexes.');
 
@@ -137,7 +139,7 @@ for (const row of source) {
   seen.add(name.toLowerCase());
   const id = `ex-gv-${row.id}`;
   media.set(id, row.image);
-  added.push({ id, name, category, bodyPart });
+  added.push({ id, name, category, bodyPart, equipment: equipmentFromDataset(row.equipment) });
 }
 
 /**
@@ -244,3 +246,4 @@ const tally = (key) =>
 
 console.log(`kept ${existing.length}, added ${added.length}, total ${final.length}`);
 console.log('bodyPart:', tally('bodyPart'));
+console.log('equipment:', tally('equipment'));

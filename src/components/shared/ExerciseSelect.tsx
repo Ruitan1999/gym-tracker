@@ -5,7 +5,15 @@ import { imageForExercise, MEDIA_ATTRIBUTION } from '../../utils/exerciseImage';
 import ExerciseThumb from './ExerciseThumb';
 import { BODY_PART_ORDER, BODY_PART_CODE, BODY_PART_ACCENT } from '../../utils/bodyParts';
 import { searchExercises } from '../../utils/exerciseSearch';
-import type { BodyPart } from '../../types';
+import {
+  EQUIPMENT_ORDER,
+  EQUIPMENT_LABELS,
+  countByEquipment,
+  exerciseSubtitle,
+  filterByEquipment,
+  type EquipmentFilter,
+} from '../../utils/exerciseEquipment';
+import type { BodyPart, Equipment, Exercise } from '../../types';
 
 interface ExerciseSelectProps {
   onSelect: (exerciseId: string) => void;
@@ -41,6 +49,12 @@ export default function ExerciseSelect({
    * dozen or so that could possibly be the right answer.
    */
   const [openBodyPart, setOpenBodyPart] = useState<BodyPart | null>(null);
+  /**
+   * Narrows the open body part, and a search, to one kind of kit. Kept for as
+   * long as the sheet is open and not beyond: it answers "what's at my gym
+   * today", which is not worth remembering to the next visit.
+   */
+  const [equipment, setEquipment] = useState<EquipmentFilter>(null);
   const [choosingCategoryFor, setChoosingCategoryFor] = useState<string | null>(null);
   const [dragY, setDragY] = useState(0);
   const [closing, setClosing] = useState(false);
@@ -148,9 +162,13 @@ export default function ExerciseSelect({
 
   const isSearching = filter.length > 0;
 
-  const searchResults = useMemo(
+  const searchMatches = useMemo(
     () => (isSearching ? searchExercises(appData.exercises, filter) : []),
     [appData.exercises, filter, isSearching],
+  );
+  const searchResults = useMemo(
+    () => filterByEquipment(searchMatches, equipment),
+    [searchMatches, equipment],
   );
 
   const groupedByCategory = useMemo(() => {
@@ -160,6 +178,11 @@ export default function ExerciseSelect({
     }
     return groups;
   }, [appData.exercises]);
+
+  const openList = useMemo(
+    () => (openBodyPart ? filterByEquipment(groupedByCategory[openBodyPart], equipment) : []),
+    [groupedByCategory, openBodyPart, equipment],
+  );
 
   return (
     <>
@@ -249,7 +272,12 @@ export default function ExerciseSelect({
         <div ref={scrollRef} className="flex-1 overflow-y-auto px-5 pb-8">
           {isSearching ? (
             <div>
-              {searchResults.length === 0 ? (
+              {searchMatches.length > 0 && (
+                <EquipmentChips pool={searchMatches} value={equipment} onChange={setEquipment} />
+              )}
+              {searchMatches.length > 0 && searchResults.length === 0 ? (
+                <NoneForEquipment equipment={equipment} onAny={() => setEquipment(null)} />
+              ) : searchResults.length === 0 ? (
                 <div className="pt-2">
                   {choosingCategoryFor === null ? (
                     <button
@@ -360,12 +388,7 @@ export default function ExerciseSelect({
                         }}
                       >
                         <PickerThumb id={ex.id} images={exerciseImages} />
-                        <span
-                          className="flex-1 text-[15px]"
-                          style={{ color: 'var(--color-text)', fontWeight: 500 }}
-                        >
-                          {ex.name}
-                        </span>
+                        <ExerciseLabel exercise={ex} medium />
                         {added.has(ex.id) ? (
                           <AddedTag />
                         ) : (
@@ -466,25 +489,31 @@ export default function ExerciseSelect({
                       className="font-mono text-[10px]"
                       style={{ color: 'var(--color-text-faint)' }}
                     >
-                      {String(groupedByCategory[openBodyPart].length).padStart(2, '0')}
+                      {String(openList.length).padStart(2, '0')}
                     </span>
                   </div>
+                  <EquipmentChips
+                    pool={groupedByCategory[openBodyPart]}
+                    value={equipment}
+                    onChange={setEquipment}
+                  />
+                  {openList.length === 0 && (
+                    <NoneForEquipment equipment={equipment} onAny={() => setEquipment(null)} />
+                  )}
                   <ul>
-                    {groupedByCategory[openBodyPart].map((ex, i, list) => (
+                    {openList.map((ex, i, list) => (
                       <li key={ex.id}>
                         <button
                           type="button"
                           onClick={() => onSelect(ex.id)}
-                          className="w-full text-left h-12 px-2 flex items-center gap-3 press"
+                          className="w-full text-left h-14 px-2 flex items-center gap-3 press"
                           style={{
                             borderBottom:
                               i < list.length - 1 ? '1px solid var(--color-line)' : undefined,
                           }}
                         >
                           <PickerThumb id={ex.id} images={exerciseImages} />
-                          <span className="flex-1 text-[15px]" style={{ color: 'var(--color-text)' }}>
-                            {ex.name}
-                          </span>
+                          <ExerciseLabel exercise={ex} />
                           {added.has(ex.id) ? (
                             <AddedTag />
                           ) : (
@@ -540,5 +569,104 @@ function AddedTag() {
       </svg>
       ADDED
     </span>
+  );
+}
+
+/** Name over "Chest · Barbell", so a result says what it is without opening it. */
+function ExerciseLabel({ exercise, medium = false }: { exercise: Exercise; medium?: boolean }) {
+  const part = exercise.bodyPart.charAt(0).toUpperCase() + exercise.bodyPart.slice(1);
+  return (
+    <span className="flex-1 min-w-0">
+      <span
+        className="block text-[15px] truncate"
+        style={{ color: 'var(--color-text)', fontWeight: medium ? 500 : undefined }}
+      >
+        {exercise.name}
+      </span>
+      <span
+        className="block font-mono text-[10px] mt-0.5"
+        style={{ color: 'var(--color-text-faint)' }}
+      >
+        {exerciseSubtitle(exercise, part)}
+      </span>
+    </span>
+  );
+}
+
+/**
+ * Any · Machine · Cable ... in one row that scrolls sideways rather than
+ * wrapping onto a second line and pushing the list down. A chip that would
+ * lead nowhere is left out, except the one currently chosen, which has to stay
+ * so it can be turned off.
+ */
+function EquipmentChips({
+  pool,
+  value,
+  onChange,
+}: {
+  pool: Exercise[];
+  value: EquipmentFilter;
+  onChange: (next: EquipmentFilter) => void;
+}) {
+  const counts = countByEquipment(pool);
+  const shown: Equipment[] = EQUIPMENT_ORDER.filter((e) => counts[e] || e === value);
+  if (shown.length === 0) return null;
+  return (
+    <div
+      role="group"
+      aria-label="Filter by equipment"
+      className="flex gap-2 overflow-x-auto no-scrollbar -mx-5 px-5 mb-3"
+      // A sideways swipe here is the row scrolling, never the sheet being
+      // dragged shut by the little downward drift that comes with it.
+      onTouchStart={(e) => e.stopPropagation()}
+      onTouchMove={(e) => e.stopPropagation()}
+      onTouchEnd={(e) => e.stopPropagation()}
+    >
+      {[null, ...shown].map((option) => {
+        const on = option === value;
+        return (
+          <button
+            key={option ?? 'any'}
+            type="button"
+            onClick={() => onChange(option)}
+            aria-pressed={on}
+            className="shrink-0 h-11 px-4 caps-tight text-[10px] press"
+            style={{
+              background: on ? 'var(--color-volt)' : 'var(--color-surface)',
+              color: on ? '#ffffff' : 'var(--color-text)',
+              border: `1px solid ${on ? 'var(--color-volt)' : 'var(--color-line-2)'}`,
+              borderRadius: 'var(--radius)',
+              fontWeight: on ? 700 : 400,
+            }}
+          >
+            {option ? EQUIPMENT_LABELS[option] : 'Any'}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+function NoneForEquipment({
+  equipment,
+  onAny,
+}: {
+  equipment: EquipmentFilter;
+  onAny: () => void;
+}) {
+  return (
+    <div className="py-6 text-center">
+      <p className="text-[13px]" style={{ color: 'var(--color-text-muted)' }}>
+        No {equipment ? EQUIPMENT_LABELS[equipment].toLowerCase() : ''} exercises here.
+      </p>
+      <button
+        type="button"
+        onClick={onAny}
+        className="h-11 px-4 mt-2 caps-tight text-[10px] press"
+        style={{ color: 'var(--color-volt)' }}
+      >
+        SHOW ANY EQUIPMENT
+      </button>
+    </div>
   );
 }

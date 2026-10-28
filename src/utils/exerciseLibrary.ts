@@ -88,6 +88,11 @@ export function mergeExerciseLibrary(
       ...withBodyPart(entry, current),
       name: ownName.has(entry.id) ? entry.name : current.name,
       bodyPart: current.bodyPart,
+      // Like the body part, this is the library's to say: a copy stored before
+      // equipment existed has none, and renaming it must not keep it that way.
+      ...((current.equipment ?? entry.equipment)
+        ? { equipment: current.equipment ?? entry.equipment }
+        : {}),
     });
   }
 
