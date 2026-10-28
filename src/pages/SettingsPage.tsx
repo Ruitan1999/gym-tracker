@@ -9,6 +9,7 @@ import { DEFAULT_PREFERENCES } from '../types';
 import { MEDIA_ATTRIBUTION } from '../utils/exerciseImage';
 import { isAdmin, adminConfigured } from '../utils/admin';
 import { RUNNING_BUILD } from '../utils/buildVersion';
+import { buildCsvExport, buildJsonExport, downloadText, exportFileName } from '../utils/exportData';
 import { Link } from 'react-router-dom';
 
 export default function SettingsPage() {
@@ -20,6 +21,8 @@ export default function SettingsPage() {
   const [newRep, setNewRep] = useState<number | ''>('');
   const [accountBusy, setAccountBusy] = useState(false);
   const [copiedId, setCopiedId] = useState(false);
+  const [exportFrom, setExportFrom] = useState('');
+  const [exportTo, setExportTo] = useState('');
 
   async function copyAccountId(uid: string) {
     try {
@@ -107,6 +110,25 @@ export default function SettingsPage() {
     const clamped = Math.min(50, Math.max(0.25, value));
     updatePreferences({ ...preferences, weightStepKg: clamped });
   }
+
+  function exportJson() {
+    downloadText(buildJsonExport(appData), exportFileName('json'), 'application/json');
+  }
+
+  function exportCsv() {
+    downloadText(
+      buildCsvExport(appData, { from: exportFrom, to: exportTo }),
+      exportFileName('csv'),
+      'text/csv;charset=utf-8',
+    );
+  }
+
+  const dateFieldStyle = {
+    background: '#ffffff',
+    border: '1px solid var(--color-line-2)',
+    borderRadius: 'var(--radius)',
+    color: 'var(--color-text)',
+  } as const;
 
   return (
     <PageShell title="Settings">
@@ -242,6 +264,72 @@ export default function SettingsPage() {
           >
             USED BY THE +/- STEPPER ON LOG SCREEN
           </p>
+        </Section>
+
+        <Section label="EXPORT">
+          <div className="grid grid-cols-2 gap-2">
+            {[
+              { label: 'JSON', run: exportJson },
+              { label: 'CSV', run: exportCsv },
+            ].map((b) => (
+              <button
+                key={b.label}
+                type="button"
+                onClick={b.run}
+                className="h-12 press caps-tight text-[11px]"
+                style={{
+                  background: '#ffffff',
+                  border: '1px solid var(--color-line-2)',
+                  borderRadius: 'var(--radius)',
+                  color: 'var(--color-text)',
+                }}
+              >
+                {b.label}
+              </button>
+            ))}
+          </div>
+          <p className="caps-tight text-[9px] mt-3" style={{ color: 'var(--color-text-faint)' }}>
+            JSON IS A FULL BACKUP OF EVERYTHING. CSV IS ONE ROW PER SET.
+          </p>
+          <details className="mt-3 group">
+            <summary
+              className="caps-tight text-[10px] press cursor-pointer h-9 flex items-center"
+              style={{ color: 'var(--color-text)' }}
+            >
+              DATE RANGE (CSV ONLY)
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="square" className="w-3.5 h-3.5 ml-1.5 group-open:rotate-90" style={{ color: 'var(--color-text-faint)' }}>
+                <path d="M9 6l6 6-6 6" />
+              </svg>
+            </summary>
+            <div className="grid grid-cols-2 gap-2 mt-1">
+              <label className="block">
+                <span className="caps-tight text-[9px]" style={{ color: 'var(--color-text-faint)' }}>
+                  FROM
+                </span>
+                <input
+                  type="date"
+                  value={exportFrom}
+                  max={exportTo || undefined}
+                  onChange={(e) => setExportFrom(e.target.value)}
+                  className="w-full h-11 px-3 text-sm mt-1"
+                  style={dateFieldStyle}
+                />
+              </label>
+              <label className="block">
+                <span className="caps-tight text-[9px]" style={{ color: 'var(--color-text-faint)' }}>
+                  TO
+                </span>
+                <input
+                  type="date"
+                  value={exportTo}
+                  min={exportFrom || undefined}
+                  onChange={(e) => setExportTo(e.target.value)}
+                  className="w-full h-11 px-3 text-sm mt-1"
+                  style={dateFieldStyle}
+                />
+              </label>
+            </div>
+          </details>
         </Section>
 
         {auth?.user ? (
