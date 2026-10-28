@@ -3,6 +3,8 @@ import { Dumbbell } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAppContext } from '../../context/AppContext';
 import ExerciseStrip from '../shared/ExerciseStrip';
+import MiniBodyMap from './MiniBodyMap';
+import { bodyPartsOfTemplate } from '../../utils/bodyParts';
 import ConfirmModal from '../shared/ConfirmModal';
 import {
   draftFromTemplate,
@@ -161,7 +163,7 @@ export default function NextUpCard() {
           <Ribbon background="var(--color-volt)" left="NEXT UP" right={dayLabel(today, 0)} />
           <div style={{ padding: '14px 16px 16px 16px' }}>
             <TemplateLine group={first} />
-            <ExerciseStrip exerciseIds={first.exerciseIds} max={8} />
+            <PictureRow group={first} />
           </div>
         </button>
 
@@ -238,7 +240,7 @@ export default function NextUpCard() {
           />
           <TemplateLine group={upcoming.group} />
           <div className="mb-4">
-            <ExerciseStrip exerciseIds={upcoming.group.exerciseIds} max={8} />
+            <PictureRow group={upcoming.group} />
           </div>
           <button
             type="button"
@@ -420,6 +422,22 @@ function Name({ children }: { children: React.ReactNode }) {
     >
       {children}
     </span>
+  );
+}
+
+/**
+ * The exercise pictures with the body map at the right end. The map is the
+ * quick read ("legs today"); the pictures say which exercises.
+ */
+function PictureRow({ group }: { group: WorkoutGroup }) {
+  const { appData } = useAppContext();
+  return (
+    <div className="flex items-center justify-between gap-3">
+      <ExerciseStrip exerciseIds={group.exerciseIds} max={8} />
+      <span className="ml-auto">
+        <MiniBodyMap parts={bodyPartsOfTemplate(group.exerciseIds, appData.exercises)} />
+      </span>
+    </div>
   );
 }
 

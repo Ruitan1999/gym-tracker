@@ -29,6 +29,8 @@ import RestTimer from './RestTimer';
 import { useRestTimer } from '../../utils/useRestTimer';
 import { useWakeLock } from '../../utils/useWakeLock';
 import ExerciseStrip from '../shared/ExerciseStrip';
+import MiniBodyMap from './MiniBodyMap';
+import { bodyPartsOfTemplate } from '../../utils/bodyParts';
 import { TEMPLATE_LIST_ID } from '../../utils/templateList';
 import { ratingColor } from '../../utils/rating';
 
@@ -597,8 +599,12 @@ export default function WorkoutForm({
                     </div>
                     {/* The line-up is what tells two templates apart; the
                         names alone read the same. */}
-                    <div className="mt-2">
+                    <div className="mt-2 flex items-center justify-between gap-3">
                       <ExerciseStrip exerciseIds={g.exerciseIds} max={8} />
+                      {/* Below the menu's 44px corner, so the two never overlap. */}
+                      <span className="ml-auto">
+                        <MiniBodyMap parts={bodyPartsOfTemplate(g.exerciseIds, appData.exercises)} />
+                      </span>
                     </div>
                   </button>
                   {/* Positioned rather than laid out: given a row of its own, a
@@ -631,11 +637,21 @@ export default function WorkoutForm({
       )}
 
       {showActiveSession && entries.length > 0 && startedAt && !isEdit && (
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-3">
           <span className="caps-tight text-[9px]" style={{ color: 'var(--color-text-faint)' }}>
             SESSION TIME
           </span>
-          <SessionClock startedAt={startedAt} />
+          <span className="flex items-center gap-3">
+            <SessionClock startedAt={startedAt} />
+            {/* What the session works so far; follows the exercises as they
+                are added or removed. */}
+            <MiniBodyMap
+              parts={bodyPartsOfTemplate(
+                entries.map((e) => e.exerciseId),
+                appData.exercises,
+              )}
+            />
+          </span>
         </div>
       )}
 

@@ -10,6 +10,8 @@ import { useDragReorder } from '../utils/useDragReorder';
 import type { WorkoutGroup } from '../types';
 import ExerciseStrip from '../components/shared/ExerciseStrip';
 import { dayCodeLabel } from '../utils/schedule';
+import MiniBodyMap from '../components/workout/MiniBodyMap';
+import { bodyPartsOfTemplate } from '../utils/bodyParts';
 
 export default function GroupsPage() {
   const { appData, updateGroup, deleteGroup, reorderGroups } = useAppContext();
@@ -146,8 +148,13 @@ export default function GroupsPage() {
                           EMPTY — TAP TO ADD EXERCISES
                         </span>
                       ) : (
-                        <span className="block mt-2">
+                        <span className="mt-2 flex items-center justify-between gap-3">
                           <ExerciseStrip exerciseIds={g.exerciseIds} max={6} />
+                          <span className="ml-auto">
+                            <MiniBodyMap
+                              parts={bodyPartsOfTemplate(g.exerciseIds, appData.exercises)}
+                            />
+                          </span>
                         </span>
                       )}
                     </span>

@@ -75,3 +75,19 @@ export function workedBodyParts(
   }
   return tally;
 }
+
+/**
+ * The body parts a list of exercises would work, for lighting up a small map
+ * before any set exists. One exercise is enough to light its region. Cardio
+ * belongs to no region on the figure, and ids no longer in the library (or
+ * stored without a body part) are skipped rather than guessed at.
+ */
+export function bodyPartsOfTemplate(exerciseIds: string[], exercises: Exercise[]): BodyPart[] {
+  const byId = new Map(exercises.map((e) => [e.id, e]));
+  const found = new Set<BodyPart>();
+  for (const id of exerciseIds) {
+    const part = byId.get(id)?.bodyPart;
+    if (part && part !== 'cardio') found.add(part);
+  }
+  return BODY_PART_ORDER.filter((p) => found.has(p));
+}
