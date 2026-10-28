@@ -25,6 +25,9 @@ import {
   todayString,
 } from '../../utils/templateSession';
 import SessionClock from './SessionClock';
+import RestTimer from './RestTimer';
+import { useRestTimer } from '../../utils/useRestTimer';
+import { useWakeLock } from '../../utils/useWakeLock';
 import ExerciseStrip from '../shared/ExerciseStrip';
 import { ratingColor } from '../../utils/rating';
 
@@ -112,6 +115,12 @@ export default function WorkoutForm({
   const [sourceGroupId, setSourceGroupId] = useState<string | null>(
     () => (isEdit ? null : (draft?.sourceGroupId ?? null)),
   );
+
+  // Rest and screen-awake only belong to a session being lived, not to history
+  // being edited or the template picker that sits in front of one.
+  const sessionLive = !isEdit && isFocusedRoute;
+  const rest = useRestTimer();
+  useWakeLock(sessionLive);
 
   // A list of expanded cards is impossible to reorder — one card fills the
   // screen. Everything folds for the drag and comes back as it was.
@@ -305,6 +314,16 @@ export default function WorkoutForm({
   }
 
   function handleSetsChange(entryIndex: number, sets: WorkoutSet[]) {
+    // There is no per-set tick: sets arrive pre-sized and empty, and a set
+    // counts as done once its reps go from nothing to something. That is the
+    // moment rest begins; fixing a number later, changing load or adding or
+    // removing a set does not restart it.
+    if (sessionLive) {
+      const before = entries[entryIndex]?.sets ?? [];
+      if (sets.length === before.length && sets.some((s, i) => s.reps > 0 && !(before[i].reps > 0))) {
+        rest.start();
+      }
+    }
     setEntries((prev) => prev.map((e, i) => (i === entryIndex ? { ...e, sets } : e)));
   }
 
@@ -318,6 +337,9 @@ export default function WorkoutForm({
     const entry = entries[entryIndex];
     if (!entry) return;
     const nextDone = !entry.done;
+    // The last set already started a rest; finishing the exercise only starts
+    // one when nothing is counting, so it never resets a rest part-way.
+    if (sessionLive && nextDone && rest.phase === 'idle') rest.start();
     setEntries((prev) => prev.map((e, i) => (i === entryIndex ? { ...e, done: nextDone } : e)));
     setCollapsedIds((prev) => {
       const next = new Set(prev);
@@ -499,7 +521,11 @@ export default function WorkoutForm({
   const hasFixedCta = showEmptyState && (groups.length > 0 || hasTodaysWorkout);
 
   return (
-    <div className={`flex flex-col gap-5 ${hasFixedCta ? 'pb-32' : 'pb-8'}`}>
+    <div
+      className={`flex flex-col gap-5 ${
+        hasFixedCta || (sessionLive && rest.phase !== 'idle') ? 'pb-32' : 'pb-8'
+      }`}
+    >
       {/* Groups picker */}
       {showGroupsPicker && (
         <section>
@@ -936,6 +962,8 @@ const color = ratingColor(n)!;
           CANCEL
         </button>
       )}
+
+      {sessionLive && <RestTimer timer={rest} />}
 
       {menuForGroup && (
         <ActionSheet
