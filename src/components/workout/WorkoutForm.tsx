@@ -29,6 +29,7 @@ import RestTimer from './RestTimer';
 import { useRestTimer } from '../../utils/useRestTimer';
 import { useWakeLock } from '../../utils/useWakeLock';
 import ExerciseStrip from '../shared/ExerciseStrip';
+import { TEMPLATE_LIST_ID } from '../../utils/templateList';
 import { ratingColor } from '../../utils/rating';
 
 interface WorkoutFormProps {
@@ -528,7 +529,7 @@ export default function WorkoutForm({
     >
       {/* Groups picker */}
       {showGroupsPicker && (
-        <section>
+        <section id={TEMPLATE_LIST_ID} style={{ scrollMarginTop: '72px' }}>
           <div className="flex items-center justify-between mb-4">
             <h2
               className="font-display leading-none"

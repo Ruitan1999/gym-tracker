@@ -19,6 +19,7 @@ import {
   templatesOn,
   todayIndex,
 } from '../../utils/schedule';
+import { scrollToTemplateList } from '../../utils/templateList';
 import type { Workout, WorkoutGroup } from '../../types';
 
 // Matches the momentum card's icons, which render at the same size.
@@ -204,6 +205,7 @@ export default function NextUpCard() {
             ))}
           </div>
         )}
+        {groups.length > 1 && <ChooseDifferent />}
       </Shell>
       {pendingStart && (
         <ConfirmModal
@@ -246,6 +248,7 @@ export default function NextUpCard() {
           >
             START EARLY →
           </button>
+          {groups.length > 1 && <ChooseDifferent />}
         </div>
       </Shell>
       {pendingStart && (
@@ -291,6 +294,24 @@ export default function NextUpCard() {
   }
 
   return null;
+}
+
+/**
+ * A way out of the suggestion that never changes anything: it only scrolls to
+ * the template list further down. Callers show it only when there is another
+ * template to choose.
+ */
+function ChooseDifferent() {
+  return (
+    <button
+      type="button"
+      onClick={scrollToTemplateList}
+      className="w-full h-11 press caps-tight text-[10px] flex items-center justify-center"
+      style={{ color: 'var(--color-text-muted)' }}
+    >
+      Choose a different workout
+    </button>
+  );
 }
 
 function Shell({ tone, children }: { tone: 'due' | 'rest' | 'done' | 'empty'; children: React.ReactNode }) {
