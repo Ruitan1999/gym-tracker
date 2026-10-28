@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
-import { Dumbbell, ChevronLeft,ChevronRight, Flame, CalendarDays, ClipboardList, Weight, type LucideIcon } from 'lucide-react';
+import { Dumbbell, ChevronLeft, ChevronRight, Flame, CalendarDays, ClipboardList, Weight, type LucideIcon } from 'lucide-react';
 import { useAppContext } from '../context/AppContext';
 import PageShell from '../components/layout/PageShell';
 import EmptyState from '../components/shared/EmptyState';
