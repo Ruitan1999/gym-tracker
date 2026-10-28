@@ -10,13 +10,25 @@ import { useDragReorder } from '../utils/useDragReorder';
 import type { WorkoutGroup } from '../types';
 import ExerciseStrip from '../components/shared/ExerciseStrip';
 import { dayCodeLabel } from '../utils/schedule';
+import { nextInRotation, trainingModeOf } from '../utils/rotation';
+import type { TrainingMode } from '../types';
 import MiniBodyMap from '../components/workout/MiniBodyMap';
 import { bodyPartsOfTemplate } from '../utils/bodyParts';
 
 export default function GroupsPage() {
-  const { appData, updateGroup, deleteGroup, reorderGroups } = useAppContext();
+  const { appData, updateGroup, deleteGroup, reorderGroups, updatePreferences } =
+    useAppContext();
   const navigate = useNavigate();
   const groups = appData.groups ?? [];
+  const mode = trainingModeOf(appData.preferences);
+  const rotationNextId = mode === 'rotation' ? nextInRotation(groups, appData.workouts)?.id : undefined;
+
+  function setMode(next: TrainingMode) {
+    if (next === mode) return;
+    // Only the mode changes: each template keeps its weekdays, so switching
+    // back brings the week exactly as it was.
+    updatePreferences({ ...appData.preferences, trainingMode: next });
+  }
 
   const [menuFor, setMenuFor] = useState<WorkoutGroup | null>(null);
   const [renaming, setRenaming] = useState<WorkoutGroup | null>(null);
@@ -76,13 +88,15 @@ export default function GroupsPage() {
   return (
     <PageShell title="Workout Template" showBack disableRefresh={draggingId !== null}>
       <div className="flex flex-col gap-4">
+        <HowYouTrain mode={mode} onChange={setMode} />
+
         <p className="caps-tight text-[9px]" style={{ color: 'var(--color-text-faint)' }}>
           {String(groups.length).padStart(2, '0')} TEMPLATE{groups.length === 1 ? '' : 'S'}
           {groups.length > 1 && ' · HOLD TO REORDER'}
         </p>
 
         <ul className="flex flex-col gap-2">
-          {groups.map((g) => {
+          {groups.map((g, index) => {
             const names = g.exerciseIds
               .map((id) => appData.exercises.find((e) => e.id === id)?.name)
               .filter(Boolean) as string[];
@@ -112,13 +126,30 @@ export default function GroupsPage() {
                     <span className="flex-1 min-w-0">
                       {/* Above the name, as on the home screen: the days are
                           what decide when this one comes round. */}
-                      {dayCodeLabel(g) && (
+                      {mode === 'rotation' ? (
+                        // Order is what counts in rotation; the weekdays are
+                        // kept but not shown, as they are not being used.
+                        <span
+                          className="caps-tight text-[9px] block truncate"
+                          style={{
+                            color:
+                              g.id === rotationNextId
+                                ? 'var(--color-volt)'
+                                : 'var(--color-text-faint)',
+                          }}
+                        >
+                          {String(index + 1).padStart(2, '0')}
+                          {g.id === rotationNextId && ' · NEXT'}
+                        </span>
+                      ) : (
+                        dayCodeLabel(g) && (
                         <span
                           className="caps-tight text-[9px] block truncate"
                           style={{ color: 'var(--color-volt)' }}
                         >
                           {dayCodeLabel(g)}
                         </span>
+                        )
                       )}
                       <span className="flex items-baseline gap-1.5">
                         <span
@@ -250,5 +281,77 @@ export default function GroupsPage() {
       )}
 
     </PageShell>
+  );
+}
+
+/**
+ * The two ways to train, as a pill with the chosen side raised. A radio group
+ * rather than tabs: it is a setting, and exactly one side is always chosen.
+ */
+function HowYouTrain({
+  mode,
+  onChange,
+}: {
+  mode: TrainingMode;
+  onChange: (mode: TrainingMode) => void;
+}) {
+  const options: { value: TrainingMode; label: string }[] = [
+    { value: 'week', label: 'Fixed Week' },
+    { value: 'rotation', label: 'Rotation' },
+  ];
+  return (
+    <section
+      className="card p-3.5"
+      style={{ border: '1px solid var(--color-line)' }}
+      aria-label="How you train"
+    >
+      <p className="caps-tight text-[9px] mb-2.5" style={{ color: 'var(--color-text-faint)' }}>
+        HOW YOU TRAIN
+      </p>
+      <div
+        role="radiogroup"
+        aria-label="How you train"
+        className="grid grid-cols-2 gap-1 p-1"
+        style={{
+          background: 'var(--color-elev)',
+          border: '1px solid var(--color-line)',
+          borderRadius: 'var(--radius)',
+        }}
+      >
+        {options.map((o) => {
+          const selected = o.value === mode;
+          return (
+            <button
+              key={o.value}
+              type="button"
+              role="radio"
+              aria-checked={selected}
+              onClick={() => onChange(o.value)}
+              className="press caps-tight text-[11px]"
+              style={{
+                minHeight: '44px',
+                fontWeight: 700,
+                letterSpacing: '0.1em',
+                borderRadius: 'calc(var(--radius) - 2px)',
+                background: selected ? 'var(--color-surface)' : 'transparent',
+                color: selected ? 'var(--color-text)' : 'var(--color-text-muted)',
+                border: selected ? '1px solid var(--color-line-2)' : '1px solid transparent',
+                boxShadow: selected ? '0 1px 3px rgba(0, 0, 0, 0.25)' : 'none',
+              }}
+            >
+              {o.label}
+            </button>
+          );
+        })}
+      </div>
+      <p
+        className="mt-2.5"
+        style={{ fontSize: '13px', color: 'var(--color-text-muted)', lineHeight: 1.45 }}
+      >
+        {mode === 'week'
+          ? 'Each template has its own weekdays.'
+          : 'Templates take turns in the order below; Next Up is whichever is next.'}
+      </p>
+    </section>
   );
 }

@@ -4,6 +4,7 @@ import { Dumbbell, NotebookText, Play, TrendingUp, Settings } from 'lucide-react
 import { useAppContext } from '../../context/AppContext';
 import { prepareStart, templateDueToday } from '../../utils/startSession';
 import { todayIndex } from '../../utils/schedule';
+import { trainingModeOf } from '../../utils/rotation';
 
 const ICON_SIZE = 22;
 const ICON_STROKE = 1.75;
@@ -58,7 +59,13 @@ export default function BottomNav() {
   const { appData } = useAppContext();
 
   function start() {
-    const due = templateDueToday(appData.groups ?? [], appData.workouts, todayIndex());
+    const due = templateDueToday(
+      appData.groups ?? [],
+      appData.workouts,
+      todayIndex(),
+      undefined,
+      trainingModeOf(appData.preferences),
+    );
     const { autoOpenSelect } = prepareStart(due, appData.workouts);
     navigate('/workout/new', autoOpenSelect ? { state: { autoOpenSelect: true } } : undefined);
   }

@@ -6,21 +6,11 @@ import ExerciseStrip from '../shared/ExerciseStrip';
 import MiniBodyMap from './MiniBodyMap';
 import { bodyPartsOfTemplate } from '../../utils/bodyParts';
 import ConfirmModal from '../shared/ConfirmModal';
-import {
-  draftFromTemplate,
-  draftHasProgress,
-  loadDraft,
-  saveDraft,
-  todayString,
-} from '../../utils/templateSession';
-import {
-  DAY_CODES,
-  DAY_NAMES,
-  nextUpcoming,
-  hasAnySchedule,
-  templatesOn,
-  todayIndex,
-} from '../../utils/schedule';
+import { todayString } from '../../utils/templateSession';
+import { DAY_CODES, DAY_NAMES, todayIndex } from '../../utils/schedule';
+import { selectNextUp } from '../../utils/nextUp';
+import { trainingModeOf } from '../../utils/rotation';
+import { beginTemplate, replaceDraftWith } from '../../utils/startSession';
 import { scrollToTemplateList } from '../../utils/templateList';
 import type { Workout, WorkoutGroup } from '../../types';
 
@@ -56,54 +46,64 @@ export default function NextUpCard() {
   const groups = useMemo(() => appData.groups ?? [], [appData.groups]);
   const today = todayIndex();
 
-  const dueToday = useMemo(() => templatesOn(groups, today), [groups, today]);
-  const upcoming = useMemo(() => nextUpcoming(groups, today), [groups, today]);
-
-  const loggedToday = useMemo(() => {
-    const iso = todayString();
-    return appData.workouts
-      .filter((w) => w.date === iso)
-      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0];
-  }, [appData.workouts]);
+  const mode = trainingModeOf(appData.preferences);
+  // The same choice the bottom nav's Start button makes, from one function.
+  const pick = useMemo(
+    () => selectNextUp(groups, appData.workouts, mode, today, todayString()),
+    [groups, appData.workouts, mode, today],
+  );
 
   function start(group: WorkoutGroup) {
-    const existing = loadDraft();
-    // A different template already has real work logged against it — jumping
-    // straight into this one would silently wipe that out.
-    if (draftHasProgress(existing) && existing?.sourceGroupId !== group.id) {
+    if (beginTemplate(group, appData.workouts) === 'confirm') {
+      // A different template already has real work logged against it — jumping
+      // straight into this one would silently wipe that out.
       setPendingStart(group);
       return;
     }
-    // Same template, already underway: reopen it as it stands rather than
-    // regenerating a fresh draft that would reset the sets already logged.
-    if (draftHasProgress(existing) && existing?.sourceGroupId === group.id) {
-      navigate('/workout/new');
-      return;
-    }
-    saveDraft(draftFromTemplate(group, appData.workouts));
     navigate('/workout/new');
   }
 
   function confirmStart(group: WorkoutGroup) {
-    saveDraft(draftFromTemplate(group, appData.workouts));
+    replaceDraftWith(group, appData.workouts);
     setPendingStart(null);
     navigate('/workout/new');
   }
 
+  const confirmModal = pendingStart && (
+    <ConfirmModal
+      eyebrow="WORKOUT IN PROGRESS"
+      title={`Start "${pendingStart.name}" instead?`}
+      message="Your current workout hasn't been saved yet — starting a new one will discard it."
+      confirmLabel="DISCARD & START →"
+      cancelLabel="KEEP CURRENT"
+      destructive
+      onConfirm={() => confirmStart(pendingStart)}
+      onClose={() => setPendingStart(null)}
+    />
+  );
+
   // Nothing to say until there is at least one template to schedule.
-  if (groups.length === 0) return null;
+  if (pick.kind === 'none') return null;
 
   // Trained today already: the card steps back rather than nagging for a second
   // session, and points at what is next instead. Still today's business, so it
   // keeps the banner — deep green rather than the due colour, so the two never
   // get mistaken for each other at a glance.
-  if (loggedToday) {
+  if (pick.kind === 'done') {
+    const loggedToday = pick.workout;
+    const upcoming = pick.upcoming;
     return (
       <Shell tone="done">
         <Ribbon
           background="var(--color-done-deep)"
           left="DONE TODAY"
-          right={upcoming ? `NEXT · ${DAY_CODES[upcoming.day]}` : undefined}
+          right={
+            upcoming
+              ? `NEXT · ${DAY_CODES[upcoming.day]}`
+              : pick.rotationNext
+              ? `NEXT · ${pick.rotationNext.name}`
+              : undefined
+          }
         />
         <div style={{ padding: '14px 16px 16px 16px' }}>
           <div className="flex items-center gap-2 mb-1.5">
@@ -147,11 +147,35 @@ export default function NextUpCard() {
     );
   }
 
+  // Rotation: no weekday to name, just whichever template is next in turn.
+  // Same card, same one press to start as a scheduled day.
+  if (pick.kind === 'rotation') {
+    return (
+      <>
+        <Shell tone="due">
+          <button
+            type="button"
+            onClick={() => start(pick.group)}
+            className="w-full text-left press block"
+          >
+            <Ribbon background="var(--color-volt)" left="NEXT UP" right="NEXT IN ROTATION" />
+            <div style={{ padding: '14px 16px 16px 16px' }}>
+              <TemplateLine group={pick.group} />
+              <PictureRow group={pick.group} />
+            </div>
+          </button>
+          {groups.length > 1 && <ChooseDifferent />}
+        </Shell>
+        {confirmModal}
+      </>
+    );
+  }
+
   // Something is due today: this is the whole point of the card, and the
   // banner is what makes that unmissable — the eyebrow it replaced was too
   // easy to skip past now that the card itself is the only button.
-  if (dueToday.length > 0) {
-    const [first, ...alsoToday] = dueToday;
+  if (pick.kind === 'due') {
+    const { first, alsoToday } = pick;
     return (
       <>
       <Shell tone="due">
@@ -209,18 +233,7 @@ export default function NextUpCard() {
         )}
         {groups.length > 1 && <ChooseDifferent />}
       </Shell>
-      {pendingStart && (
-        <ConfirmModal
-          eyebrow="WORKOUT IN PROGRESS"
-          title={`Start "${pendingStart.name}" instead?`}
-          message="Your current workout hasn't been saved yet — starting a new one will discard it."
-          confirmLabel="DISCARD & START →"
-          cancelLabel="KEEP CURRENT"
-          destructive
-          onConfirm={() => confirmStart(pendingStart)}
-          onClose={() => setPendingStart(null)}
-        />
-      )}
+      {confirmModal}
       </>
     );
   }
@@ -228,7 +241,8 @@ export default function NextUpCard() {
   // Days are set, just not today's. A rest day is a real answer, so the card
   // gives it — quietly: a coloured banner here would claim an urgency the day
   // doesn't have, so it stays plain text.
-  if (upcoming) {
+  if (pick.kind === 'upcoming') {
+    const { upcoming } = pick;
     return (
       <>
       <Shell tone="rest">
@@ -253,24 +267,13 @@ export default function NextUpCard() {
           {groups.length > 1 && <ChooseDifferent />}
         </div>
       </Shell>
-      {pendingStart && (
-        <ConfirmModal
-          eyebrow="WORKOUT IN PROGRESS"
-          title={`Start "${pendingStart.name}" instead?`}
-          message="Your current workout hasn't been saved yet — starting a new one will discard it."
-          confirmLabel="DISCARD & START →"
-          cancelLabel="KEEP CURRENT"
-          destructive
-          onConfirm={() => confirmStart(pendingStart)}
-          onClose={() => setPendingStart(null)}
-        />
-      )}
+      {confirmModal}
       </>
     );
   }
 
   // Templates, but none of them on the calendar.
-  if (!hasAnySchedule(groups)) {
+  if (pick.kind === 'unscheduled') {
     return (
       <Shell tone="empty">
         <div className="p-4">

@@ -69,11 +69,16 @@ export interface Workout {
   createdAt: string; // ISO datetime — when it was saved, so the finish time
 }
 
+/** 'week': each template has its own weekdays. 'rotation': templates take turns. */
+export type TrainingMode = 'week' | 'rotation';
+
 export interface UserPreferences {
   weightUnit: 'kg' | 'lb';
   quickReps: number[];
   weightStepKg: number;
   weightStepLb: number;
+  /** Absent means 'week'. Weekdays stay on the templates either way. */
+  trainingMode?: TrainingMode;
 }
 
 export const DEFAULT_PREFERENCES: UserPreferences = {
