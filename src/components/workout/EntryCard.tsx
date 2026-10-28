@@ -6,6 +6,7 @@ import RenameModal from '../shared/RenameModal';
 import ActionSheet from '../shared/ActionSheet';
 import { imageForExercise } from '../../utils/exerciseImage';
 import { BODY_PART_LABELS, BODY_PART_ACCENT } from '../../utils/bodyParts';
+import { targetAdvice } from '../../utils/targetAdvice';
 import type { WorkoutSet } from '../../types';
 
 /** Big enough to make out at a glance without pushing the title off-centre. */
@@ -45,6 +46,8 @@ export default function EntryCard({
 }: EntryCardProps) {
   const { appData, renameExercise, exerciseImages, showToast } = useAppContext();
   const exercise = appData.exercises.find((e) => e.id === exerciseId);
+  // Nothing to aim for once the exercise is marked done.
+  const advice = done ? null : targetAdvice(previousSets, 'kg', appData.preferences.weightStepKg);
   const [showRemoveConfirm, setShowRemoveConfirm] = useState(false);
   const [showRename, setShowRename] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
@@ -382,6 +385,17 @@ export default function EntryCard({
 
       {collapsed ? null : (
         <>
+      {/* Plain words on what to aim for. Advice only: not a button, and it never
+          touches a set. The inputs on the card are kg, so the advice is in kg. */}
+      {advice && (
+        <p
+          data-testid="target-advice"
+          className="px-3 pt-2.5 pb-1 text-[12px] leading-snug"
+          style={{ color: 'var(--color-text-faint)' }}
+        >
+          {advice}
+        </p>
+      )}
       {/* Sets */}
       <div className="relative">
         {sets.map((set, i) => {
