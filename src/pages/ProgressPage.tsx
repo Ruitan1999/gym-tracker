@@ -5,6 +5,8 @@ import { useAppContext } from '../context/AppContext';
 import PageShell from '../components/layout/PageShell';
 import EmptyState from '../components/shared/EmptyState';
 import ExerciseThumb from '../components/shared/ExerciseThumb';
+import YearHeatmap from '../components/progress/YearHeatmap';
+import MuscleBalance from '../components/progress/MuscleBalance';
 import { imageForExercise } from '../utils/exerciseImage';
 import { getMaxWeightData } from '../utils/chartHelpers';
 import { kgToLb } from '../utils/conversions';
@@ -248,6 +250,11 @@ export default function ProgressPage() {
   return (
     <PageShell title="Progress">
       <div className="flex flex-col gap-5">
+        <YearHeatmap workouts={appData.workouts} unit={unit} />
+        <MuscleBalance workouts={appData.workouts} exercises={appData.exercises} />
+        <h2 className="caps-tight text-[9px] -mb-2" style={{ color: 'var(--color-text-faint)' }}>
+          EXERCISES
+        </h2>
         {hasGroups && (
           <div className="flex self-start gap-1.5" role="tablist" aria-label="View mode">
             <ToggleBtn
