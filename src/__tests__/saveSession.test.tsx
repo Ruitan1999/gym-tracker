@@ -93,7 +93,7 @@ describe('what pressing Save Session guarantees', () => {
 
     expect(onSavedSession()).toBe(true);
     // Not the live session: its clock has no business still running.
-    expect(screen.queryByText('SESSION TIME')).toBeNull();
+    expect(screen.queryByTestId('session-strip')).toBeNull();
   });
 
   it('clears the draft, so nothing is waiting to be resumed', () => {

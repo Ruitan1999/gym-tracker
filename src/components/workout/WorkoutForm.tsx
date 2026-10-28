@@ -24,7 +24,7 @@ import {
   saveDraft,
   todayString,
 } from '../../utils/templateSession';
-import SessionClock from './SessionClock';
+import SessionStrip from './SessionStrip';
 import RestTimer from './RestTimer';
 import { useRestTimer } from '../../utils/useRestTimer';
 import { useWakeLock } from '../../utils/useWakeLock';
@@ -110,6 +110,8 @@ export default function WorkoutForm({
     new Set(draft?.collapsedIds ?? []),
   );
   const [scrollToEntryId, setScrollToEntryId] = useState<string | null>(null);
+  const [tappedChipId, setTappedChipId] = useState<string | null>(null);
+  const stripRef = useRef<HTMLDivElement>(null);
   const [menuForGroup, setMenuForGroup] = useState<WorkoutGroup | null>(null);
   const [renamingGroup, setRenamingGroup] = useState<WorkoutGroup | null>(null);
   const [deletingGroup, setDeletingGroup] = useState<WorkoutGroup | null>(null);
@@ -182,7 +184,9 @@ export default function WorkoutForm({
         }
         scroller = scroller.parentElement;
       }
-      const OFFSET = 80;
+      // Clear of the pinned strip, which sits over the top of the scroller.
+      const stripH = stripRef.current?.offsetHeight ?? 0;
+      const OFFSET = stripH > 0 ? stripH + 12 : 80;
       if (scroller && scroller !== document.body) {
         const elTop = el.getBoundingClientRect().top;
         const scTop = scroller.getBoundingClientRect().top;
@@ -314,6 +318,18 @@ export default function WorkoutForm({
       else next.add(entryId);
       return next;
     });
+  }
+
+  // Opens the card it names and brings it up; the others stay as they are.
+  function handleChipSelect(entryId: string) {
+    setTappedChipId(entryId);
+    setCollapsedIds((prev) => {
+      if (!prev.has(entryId)) return prev;
+      const next = new Set(prev);
+      next.delete(entryId);
+      return next;
+    });
+    setScrollToEntryId(entryId);
   }
 
   function handleSetsChange(entryIndex: number, sets: WorkoutSet[]) {
@@ -632,23 +648,20 @@ export default function WorkoutForm({
         </section>
       )}
 
-      {showActiveSession && entries.length > 0 && startedAt && !isEdit && (
-        <div className="flex items-center justify-between gap-3">
-          <span className="caps-tight text-[9px]" style={{ color: 'var(--color-text-faint)' }}>
-            SESSION TIME
-          </span>
-          <span className="flex items-center gap-3">
-            <SessionClock startedAt={startedAt} />
-            {/* What the session works so far; follows the exercises as they
-                are added or removed. */}
-            <MiniBodyMap
-              parts={bodyPartsOfTemplate(
-                entries.map((e) => e.exerciseId),
-                appData.exercises,
-              )}
-            />
-          </span>
-        </div>
+      {/* Time, sets, volume and a chip per exercise, pinned while the cards
+          scroll underneath. Replaces the old session-time row. */}
+      {showActiveSession && !isEdit && entries.length > 0 && (
+        <SessionStrip
+          ref={stripRef}
+          entries={entries}
+          startedAt={startedAt}
+          tappedId={tappedChipId}
+          bodyParts={bodyPartsOfTemplate(
+            entries.map((e) => e.exerciseId),
+            appData.exercises,
+          )}
+          onSelect={handleChipSelect}
+        />
       )}
 
       {showActiveSession && entries.length > 0 && (
