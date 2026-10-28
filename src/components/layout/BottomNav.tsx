@@ -3,6 +3,7 @@ import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { Dumbbell, NotebookText, Play, TrendingUp, Settings } from 'lucide-react';
 import { useAppContext } from '../../context/AppContext';
 import { prepareStart, templateDueToday } from '../../utils/startSession';
+import { draftHasProgress, loadDraft } from '../../utils/templateSession';
 import { todayIndex } from '../../utils/schedule';
 import { trainingModeOf } from '../../utils/rotation';
 
@@ -70,6 +71,12 @@ export default function BottomNav() {
     navigate('/workout/new', autoOpenSelect ? { state: { autoOpenSelect: true } } : undefined);
   }
 
+  // Read on each render, which includes every change of page: the form that
+  // writes the draft is not on screen while this nav is, so there is nothing to
+  // subscribe to. This is what tells you a session is still open now that
+  // Home no longer has a bar saying so.
+  const resuming = draftHasProgress(loadDraft());
+
   const TOP_LEVEL_PATHS = ['/', '/history', '/progress', '/settings'];
   const hideOnRoute = !TOP_LEVEL_PATHS.includes(location.pathname);
 
@@ -104,19 +111,19 @@ export default function BottomNav() {
     >
       <div className="grid grid-cols-5 w-full max-w-[800px] mx-auto">
         {leftTabs.map(renderTab)}
-        <StartButton onStart={start} />
+        <StartButton onStart={start} resuming={resuming} />
         {rightTabs.map(renderTab)}
       </div>
     </nav>
   );
 }
 
-function StartButton({ onStart }: { onStart: () => void }) {
+function StartButton({ onStart, resuming }: { onStart: () => void; resuming: boolean }) {
   return (
     <button
       type="button"
       onClick={onStart}
-      aria-label="Start workout"
+      aria-label={resuming ? 'Resume workout' : 'Start workout'}
       className="group relative flex flex-col items-center justify-end pb-3 min-h-[60px] text-[var(--color-text)] outline-none"
     >
       <span
@@ -135,7 +142,7 @@ function StartButton({ onStart }: { onStart: () => void }) {
         <Play size={24} strokeWidth={2} fill="currentColor" />
       </span>
       <span className="caps-tight text-[9px]" style={{ letterSpacing: '0.12em' }}>
-        Start
+        {resuming ? 'Resume' : 'Start'}
       </span>
     </button>
   );

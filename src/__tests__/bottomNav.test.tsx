@@ -131,12 +131,24 @@ describe('bottom nav', () => {
     const before = localStorage.getItem(DRAFT_KEY);
     renderNav();
 
-    fireEvent.click(screen.getByRole('button', { name: 'Start workout' }));
+    // With a session open the button says so, since Home no longer does.
+    expect(screen.queryByRole('button', { name: 'Start workout' })).toBeNull();
+    const resume = screen.getByRole('button', { name: 'Resume workout' });
+    expect(resume.textContent).toContain('Resume');
+    fireEvent.click(resume);
 
     const where = screen.getByTestId('where');
     expect(where.textContent).toBe('/workout/new');
     expect(JSON.parse(where.getAttribute('data-state')!)).toBeNull();
     expect(localStorage.getItem(DRAFT_KEY)).toBe(before);
+  });
+
+  it('says Start when there is nothing in progress', () => {
+    seed({ days: [3] });
+    renderNav();
+
+    expect(screen.getByRole('button', { name: 'Start workout' }).textContent).toContain('Start');
+    expect(screen.queryByRole('button', { name: 'Resume workout' })).toBeNull();
   });
 
   it('still navigates with the other tabs', () => {
