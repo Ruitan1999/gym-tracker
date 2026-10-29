@@ -48,4 +48,9 @@ describe('picturesToStore', () => {
     );
     expect(urls).toEqual([]);
   });
+
+  it('skips pictures that have been replaced, since they are never shown', () => {
+    const urls = picturesToStore(data, true, { 'ex-gv-0010': 'https://example.com/mine.webp' });
+    expect(urls).toEqual(['/assets/exercise-images/ex-gv-0012.webp']);
+  });
 });

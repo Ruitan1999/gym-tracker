@@ -41,14 +41,14 @@ function prefetchAllPages() {
 }
 
 function AppRoutes() {
-  const { loading: appLoading, appData } = useAppContext();
+  const { loading: appLoading, appData, exerciseImages } = useAppContext();
 
   // Once the data is in, store the exercise pictures on the phone in the
   // background, so lists and workouts read them locally. Once per launch: the
   // worker skips any it already has.
   useEffect(() => {
     if (appLoading) return;
-    return storePictures(appData);
+    return storePictures(appData, exerciseImages);
     // appData is read once the loading ends; later edits need not resend.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [appLoading]);

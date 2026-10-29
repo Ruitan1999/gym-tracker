@@ -132,11 +132,20 @@ self.addEventListener('fetch', (event) => {
  * sends the list, the owner's own exercises first; any already stored are
  * skipped.
  */
-async function storePictures(urls) {
+async function storePictures(urls, complete) {
   const cache = await caches.open(PICTURES);
   // One read of what is stored, not a lookup per picture: on a phone that
   // already has them all, that is the whole cost of a launch.
-  const have = new Set((await cache.keys()).map((r) => new URL(r.url).pathname));
+  const keys = await cache.keys();
+  const have = new Set(keys.map((r) => new URL(r.url).pathname));
+  // A complete list is the whole library: anything stored that is no longer
+  // in it (a removed or renamed exercise) goes, so the store never grows.
+  if (complete) {
+    const listed = new Set(urls);
+    await Promise.all(
+      keys.filter((r) => !listed.has(new URL(r.url).pathname)).map((r) => cache.delete(r)),
+    );
+  }
   const wanted = urls.filter(
     (url) => typeof url === 'string' && url.startsWith(PICTURE_PATH) && !have.has(url),
   );
@@ -158,17 +167,33 @@ async function storePictures(urls) {
   await Promise.all(Array.from({ length: 6 }, slot));
 }
 
-/** The store in progress, so a second request joins it instead of repeating it. */
+/**
+ * The store in progress. A request that arrives meanwhile waits and runs
+ * after it (the latest one only), rather than doubling up or being dropped.
+ */
 let storing = null;
+let queued = null;
+
+function runStore(request) {
+  storing = storePictures(request.urls, request.complete === true).finally(() => {
+    storing = null;
+    if (queued) {
+      const next = queued;
+      queued = null;
+      runStore(next);
+    }
+  });
+  return storing;
+}
 
 self.addEventListener('message', (event) => {
   const data = event.data;
   if (data && data.type === 'store-pictures' && Array.isArray(data.urls)) {
-    if (!storing) {
-      storing = storePictures(data.urls).finally(() => {
-        storing = null;
-      });
+    if (storing) {
+      queued = data;
+      event.waitUntil(storing);
+    } else {
+      event.waitUntil(runStore(data));
     }
-    event.waitUntil(storing);
   }
 });
