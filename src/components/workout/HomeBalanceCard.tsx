@@ -9,7 +9,7 @@ import { balancePaint } from '../progress/balancePaint';
 
 /**
  * The body, shaded by sets worked in the last 30 days, with the sets per part
- * beside it. No controls: other windows and modes are on Progress.
+ * beside it. No controls: other windows and modes are on Stats.
  */
 export default function HomeBalanceCard() {
   const { appData } = useAppContext();

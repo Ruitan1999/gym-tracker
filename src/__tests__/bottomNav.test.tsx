@@ -80,7 +80,7 @@ describe('bottom nav', () => {
     const items = Array.from(nav.querySelectorAll('a, button')).map(
       (el) => el.getAttribute('aria-label') ?? el.textContent,
     );
-    expect(items).toEqual(['Log', 'Plan', 'Start workout', 'Log Book', 'Progress']);
+    expect(items).toEqual(['Log', 'Plan', 'Start workout', 'Log Book', 'Stats']);
   });
 
   it('opens the template due today', () => {
@@ -155,7 +155,7 @@ describe('bottom nav', () => {
     seed();
     renderNav();
 
-    fireEvent.click(screen.getByRole('link', { name: /Progress/ }));
+    fireEvent.click(screen.getByRole('link', { name: /Stats/ }));
     expect(screen.getByTestId('where').textContent).toBe('/progress');
   });
 });

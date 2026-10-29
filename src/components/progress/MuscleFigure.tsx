@@ -23,7 +23,7 @@ function Side({
 }
 
 /**
- * The Progress card needs to light up the parts that were NOT trained, and to
+ * The Stats card needs to light up the parts that were NOT trained, and to
  * show the figure when nothing was trained at all, so its paint is the
  * caller's; the drawing is the one the session pages use.
  */

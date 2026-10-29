@@ -194,7 +194,7 @@ export default function LandingPage() {
             <Reveal delay={160}>
               <Feature
                 code="03"
-                title="Progress"
+                title="Stats"
                 desc="Per-exercise charts. Volume, top set, estimated 1RM — actual signal, not vanity."
               />
             </Reveal>

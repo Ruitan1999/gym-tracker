@@ -241,14 +241,14 @@ export default function ProgressPage() {
 
   if (summaries.length === 0) {
     return (
-      <PageShell title="Progress">
+      <PageShell title="Stats">
         <EmptyState message="Log a workout to start tracking progress" />
       </PageShell>
     );
   }
 
   return (
-    <PageShell title="Progress">
+    <PageShell title="Stats">
       <div className="flex flex-col gap-5">
         <YearHeatmap workouts={appData.workouts} unit={unit} />
         <MuscleBalance workouts={appData.workouts} exercises={appData.exercises} />

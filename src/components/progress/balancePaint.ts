@@ -6,7 +6,7 @@ export const IDLE_PAINT: PartPaint = { fill: 'var(--color-line-2)', opacity: 0.5
 
 /**
  * Shading for "sets worked": the most-trained part at full strength, the rest
- * in proportion, untrained parts left grey. Shared by the Progress card and
+ * in proportion, untrained parts left grey. Shared by the Stats card and
  * the one on Home so the two always agree.
  */
 export function balancePaint(sets: Partial<Record<BodyPart, number>>): (part: BodyPart) => PartPaint {

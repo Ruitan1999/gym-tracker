@@ -39,7 +39,7 @@ const rightTabs = [
   },
   {
     to: '/progress',
-    label: 'Progress',
+    label: 'Stats',
     code: '04',
     icon: <TrendingUp size={ICON_SIZE} strokeWidth={ICON_STROKE} />,
     // The only tab still behind its own chunk — the rest ship in the bundle.
