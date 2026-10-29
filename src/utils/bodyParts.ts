@@ -54,11 +54,8 @@ export const BODY_PART_ACCENT: Record<BodyPart, string> = {
   cardio: 'var(--color-volt-deep)',
 };
 
-/**
- * Sets logged per body part, counting only sets that actually happened — an
- * exercise left at zero reps was set up and abandoned, and shading the map for
- * it would claim work that was never done.
- */
+// Keyed on the array itself: the library is replaced, never edited in place, so
+// a new array is a new key.
 const byIdCache = new WeakMap<Exercise[], Map<string, Exercise>>();
 
 /** The library by id, built once per array: every template row and card asks. */
@@ -71,6 +68,11 @@ function exercisesById(exercises: Exercise[]): Map<string, Exercise> {
   return byId;
 }
 
+/**
+ * Sets logged per body part, counting only sets that actually happened — an
+ * exercise left at zero reps was set up and abandoned, and shading the map for
+ * it would claim work that was never done.
+ */
 export function workedBodyParts(
   workout: Pick<Workout, 'entries'>,
   exercises: Exercise[],

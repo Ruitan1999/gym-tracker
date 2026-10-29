@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { Dumbbell, NotebookText, Play, TrendingUp, Settings } from 'lucide-react';
 import { useAppContext } from '../../context/AppContext';
@@ -49,9 +49,9 @@ const rightTabs = [
 
 type Tab = (typeof leftTabs)[number];
 
-// How far the Start button stands above the bar.
 const TOP_LEVEL_PATHS = ['/', '/history', '/progress', '/settings'];
 
+// How far the Start button stands above the bar.
 const START_RISE = 20;
 const START_SIZE = 56;
 
@@ -76,11 +76,9 @@ export default function BottomNav() {
   }
 
   // This is what tells you a session is still open now that Home no longer has
-  // a bar saying so.
-  // The draft only changes while the form is up, when this nav is hidden, so
-  // reading it on a change of page is enough and spares a parse per render.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const resuming = useMemo(() => draftHasProgress(loadDraft()), [location.pathname]);
+  // a bar saying so. Read on each render so it can never be behind the draft;
+  // this nav only re-renders on a change of page or of data, not per keystroke.
+  const resuming = draftHasProgress(loadDraft());
 
   const hideOnRoute = !TOP_LEVEL_PATHS.includes(location.pathname);
 

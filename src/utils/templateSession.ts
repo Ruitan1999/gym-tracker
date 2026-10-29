@@ -171,7 +171,7 @@ export function draftFromTemplate(
   { startedAt = new Date().toISOString(), autoFill = false }: StartOptions & { startedAt?: string } = {},
 ): Draft {
   const entries = entriesFromTemplate(group, workouts, { autoFill });
-  const unconfirmed = unconfirmedOf(entries);
+  const unconfirmed = autoFill ? unconfirmedOf(entries) : {};
   return {
     date: todayString(),
     name: group.name,

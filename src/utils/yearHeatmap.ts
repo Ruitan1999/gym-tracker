@@ -33,9 +33,10 @@ export const HEATMAP_WEEKS = 53;
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 /**
- * Local calendar dates only. Adding days goes through `new Date(y, m, d + n)`,
- * which the engine normalises on the wall clock, so a daylight-saving change
- * can never skip or repeat a day the way adding 86 400 000 ms would.
+ * Adding days goes through `new Date(y, m, d + n)`, which the engine
+ * normalises on the wall clock, so a daylight-saving change can never skip or
+ * repeat a day the way adding 86 400 000 ms would. Keys come from
+ * `localDateKey`.
  */
 function addDays(d: Date, n: number): Date {
   return new Date(d.getFullYear(), d.getMonth(), d.getDate() + n);

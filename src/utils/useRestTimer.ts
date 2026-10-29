@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 export const DEFAULT_REST_SECONDS = 90;
 export const REST_STEP_SECONDS = 15;
@@ -89,10 +89,15 @@ export function useRestTimerCore() {
 
   useEffect(() => {
     if (!running) return;
+    let id: ReturnType<typeof setTimeout>;
     const check = () => {
-      if (Date.now() >= endAt) finish(endAt);
+      clearTimeout(id);
+      const left = endAt - Date.now();
+      // A timeout can fire a hair early; look again rather than get stuck at 0:00.
+      if (left <= 0) finish(endAt);
+      else id = setTimeout(check, left);
     };
-    const id = setTimeout(check, Math.max(0, endAt - Date.now()));
+    check();
     // Throttled timers may not fire while hidden; catch up the moment we're back.
     document.addEventListener('visibilitychange', check);
     return () => {
@@ -162,12 +167,16 @@ export type RestTimerCore = ReturnType<typeof useRestTimerCore>;
  * Whole seconds left for the countdown on screen. This is the only thing that
  * ticks, so call it from the bar and nowhere that re-renders a whole form.
  */
-export function useRemaining(timer: Pick<RestTimerCore, 'phase' | 'endAt' | 'pausedMs'>): number {
+export function useRemaining(
+  timer: Pick<RestTimerCore, 'phase' | 'endAt' | 'pausedMs' | 'total'>,
+): number {
   const [now, setNow] = useState(() => Date.now());
   const running = timer.phase === 'running';
   const { endAt } = timer;
 
-  useEffect(() => {
+  // Before paint, so the first frame of a new or resumed rest never shows the
+  // number worked out from the last time `now` was taken.
+  useLayoutEffect(() => {
     if (!running) return;
     const tick = () => setNow(Date.now());
     tick();
@@ -180,7 +189,7 @@ export function useRemaining(timer: Pick<RestTimerCore, 'phase' | 'endAt' | 'pau
     };
   }, [running, endAt]);
 
-  if (timer.phase === 'running') return remainingSeconds(endAt, now);
+  if (timer.phase === 'running') return Math.min(remainingSeconds(endAt, now), timer.total);
   if (timer.phase === 'paused') return Math.ceil(timer.pausedMs / 1000);
   return 0;
 }
