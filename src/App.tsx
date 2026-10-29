@@ -2,6 +2,7 @@ import { useState, useCallback, Suspense, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { AppProvider, useAppContext } from './context/AppContext';
+import { storePictures } from './utils/storePictures';
 import SaveErrorBanner from './components/layout/SaveErrorBanner';
 import RouteErrorBoundary from './components/layout/RouteErrorBoundary';
 import UpdateBanner from './components/layout/UpdateBanner';
@@ -39,7 +40,17 @@ function prefetchAllPages() {
 }
 
 function AppRoutes() {
-  const { loading: appLoading } = useAppContext();
+  const { loading: appLoading, appData } = useAppContext();
+
+  // Once the data is in, store the exercise pictures on the phone in the
+  // background, so lists and workouts read them locally. Once per launch: the
+  // worker skips any it already has.
+  useEffect(() => {
+    if (appLoading) return;
+    return storePictures(appData);
+    // appData is read once the loading ends; later edits need not resend.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [appLoading]);
 
   useEffect(() => {
     const ric = (window as unknown as { requestIdleCallback?: (cb: () => void) => number }).requestIdleCallback;

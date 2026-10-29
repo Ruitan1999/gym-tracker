@@ -16,6 +16,14 @@
 
 const BUILD = '__BUILD_ID__';
 const CACHE = `liftgauge-${BUILD}`;
+/**
+ * Exercise pictures, kept across deploys. Their names never change meaning
+ * (one id, one file), so throwing them away with each build only meant the
+ * phone downloaded the whole set again after every release. Bump the suffix
+ * to drop them deliberately.
+ */
+const PICTURES = 'liftgauge-pictures-v1';
+const PICTURE_PATH = '/assets/exercise-images/';
 
 /** What an offline launch falls back to: the app's own HTML, whatever the path. */
 const SHELL = '/';
@@ -38,8 +46,11 @@ self.addEventListener('activate', (event) => {
   event.waitUntil(
     (async () => {
       const names = await caches.keys();
-      // Each build gets its own cache, so the previous one leaves with it.
-      await Promise.all(names.filter((n) => n !== CACHE).map((n) => caches.delete(n)));
+      // Each build gets its own cache, so the previous one leaves with it. The
+      // pictures are not tied to a build and stay.
+      await Promise.all(
+        names.filter((n) => n !== CACHE && n !== PICTURES).map((n) => caches.delete(n)),
+      );
       await clients.claim();
     })(),
   );
@@ -68,8 +79,8 @@ async function freshDocument(request) {
 }
 
 /** Hashed assets never change under their own name, so the first copy is final. */
-async function cachedAsset(request) {
-  const cache = await caches.open(CACHE);
+async function cachedAsset(request, cacheName = CACHE) {
+  const cache = await caches.open(cacheName);
   const hit = await cache.match(request);
   if (hit) return hit;
   try {
@@ -104,9 +115,49 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
+  if (url.pathname.startsWith(PICTURE_PATH)) {
+    event.respondWith(cachedAsset(request, PICTURES));
+    return;
+  }
   if (url.pathname.startsWith('/assets/')) {
     event.respondWith(cachedAsset(request));
   }
   // Everything else — icons, the manifest, exercise pictures — keeps the
   // browser's ordinary handling, which their own headers already describe.
+});
+
+/**
+ * Stores exercise pictures ahead of need, so opening a workout, the picker or
+ * a new exercise reads them from the phone rather than the network. The page
+ * sends the list, the owner's own exercises first. A few at a time, skipping
+ * any already stored, so it stays out of the way of anything the page is
+ * actually loading.
+ */
+async function storePictures(urls) {
+  const cache = await caches.open(PICTURES);
+  const wanted = [];
+  for (const url of urls) {
+    if (typeof url !== 'string' || !url.startsWith(PICTURE_PATH)) continue;
+    if (!(await cache.match(url))) wanted.push(url);
+  }
+  const AT_ONCE = 6;
+  for (let i = 0; i < wanted.length; i += AT_ONCE) {
+    await Promise.all(
+      wanted.slice(i, i + AT_ONCE).map(async (url) => {
+        try {
+          const response = await fetch(url);
+          if (response && response.ok) await cache.put(url, response);
+        } catch {
+          /* offline or refused: it will be fetched when it is shown */
+        }
+      }),
+    );
+  }
+}
+
+self.addEventListener('message', (event) => {
+  const data = event.data;
+  if (data && data.type === 'store-pictures' && Array.isArray(data.urls)) {
+    event.waitUntil(storePictures(data.urls));
+  }
 });
