@@ -1,10 +1,8 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { ArrowLeftRight, CalendarDays, Check, Dumbbell } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAppContext } from '../../context/AppContext';
 import ConfirmModal from '../shared/ConfirmModal';
-import { imageForExercise } from '../../utils/exerciseImage';
-import { prefetchImages } from '../../utils/prefetchImages';
 import { todayString } from '../../utils/templateSession';
 import { DAY_CODES, DAY_NAMES, todayIndex } from '../../utils/schedule';
 import { selectNextUp } from '../../utils/nextUp';
@@ -39,7 +37,7 @@ function sessionSummary(workout: Workout): string {
  * out of the way — and where there isn't one, it says that instead of guessing.
  */
 export default function NextUpCard() {
-  const { appData, exerciseImages } = useAppContext();
+  const { appData } = useAppContext();
   const navigate = useNavigate();
   const [pendingStart, setPendingStart] = useState<WorkoutGroup | null>(null);
 
@@ -54,26 +52,6 @@ export default function NextUpCard() {
   );
 
   const week = useThisWeek().days;
-
-  // The pictures of what this card offers, fetched while it sits there, so
-  // starting it has nothing left to wait on. Only these: any other template is
-  // a deliberate choice from Plan, and fetching every template's pictures on
-  // each visit to Home cost data on a phone for little gain.
-  const offeredIds =
-    pick.kind === 'due'
-      ? [pick.first, ...pick.alsoToday].flatMap((g) => g.exerciseIds)
-      : pick.kind === 'rotation'
-        ? pick.group.exerciseIds
-        : pick.kind === 'upcoming'
-          ? pick.upcoming.group.exerciseIds
-          : [];
-  const offeredKey = [...new Set(offeredIds)].join('|');
-  useEffect(() => {
-    if (!offeredKey) return;
-    return prefetchImages(
-      offeredKey.split('|').map((id) => imageForExercise(id, exerciseImages)),
-    );
-  }, [offeredKey, exerciseImages]);
 
   const startOptions = { autoFill: !!appData.preferences.autoFillFromLast };
 

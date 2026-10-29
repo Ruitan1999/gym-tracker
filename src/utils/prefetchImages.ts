@@ -15,7 +15,7 @@ const asked = new Set<string>();
  * idle callback is a property of the moment this runs, not of when the module
  * happened to load.
  */
-function schedule(run: () => void): () => void {
+export function whenIdle(run: () => void): () => void {
   if (typeof requestIdleCallback === 'function') {
     const handle = requestIdleCallback(run, { timeout: 2000 });
     return () => cancelIdleCallback(handle);
@@ -25,7 +25,7 @@ function schedule(run: () => void): () => void {
 }
 
 /** True when the device has asked for less data; warming is a courtesy. */
-function savingData(): boolean {
+export function savingData(): boolean {
   const c = (navigator as { connection?: { saveData?: boolean } }).connection;
   return c?.saveData === true;
 }
@@ -48,7 +48,7 @@ export function prefetchImages(urls: (string | null)[], limit = 24): () => void 
   }
   if (wanted.length === 0) return () => {};
 
-  return schedule(() => {
+  return whenIdle(() => {
     for (const url of wanted) {
       // Marked here rather than when this was scheduled. An effect that
       // re-runs cancels the scheduled fetch first, and a URL marked at

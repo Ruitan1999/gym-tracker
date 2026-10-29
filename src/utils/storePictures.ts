@@ -1,12 +1,8 @@
 import type { AppData } from '../types';
 import { exerciseImageUrl } from './exerciseImage';
 import { usedExerciseIds } from './warmExerciseImages';
+import { savingData, whenIdle } from './prefetchImages';
 
-/** True when the device has asked for less data. */
-function savingData(): boolean {
-  const c = (navigator as { connection?: { saveData?: boolean } }).connection;
-  return c?.saveData === true;
-}
 
 /**
  * The shipped pictures to keep on the phone, this account's own exercises
@@ -41,7 +37,7 @@ export function picturesToStore(
 export function storePictures(appData: Pick<AppData, 'groups' | 'workouts' | 'exercises'>): () => void {
   if (typeof navigator === 'undefined' || !('serviceWorker' in navigator)) return () => {};
   let cancelled = false;
-  const run = () => {
+  const cancelIdle = whenIdle(() => {
     navigator.serviceWorker.ready
       .then((registration) => {
         if (cancelled) return;
@@ -51,11 +47,9 @@ export function storePictures(appData: Pick<AppData, 'groups' | 'workouts' | 'ex
         });
       })
       .catch(() => {});
-  };
-  const ric = (window as unknown as { requestIdleCallback?: (cb: () => void) => number }).requestIdleCallback;
-  const handle = ric ? ric(run) : window.setTimeout(run, 1500);
+  });
   return () => {
     cancelled = true;
-    if (!ric) window.clearTimeout(handle);
+    cancelIdle();
   };
 }

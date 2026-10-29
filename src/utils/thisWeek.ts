@@ -65,13 +65,19 @@ export function thisWeek(
 }
 
 const NO_GROUPS: WorkoutGroup[] = [];
-const cache = new WeakMap<Workout[], WeakMap<WorkoutGroup[], Map<string, ThisWeek>>>();
+let last: {
+  workouts: Workout[];
+  groups: WorkoutGroup[];
+  mode: TrainingMode;
+  todayIso: string;
+  week: ThisWeek;
+} | null = null;
 
 /**
- * `thisWeek` for today, worked out once per set of data. Home asks for it from
- * two cards; the second asks for what the first already built. Keyed on the
- * arrays themselves (app data is replaced, never edited in place), the mode
- * and the date, so a new day or a new save gives a fresh week.
+ * `thisWeek` for today, remembered for the same data. Home asks for it from
+ * two cards in one render; the second gets what the first built. App data is
+ * replaced, never edited in place, so the same arrays mean the same answer; a
+ * new save, mode or day works it out again.
  */
 export function thisWeekFor(
   workouts: Workout[],
@@ -80,15 +86,14 @@ export function thisWeekFor(
   todayIso: string,
 ): ThisWeek {
   const g = groups ?? NO_GROUPS;
-  let byGroups = cache.get(workouts);
-  if (!byGroups) cache.set(workouts, (byGroups = new WeakMap()));
-  let byKey = byGroups.get(g);
-  if (!byKey) byGroups.set(g, (byKey = new Map()));
-  const key = `${mode}|${todayIso}`;
-  let week = byKey.get(key);
-  if (!week) {
-    week = thisWeek(workouts, g, mode);
-    byKey.set(key, week);
+  if (
+    !last ||
+    last.workouts !== workouts ||
+    last.groups !== g ||
+    last.mode !== mode ||
+    last.todayIso !== todayIso
+  ) {
+    last = { workouts, groups: g, mode, todayIso, week: thisWeek(workouts, g, mode) };
   }
-  return week;
+  return last.week;
 }

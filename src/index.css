@@ -106,7 +106,8 @@ body {
 /* The two label styles. In the components layer so a size or tracking
    utility on an element still wins; 11px is the label floor, set here once. */
 @layer components {
-  .caps {
+  .caps,
+  .caps-tight {
     font-size: 11px;
     text-transform: uppercase;
     letter-spacing: 0.08em;
@@ -114,11 +115,7 @@ body {
     font-weight: 500;
   }
   .caps-tight {
-    font-size: 11px;
-    text-transform: uppercase;
     letter-spacing: 0.04em;
-    font-family: var(--font-mono);
-    font-weight: 500;
   }
 }
 

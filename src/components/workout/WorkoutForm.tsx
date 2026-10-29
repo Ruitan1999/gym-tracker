@@ -43,8 +43,10 @@ interface WorkoutFormProps {
 /**
  * The same exercises, in any order. Only adding or removing an exercise makes
  * the session a different workout from its template: sets are kept per
- * exercise anyway, so adding or removing one says nothing about the template,
- * and moving an exercise in one session is not a reason to ask to rewrite it.
+ * exercise anyway, so adding or removing a set says nothing about the
+ * template, and moving an exercise in one session is not a reason to ask to
+ * rewrite it. Used both for "has this drifted from its template" and for
+ * "is this already one of the templates".
  */
 function sameExerciseIds(a: string[], b: string[]): boolean {
   if (a.length !== b.length) return false;
@@ -387,12 +389,7 @@ export default function WorkoutForm({
 
 
   function exerciseIdsMatchExistingGroup(ids: string[]): boolean {
-    const target = new Set(ids);
-    return groups.some(
-      (g) =>
-        g.exerciseIds.length === target.size &&
-        g.exerciseIds.every((id) => target.has(id)),
-    );
+    return groups.some((g) => sameExerciseIds(g.exerciseIds, ids));
   }
 
   /**

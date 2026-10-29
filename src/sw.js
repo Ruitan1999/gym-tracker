@@ -122,42 +122,53 @@ self.addEventListener('fetch', (event) => {
   if (url.pathname.startsWith('/assets/')) {
     event.respondWith(cachedAsset(request));
   }
-  // Everything else — icons, the manifest, exercise pictures — keeps the
+  // Everything else — icons, the manifest — keeps the
   // browser's ordinary handling, which their own headers already describe.
 });
 
 /**
  * Stores exercise pictures ahead of need, so opening a workout, the picker or
  * a new exercise reads them from the phone rather than the network. The page
- * sends the list, the owner's own exercises first. A few at a time, skipping
- * any already stored, so it stays out of the way of anything the page is
- * actually loading.
+ * sends the list, the owner's own exercises first; any already stored are
+ * skipped.
  */
 async function storePictures(urls) {
   const cache = await caches.open(PICTURES);
-  const wanted = [];
-  for (const url of urls) {
-    if (typeof url !== 'string' || !url.startsWith(PICTURE_PATH)) continue;
-    if (!(await cache.match(url))) wanted.push(url);
-  }
-  const AT_ONCE = 6;
-  for (let i = 0; i < wanted.length; i += AT_ONCE) {
-    await Promise.all(
-      wanted.slice(i, i + AT_ONCE).map(async (url) => {
-        try {
-          const response = await fetch(url);
-          if (response && response.ok) await cache.put(url, response);
-        } catch {
-          /* offline or refused: it will be fetched when it is shown */
-        }
-      }),
-    );
-  }
+  // One read of what is stored, not a lookup per picture: on a phone that
+  // already has them all, that is the whole cost of a launch.
+  const have = new Set((await cache.keys()).map((r) => new URL(r.url).pathname));
+  const wanted = urls.filter(
+    (url) => typeof url === 'string' && url.startsWith(PICTURE_PATH) && !have.has(url),
+  );
+  let next = 0;
+  // Six slots, each taking the next picture as soon as it is free, so one slow
+  // download never holds the others back. Low priority, so anything the page
+  // is actually waiting for goes first.
+  const slot = async () => {
+    while (next < wanted.length) {
+      const url = wanted[next++];
+      try {
+        const response = await fetch(url, { priority: 'low' });
+        if (response && response.ok) await cache.put(url, response);
+      } catch {
+        /* offline or refused: it will be fetched when it is shown */
+      }
+    }
+  };
+  await Promise.all(Array.from({ length: 6 }, slot));
 }
+
+/** The store in progress, so a second request joins it instead of repeating it. */
+let storing = null;
 
 self.addEventListener('message', (event) => {
   const data = event.data;
   if (data && data.type === 'store-pictures' && Array.isArray(data.urls)) {
-    event.waitUntil(storePictures(data.urls));
+    if (!storing) {
+      storing = storePictures(data.urls).finally(() => {
+        storing = null;
+      });
+    }
+    event.waitUntil(storing);
   }
 });

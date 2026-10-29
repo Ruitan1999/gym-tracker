@@ -13,7 +13,7 @@ import { todayString } from '../../utils/templateSession';
  */
 export default function StreakCard() {
   const { appData } = useAppContext();
-  // Part of the key so a phone left open past midnight rolls the week over.
+  // Part of the streak's key, so a phone left open past midnight moves it on.
   const today = todayString();
   const { trainedDays, plannedDays } = useThisWeek();
   const streak = useMemo(

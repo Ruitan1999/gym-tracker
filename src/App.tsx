@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { AppProvider, useAppContext } from './context/AppContext';
 import { storePictures } from './utils/storePictures';
+import { whenIdle } from './utils/prefetchImages';
 import SaveErrorBanner from './components/layout/SaveErrorBanner';
 import RouteErrorBoundary from './components/layout/RouteErrorBoundary';
 import UpdateBanner from './components/layout/UpdateBanner';
@@ -52,14 +53,7 @@ function AppRoutes() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [appLoading]);
 
-  useEffect(() => {
-    const ric = (window as unknown as { requestIdleCallback?: (cb: () => void) => number }).requestIdleCallback;
-    if (ric) {
-      ric(prefetchAllPages);
-    } else {
-      setTimeout(prefetchAllPages, 200);
-    }
-  }, []);
+  useEffect(() => whenIdle(prefetchAllPages), []);
 
   if (appLoading) {
     return <LoadingScreen />;
