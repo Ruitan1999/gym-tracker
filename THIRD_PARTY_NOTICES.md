@@ -30,3 +30,12 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
+
+## UI UX Pro Max (design skill for Claude Code)
+
+`.claude/skills/ui-ux-pro-max/` is a copy of the `ui-ux-pro-max` skill from
+https://github.com/nextlevelbuilder/ui-ux-pro-max-skill (commit `28b3b8d`),
+MIT licensed, Copyright (c) 2024 Next Level Builder. It is a development aid
+for Claude Code and is not part of the app's bundle. Its licence is kept next
+to it in `.claude/skills/ui-ux-pro-max/LICENSE`. The skill's test suite was
+left out, and the script paths in `SKILL.md` were changed from `${CLAUDE_PLUGIN_ROOT}/.claude/skills/...` to `.claude/skills/...` so they work when run from the repo root.
