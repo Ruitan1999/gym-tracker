@@ -86,4 +86,23 @@ describe('an edit made while the fetch is still in flight', () => {
     const saved = vi.mocked(saveRemoteAppData).mock.calls.at(-1)?.[1];
     expect(saved?.workouts.map((w) => w.name)).toEqual(expect.arrayContaining(['First', 'Second']));
   });
+
+  it('on a phone with nothing saved, keeps the whole account and adds the new work', async () => {
+    // No saved copy: the screen starts empty while the account has history.
+    let land!: (v: { data: AppData; existed: boolean }) => void;
+    vi.mocked(loadRemoteAppData).mockReturnValue(new Promise((r) => (land = r)));
+    render(
+      <AppProvider uid={UID}>
+        <Logger />
+      </AppProvider>,
+    );
+    // Nothing is written as this account's saved copy before anything is done.
+    expect(loadCachedAppData(UID)).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: 'First' }));
+    await act(async () => land({ data: data(['Jan', 'Feb', 'Mar']), existed: true }));
+
+    const pushed = vi.mocked(saveRemoteAppData).mock.calls.at(-1)?.[1];
+    expect(pushed?.workouts.map((w) => w.name).sort()).toEqual(['Feb', 'First', 'Jan', 'Mar']);
+    expect(screen.getByTestId('names').textContent?.split(',').sort()).toEqual(['Feb', 'First', 'Jan', 'Mar']);
+  });
 });

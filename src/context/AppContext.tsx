@@ -19,6 +19,7 @@ import {
   saveCachedAppData,
 } from '../utils/storage';
 import { loadRemoteAppData, saveRemoteAppData } from '../utils/remoteStorage';
+import { mergeAppData } from '../utils/mergeAppData';
 import {
   isShippedExercise,
   mergeExerciseLibrary,
@@ -191,13 +192,12 @@ export function AppProvider({
             setAppData(finalData);
             saveCachedAppData(uid, finalData);
           } else {
-            // Anything touched while the fetch was in flight is newer than what
-            // came back, and this is a wholesale replace, so it stands. The
-            // device copy already holds it and must not be overwritten with the
-            // fetch; a fresh save (now that the fetch has landed) carries it up.
-            // Before, the fetch overwrote the device copy and the next edit's
-            // save was skipped, so a relaunch in between lost the change.
-            setAppData((prev) => ({ ...prev }));
+            // Something was done here while the fetch was in flight. Neither
+            // copy simply wins: the phone's may have started empty or stale,
+            // and the account's lacks what was just done. Merged by id, the
+            // account keeps everything it has and the phone's work goes on
+            // top; the save that follows writes that to the device and up.
+            setAppData((prev) => mergeAppData(prev, finalData));
           }
         }
 
@@ -243,6 +243,10 @@ export function AppProvider({
         touchedSinceLoadRef.current = true;
       }
       if (!hasLoadedRemoteRef.current) {
+        // Nothing of this account's is on screen yet and nothing has been done:
+        // the starting state is not theirs, and saving it would leave an empty
+        // (or another person's) copy as this account's saved copy.
+        if (!lastAppliedRef.current && appData === initialDataRef.current) return;
         // Written even before the fetch lands, so work done in that window is
         // on the device rather than only in memory.
         saveCachedAppData(uid, appData);
