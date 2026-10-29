@@ -5,6 +5,31 @@ Compared against this app as of `1fb5d63`.
 
 **Contents:** Part 1 the six picks, Part 2 graphics and UI worth borrowing, Part 3 the nine you chose with build notes, Part 4 suggested order.
 
+## Status
+
+Built on 2026-10-28/29 and shipped to `main`. Every item passed type check, lint, the full test suite and a production build before it was merged, and was looked at in a real mobile-sized browser.
+
+| Item | State | Notes |
+|---|---|---|
+| Part 1.2 Rest timer | Done | Docked bar at the bottom of a live session: countdown, -15, +15, pause, Skip. There is no per-set tick in the app, so a set counts as logged when its reps go from nothing to something; marking an exercise done starts a rest only if none is running. 90 s default, last length remembered. Removes itself when finished. The timer is not kept across a page reload. |
+| Part 1.3 Keep screen awake | Done | Wake Lock while a new session is open; re-taken when the page comes back. Does not stop Android discarding the app. Not checked on a real phone. |
+| Part 3.1 Stat tiles | Done | 2x2 tiles in the Log Book. Hidden with no history, as before. |
+| Part 3.2 Lifetime tonnage | Done | "Lifted in total", plus "this month" under it. |
+| Part 3.5 Choose a different workout | Done | Quiet link under the Next Up card; scrolls to the template list, changes nothing. Hidden with one template. |
+| Part 1.1 Equipment filter | Done | Chips in the picker, under a body part and above search results. All 1,427 shipped exercises now carry equipment (from the same MIT dataset the library already came from). Own exercises have none and show only under Any. Some dataset oddities, e.g. "Hands Bike" under Chest. |
+| Part 1.4 Export | Done | Settings: JSON (full backup, wrapped in a small header) and CSV (one row per set, Excel-safe, optional date range). |
+| Part 3.3 Body map on session cards | Done | Mini figure on Next Up, template rows (Home and Manage) and the session strip. |
+| Part 3.4 Raised Start button | Done | Fifth tab, per your decision (a). Opens today's template, or the picker if none is due or one is already logged today; resumes an open session. The label reads Resume while a session is open. The Home "Start workout" bar was removed at your request. |
+| Part 3.6 Header and exercise chips | Done | Sticky strip under the title: time, sets done, volume, a progress bar and a numbered chip per exercise. It is about 113 px tall. |
+| Part 3.7 Plain-words target line | Done | Sentence version only, advice only. The workout form is kg-only today, so the sentence is in kg. |
+| Part 1.5 Rotation mode | Done | `Fixed Week | Rotation` on Manage templates. Workouts do not record their template, so the last-trained one is inferred by name, then by exercise set. Weekday labels are hidden in rotation but kept in the data. |
+| Part 1.6 Auto-fill weights | Done | Setting, off by default. Filled-in sets do not count as work or as done until touched. |
+| Part 3.8 Year heatmap | Done | On Progress, Time / Volume switch, scrolls sideways inside its card. |
+| Part 3.9 Muscle balance map | Done | On Progress: Balance / Untrained / Recovering over Week, 30d, 90d, All. Coarse body parts only. |
+| Body figure artwork | Done, changed approach | Replaced our blocky figure with the MuscleMap outlines (MIT), taken directly from MuscleMap with its notice in `THIRD_PARTY_NOTICES.md`. Nothing from openGym's code or images was used. |
+
+Not part of this run: Part 2 items not picked, and everything under "Probably skip".
+
 ## Read this first: what can and can't be borrowed
 
 | Thing | Licence | What it means for us |
