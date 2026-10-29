@@ -3,6 +3,7 @@ import { Dumbbell } from 'lucide-react';
 import { useAppContext } from '../../context/AppContext';
 import { weeklyStreak } from '../../utils/streak';
 import { scheduledDaysThisWeek } from '../../utils/schedule';
+import { trainingModeOf } from '../../utils/rotation';
 
 function isoDate(d: Date): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
@@ -29,7 +30,12 @@ export default function WeeklyInsights() {
     const monday = new Date(today);
     monday.setDate(today.getDate() - mondayOffset);
 
-    const planned = scheduledDaysThisWeek(appData.groups ?? []);
+    // Rotation has no weekdays to plan around; the days are kept in the data
+    // but not shown as upcoming sessions.
+    const planned =
+      trainingModeOf(appData.preferences) === 'rotation'
+        ? new Set<number>()
+        : scheduledDaysThisWeek(appData.groups ?? []);
 
     const days = Array.from({ length: 7 }, (_, i) => {
       const d = new Date(monday);
@@ -54,7 +60,7 @@ export default function WeeklyInsights() {
       totalSessions: appData.workouts.length,
       weekCount: days.filter((d) => d.trained).length,
     };
-  }, [appData.workouts, appData.groups]);
+  }, [appData.workouts, appData.groups, appData.preferences]);
 
   const streakPct = Math.min(streak / STREAK_GOAL_WEEKS, 1);
 

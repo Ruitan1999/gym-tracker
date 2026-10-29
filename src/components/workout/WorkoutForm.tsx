@@ -13,6 +13,7 @@ import type { Workout, WorkoutEntry, WorkoutGroup, WorkoutSet } from '../../type
 import { useDragReorder } from '../../utils/useDragReorder';
 import { imageForExercise } from '../../utils/exerciseImage';
 import { dayCodeLabel } from '../../utils/schedule';
+import { trainingModeOf } from '../../utils/rotation';
 import { prefetchImages } from '../../utils/prefetchImages';
 import type { TemplateOffer } from '../../utils/templateOffer';
 import {
@@ -622,7 +623,8 @@ export default function WorkoutForm({
           <div className="flex flex-col gap-2">
             {groups.map((g) => {
               const exCount = g.exerciseIds.length;
-              const days = dayCodeLabel(g);
+              // Rotation ignores weekdays, so the labels would only mislead.
+              const days = trainingModeOf(appData.preferences) === 'rotation' ? null : dayCodeLabel(g);
               return (
                 <div key={g.id} className="card relative">
                   <button
