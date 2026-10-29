@@ -242,11 +242,13 @@ describe('before any days are set', () => {
     expect(screen.getByRole('button', { name: /SET WORKOUT DAYS/ })).toBeTruthy();
   });
 
-  it('says nothing at all when there are no templates yet', () => {
+  it('shows only the week when there are no templates yet', () => {
     seed({ groups: [] });
-    const { container } = renderCard();
+    renderCard();
 
-    // A brand new account has an empty state of its own; this card keeps quiet.
-    expect(container.textContent).toBe('');
+    // Nothing to suggest, but the dates still read.
+    expect(screen.getByRole('list', { name: 'This week' })).toBeTruthy();
+    expect(screen.queryByText(/NEXT UP/)).toBeNull();
+    expect(screen.queryByRole('button')).toBeNull();
   });
 });

@@ -1,28 +1,22 @@
 import { useEffect, useRef, useState } from 'react';
 import { createPortal, flushSync } from 'react-dom';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useAppContext } from '../../context/AppContext';
 import ExerciseSelect from '../shared/ExerciseSelect';
 import DatePicker from '../shared/DatePicker';
 import ConfirmModal from '../shared/ConfirmModal';
-import ActionSheet from '../shared/ActionSheet';
-import RenameModal from '../shared/RenameModal';
 import EntryCard, { type SetsChange } from './EntryCard';
 import heroIllustration from '../../assets/healthy-habit.svg';
-import type { Workout, WorkoutEntry, WorkoutGroup, WorkoutSet } from '../../types';
+import type { Workout, WorkoutEntry, WorkoutSet } from '../../types';
 import { useDragReorder } from '../../utils/useDragReorder';
 import { imageForExercise } from '../../utils/exerciseImage';
-import { dayCodeLabel } from '../../utils/schedule';
-import { trainingModeOf } from '../../utils/rotation';
 import { prefetchImages } from '../../utils/prefetchImages';
 import type { TemplateOffer } from '../../utils/templateOffer';
 import {
   DRAFT_KEY,
   type Draft,
   loadDraft,
-  draftFromTemplate,
   lastSetsFor,
-  saveDraft,
   todayString,
   confirmEntry,
   confirmSet,
@@ -37,10 +31,7 @@ import SessionStrip from './SessionStrip';
 import RestTimer from './RestTimer';
 import { useRestTimerCore } from '../../utils/useRestTimer';
 import { useWakeLock } from '../../utils/useWakeLock';
-import ExerciseStrip from '../shared/ExerciseStrip';
-import MiniBodyMap from './MiniBodyMap';
 import { bodyPartsOfTemplate } from '../../utils/bodyParts';
-import { TEMPLATE_LIST_ID } from '../../utils/templateList';
 import { ratingColor } from '../../utils/rating';
 
 interface WorkoutFormProps {
@@ -72,8 +63,6 @@ export default function WorkoutForm({
     loading,
     addWorkout,
     updateWorkout,
-    updateGroup,
-    deleteGroup,
     showSessionSaved,
     exerciseImages,
   } = useAppContext();
@@ -110,7 +99,6 @@ export default function WorkoutForm({
     () => (isEdit ? (existingWorkout?.startedAt ?? null) : (draft?.startedAt ?? null)),
   );
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
-  const [pendingTemplateStart, setPendingTemplateStart] = useState<WorkoutGroup | null>(null);
   const [validationError, setValidationError] = useState('');
   const [collapsedIds, setCollapsedIds] = useState<Set<string>>(
     new Set(draft?.collapsedIds ?? []),
@@ -118,9 +106,6 @@ export default function WorkoutForm({
   const [scrollToEntryId, setScrollToEntryId] = useState<string | null>(null);
   const [tappedChipId, setTappedChipId] = useState<string | null>(null);
   const stripRef = useRef<HTMLDivElement>(null);
-  const [menuForGroup, setMenuForGroup] = useState<WorkoutGroup | null>(null);
-  const [renamingGroup, setRenamingGroup] = useState<WorkoutGroup | null>(null);
-  const [deletingGroup, setDeletingGroup] = useState<WorkoutGroup | null>(null);
   // Editing history is never "started from a template" — the link only exists
   // for the session it was started in.
   const [sourceGroupId, setSourceGroupId] = useState<string | null>(
@@ -407,52 +392,6 @@ export default function WorkoutForm({
     });
   }
 
-  function handleStartFromGroup(group: WorkoutGroup) {
-    if (!isFocusedRoute) {
-      // A different template already has real work logged against it —
-      // starting this one would silently overwrite that session.
-      if (hasAnyInput && sourceGroupId !== group.id) {
-        setPendingTemplateStart(group);
-        return;
-      }
-      // Same template, already underway: reopen it as it stands rather than
-      // regenerating a fresh draft that would reset the sets already logged.
-      if (hasAnyInput && sourceGroupId === group.id) {
-        navigate('/workout/new');
-        return;
-      }
-      saveDraft(draftFromTemplate(group, appData.workouts, { autoFill }));
-      navigate('/workout/new');
-      return;
-    }
-
-    const begunAt = startedAt ?? new Date().toISOString();
-    const draftPayload = draftFromTemplate(group, appData.workouts, {
-      startedAt: begunAt,
-      autoFill,
-    });
-    const newEntries = draftPayload.entries;
-    const collapsed = draftPayload.collapsedIds;
-
-    onNameChange(group.name);
-    setSourceGroupId(group.id);
-    setStartedAt(begunAt);
-    setEntries(newEntries);
-    setUnconfirmed(draftPayload.unconfirmed ?? {});
-    setCollapsedIds(new Set(collapsed));
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        const main = document.querySelector('main');
-        if (main) main.scrollTo({ top: 0 });
-      });
-    });
-  }
-
-  function confirmStartFromGroup(group: WorkoutGroup) {
-    saveDraft(draftFromTemplate(group, appData.workouts, { autoFill }));
-    setPendingTemplateStart(null);
-    navigate('/workout/new');
-  }
 
   function exerciseIdsMatchExistingGroup(ids: string[]): boolean {
     const target = new Set(ids);
@@ -562,7 +501,6 @@ export default function WorkoutForm({
 
   const showActiveSession = isEdit || isFocusedRoute;
   const showEmptyState = !isEdit && !isFocusedRoute;
-  const showGroupsPicker = showEmptyState && groups.length > 0;
   const todayIso = todayString();
   const hasTodaysWorkout = !isEdit && !isFocusedRoute && appData.workouts.some((w) => w.date === todayIso);
   const ratingMatch = notes.match(/^Rating: (\d+)/);
@@ -585,113 +523,6 @@ export default function WorkoutForm({
     <div
       className={`flex flex-col gap-5 ${sessionLive && rest.phase !== 'idle' ? 'pb-32' : 'pb-8'}`}
     >
-      {/* Groups picker */}
-      {showGroupsPicker && (
-        <section id={TEMPLATE_LIST_ID} style={{ scrollMarginTop: '72px' }}>
-          <div className="flex items-center justify-between mb-4">
-            <h2
-              className="font-display leading-none"
-              style={{
-                fontSize: '1.25rem',
-                fontWeight: 700,
-                letterSpacing: '-0.02em',
-                fontVariationSettings: '"wdth" 90',
-                color: 'var(--color-text)',
-              }}
-            >
-              Workout Template
-            </h2>
-            <Link
-              to="/groups"
-              className="caps text-[10px] press"
-              style={{ color: 'var(--color-text)' }}
-            >
-              MANAGE →
-            </Link>
-          </div>
-          <div className="flex flex-col gap-2">
-            {groups.map((g) => {
-              const exCount = g.exerciseIds.length;
-              // Rotation ignores weekdays, so the labels would only mislead.
-              const days = trainingModeOf(appData.preferences) === 'rotation' ? null : dayCodeLabel(g);
-              return (
-                <div key={g.id} className="card relative">
-                  <button
-                    type="button"
-                    onClick={() => handleStartFromGroup(g)}
-                    className="w-full text-left press px-3 pt-2.5 pb-2.5"
-                  >
-                    {/* Above the name rather than beside it: the thumbnails
-                        below have the row to themselves. */}
-                    {days && (
-                      <div
-                        className="caps-tight text-[9px] pr-11"
-                        style={{ color: 'var(--color-volt)' }}
-                      >
-                        {days}
-                      </div>
-                    )}
-                    {/* Padded clear of the menu, which is out of the flow. The
-                        count sits outside the truncating name so a long one
-                        cannot cut it off. */}
-                    <div className="flex items-baseline gap-1.5 pr-11">
-                      <span
-                        className="font-display truncate"
-                        style={{
-                          fontWeight: 700,
-                          fontSize: '1rem',
-                          letterSpacing: '-0.02em',
-                          fontVariationSettings: '"wdth" 95',
-                          color: 'var(--color-text)',
-                        }}
-                      >
-                        {g.name}
-                      </span>
-                      <span
-                        className="font-mono text-[12px] shrink-0"
-                        style={{ color: 'var(--color-text-faint)' }}
-                      >
-                        ({exCount})
-                      </span>
-                    </div>
-                    {/* The line-up is what tells two templates apart; the
-                        names alone read the same. */}
-                    <div className="mt-2 flex items-center justify-between gap-3">
-                      <ExerciseStrip exerciseIds={g.exerciseIds} max={8} />
-                      {/* Below the menu's 44px corner, so the two never overlap. */}
-                      <span className="ml-auto">
-                        <MiniBodyMap parts={bodyPartsOfTemplate(g.exerciseIds, appData.exercises)} />
-                      </span>
-                    </div>
-                  </button>
-                  {/* Positioned rather than laid out: given a row of its own, a
-                      44px tap target sets the row's height and pushes the count
-                      a long way clear of the name. */}
-                  <button
-                    type="button"
-                    onClick={() => setMenuForGroup(g)}
-                    aria-label={`Actions for ${g.name}`}
-                    aria-haspopup="menu"
-                    className="absolute top-0 right-0 w-11 h-11 flex items-center justify-center press"
-                    style={{ color: 'var(--color-text-faint)' }}
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 24 24"
-                      fill="currentColor"
-                      className="w-4 h-4"
-                    >
-                      <circle cx="12" cy="5" r="1.75" />
-                      <circle cx="12" cy="12" r="1.75" />
-                      <circle cx="12" cy="19" r="1.75" />
-                    </svg>
-                  </button>
-                </div>
-              );
-            })}
-          </div>
-        </section>
-      )}
 
       {/* Time, sets, volume and a chip per exercise, pinned while the cards
           scroll underneath. Replaces the old session-time row. */}
@@ -962,68 +793,6 @@ const color = ratingColor(n)!;
 
       {sessionLive && <RestTimer timer={rest} />}
 
-      {menuForGroup && (
-        <ActionSheet
-          eyebrow="TEMPLATE"
-          title={menuForGroup.name}
-          onClose={() => setMenuForGroup(null)}
-          items={[
-            {
-              label: 'EDIT EXERCISES',
-              onSelect: () => {
-                const target = menuForGroup;
-                setMenuForGroup(null);
-                navigate(`/groups/${target.id}`);
-              },
-            },
-            {
-              label: 'RENAME',
-              onSelect: () => {
-                setRenamingGroup(menuForGroup);
-                setMenuForGroup(null);
-              },
-            },
-            {
-              label: 'DELETE',
-              destructive: true,
-              onSelect: () => {
-                setDeletingGroup(menuForGroup);
-                setMenuForGroup(null);
-              },
-            },
-          ]}
-        />
-      )}
-
-      {renamingGroup && (
-        <RenameModal
-          eyebrow="RENAME TEMPLATE"
-          title="Rename template"
-          initialValue={renamingGroup.name}
-          onSave={(name) => {
-            updateGroup({ ...renamingGroup, name });
-            setRenamingGroup(null);
-          }}
-          onClose={() => setRenamingGroup(null)}
-        />
-      )}
-
-      {deletingGroup && (
-        <ConfirmModal
-          eyebrow="DELETE TEMPLATE"
-          title={`Delete "${deletingGroup.name}"?`}
-          message="Saved workouts keep their history — only the template is removed."
-          confirmLabel="DELETE →"
-          cancelLabel="KEEP"
-          destructive
-          onConfirm={() => {
-            deleteGroup(deletingGroup.id);
-            setDeletingGroup(null);
-          }}
-          onClose={() => setDeletingGroup(null)}
-        />
-      )}
-
       {showCancelConfirm && (
         <ConfirmModal
           eyebrow="DISCARD WORKOUT"
@@ -1037,18 +806,6 @@ const color = ratingColor(n)!;
         />
       )}
 
-      {pendingTemplateStart && (
-        <ConfirmModal
-          eyebrow="WORKOUT IN PROGRESS"
-          title={`Start "${pendingTemplateStart.name}" instead?`}
-          message="Your current workout hasn't been saved yet — starting a new one will discard it."
-          confirmLabel="DISCARD & START →"
-          cancelLabel="KEEP CURRENT"
-          destructive
-          onConfirm={() => confirmStartFromGroup(pendingTemplateStart)}
-          onClose={() => setPendingTemplateStart(null)}
-        />
-      )}
     </div>
   );
 }

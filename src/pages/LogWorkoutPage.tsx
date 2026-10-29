@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
 import PageShell from '../components/layout/PageShell';
 import WorkoutForm, { loadDraft } from '../components/workout/WorkoutForm';
-import WeeklyInsights from '../components/workout/WeeklyInsights';
+import StreakCard from '../components/workout/StreakCard';
 import HomeGreeting from '../components/workout/HomeGreeting';
 import NextUpCard from '../components/workout/NextUpCard';
 import TodayWork from '../components/workout/TodayWork';
@@ -68,7 +68,7 @@ function SessionPage({
           <>
             <HomeGreeting />
             <NextUpCard />
-            <WeeklyInsights />
+            <StreakCard />
             <TodayWork />
           </>
         ) : undefined

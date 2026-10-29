@@ -1,9 +1,8 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom';
 import { AppProvider } from '../context/AppContext';
 import NextUpCard from '../components/workout/NextUpCard';
-import { TEMPLATE_LIST_ID } from '../utils/templateList';
 
 const STORAGE_KEY = 'gym-tracker-data';
 // A Thursday: index 3.
@@ -29,11 +28,17 @@ function seed(groups: ReturnType<typeof group>[]) {
   );
 }
 
+function Where() {
+  return <div data-testid="where">{useLocation().pathname}</div>;
+}
+
 function renderCard() {
   return render(
-    <MemoryRouter>
+    <MemoryRouter initialEntries={['/']}>
       <AppProvider>
-        <div id={TEMPLATE_LIST_ID} data-testid="list" />
+        <Routes>
+          <Route path="*" element={<Where />} />
+        </Routes>
         <NextUpCard />
       </AppProvider>
     </MemoryRouter>,
@@ -71,29 +76,15 @@ describe('Choose a different workout', () => {
     expect(screen.getByText(LINK)).toBeTruthy();
   });
 
-  it('scrolls the template list into view and changes nothing else', () => {
+  it('opens Plan, where every template is, and changes nothing else', () => {
     seed([group('push', [3]), group('pull', [5])]);
-    const scroll = vi.fn();
-    window.HTMLElement.prototype.scrollIntoView = scroll;
-    window.matchMedia = vi.fn().mockReturnValue({ matches: false }) as never;
     renderCard();
     const before = localStorage.getItem(STORAGE_KEY);
     const keysBefore = Object.keys(localStorage).sort();
     fireEvent.click(screen.getByText(LINK));
-    expect(scroll).toHaveBeenCalledWith({ behavior: 'smooth', block: 'start' });
-    expect(scroll.mock.contexts[0]).toBe(screen.getByTestId('list'));
+    expect(screen.getByTestId('where').textContent).toBe('/groups');
     expect(localStorage.getItem(STORAGE_KEY)).toBe(before);
     expect(Object.keys(localStorage).sort()).toEqual(keysBefore);
-  });
-
-  it('jumps without animation when reduced motion is on', () => {
-    seed([group('push', [3]), group('pull', [5])]);
-    const scroll = vi.fn();
-    window.HTMLElement.prototype.scrollIntoView = scroll;
-    window.matchMedia = vi.fn().mockReturnValue({ matches: true }) as never;
-    renderCard();
-    fireEvent.click(screen.getByText(LINK));
-    expect(scroll).toHaveBeenCalledWith({ behavior: 'auto', block: 'start' });
   });
 
   it('is a 44px target', () => {

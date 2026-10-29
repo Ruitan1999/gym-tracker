@@ -1,3 +1,5 @@
+import { Link } from 'react-router-dom';
+import { Settings } from 'lucide-react';
 import { useMaybeAuth } from '../../context/AuthContext';
 
 function deriveName(
@@ -24,7 +26,8 @@ export default function HomeGreeting() {
   const name = deriveName(auth?.user ?? null);
 
   return (
-    <div className="mb-4">
+    <div className="mb-4 flex items-start justify-between gap-3">
+      <div className="min-w-0">
       <div className="caps-tight text-[10px]" style={{ color: 'var(--color-text-faint)' }}>
         WELCOME, {name.toUpperCase()}
       </div>
@@ -40,6 +43,21 @@ export default function HomeGreeting() {
       >
         Let's get training today.
       </h1>
+      </div>
+      {/* Settings left the bottom bar for Plan; it lives here, one tap from Home. */}
+      <Link
+        to="/settings"
+        aria-label="Settings"
+        className="shrink-0 w-11 h-11 flex items-center justify-center press"
+        style={{
+          background: 'var(--color-surface)',
+          border: '1px solid var(--color-line)',
+          borderRadius: '999px',
+          color: 'var(--color-text)',
+        }}
+      >
+        <Settings size={20} strokeWidth={1.75} />
+      </Link>
     </div>
   );
 }

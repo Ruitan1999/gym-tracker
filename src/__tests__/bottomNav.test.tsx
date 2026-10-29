@@ -80,7 +80,7 @@ describe('bottom nav', () => {
     const items = Array.from(nav.querySelectorAll('a, button')).map(
       (el) => el.getAttribute('aria-label') ?? el.textContent,
     );
-    expect(items).toEqual(['Log', 'Log Book', 'Start workout', 'Progress', 'Settings']);
+    expect(items).toEqual(['Log', 'Plan', 'Start workout', 'Log Book', 'Progress']);
   });
 
   it('opens the template due today', () => {

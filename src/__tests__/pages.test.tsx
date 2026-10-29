@@ -19,10 +19,11 @@ describe('Page integration tests', () => {
   });
 
   describe('LogWorkoutPage', () => {
-    it('gives the home page over to the momentum panel instead of a title', () => {
+    it('gives the home page over to the week, Next Up and streak instead of a title', () => {
       renderWithProviders(<LogWorkoutPage />);
       expect(screen.queryByText('Log Session')).toBeNull();
-      expect(screen.getByText('MOMENTUM')).toBeDefined();
+      expect(screen.getByLabelText('Streak')).toBeDefined();
+      expect(screen.getByRole('link', { name: 'Settings' })).toBeDefined();
       // Starting is the bottom nav's job; an empty home has no button of its own.
       expect(screen.queryByRole('button', { name: /LOG WORKOUT/ })).toBeNull();
     });

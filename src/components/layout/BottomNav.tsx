@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
-import { Dumbbell, NotebookText, Play, TrendingUp, Settings } from 'lucide-react';
+import { CalendarDays, Dumbbell, NotebookText, Play, TrendingUp } from 'lucide-react';
 import { useAppContext } from '../../context/AppContext';
 import { prepareStart, templateDueToday } from '../../utils/startSession';
 import { draftHasProgress, loadDraft } from '../../utils/templateSession';
@@ -19,37 +19,39 @@ const leftTabs = [
     prefetch: () => {},
   },
   {
-    to: '/history',
-    label: 'Log Book',
+    // Templates, their order and how the week is trained. Settings moved off
+    // the bar to a gear on Home to make room.
+    to: '/groups',
+    label: 'Plan',
     code: '02',
-    icon: <NotebookText size={ICON_SIZE} strokeWidth={ICON_STROKE} />,
+    icon: <CalendarDays size={ICON_SIZE} strokeWidth={ICON_STROKE} />,
     prefetch: () => {},
   },
 ];
 
 const rightTabs = [
   {
+    to: '/history',
+    label: 'Log Book',
+    code: '03',
+    icon: <NotebookText size={ICON_SIZE} strokeWidth={ICON_STROKE} />,
+    prefetch: () => {},
+  },
+  {
     to: '/progress',
     label: 'Progress',
-    code: '03',
+    code: '04',
     icon: <TrendingUp size={ICON_SIZE} strokeWidth={ICON_STROKE} />,
     // The only tab still behind its own chunk — the rest ship in the bundle.
     prefetch: () => {
       import('../../pages/ProgressPage').catch(() => {});
     },
   },
-  {
-    to: '/settings',
-    label: 'Settings',
-    code: '04',
-    icon: <Settings size={ICON_SIZE} strokeWidth={ICON_STROKE} />,
-    prefetch: () => {},
-  },
 ];
 
 type Tab = (typeof leftTabs)[number];
 
-const TOP_LEVEL_PATHS = ['/', '/history', '/progress', '/settings'];
+const TOP_LEVEL_PATHS = ['/', '/groups', '/history', '/progress'];
 
 // How far the Start button stands above the bar.
 const START_RISE = 20;

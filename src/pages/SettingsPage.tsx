@@ -131,7 +131,7 @@ export default function SettingsPage() {
   } as const;
 
   return (
-    <PageShell title="Settings">
+    <PageShell title="Settings" showBack>
       <div className="space-y-6">
         <Section label="EXERCISE INDEX">
           <button

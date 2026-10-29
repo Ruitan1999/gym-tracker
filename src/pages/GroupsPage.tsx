@@ -75,7 +75,7 @@ export default function GroupsPage() {
 
   if (groups.length === 0) {
     return (
-      <PageShell title="Workout Template" showBack>
+      <PageShell title="Plan">
         <EmptyState
           message="No template saved"
           description="BUILD ONE HERE, OR SAVE ANY WORKOUT AS A TEMPLATE"
@@ -86,7 +86,7 @@ export default function GroupsPage() {
   }
 
   return (
-    <PageShell title="Workout Template" showBack disableRefresh={draggingId !== null}>
+    <PageShell title="Plan" disableRefresh={draggingId !== null}>
       <div className="flex flex-col gap-4">
         <HowYouTrain mode={mode} onChange={setMode} />
 

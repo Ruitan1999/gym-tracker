@@ -11,7 +11,8 @@ import { DAY_CODES, DAY_NAMES, todayIndex } from '../../utils/schedule';
 import { selectNextUp } from '../../utils/nextUp';
 import { trainingModeOf } from '../../utils/rotation';
 import { beginTemplate, replaceDraftWith } from '../../utils/startSession';
-import { scrollToTemplateList } from '../../utils/templateList';
+import WeekStrip from './WeekStrip';
+import { thisWeek, type WeekDay } from '../../utils/thisWeek';
 import type { Workout, WorkoutGroup } from '../../types';
 
 // Matches the momentum card's icons, which render at the same size.
@@ -53,6 +54,11 @@ export default function NextUpCard() {
     [groups, appData.workouts, mode, today],
   );
 
+  const week = useMemo(
+    () => thisWeek(appData.workouts, groups, mode).days,
+    [appData.workouts, groups, mode],
+  );
+
   const startOptions = { autoFill: !!appData.preferences.autoFillFromLast };
 
   function start(group: WorkoutGroup) {
@@ -84,8 +90,16 @@ export default function NextUpCard() {
     />
   );
 
-  // Nothing to say until there is at least one template to schedule.
-  if (pick.kind === 'none') return null;
+  // No template to suggest yet, but the week itself is still worth showing.
+  if (pick.kind === 'none') {
+    return (
+      <section className="card mb-4 p-3">
+        <WeekStrip days={week} />
+      </section>
+    );
+  }
+
+  const choose = groups.length > 1 ? <ChooseDifferent onChoose={() => navigate('/groups')} /> : null;
 
   // Trained today already: the card steps back rather than nagging for a second
   // session, and points at what is next instead. Still today's business, so it
@@ -95,7 +109,7 @@ export default function NextUpCard() {
     const loggedToday = pick.workout;
     const upcoming = pick.upcoming;
     return (
-      <Shell tone="done">
+      <Shell tone="done" week={week}>
         <Ribbon
           background="var(--color-done-deep)"
           left="DONE TODAY"
@@ -154,7 +168,7 @@ export default function NextUpCard() {
   if (pick.kind === 'rotation') {
     return (
       <>
-        <Shell tone="due">
+        <Shell tone="due" week={week} footer={choose}>
           <button
             type="button"
             onClick={() => start(pick.group)}
@@ -166,7 +180,6 @@ export default function NextUpCard() {
               <PictureRow group={pick.group} />
             </div>
           </button>
-          {groups.length > 1 && <ChooseDifferent />}
         </Shell>
         {confirmModal}
       </>
@@ -180,7 +193,7 @@ export default function NextUpCard() {
     const { first, alsoToday } = pick;
     return (
       <>
-      <Shell tone="due">
+      <Shell tone="due" week={week} footer={choose}>
         <button
           type="button"
           onClick={() => start(first)}
@@ -233,7 +246,6 @@ export default function NextUpCard() {
             ))}
           </div>
         )}
-        {groups.length > 1 && <ChooseDifferent />}
       </Shell>
       {confirmModal}
       </>
@@ -247,7 +259,7 @@ export default function NextUpCard() {
     const { upcoming } = pick;
     return (
       <>
-      <Shell tone="rest">
+      <Shell tone="rest" week={week} footer={choose}>
         <div className="p-4">
           <Eyebrow
             left="NEXT UP"
@@ -266,7 +278,6 @@ export default function NextUpCard() {
           >
             START EARLY →
           </button>
-          {groups.length > 1 && <ChooseDifferent />}
         </div>
       </Shell>
       {confirmModal}
@@ -277,7 +288,7 @@ export default function NextUpCard() {
   // Templates, but none of them on the calendar.
   if (pick.kind === 'unscheduled') {
     return (
-      <Shell tone="empty">
+      <Shell tone="empty" week={week}>
         <div className="p-4">
           <Eyebrow left="NEXT UP" leftColor="var(--color-text-faint)" />
           <Name>Give your week a shape</Name>
@@ -304,15 +315,14 @@ export default function NextUpCard() {
 }
 
 /**
- * A way out of the suggestion that never changes anything: it only scrolls to
- * the template list further down. Callers show it only when there is another
- * template to choose.
+ * A way out of the suggestion that never changes anything: it only opens Plan,
+ * where every template is. Shown only when there is another template to choose.
  */
-function ChooseDifferent() {
+function ChooseDifferent({ onChoose }: { onChoose: () => void }) {
   return (
     <button
       type="button"
-      onClick={scrollToTemplateList}
+      onClick={onChoose}
       className="w-full h-11 press caps-tight text-[10px] flex items-center justify-center"
       style={{ color: 'var(--color-text-muted)' }}
     >
@@ -321,7 +331,22 @@ function ChooseDifferent() {
   );
 }
 
-function Shell({ tone, children }: { tone: 'due' | 'rest' | 'done' | 'empty'; children: React.ReactNode }) {
+/**
+ * One card: the week across the top, then the suggestion in its own tinted
+ * panel, then the way out. Reading the suggestion against the dates is the
+ * point; on their own the two said less.
+ */
+function Shell({
+  tone,
+  week,
+  footer,
+  children,
+}: {
+  tone: 'due' | 'rest' | 'done' | 'empty';
+  week: WeekDay[];
+  footer?: React.ReactNode;
+  children: React.ReactNode;
+}) {
   const style =
     tone === 'due'
       ? { background: 'var(--color-volt-wash)', border: '1px solid var(--color-volt-line)' }
@@ -332,11 +357,12 @@ function Shell({ tone, children }: { tone: 'due' | 'rest' | 'done' | 'empty'; ch
       : { background: 'var(--color-surface)', border: '1px solid var(--color-line)' };
 
   return (
-    <section
-      className="mb-4 overflow-hidden"
-      style={{ ...style, borderRadius: 'var(--radius)' }}
-    >
-      {children}
+    <section className="card mb-4 p-3">
+      <WeekStrip days={week} />
+      <div className="mt-3 overflow-hidden" style={{ ...style, borderRadius: 'var(--radius)' }}>
+        {children}
+      </div>
+      {footer && <div className="mt-1 -mb-1">{footer}</div>}
     </section>
   );
 }

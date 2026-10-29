@@ -122,22 +122,6 @@ describe('where the mini map is placed', () => {
     expect(screen.getByRole('img', { name: 'Works chest' })).toBeTruthy();
   });
 
-  it('sits on each Home template row, and not on a cardio-only one', () => {
-    render(
-      <MemoryRouter initialEntries={['/']}>
-        <AppProvider>
-          <WorkoutForm name="" onNameChange={() => {}} />
-        </AppProvider>
-      </MemoryRouter>,
-    );
-    expect(screen.getByRole('img', { name: 'Works chest' })).toBeTruthy();
-    expect(screen.getByRole('img', { name: 'Works legs' })).toBeTruthy();
-    expect(screen.getAllByRole('img', { name: /^Works / })).toHaveLength(2);
-    // The row button still starts the template and now contains the figure.
-    const row = screen.getByRole('img', { name: 'Works legs' }).closest('button');
-    expect(row?.textContent).toContain('Leg Day');
-  });
-
   it('sits on each Manage templates row', () => {
     render(
       <MemoryRouter initialEntries={['/groups']}>
