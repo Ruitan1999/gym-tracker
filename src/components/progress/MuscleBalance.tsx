@@ -6,6 +6,7 @@ import type { BalanceWindow } from '../../utils/muscleBalance';
 import Segmented from './Segmented';
 import MuscleFigure from './MuscleFigure';
 import type { PartPaint } from './MuscleFigure';
+import { balancePaint, IDLE_PAINT } from './balancePaint';
 
 type Lens = 'balance' | 'untrained' | 'recovering';
 
@@ -29,7 +30,7 @@ const WINDOW_WORDS: Record<BalanceWindow, string> = {
   all: 'all time',
 };
 
-const IDLE: PartPaint = { fill: 'var(--color-line-2)', opacity: 0.55 };
+const IDLE = IDLE_PAINT;
 
 function names(parts: BodyPart[]): string {
   return parts.map((p) => BODY_PART_LABELS[p].toLowerCase()).join(', ');
@@ -60,15 +61,9 @@ export default function MuscleBalance({
         .sort((a, b) => b[1] - a[1]),
     [balance.sets],
   );
-  const hardest = ranked.length > 0 ? ranked[0][1] : 1;
 
   const paint = (part: BodyPart): PartPaint => {
-    if (lens === 'balance') {
-      const sets = balance.sets[part] ?? 0;
-      return sets > 0
-        ? { fill: 'var(--color-volt)', opacity: 0.35 + 0.65 * (sets / hardest) }
-        : IDLE;
-    }
+    if (lens === 'balance') return balancePaint(balance.sets)(part);
     if (lens === 'untrained') {
       if (NOT_A_MUSCLE.includes(part)) return IDLE;
       return balance.sets[part]

@@ -501,8 +501,6 @@ export default function WorkoutForm({
 
   const showActiveSession = isEdit || isFocusedRoute;
   const showEmptyState = !isEdit && !isFocusedRoute;
-  const todayIso = todayString();
-  const hasTodaysWorkout = !isEdit && !isFocusedRoute && appData.workouts.some((w) => w.date === todayIso);
   const ratingMatch = notes.match(/^Rating: (\d+)/);
   const currentRating = ratingMatch ? parseInt(ratingMatch[1], 10) : 0;
 
@@ -608,7 +606,7 @@ export default function WorkoutForm({
         </button>
       )}
 
-      {!loading && showEmptyState && groups.length === 0 && !hasTodaysWorkout && createPortal(
+      {!loading && showEmptyState && groups.length === 0 && appData.workouts.length === 0 && createPortal(
         <div
           className="fixed left-0 right-0 z-40 px-6 flex flex-col items-center justify-center pointer-events-none"
           style={{

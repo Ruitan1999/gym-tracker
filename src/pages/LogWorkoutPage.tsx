@@ -3,6 +3,7 @@ import { useLocation, useParams } from 'react-router-dom';
 import PageShell from '../components/layout/PageShell';
 import WorkoutForm, { loadDraft } from '../components/workout/WorkoutForm';
 import StreakCard from '../components/workout/StreakCard';
+import HomeBalanceCard from '../components/workout/HomeBalanceCard';
 import HomeGreeting from '../components/workout/HomeGreeting';
 import NextUpCard from '../components/workout/NextUpCard';
 import TodayWork from '../components/workout/TodayWork';
@@ -69,6 +70,7 @@ function SessionPage({
             <HomeGreeting />
             <NextUpCard />
             <StreakCard />
+            <HomeBalanceCard />
             <TodayWork />
           </>
         ) : undefined

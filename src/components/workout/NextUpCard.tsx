@@ -1,8 +1,7 @@
 import { useMemo, useState } from 'react';
-import { Dumbbell } from 'lucide-react';
+import { ArrowLeftRight, CalendarDays, Check, Dumbbell } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAppContext } from '../../context/AppContext';
-import ExerciseStrip from '../shared/ExerciseStrip';
 import MiniBodyMap from './MiniBodyMap';
 import { bodyPartsOfTemplate } from '../../utils/bodyParts';
 import ConfirmModal from '../shared/ConfirmModal';
@@ -15,7 +14,6 @@ import WeekStrip from './WeekStrip';
 import { thisWeek, type WeekDay } from '../../utils/thisWeek';
 import type { Workout, WorkoutGroup } from '../../types';
 
-// Matches the momentum card's icons, which render at the same size.
 const ICON_STROKE = 2;
 
 /** How the day reads on the card: today by name, anything else by its own. */
@@ -93,194 +91,112 @@ export default function NextUpCard() {
   // No template to suggest yet, but the week itself is still worth showing.
   if (pick.kind === 'none') {
     return (
-      <section className="card mb-4 p-3">
-        <WeekStrip days={week} />
-      </section>
+      <Card week={week}>
+        {null}
+      </Card>
     );
   }
 
   const choose = groups.length > 1 ? <ChooseDifferent onChoose={() => navigate('/groups')} /> : null;
 
-  // Trained today already: the card steps back rather than nagging for a second
-  // session, and points at what is next instead. Still today's business, so it
-  // keeps the banner — deep green rather than the due colour, so the two never
-  // get mistaken for each other at a glance.
+  // Trained today already: the row steps back to what was done, and names
+  // what is next rather than asking for a second session.
   if (pick.kind === 'done') {
     const loggedToday = pick.workout;
-    const upcoming = pick.upcoming;
+    const next = pick.upcoming
+      ? `NEXT · ${DAY_CODES[pick.upcoming.day]}`
+      : pick.rotationNext
+        ? `NEXT · ${pick.rotationNext.name}`
+        : null;
     return (
-      <Shell tone="done" week={week}>
-        <Ribbon
-          background="var(--color-done-deep)"
-          left="DONE TODAY"
-          right={
-            upcoming
-              ? `NEXT · ${DAY_CODES[upcoming.day]}`
-              : pick.rotationNext
-              ? `NEXT · ${pick.rotationNext.name}`
-              : undefined
-          }
+      <Card week={week}>
+        <Row
+          tone="done"
+          label="DONE TODAY"
+          name={loggedToday.name || 'Session logged'}
+          sub={sessionSummary(loggedToday)}
+          action="VIEW SESSION"
+          onPress={() => navigate(`/history/${loggedToday.id}`)}
         />
-        <div style={{ padding: '14px 16px 16px 16px' }}>
-          <div className="flex items-center gap-2 mb-1.5">
-            <span
-              className="shrink-0 flex items-center justify-center"
-              style={{
-                width: 30,
-                height: 30,
-                background: 'var(--color-done)',
-                borderRadius: '7px',
-                color: '#ffffff',
-              }}
-            >
-              <Dumbbell className="w-4 h-4" strokeWidth={ICON_STROKE} />
-            </span>
-            <Name>{loggedToday.name || 'Session logged'}</Name>
-          </div>
-          <div
-            className="font-mono text-[12px] mb-4"
+        {next && (
+          <p
+            className="caps-tight text-[10px] text-center mt-2"
             style={{ color: 'var(--color-text-muted)' }}
           >
-            {sessionSummary(loggedToday)}
-          </div>
-          <button
-            type="button"
-            onClick={() => navigate(`/history/${loggedToday.id}`)}
-            className="w-full h-12 press caps-tight text-[11px]"
-            style={{
-              background: 'var(--color-surface)',
-              border: '1px solid var(--color-done-line)',
-              borderRadius: 'var(--radius)',
-              color: 'var(--color-text)',
-              fontWeight: 700,
-              letterSpacing: '0.12em',
-            }}
-          >
-            VIEW SESSION →
-          </button>
-        </div>
-      </Shell>
+            {next}
+          </p>
+        )}
+      </Card>
     );
   }
 
-  // Rotation: no weekday to name, just whichever template is next in turn.
-  // Same card, same one press to start as a scheduled day.
   if (pick.kind === 'rotation') {
     return (
       <>
-        <Shell tone="due" week={week} footer={choose}>
-          <button
-            type="button"
-            onClick={() => start(pick.group)}
-            className="w-full text-left press block"
-          >
-            <Ribbon background="var(--color-volt)" left="NEXT UP" right="NEXT IN ROTATION" />
-            <div style={{ padding: '14px 16px 16px 16px' }}>
-              <TemplateLine group={pick.group} />
-              <PictureRow group={pick.group} />
-            </div>
-          </button>
-        </Shell>
+        <Card week={week} footer={choose}>
+          <Row
+            tone="due"
+            label="NEXT IN ROTATION"
+            name={pick.group.name}
+            parts={bodyPartsOfTemplate(pick.group.exerciseIds, appData.exercises)}
+            action="START"
+            onPress={() => start(pick.group)}
+          />
+        </Card>
         {confirmModal}
       </>
     );
   }
 
-  // Something is due today: this is the whole point of the card, and the
-  // banner is what makes that unmissable — the eyebrow it replaced was too
-  // easy to skip past now that the card itself is the only button.
   if (pick.kind === 'due') {
     const { first, alsoToday } = pick;
     return (
       <>
-      <Shell tone="due" week={week} footer={choose}>
-        <button
-          type="button"
-          onClick={() => start(first)}
-          className="w-full text-left press block"
-        >
-          <Ribbon background="var(--color-volt)" left="NEXT UP" right={dayLabel(today, 0)} />
-          <div style={{ padding: '14px 16px 16px 16px' }}>
-            <TemplateLine group={first} />
-            <PictureRow group={first} />
-          </div>
-        </button>
-
-        {/* Two templates can share a day. The second is offered underneath
-            rather than beside, so there is still one obvious button. */}
-        {alsoToday.length > 0 && (
-          <div
-            className="flex flex-col gap-2"
-            style={{ padding: '0 16px 16px 16px' }}
-          >
-            {alsoToday.map((g) => (
-              <button
-                key={g.id}
-                type="button"
-                onClick={() => start(g)}
-                className="w-full h-11 px-3 flex items-center justify-between gap-2 press"
-                style={{
-                  background: 'var(--color-surface)',
-                  border: '1px solid var(--color-line)',
-                  borderRadius: 'var(--radius)',
-                }}
-              >
-                <span className="flex items-center gap-2 min-w-0">
-                  <span className="truncate" style={{ fontSize: '13px', fontWeight: 600 }}>
-                    {g.name}
-                  </span>
-                  <span
-                    className="font-mono text-[11px] shrink-0"
-                    style={{ color: 'var(--color-text-faint)' }}
-                  >
-                    ({g.exerciseIds.length})
-                  </span>
-                </span>
-                <span
-                  className="caps-tight text-[9px] shrink-0"
-                  style={{ color: 'var(--color-volt)' }}
-                >
-                  ALSO TODAY →
-                </span>
-              </button>
-            ))}
-          </div>
-        )}
-      </Shell>
-      {confirmModal}
+        <Card week={week} footer={choose}>
+          <Row
+            tone="due"
+            label={dayLabel(today, 0)}
+            name={first.name}
+            parts={bodyPartsOfTemplate(first.exerciseIds, appData.exercises)}
+            action="START"
+            onPress={() => start(first)}
+          />
+          {/* Two templates can share a day; the second is a row of its own. */}
+          {alsoToday.map((g) => (
+            <div key={g.id} className="mt-2">
+              <Row
+                tone="quiet"
+                label="ALSO TODAY"
+                name={g.name}
+                parts={bodyPartsOfTemplate(g.exerciseIds, appData.exercises)}
+                action="START"
+                onPress={() => start(g)}
+              />
+            </div>
+          ))}
+        </Card>
+        {confirmModal}
       </>
     );
   }
 
-  // Days are set, just not today's. A rest day is a real answer, so the card
-  // gives it — quietly: a coloured banner here would claim an urgency the day
-  // doesn't have, so it stays plain text.
+  // A rest day is a real answer: the next one shows quietly, and can still be
+  // started early.
   if (pick.kind === 'upcoming') {
     const { upcoming } = pick;
     return (
       <>
-      <Shell tone="rest" week={week} footer={choose}>
-        <div className="p-4">
-          <Eyebrow
-            left="NEXT UP"
-            leftColor="var(--color-text-faint)"
-            right={dayLabel(upcoming.day, upcoming.daysAway)}
+        <Card week={week} footer={choose}>
+          <Row
+            tone="quiet"
+            label={dayLabel(upcoming.day, upcoming.daysAway)}
+            name={upcoming.group.name}
+            parts={bodyPartsOfTemplate(upcoming.group.exerciseIds, appData.exercises)}
+            action="START EARLY"
+            onPress={() => start(upcoming.group)}
           />
-          <TemplateLine group={upcoming.group} />
-          <div className="mb-4">
-            <PictureRow group={upcoming.group} />
-          </div>
-          <button
-            type="button"
-            onClick={() => start(upcoming.group)}
-            className="w-full h-12 btn-ghost press caps-tight text-[11px]"
-            style={{ borderRadius: 'var(--radius)', letterSpacing: '0.12em' }}
-          >
-            START EARLY →
-          </button>
-        </div>
-      </Shell>
-      {confirmModal}
+        </Card>
+        {confirmModal}
       </>
     );
   }
@@ -288,26 +204,17 @@ export default function NextUpCard() {
   // Templates, but none of them on the calendar.
   if (pick.kind === 'unscheduled') {
     return (
-      <Shell tone="empty" week={week}>
-        <div className="p-4">
-          <Eyebrow left="NEXT UP" leftColor="var(--color-text-faint)" />
-          <Name>Give your week a shape</Name>
-          <p
-            className="mt-1.5 mb-4"
-            style={{ fontSize: '13px', color: 'var(--color-text-muted)', lineHeight: 1.45 }}
-          >
-            Pick the days you train a template and it waits for you here.
-          </p>
-          <button
-            type="button"
-            onClick={() => navigate('/groups')}
-            className="w-full h-12 btn-ghost press caps-tight text-[11px]"
-            style={{ borderRadius: 'var(--radius)', letterSpacing: '0.12em' }}
-          >
-            SET WORKOUT DAYS →
-          </button>
-        </div>
-      </Shell>
+      <Card week={week}>
+        <Row
+          tone="quiet"
+          label="NEXT UP"
+          name="Give your week a shape"
+          sub="Pick the days you train a template."
+          action="SET WORKOUT DAYS"
+          icon="calendar"
+          onPress={() => navigate('/groups')}
+        />
+      </Card>
     );
   }
 
@@ -323,168 +230,115 @@ function ChooseDifferent({ onChoose }: { onChoose: () => void }) {
     <button
       type="button"
       onClick={onChoose}
-      className="w-full h-11 press caps-tight text-[10px] flex items-center justify-center"
-      style={{ color: 'var(--color-text-muted)' }}
+      className="w-full h-11 press flex items-center justify-center gap-2"
+      style={{ color: 'var(--color-volt)', fontSize: '14px', fontWeight: 600 }}
     >
+      <ArrowLeftRight aria-hidden size={16} strokeWidth={ICON_STROKE} />
       Choose a different workout
     </button>
   );
 }
 
-/**
- * One card: the week across the top, then the suggestion in its own tinted
- * panel, then the way out. Reading the suggestion against the dates is the
- * point; on their own the two said less.
- */
-function Shell({
-  tone,
+/** The week across the top, the suggestion under it, the way out last. */
+function Card({
   week,
   footer,
   children,
 }: {
-  tone: 'due' | 'rest' | 'done' | 'empty';
   week: WeekDay[];
   footer?: React.ReactNode;
   children: React.ReactNode;
 }) {
-  const style =
-    tone === 'due'
-      ? { background: 'var(--color-volt-wash)', border: '1px solid var(--color-volt-line)' }
-      : tone === 'done'
-      ? { background: 'var(--color-done-tint)', border: '1px solid var(--color-done-line)' }
-      : tone === 'empty'
-      ? { background: 'var(--color-elev)', border: '1px dashed var(--color-line-2)' }
-      : { background: 'var(--color-surface)', border: '1px solid var(--color-line)' };
-
   return (
     <section className="card mb-4 p-3">
       <WeekStrip days={week} />
-      <div className="mt-3 overflow-hidden" style={{ ...style, borderRadius: 'var(--radius)' }}>
-        {children}
-      </div>
+      {children && <div className="mt-3">{children}</div>}
       {footer && <div className="mt-1 -mb-1">{footer}</div>}
     </section>
   );
 }
 
+const TONES = {
+  due: { panel: 'var(--color-volt-wash)', badge: 'var(--color-volt)', pill: 'var(--color-volt)', pillText: '#ffffff' },
+  done: { panel: 'var(--color-done-tint)', badge: 'var(--color-done)', pill: 'var(--color-surface)', pillText: 'var(--color-done-deep)' },
+  quiet: { panel: 'var(--color-elev)', badge: 'var(--color-text-muted)', pill: 'var(--color-surface)', pillText: 'var(--color-text)' },
+} as const;
+
 /**
- * A full-width band across the top of the card, for the two states that are
- * about today. Left as plain text on the other states — a colour this bold
- * would claim urgency days that aren't today don't have.
+ * One compact line: what kind of day it is, the template, the body it works
+ * and the one thing to do. The whole row is the button, so the target is the
+ * full width rather than the small pill alone.
  */
-function Ribbon({
-  background,
-  left,
-  right,
+function Row({
+  tone,
+  label,
+  name,
+  sub,
+  parts,
+  action,
+  icon = tone === 'done' ? 'check' : 'dumbbell',
+  onPress,
 }: {
-  background: string;
-  left: string;
-  right?: string;
+  tone: keyof typeof TONES;
+  label: string;
+  name: string;
+  sub?: string;
+  parts?: ReturnType<typeof bodyPartsOfTemplate>;
+  action: string;
+  icon?: 'dumbbell' | 'check' | 'calendar';
+  onPress: () => void;
 }) {
+  const t = TONES[tone];
+  const Icon = icon === 'check' ? Check : icon === 'calendar' ? CalendarDays : Dumbbell;
   return (
-    <div
-      className="flex items-center justify-between"
-      style={{ background, padding: '10px 16px' }}
+    <button
+      type="button"
+      onClick={onPress}
+      className="w-full text-left press flex items-center gap-3"
+      style={{ background: t.panel, borderRadius: 'var(--radius)', padding: '12px' }}
     >
       <span
-        className="font-mono"
-        style={{
-          fontWeight: 700,
-          textTransform: 'uppercase',
-          letterSpacing: '0.12em',
-          fontSize: '11px',
-          color: '#ffffff',
-        }}
+        aria-hidden
+        className="shrink-0 flex items-center justify-center"
+        style={{ width: 40, height: 40, borderRadius: '10px', background: t.badge, color: '#ffffff' }}
       >
-        {left}
+        <Icon size={20} strokeWidth={ICON_STROKE} />
       </span>
-      {right && (
+      <span className="flex-1 min-w-0">
+        <span className="block caps-tight text-[10px]" style={{ color: 'var(--color-text-muted)' }}>
+          {label}
+        </span>
         <span
-          className="font-mono"
+          className="block font-display truncate"
           style={{
-            textTransform: 'uppercase',
-            letterSpacing: '0.08em',
-            fontSize: '9px',
-            color: 'rgba(255,255,255,0.75)',
+            fontSize: '1.0625rem',
+            fontWeight: 700,
+            letterSpacing: '-0.02em',
+            fontVariationSettings: '"wdth" 95',
+            color: 'var(--color-text)',
           }}
         >
-          {right}
+          {name}
         </span>
-      )}
-    </div>
-  );
-}
-
-function Eyebrow({
-  left,
-  leftColor,
-  right,
-}: {
-  left: string;
-  leftColor: string;
-  right?: string;
-}) {
-  return (
-    <div className="flex items-center justify-between mb-2">
-      <span className="caps-tight text-[9px]" style={{ color: leftColor }}>
-        {left}
+        {sub && (
+          <span className="block font-mono text-[12px]" style={{ color: 'var(--color-text-muted)' }}>
+            {sub}
+          </span>
+        )}
       </span>
-      {right && (
-        <span className="caps-tight text-[9px]" style={{ color: 'var(--color-text-faint)' }}>
-          {right}
-        </span>
-      )}
-    </div>
-  );
-}
-
-function Name({ children }: { children: React.ReactNode }) {
-  return (
-    <span
-      className="font-display"
-      style={{
-        fontSize: '1.375rem',
-        fontWeight: 700,
-        letterSpacing: '-0.02em',
-        fontVariationSettings: '"wdth" 90',
-        lineHeight: 1.1,
-        color: 'var(--color-text)',
-      }}
-    >
-      {children}
-    </span>
-  );
-}
-
-/**
- * The exercise pictures with the body map at the right end. The map is the
- * quick read ("legs today"); the pictures say which exercises.
- */
-function PictureRow({ group }: { group: WorkoutGroup }) {
-  const { appData } = useAppContext();
-  return (
-    <div className="flex items-center justify-between gap-3">
-      <ExerciseStrip exerciseIds={group.exerciseIds} max={8} />
-      <span className="ml-auto">
-        <MiniBodyMap parts={bodyPartsOfTemplate(group.exerciseIds, appData.exercises)} />
-      </span>
-    </div>
-  );
-}
-
-/** The template's name with its count, as the cards below it read. */
-function TemplateLine({ group }: { group: WorkoutGroup }) {
-  return (
-    <div className="flex items-baseline gap-1.5 mb-3 min-w-0">
-      <span className="truncate">
-        <Name>{group.name}</Name>
-      </span>
+      {parts && parts.length > 0 && <MiniBodyMap parts={parts} />}
       <span
-        className="font-mono text-[13px] shrink-0"
-        style={{ color: 'var(--color-text-faint)' }}
+        className="shrink-0 caps-tight text-[10px] px-3 h-9 flex items-center"
+        style={{
+          background: t.pill,
+          color: t.pillText,
+          borderRadius: '999px',
+          fontWeight: 700,
+          border: tone === 'due' ? 'none' : '1px solid var(--color-line-2)',
+        }}
       >
-        ({group.exerciseIds.length})
+        {action}
       </span>
-    </div>
+    </button>
   );
 }
