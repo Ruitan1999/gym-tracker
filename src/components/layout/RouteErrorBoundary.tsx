@@ -33,7 +33,7 @@ export default class RouteErrorBoundary extends Component<Props, State> {
         className="min-h-[100dvh] flex flex-col items-center justify-center px-6 text-center"
         style={{ background: 'var(--color-bg)' }}
       >
-        <div className="caps-tight text-[9px]" style={{ color: 'var(--color-text-faint)' }}>
+        <div className="caps-tight text-[11px]" style={{ color: 'var(--color-text-faint)' }}>
           COULDN'T LOAD THIS PAGE
         </div>
         <p
@@ -52,7 +52,7 @@ export default class RouteErrorBoundary extends Component<Props, State> {
         </p>
         {this.state.detail && (
           <p
-            className="font-mono text-[10px] mb-6 max-w-full break-words"
+            className="font-mono text-[11px] mb-6 max-w-full break-words"
             style={{ color: 'var(--color-text-faint)' }}
           >
             {this.state.detail}

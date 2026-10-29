@@ -36,7 +36,7 @@ export default function TemplateDetailPage() {
     return (
       <PageShell title="Template" showBack>
         <p
-          className="caps-tight text-[10px] text-center py-16"
+          className="caps-tight text-[11px] text-center py-16"
           style={{ color: 'var(--color-text-faint)' }}
         >
           — NOT FOUND —
@@ -206,7 +206,7 @@ function TemplateEditor({ group, isNew }: { group: WorkoutGroup; isNew: boolean 
     >
       <div className="flex flex-col gap-5">
         <header>
-          <div className="caps-tight text-[9px]" style={{ color: 'var(--color-text-faint)' }}>
+          <div className="caps-tight text-[11px]" style={{ color: 'var(--color-text-faint)' }}>
             TEMPLATE
           </div>
           {/* Tap the name to change it, rather than going through a menu and
@@ -262,7 +262,7 @@ function TemplateEditor({ group, isNew }: { group: WorkoutGroup; isNew: boolean 
               {draftName}
             </h2>
           )}
-          <div className="caps-tight text-[9px] mt-1.5" style={{ color: 'var(--color-text-faint)' }}>
+          <div className="caps-tight text-[11px] mt-1.5" style={{ color: 'var(--color-text-faint)' }}>
             {String(slots.length).padStart(2, '0')} EXERCISE{slots.length === 1 ? '' : 'S'}
             {slots.length > 1 && ' · HOLD TO REORDER'}
             {dirty && <span style={{ color: 'var(--color-volt)' }}> · UNSAVED</span>}
@@ -287,10 +287,10 @@ function TemplateEditor({ group, isNew }: { group: WorkoutGroup; isNew: boolean 
           }}
         >
           <div className="flex items-center justify-between mb-2.5">
-            <span className="caps-tight text-[9px]" style={{ color: 'var(--color-volt)' }}>
+            <span className="caps-tight text-[11px]" style={{ color: 'var(--color-volt)' }}>
               WORKOUT DAYS
             </span>
-            <span className="caps-tight text-[9px]" style={{ color: 'var(--color-text-faint)' }}>
+            <span className="caps-tight text-[11px]" style={{ color: 'var(--color-text-faint)' }}>
               {days.length === 0 ? 'SET →' : 'EDIT →'}
             </span>
           </div>
@@ -333,7 +333,7 @@ function TemplateEditor({ group, isNew }: { group: WorkoutGroup; isNew: boolean 
             >
               Nothing in this template yet
             </p>
-            <p className="caps-tight text-[9px] mt-1.5" style={{ color: 'var(--color-text-faint)' }}>
+            <p className="caps-tight text-[11px] mt-1.5" style={{ color: 'var(--color-text-faint)' }}>
               ADD THE EXERCISES YOU WANT TO REPEAT
             </p>
           </div>
@@ -363,7 +363,7 @@ function TemplateEditor({ group, isNew }: { group: WorkoutGroup; isNew: boolean 
                       onKeyDown={handleKeyDown(slot.key)}
                     >
                       <span
-                        className="caps-tight text-[10px] shrink-0"
+                        className="caps-tight text-[11px] shrink-0"
                         style={{ color: 'var(--color-text)' }}
                       >
                         {String(index + 1).padStart(2, '0')}
@@ -385,7 +385,7 @@ function TemplateEditor({ group, isNew }: { group: WorkoutGroup; isNew: boolean 
                       </span>
                       {exercise && (
                         <span
-                          className="caps-tight text-[9px] px-2 py-0.5 shrink-0"
+                          className="caps-tight text-[11px] px-2 py-0.5 shrink-0"
                           style={{
                             color: BODY_PART_ACCENT[exercise.bodyPart],
                             border: `1px solid ${BODY_PART_ACCENT[exercise.bodyPart]}`,

@@ -44,18 +44,18 @@ export default function HomeBalanceCard() {
   return (
     <section className="card mb-4 p-4" aria-label="Muscle balance">
       <div className="flex items-center justify-between gap-3 mb-3">
-        <h2 className="caps-tight text-[10px]" style={{ color: 'var(--color-text-muted)' }}>
+        <h2 className="caps-tight text-[11px]" style={{ color: 'var(--color-text-muted)' }}>
           Muscle balance
         </h2>
         <div className="w-40">
           <Segmented label="Window" options={OPTIONS} value={window} onChange={setWindow} />
         </div>
       </div>
-      <div className="flex items-start gap-4">
+      <div className="flex flex-wrap items-start gap-4">
         <MuscleFigure paint={balancePaint(sets)} description={description} />
         {/* The same numbers as words, most-trained first. */}
-        <div className="flex-1 min-w-0" aria-hidden>
-          <div className="caps-tight text-[9px] mb-2" style={{ color: 'var(--color-text-faint)' }}>
+        <div className="flex-1 min-w-[136px]" aria-hidden>
+          <div className="caps-tight text-[11px] mb-2" style={{ color: 'var(--color-text-faint)' }}>
             SETS · THE LAST {days} DAYS
           </div>
           {ranked.length === 0 ? (
@@ -67,7 +67,7 @@ export default function HomeBalanceCard() {
               {ranked.map(([part, n]) => (
                 <li key={part} className="flex items-baseline gap-2">
                   <span
-                    className="caps-tight text-[10px] flex-1 min-w-0 truncate"
+                    className="caps-tight text-[11px] flex-1 min-w-0 truncate"
                     style={{ color: 'var(--color-text)' }}
                   >
                     {BODY_PART_LABELS[part]}

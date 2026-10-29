@@ -40,4 +40,20 @@ first).
 readability gain for least risk), then 3 (dark mode), then 5 and 9 (tidy
 polish), then 6 and 7 when you want new behaviour.
 
-Nothing here has been changed yet; this is the list to choose from.
+## Done
+
+Items 1, 2 and 4 were applied together on 2026-10-29:
+
+- The faint text token is now `#707070` (4.95:1 on white, 4.54:1 on the page).
+- No text below 11 px: every 9 and 10 px label is now 11 px. The two label
+  classes have tighter tracking: `.caps` 0.14em to 0.08em, `.caps-tight`
+  0.08em to 0.04em; the nav labels use 0.02em.
+- Shared 44 px controls are now 48 px (rep chips, ±15 / pause / Skip on the
+  rest bar, segmented switches, icon buttons, Choose a different workout).
+- Checked at 360 px and 430 px: no horizontal scroll and no clipped text. At
+  360 px the balance list moves under the figure, and the streak line, tile
+  labels and heatmap summary wrap instead of cutting off. Long exercise
+  names still end in an ellipsis, as before. The rep chips wrapping onto a
+  second row at 360 px predates this change.
+
+Still open: 3 (dark mode) and 5 to 10.

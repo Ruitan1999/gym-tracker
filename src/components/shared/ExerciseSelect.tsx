@@ -242,7 +242,7 @@ export default function ExerciseSelect({
           <button
             type="button"
             onClick={handleClose}
-            className="h-10 px-3 caps-tight text-[10px] press"
+            className="h-10 px-3 caps-tight text-[11px] press"
             style={{ color: 'var(--color-text-muted)' }}
           >
             CLOSE ✕
@@ -310,7 +310,7 @@ export default function ExerciseSelect({
                   ) : (
                     <div>
                       <div
-                        className="caps text-[10px] mb-3"
+                        className="caps text-[11px] mb-3"
                         style={{ color: 'var(--color-text-muted)' }}
                       >
                         WHAT TYPE OF EXERCISE IS "{choosingCategoryFor.toUpperCase()}"?
@@ -351,7 +351,7 @@ export default function ExerciseSelect({
                               {cat.charAt(0).toUpperCase() + cat.slice(1)}
                             </span>
                             <span
-                              className="caps-tight text-[9px] px-2 py-0.5"
+                              className="caps-tight text-[11px] px-2 py-0.5"
                               style={{
                                 color: BODY_PART_ACCENT[cat],
                                 border: `1px solid ${BODY_PART_ACCENT[cat]}`,
@@ -366,7 +366,7 @@ export default function ExerciseSelect({
                       <button
                         type="button"
                         onClick={() => setChoosingCategoryFor(null)}
-                        className="w-full h-12 mt-3 caps-tight text-[10px] press"
+                        className="w-full h-12 mt-3 caps-tight text-[11px] press"
                         style={{ color: 'var(--color-text-muted)' }}
                       >
                         ← BACK
@@ -393,7 +393,7 @@ export default function ExerciseSelect({
                           <AddedTag />
                         ) : (
                           <span
-                            className="caps-tight text-[9px] px-2 py-0.5"
+                            className="caps-tight text-[11px] px-2 py-0.5"
                             style={{
                               color: BODY_PART_ACCENT[ex.bodyPart],
                               border: `1px solid ${BODY_PART_ACCENT[ex.bodyPart]}`,
@@ -434,7 +434,7 @@ export default function ExerciseSelect({
                         }}
                       >
                         <span
-                          className="caps-tight text-[9px]"
+                          className="caps-tight text-[11px]"
                           style={{ color: BODY_PART_ACCENT[cat] }}
                         >
                           {BODY_PART_CODE[cat]}
@@ -469,7 +469,7 @@ export default function ExerciseSelect({
                         setOpenBodyPart(null);
                         scrollRef.current?.scrollTo({ top: 0 });
                       }}
-                      className="h-9 px-3 caps-tight text-[10px] press"
+                      className="h-9 px-3 caps-tight text-[11px] press"
                       style={{
                         color: 'var(--color-text)',
                         border: '1px solid var(--color-line-2)',
@@ -479,14 +479,14 @@ export default function ExerciseSelect({
                       ← ALL
                     </button>
                     <span
-                      className="caps text-[10px]"
+                      className="caps text-[11px]"
                       style={{ color: BODY_PART_ACCENT[openBodyPart] }}
                     >
                       {openBodyPart.toUpperCase()}
                     </span>
                     <span className="flex-1 h-px" style={{ background: 'var(--color-line)' }} />
                     <span
-                      className="font-mono text-[10px]"
+                      className="font-mono text-[11px]"
                       style={{ color: 'var(--color-text-faint)' }}
                     >
                       {String(openList.length).padStart(2, '0')}
@@ -531,7 +531,7 @@ export default function ExerciseSelect({
           )}
           {/* Required wherever the exercise images are shown. */}
           <p
-            className="caps-tight text-[9px] pt-5 pb-1 text-center"
+            className="caps-tight text-[11px] pt-5 pb-1 text-center"
             style={{ color: 'var(--color-text-faint)' }}
           >
             {MEDIA_ATTRIBUTION}
@@ -556,7 +556,7 @@ function PickerThumb({ id, images }: { id: string; images: Record<string, string
 function AddedTag() {
   return (
     <span
-      className="caps-tight text-[9px] px-2 py-0.5 flex items-center gap-1"
+      className="caps-tight text-[11px] px-2 py-0.5 flex items-center gap-1"
       style={{
         color: 'var(--color-done-deep)',
         background: 'var(--color-done-tint)',
@@ -584,7 +584,7 @@ function ExerciseLabel({ exercise, medium = false }: { exercise: Exercise; mediu
         {exercise.name}
       </span>
       <span
-        className="block font-mono text-[10px] mt-0.5"
+        className="block font-mono text-[11px] mt-0.5"
         style={{ color: 'var(--color-text-faint)' }}
       >
         {exerciseSubtitle(exercise, part)}
@@ -630,7 +630,7 @@ function EquipmentChips({
             type="button"
             onClick={() => onChange(option)}
             aria-pressed={on}
-            className="shrink-0 h-11 px-4 caps-tight text-[10px] press"
+            className="shrink-0 h-12 px-4 caps-tight text-[11px] press"
             style={{
               background: on ? 'var(--color-volt)' : 'var(--color-surface)',
               color: on ? '#ffffff' : 'var(--color-text)',
@@ -662,7 +662,7 @@ function NoneForEquipment({
       <button
         type="button"
         onClick={onAny}
-        className="h-11 px-4 mt-2 caps-tight text-[10px] press"
+        className="h-12 px-4 mt-2 caps-tight text-[11px] press"
         style={{ color: 'var(--color-volt)' }}
       >
         SHOW ANY EQUIPMENT

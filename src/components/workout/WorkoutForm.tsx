@@ -649,7 +649,7 @@ export default function WorkoutForm({
       <section className="relative card">
         <div className="relative p-4">
           <div className="flex items-center justify-between">
-            <div className="caps-tight text-[9px]" style={{ color: 'var(--color-text-faint)' }}>
+            <div className="caps-tight text-[11px]" style={{ color: 'var(--color-text-faint)' }}>
               SESSION {isEdit ? 'EDIT' : 'NEW'}
             </div>
           </div>
@@ -668,7 +668,7 @@ export default function WorkoutForm({
             className="mt-4 pt-4"
             style={{ borderTop: '1px solid var(--color-line)' }}
           >
-            <div className="caps-tight text-[9px] mb-2" style={{ color: 'var(--color-text-muted)' }}>
+            <div className="caps-tight text-[11px] mb-2" style={{ color: 'var(--color-text-muted)' }}>
               RPE SESSION RATING
             </div>
             <div className="grid grid-cols-10 gap-1">
@@ -699,7 +699,7 @@ const color = ratingColor(n)!;
               })}
             </div>
             <div
-              className="flex justify-between mt-1.5 caps-tight text-[9px]"
+              className="flex justify-between mt-1.5 caps-tight text-[11px]"
               style={{ color: 'var(--color-text-faint)' }}
             >
               <span>EASY</span>
@@ -712,7 +712,7 @@ const color = ratingColor(n)!;
       )}
 
       {validationError && (
-        <p className="caps-tight text-[10px] text-center" style={{ color: 'var(--color-rust)' }}>
+        <p className="caps-tight text-[11px] text-center" style={{ color: 'var(--color-rust)' }}>
           ⚠ {validationError}
         </p>
       )}
@@ -722,7 +722,7 @@ const color = ratingColor(n)!;
         {totalExercises > 0 && (
           <div
             id="save-gate-hint"
-            className="flex items-center justify-between caps-tight text-[9px]"
+            className="flex items-center justify-between caps-tight text-[11px]"
             style={{ color: saveGated ? 'var(--color-text-muted)' : 'var(--color-done-deep)' }}
           >
             <span>
@@ -814,7 +814,7 @@ function HeroStat({ label, value, divider }: { label: string; value: number; div
       className="pt-3 px-1"
       style={divider ? { borderLeft: '1px solid var(--color-line)' } : undefined}
     >
-      <div className="caps-tight text-[9px]" style={{ color: 'var(--color-text-faint)' }}>
+      <div className="caps-tight text-[11px]" style={{ color: 'var(--color-text-faint)' }}>
         {label}
       </div>
       <div

@@ -68,7 +68,7 @@ export default function WorkoutCard({ workout }: WorkoutCardProps) {
         }}
       >
         <div
-          className="caps-tight text-[9px]"
+          className="caps-tight text-[11px]"
           style={{ color: 'var(--color-text)' }}
         >
           {weekday}
@@ -87,7 +87,7 @@ export default function WorkoutCard({ workout }: WorkoutCardProps) {
         </div>
         {time && (
           <div
-            className="caps-tight text-[9px] mt-1"
+            className="caps-tight text-[11px] mt-1"
             style={{ color: 'var(--color-text-faint)' }}
           >
             {time.replace(/\s/g, '')}
@@ -113,7 +113,7 @@ export default function WorkoutCard({ workout }: WorkoutCardProps) {
           </div>
           {rating && ratingColor && (
             <span
-              className="font-mono text-[10px] shrink-0 px-1.5 py-0.5"
+              className="font-mono text-[11px] shrink-0 px-1.5 py-0.5"
               style={{
                 color: ratingColor,
                 border: `1px solid ${ratingColor}`,

@@ -20,7 +20,7 @@
   --color-line-3: #a8a8a8;
   --color-text: #0a0a0a;
   --color-text-muted: #595959;
-  --color-text-faint: #9a9a9a;
+  --color-text-faint: #707070;
   /* Classic royal blue: 6.37 against white and 5.84 as text on the page, so
      it clears AA as a fill and as type without being nudged. */
   --color-volt: #1458cc;
@@ -102,13 +102,13 @@ body {
 
 .caps {
   text-transform: uppercase;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.08em;
   font-family: var(--font-mono);
   font-weight: 500;
 }
 .caps-tight {
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.04em;
   font-family: var(--font-mono);
   font-weight: 500;
 }

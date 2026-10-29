@@ -29,7 +29,7 @@ function Figure({
             : { fill: 'var(--color-line-2)', opacity: 0.55 };
         }}
       />
-      <span className="caps-tight text-[9px]" style={{ color: 'var(--color-text-faint)' }}>
+      <span className="caps-tight text-[11px]" style={{ color: 'var(--color-text-faint)' }}>
         {label}
       </span>
     </div>
@@ -47,7 +47,7 @@ export default function BodyMap({ worked }: { worked: Partial<Record<BodyPart, n
 
   return (
     <section className="card p-4">
-      <div className="caps-tight text-[9px] mb-3" style={{ color: 'var(--color-text-faint)' }}>
+      <div className="caps-tight text-[11px] mb-3" style={{ color: 'var(--color-text-faint)' }}>
         WORKED THIS SESSION
       </div>
       <div className="flex items-start gap-4">
@@ -70,7 +70,7 @@ export default function BodyMap({ worked }: { worked: Partial<Record<BodyPart, n
                 }}
               />
               <span
-                className="caps-tight text-[9px] flex-1 min-w-0 truncate"
+                className="caps-tight text-[11px] flex-1 min-w-0 truncate"
                 style={{ color: 'var(--color-text)' }}
               >
                 {BODY_PART_LABELS[part]}
@@ -84,7 +84,7 @@ export default function BodyMap({ worked }: { worked: Partial<Record<BodyPart, n
               >
                 {sets}
               </span>
-              <span className="caps-tight text-[9px]" style={{ color: 'var(--color-text-faint)' }}>
+              <span className="caps-tight text-[11px]" style={{ color: 'var(--color-text-faint)' }}>
                 {sets === 1 ? 'SET' : 'SETS'}
               </span>
             </li>

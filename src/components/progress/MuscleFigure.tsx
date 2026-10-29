@@ -15,7 +15,7 @@ function Side({
   return (
     <div className="flex flex-col items-center gap-1.5">
       <BodyFigure side={side} paint={paint} width={96} />
-      <span className="caps-tight text-[9px]" style={{ color: 'var(--color-text-faint)' }}>
+      <span className="caps-tight text-[11px]" style={{ color: 'var(--color-text-faint)' }}>
         {label}
       </span>
     </div>

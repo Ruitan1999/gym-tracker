@@ -90,7 +90,7 @@ export default function GroupsPage() {
       <div className="flex flex-col gap-4">
         <HowYouTrain mode={mode} onChange={setMode} />
 
-        <p className="caps-tight text-[9px]" style={{ color: 'var(--color-text-faint)' }}>
+        <p className="caps-tight text-[11px]" style={{ color: 'var(--color-text-faint)' }}>
           {String(groups.length).padStart(2, '0')} TEMPLATE{groups.length === 1 ? '' : 'S'}
           {groups.length > 1 && ' · HOLD TO REORDER'}
         </p>
@@ -130,7 +130,7 @@ export default function GroupsPage() {
                         // Order is what counts in rotation; the weekdays are
                         // kept but not shown, as they are not being used.
                         <span
-                          className="caps-tight text-[9px] block truncate"
+                          className="caps-tight text-[11px] block truncate"
                           style={{
                             color:
                               g.id === rotationNextId
@@ -144,7 +144,7 @@ export default function GroupsPage() {
                       ) : (
                         dayCodeLabel(g) && (
                         <span
-                          className="caps-tight text-[9px] block truncate"
+                          className="caps-tight text-[11px] block truncate"
                           style={{ color: 'var(--color-volt)' }}
                         >
                           {dayCodeLabel(g)}
@@ -173,7 +173,7 @@ export default function GroupsPage() {
                       </span>
                       {names.length === 0 ? (
                         <span
-                          className="caps-tight text-[9px] block truncate mt-0.5"
+                          className="caps-tight text-[11px] block truncate mt-0.5"
                           style={{ color: 'var(--color-text-faint)' }}
                         >
                           EMPTY — TAP TO ADD EXERCISES
@@ -305,7 +305,7 @@ function HowYouTrain({
       style={{ border: '1px solid var(--color-line)' }}
       aria-label="How you train"
     >
-      <p className="caps-tight text-[9px] mb-2.5" style={{ color: 'var(--color-text-faint)' }}>
+      <p className="caps-tight text-[11px] mb-2.5" style={{ color: 'var(--color-text-faint)' }}>
         HOW YOU TRAIN
       </p>
       <div
@@ -329,7 +329,7 @@ function HowYouTrain({
               onClick={() => onChange(o.value)}
               className="press caps-tight text-[11px]"
               style={{
-                minHeight: '44px',
+                minHeight: '48px',
                 fontWeight: 700,
                 letterSpacing: '0.1em',
                 borderRadius: 'calc(var(--radius) - 2px)',

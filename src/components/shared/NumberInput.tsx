@@ -116,7 +116,7 @@ export default function NumberInput({
       {label && (
         <label
           htmlFor={inputId}
-          className="caps-tight text-[9px]"
+          className="caps-tight text-[11px]"
           style={{ color: 'var(--color-text-muted)' }}
         >
           {label}

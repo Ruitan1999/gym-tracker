@@ -116,7 +116,7 @@ export default function ExerciseDetailPage() {
         {/* Max Weight chart */}
         <section className="card p-4">
           <h3
-            className="caps-tight text-[10px] mb-3"
+            className="caps-tight text-[11px] mb-3"
             style={{ color: 'var(--color-text-muted)' }}
           >
             MAX WEIGHT · {unitUpper}
@@ -163,7 +163,7 @@ export default function ExerciseDetailPage() {
         {/* Total Volume chart */}
         <section className="card p-4">
           <h3
-            className="caps-tight text-[10px] mb-3"
+            className="caps-tight text-[11px] mb-3"
             style={{ color: 'var(--color-text-muted)' }}
           >
             TOTAL VOLUME · {unitUpper}
@@ -210,7 +210,7 @@ export default function ExerciseDetailPage() {
         {/* Recent sessions */}
         <section>
           <h2
-            className="caps text-[10px] mb-3 flex items-center gap-3"
+            className="caps text-[11px] mb-3 flex items-center gap-3"
             style={{ color: 'var(--color-text-muted)' }}
           >
             <span>RECENT SESSIONS</span>
@@ -245,7 +245,7 @@ export default function ExerciseDetailPage() {
                       {formatShortDate(s.date)}
                     </div>
                     <div
-                      className="caps-tight text-[9px] mt-1"
+                      className="caps-tight text-[11px] mt-1"
                       style={{ color: 'var(--color-text-faint)' }}
                     >
                       {String(s.sets.length).padStart(2, '0')} SET{s.sets.length === 1 ? '' : 'S'} · VOL {fmt(volDisplay)} {unitUpper}
@@ -262,7 +262,7 @@ export default function ExerciseDetailPage() {
                   >
                     {fmt(topDisplay)}
                     <span
-                      className="caps-tight text-[9px] ml-1"
+                      className="caps-tight text-[11px] ml-1"
                       style={{ color: 'var(--color-text-faint)' }}
                     >
                       {unitUpper}
@@ -295,7 +295,7 @@ function BigStat({
       style={divider ? { borderLeft: '1px solid var(--color-line)' } : undefined}
     >
       <div
-        className="caps-tight text-[9px] truncate"
+        className="caps-tight text-[11px] truncate"
         style={{ color: 'var(--color-text-faint)' }}
       >
         {label}

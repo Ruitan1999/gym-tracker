@@ -96,7 +96,7 @@ export default function WorkoutDetailPage() {
     return (
       <PageShell title="Session" showBack>
         <p
-          className="caps-tight text-[10px] text-center py-16"
+          className="caps-tight text-[11px] text-center py-16"
           style={{ color: 'var(--color-text-faint)' }}
         >
           — NOT FOUND —
@@ -139,7 +139,7 @@ export default function WorkoutDetailPage() {
         <button
           type="button"
           onClick={() => navigate(`/workout/${workout.id}`)}
-          className="h-9 px-3 caps-tight text-[10px] press"
+          className="h-9 px-3 caps-tight text-[11px] press"
           style={{ color: 'var(--color-text)' }}
         >
           EDIT
@@ -150,7 +150,7 @@ export default function WorkoutDetailPage() {
         {/* Date */}
         <div>
           <div
-            className="caps-tight text-[9px] mb-1"
+            className="caps-tight text-[11px] mb-1"
             style={{ color: 'var(--color-text-faint)' }}
           >
             LOGGED {workout.date}
@@ -204,7 +204,7 @@ export default function WorkoutDetailPage() {
             />
             <div className="flex-1">
               <div
-                className="caps-tight text-[9px]"
+                className="caps-tight text-[11px]"
                 style={{ color: 'var(--color-text)' }}
               >
                 ▲ TOP SET
@@ -235,7 +235,7 @@ export default function WorkoutDetailPage() {
                 {topSet.weight}
               </span>
               <span
-                className="caps-tight text-[9px] ml-1"
+                className="caps-tight text-[11px] ml-1"
                 style={{ color: 'var(--color-text-faint)' }}
               >
                 kg
@@ -266,7 +266,7 @@ export default function WorkoutDetailPage() {
             </div>
             <div>
               <div
-                className="caps-tight text-[9px]"
+                className="caps-tight text-[11px]"
                 style={{ color: 'var(--color-text-faint)' }}
               >
                 RPE FEEL
@@ -317,7 +317,7 @@ export default function WorkoutDetailPage() {
                   </div>
                 </div>
                 <span
-                  className="caps-tight text-[9px] font-mono shrink-0"
+                  className="caps-tight text-[11px] font-mono shrink-0"
                   style={{ color: 'var(--color-text-faint)' }}
                 >
                   {Math.round(entryVolume)} kg
@@ -334,7 +334,7 @@ export default function WorkoutDetailPage() {
                     }}
                   >
                     <span
-                      className="caps-tight text-[9px] w-10"
+                      className="caps-tight text-[11px] w-10"
                       style={{ color: 'var(--color-text-faint)' }}
                     >
                       SET {String(set.setNumber).padStart(2, '0')}
@@ -352,7 +352,7 @@ export default function WorkoutDetailPage() {
                           {set.reps}
                         </span>
                         <span
-                          className="caps-tight text-[9px] ml-1"
+                          className="caps-tight text-[11px] ml-1"
                           style={{ color: 'var(--color-text-faint)' }}
                         >
                           REPS
@@ -363,7 +363,7 @@ export default function WorkoutDetailPage() {
                           {set.weightKg}
                         </span>
                         <span
-                          className="caps-tight text-[9px] ml-1"
+                          className="caps-tight text-[11px] ml-1"
                           style={{ color: 'var(--color-text-faint)' }}
                         >
                           kg
@@ -381,7 +381,7 @@ export default function WorkoutDetailPage() {
         {notesText && (
           <section className="card p-4">
             <div
-              className="caps-tight text-[9px] mb-2"
+              className="caps-tight text-[11px] mb-2"
               style={{ color: 'var(--color-text-faint)' }}
             >
               NOTES MARGINALIA
@@ -475,7 +475,7 @@ function Tile({
       className="px-4 py-4"
       style={divider ? { borderLeft: '1px solid var(--color-line)' } : undefined}
     >
-      <div className="caps-tight text-[9px]" style={{ color: 'var(--color-text-faint)' }}>
+      <div className="caps-tight text-[11px]" style={{ color: 'var(--color-text-faint)' }}>
         {label}
       </div>
       <div

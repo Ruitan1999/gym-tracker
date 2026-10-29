@@ -76,7 +76,7 @@ export default function AdminLibraryPage() {
   return (
     <PageShell title="Library" eyebrow="ADMIN · EVERYONE SEES THIS" showBack>
       <div className="flex flex-col gap-4">
-        <p className="caps-tight text-[9px]" style={{ color: 'var(--color-text-faint)' }}>
+        <p className="caps-tight text-[11px]" style={{ color: 'var(--color-text-faint)' }}>
           {appData.exercises.length} EXERCISES · {withoutImage} WITHOUT A PICTURE
         </p>
 
@@ -86,7 +86,7 @@ export default function AdminLibraryPage() {
               key={f}
               type="button"
               onClick={() => setFilter(f)}
-              className="h-10 px-3 caps-tight text-[10px] press"
+              className="h-10 px-3 caps-tight text-[11px] press"
               style={{
                 borderRadius: 'var(--radius)',
                 background: filter === f ? 'var(--color-volt)' : 'transparent',
@@ -133,7 +133,7 @@ export default function AdminLibraryPage() {
                     {exercise.name}
                   </span>
                   <span
-                    className="caps-tight text-[9px]"
+                    className="caps-tight text-[11px]"
                     style={{ color: BODY_PART_ACCENT[exercise.bodyPart] }}
                   >
                     {BODY_PART_LABELS[exercise.bodyPart]}
@@ -146,7 +146,7 @@ export default function AdminLibraryPage() {
             </li>
           ))}
           {shown.length === 0 && (
-            <li className="caps-tight text-[10px] py-6 text-center" style={{ color: 'var(--color-text-faint)' }}>
+            <li className="caps-tight text-[11px] py-6 text-center" style={{ color: 'var(--color-text-faint)' }}>
               NOTHING TO SHOW
             </li>
           )}

@@ -35,7 +35,7 @@ export default function EmptyState({ message, description, action }: EmptyStateP
       </p>
       {description && (
         <p
-          className="caps-tight text-[9px] mb-6"
+          className="caps-tight text-[11px] mb-6"
           style={{ color: 'var(--color-text-faint)', letterSpacing: '0.12em' }}
         >
           {description}

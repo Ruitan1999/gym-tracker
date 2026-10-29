@@ -43,7 +43,7 @@ export default function ActionSheet({ eyebrow, title, items, onClose }: ActionSh
       >
         <div className="px-5 pt-4 pb-3" style={{ borderBottom: '1px solid var(--color-line)' }}>
           {eyebrow && (
-            <div className="caps-tight text-[9px]" style={{ color: 'var(--color-text-faint)' }}>
+            <div className="caps-tight text-[11px]" style={{ color: 'var(--color-text-faint)' }}>
               {eyebrow}
             </div>
           )}

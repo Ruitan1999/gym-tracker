@@ -113,7 +113,7 @@ export default function MuscleBalance({
 
   return (
     <section className="card p-4" aria-label="Muscle balance">
-      <h2 className="caps-tight text-[9px] mb-3" style={{ color: 'var(--color-text-faint)' }}>
+      <h2 className="caps-tight text-[11px] mb-3" style={{ color: 'var(--color-text-faint)' }}>
         MUSCLE BALANCE
       </h2>
       <div className="flex flex-col gap-2">
@@ -123,10 +123,10 @@ export default function MuscleBalance({
         )}
       </div>
 
-      <div className="flex items-start gap-4 mt-4">
+      <div className="flex flex-wrap items-start gap-4 mt-4">
         <MuscleFigure paint={paint} description={description} />
-        <div className="flex-1 min-w-0" aria-live="polite">
-          <div className="caps-tight text-[9px] mb-2" style={{ color: 'var(--color-text-faint)' }}>
+        <div className="flex-1 min-w-[136px]" aria-live="polite">
+          <div className="caps-tight text-[11px] mb-2" style={{ color: 'var(--color-text-faint)' }}>
             {heading}
           </div>
           {rows.length === 0 ? (
@@ -138,7 +138,7 @@ export default function MuscleBalance({
               {rows.map(({ part, note }) => (
                 <li key={part} className="flex items-baseline gap-2">
                   <span
-                    className="caps-tight text-[10px] flex-1 min-w-0 truncate"
+                    className="caps-tight text-[11px] flex-1 min-w-0 truncate"
                     style={{ color: 'var(--color-text)' }}
                   >
                     {BODY_PART_LABELS[part]}

@@ -42,7 +42,7 @@ export default function QuickRepChips({
   }
 
   const chipBase =
-    'shrink-0 min-w-[46px] h-[44px] px-3 font-mono text-sm font-medium press flex items-center justify-center';
+    'shrink-0 min-w-[46px] h-[48px] px-3 font-mono text-sm font-medium press flex items-center justify-center';
 
   return (
     <>
@@ -109,10 +109,10 @@ export default function QuickRepChips({
       {modalOpen && (
         <ModalShell onDismiss={() => setModalOpen(false)} label="Enter custom reps">
             <div className="flex items-baseline justify-between mb-4">
-              <div className="caps text-[10px]" style={{ color: 'var(--color-text-muted)' }}>
+              <div className="caps text-[11px]" style={{ color: 'var(--color-text-muted)' }}>
                 CUSTOM REPS
               </div>
-              <div className="caps text-[10px]" style={{ color: 'var(--color-text-faint)' }}>
+              <div className="caps text-[11px]" style={{ color: 'var(--color-text-faint)' }}>
                 0–99
               </div>
             </div>

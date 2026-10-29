@@ -23,7 +23,7 @@ export default function ConfirmModal({
 }: ConfirmModalProps) {
   return (
     <ModalShell onDismiss={onClose}>
-        <div className="caps-tight text-[9px] mb-2" style={{ color: 'var(--color-text)' }}>
+        <div className="caps-tight text-[11px] mb-2" style={{ color: 'var(--color-text)' }}>
           {eyebrow}
         </div>
         <h3

@@ -81,7 +81,7 @@ export default function SessionSavedBanner({ stats, onClose, duration = 2200 }: 
           </div>
           <div className="min-w-0 flex-1">
             <div
-              className="caps-tight text-[9px] flex items-center gap-1.5 flex-wrap"
+              className="caps-tight text-[11px] flex items-center gap-1.5 flex-wrap"
               style={{ color: 'var(--color-done-deep)', letterSpacing: '0.18em' }}
             >
               <span>SESSION LOGGED</span>
@@ -138,7 +138,7 @@ function Stat({ value, label }: { value: number | string; label: string }) {
   return (
     <span className="inline-flex items-baseline gap-1">
       <span style={{ color: 'var(--color-text)', fontWeight: 500 }}>{value}</span>
-      <span className="caps-tight text-[9px]" style={{ color: 'var(--color-text-faint)' }}>
+      <span className="caps-tight text-[11px]" style={{ color: 'var(--color-text-faint)' }}>
         {label}
       </span>
     </span>

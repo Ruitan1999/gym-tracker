@@ -53,7 +53,7 @@ export default function StreakCard() {
           {active ? `${streak} week streak` : 'Start a streak this week'}
         </div>
         <div
-          className="font-mono text-[12px] mt-0.5 truncate"
+          className="font-mono text-[12px] mt-0.5"
           style={{ color: 'var(--color-text-muted)', fontVariantNumeric: 'tabular-nums' }}
         >
           {plannedDays > 0 ? `${trainedDays} / ${plannedDays}` : trainedDays} this week · {total}{' '}
@@ -63,7 +63,7 @@ export default function StreakCard() {
       <Link
         to="/history"
         aria-label="Open Log Book"
-        className="shrink-0 w-11 h-11 flex items-center justify-center press"
+        className="shrink-0 w-12 h-12 flex items-center justify-center press"
         style={{ color: 'var(--color-text)' }}
       >
         <CalendarDays size={22} strokeWidth={1.75} />

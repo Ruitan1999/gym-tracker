@@ -88,7 +88,7 @@ export default function LandingPage() {
               >
                 SIGN IN
               </button>
-              <span className="caps-tight text-[10px]" style={{ color: 'var(--color-text-faint)' }}>
+              <span className="caps-tight text-[11px]" style={{ color: 'var(--color-text-faint)' }}>
                 NO CARD · FREE FOREVER
               </span>
             </div>
@@ -101,10 +101,10 @@ export default function LandingPage() {
               style={{ background: 'var(--color-surface)', border: '1px solid var(--color-line)', borderRadius: 'var(--radius)' }}
             >
               <div className="flex items-center justify-between">
-                <span className="caps-tight text-[10px]" style={{ color: 'var(--color-text-faint)' }}>
+                <span className="caps-tight text-[11px]" style={{ color: 'var(--color-text-faint)' }}>
                   THIS MONTH
                 </span>
-                <span className="caps-tight text-[10px]" style={{ color: 'var(--color-volt-ink)' }}>
+                <span className="caps-tight text-[11px]" style={{ color: 'var(--color-volt-ink)' }}>
                   +12.4%
                 </span>
               </div>
@@ -119,7 +119,7 @@ export default function LandingPage() {
                   {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((l, i) => (
                     <div
                       key={i}
-                      className="caps-tight text-[9px] text-center"
+                      className="caps-tight text-[11px] text-center"
                       style={{ color: 'var(--color-text-faint)' }}
                     >
                       {l}
@@ -133,7 +133,7 @@ export default function LandingPage() {
                 </div>
               </div>
               <div className="flex items-center justify-between pt-1">
-                <span className="caps-tight text-[10px]" style={{ color: 'var(--color-text-faint)' }}>
+                <span className="caps-tight text-[11px]" style={{ color: 'var(--color-text-faint)' }}>
                   STREAK
                 </span>
                 <span className="font-mono text-[12px]" style={{ color: 'var(--color-text)' }}>
@@ -260,7 +260,7 @@ export default function LandingPage() {
                 You don't need a smarter app. You need an honest one — that remembers
                 what you lifted last week, and gets out of the way.
                 <span style={{ color: 'var(--color-volt-ink)' }}>”</span>
-                <div className="mt-4 caps-tight text-[10px]" style={{ color: 'var(--color-text-faint)' }}>
+                <div className="mt-4 caps-tight text-[11px]" style={{ color: 'var(--color-text-faint)' }}>
                   LIFTGAUGE TEAM
                 </div>
               </blockquote>
@@ -293,7 +293,7 @@ export default function LandingPage() {
         />
 
         <div className="max-w-[1100px] mx-auto px-5 sm:px-8 py-10 sm:py-14 text-center relative">
-          <div className="caps-tight text-[10px] mb-3" style={{ color: 'var(--color-volt-dim)' }}>
+          <div className="caps-tight text-[11px] mb-3" style={{ color: 'var(--color-volt-dim)' }}>
             ENTER THE LOG
           </div>
           <h2
@@ -320,7 +320,7 @@ export default function LandingPage() {
             <button
               type="button"
               onClick={goSignIn}
-              className="h-11 px-5 btn-volt press caps-tight text-[11px] inline-flex items-center"
+              className="h-12 px-5 btn-volt press caps-tight text-[11px] inline-flex items-center"
               style={{ borderRadius: 'var(--radius)' }}
             >
               CREATE ACCOUNT →
@@ -328,7 +328,7 @@ export default function LandingPage() {
             <button
               type="button"
               onClick={goSignIn}
-              className="h-11 px-4 press caps-tight text-[11px] inline-flex items-center"
+              className="h-12 px-4 press caps-tight text-[11px] inline-flex items-center"
               style={{ border: '1px solid rgba(255,255,255,0.35)', color: 'var(--color-ink)', borderRadius: 'var(--radius)' }}
             >
               SIGN IN
@@ -346,13 +346,13 @@ export default function LandingPage() {
           <div className="flex items-center gap-3">
             <Logo withWordmark />
           </div>
-          <div className="caps-tight text-[10px]" style={{ color: 'var(--color-text-faint)' }}>
+          <div className="caps-tight text-[11px]" style={{ color: 'var(--color-text-faint)' }}>
             © 2026 LIFTGAUGE · BUILT FOR LIFTERS · BUILT BY RUITAN EXPERIENCE DESIGN
           </div>
           <button
             type="button"
             onClick={goSignIn}
-            className="caps-tight text-[10px] press"
+            className="caps-tight text-[11px] press"
             style={{ color: 'var(--color-text)' }}
           >
             SIGN IN →
@@ -383,7 +383,7 @@ function Metric({ value, label, accent }: { value: string; label: string; accent
           />
         )}
       </div>
-      <div className="caps-tight text-[9px]" style={{ color: 'var(--color-text-faint)' }}>
+      <div className="caps-tight text-[11px]" style={{ color: 'var(--color-text-faint)' }}>
         {label}
       </div>
     </div>
@@ -431,7 +431,7 @@ function LandingCalendarCell({ day, trained, today, past }: LandingCell) {
         <Dumbbell className="w-4 h-4" color="#ffffff" strokeWidth={ICON_STROKE} aria-hidden />
       ) : (
         <span
-          className="font-mono text-[10px] leading-none"
+          className="font-mono text-[11px] leading-none"
           style={{
             color: past ? 'var(--color-text-faint)' : 'var(--color-text)',
             fontWeight: today ? 700 : 500,
@@ -451,7 +451,7 @@ function Feature({ code, title, desc }: { code: string; title: string; desc: str
       className="p-5 h-full flex flex-col"
       style={{ background: 'var(--color-surface)', border: '1px solid var(--color-line)', borderRadius: 'var(--radius)' }}
     >
-      <div className="caps-tight text-[10px] mb-6" style={{ color: 'var(--color-volt-ink)' }}>
+      <div className="caps-tight text-[11px] mb-6" style={{ color: 'var(--color-volt-ink)' }}>
         {code}
       </div>
       <h3
@@ -476,7 +476,7 @@ function Row({ k, v }: { k: string; v: string }) {
       <span className="caps-tight text-[11px]" style={{ color: 'var(--color-text)' }}>
         {k}
       </span>
-      <span className="caps-tight text-[10px]" style={{ color: 'var(--color-volt-ink)' }}>
+      <span className="caps-tight text-[11px]" style={{ color: 'var(--color-volt-ink)' }}>
         {v}
       </span>
     </div>

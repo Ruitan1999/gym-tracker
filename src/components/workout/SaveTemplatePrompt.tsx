@@ -53,14 +53,14 @@ export default function SaveTemplatePrompt({
           <>
             {changedTemplate ? (
               <div
-                className="caps-tight text-[9px] mb-2"
+                className="caps-tight text-[11px] mb-2"
                 style={{ color: 'var(--color-volt)' }}
               >
                 TEMPLATE CHANGED
               </div>
             ) : (
               <div
-                className="flex items-center gap-1.5 caps-tight text-[9px] mb-2"
+                className="flex items-center gap-1.5 caps-tight text-[11px] mb-2"
                 style={{ color: 'var(--color-volt)' }}
               >
                 <svg
@@ -105,7 +105,7 @@ export default function SaveTemplatePrompt({
               }}
             >
               <div
-                className="caps-tight text-[9px] mb-2"
+                className="caps-tight text-[11px] mb-2"
                 style={{ color: 'var(--color-text-faint)' }}
               >
                 EXERCISES
@@ -122,7 +122,7 @@ export default function SaveTemplatePrompt({
                 ))}
                 {remaining > 0 && (
                   <li
-                    className="caps-tight text-[10px]"
+                    className="caps-tight text-[11px]"
                     style={{ color: 'var(--color-text-faint)' }}
                   >
                     +{remaining} MORE
@@ -185,7 +185,7 @@ export default function SaveTemplatePrompt({
         ) : (
           <>
             <div
-              className="caps-tight text-[9px] mb-2"
+              className="caps-tight text-[11px] mb-2"
               style={{ color: 'var(--color-text)' }}
             >
               NAME TEMPLATE
@@ -208,7 +208,7 @@ export default function SaveTemplatePrompt({
               A template lets you start from it next session.
             </p>
             <div
-              className="caps-tight text-[9px] mb-1.5"
+              className="caps-tight text-[11px] mb-1.5"
               style={{ color: 'var(--color-text-faint)' }}
             >
               TEMPLATE LABEL

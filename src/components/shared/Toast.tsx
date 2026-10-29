@@ -28,7 +28,7 @@ export default function Toast({ message, onClose, duration = 2500 }: ToastProps)
           style={{ background: 'var(--color-volt)' }}
         />
         <span
-          className="caps-tight text-[9px]"
+          className="caps-tight text-[11px]"
           style={{ color: 'var(--color-text)', letterSpacing: '0.14em' }}
         >
           ✓ OK

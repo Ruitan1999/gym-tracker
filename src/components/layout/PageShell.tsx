@@ -124,7 +124,7 @@ export default function PageShell({ title, onTitlePress, titlePressLabel, eyebro
               </button>
               <div className="min-w-0">
                 {eyebrow && (
-                  <div className="caps text-[10px] truncate" style={{ color: 'var(--color-text-faint)' }}>
+                  <div className="caps text-[11px] truncate" style={{ color: 'var(--color-text-faint)' }}>
                     {eyebrow}
                   </div>
                 )}
@@ -197,7 +197,7 @@ export default function PageShell({ title, onTitlePress, titlePressLabel, eyebro
             }}
           >
             <div
-              className="caps-tight text-[10px] flex items-center gap-2"
+              className="caps-tight text-[11px] flex items-center gap-2"
               style={{ color: 'var(--color-text-muted)' }}
             >
               <span
@@ -231,7 +231,7 @@ export default function PageShell({ title, onTitlePress, titlePressLabel, eyebro
           {!showBack && !hideTitle && (
             <div className="mb-4">
               {eyebrow && (
-                <div className="caps text-[10px]" style={{ color: 'var(--color-text-faint)' }}>
+                <div className="caps text-[11px]" style={{ color: 'var(--color-text-faint)' }}>
                   {eyebrow}
                 </div>
               )}

@@ -281,7 +281,7 @@ export default function HistoryPage() {
           {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((l, i) => (
             <div
               key={i}
-              className="caps-tight text-[9px] text-center"
+              className="caps-tight text-[11px] text-center"
               style={{ color: 'var(--color-text-faint)' }}
             >
               {l}
@@ -299,14 +299,14 @@ export default function HistoryPage() {
             month for the top of the card. The way back sits opposite it, out
             of the way until there is somewhere to go back from. */}
         <div className="flex items-center justify-between gap-3 mt-3 min-h-[16px]">
-          <span className="caps-tight text-[9px]" style={{ color: 'var(--color-text-faint)' }}>
+          <span className="caps-tight text-[11px]" style={{ color: 'var(--color-text-faint)' }}>
             {String(monthTrainedCount).padStart(2, '0')} DAY{monthTrainedCount === 1 ? '' : 'S'} TRAINED
           </span>
           {monthOffset !== 0 && (
             <button
               type="button"
               onClick={() => setMonthOffset(0)}
-              className="caps-tight text-[9px] press shrink-0"
+              className="caps-tight text-[11px] press shrink-0"
               style={{ color: 'var(--color-volt)', fontWeight: 700 }}
             >
               BACK TO TODAY →
@@ -319,7 +319,7 @@ export default function HistoryPage() {
         {groupedWorkouts.map((group) => (
           <section key={group.label}>
             <h2
-              className="caps text-[10px] mb-3 flex items-center gap-3"
+              className="caps text-[11px] mb-3 flex items-center gap-3"
               style={{ color: 'var(--color-text-muted)' }}
             >
               <span>{group.label}</span>
@@ -360,7 +360,7 @@ function MonthStep({
       onClick={onClick}
       disabled={disabled}
       aria-label={label}
-      className="w-11 h-11 shrink-0 flex items-center justify-center press disabled:opacity-20"
+      className="w-12 h-12 shrink-0 flex items-center justify-center press disabled:opacity-20"
       style={{ color: 'var(--color-text)' }}
     >
       {icon}
@@ -466,7 +466,7 @@ function StatTile({
           strokeWidth={ICON_STROKE}
           style={{ width: '0.85rem', height: '0.85rem', flexShrink: 0 }}
         />
-        <div className="caps-tight text-[9px] min-w-0 truncate" style={{ color: 'var(--color-text-faint)' }}>
+        <div className="caps-tight text-[11px] min-w-0" style={{ color: 'var(--color-text-faint)' }}>
           {label}
         </div>
       </div>
@@ -485,7 +485,7 @@ function StatTile({
         </div>
         {unit && (
           <span
-            className="caps-tight text-[9px] shrink-0"
+            className="caps-tight text-[11px] shrink-0"
             style={{ color: accent ? 'var(--color-volt)' : 'var(--color-text-faint)' }}
           >
             {unit}
@@ -494,7 +494,7 @@ function StatTile({
       </div>
       {sub && (
         <div
-          className="font-mono text-[10px] mt-2 truncate"
+          className="font-mono text-[11px] mt-2"
           style={{ color: 'var(--color-text-faint)', fontVariantNumeric: 'tabular-nums' }}
         >
           {sub}

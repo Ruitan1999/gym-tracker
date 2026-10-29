@@ -99,7 +99,7 @@ export default function YearHeatmap({
   return (
     <section className="card p-4" aria-label="Activity over the last 12 months">
       <div className="flex items-center justify-between gap-3 mb-3">
-        <h2 className="caps-tight text-[9px]" style={{ color: 'var(--color-text-faint)' }}>
+        <h2 className="caps-tight text-[11px]" style={{ color: 'var(--color-text-faint)' }}>
           LAST 12 MONTHS
         </h2>
       </div>
@@ -204,7 +204,7 @@ export default function YearHeatmap({
 
       <div className="flex items-center justify-between gap-3 mt-3">
         <p
-          className="font-mono text-[11px] min-w-0 truncate"
+          className="font-mono text-[11px] min-w-0"
           style={{ color: pickedCell ? 'var(--color-text)' : 'var(--color-text-muted)' }}
           aria-live="polite"
         >

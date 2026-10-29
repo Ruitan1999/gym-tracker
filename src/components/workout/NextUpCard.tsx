@@ -120,7 +120,7 @@ export default function NextUpCard() {
         />
         {next && (
           <p
-            className="caps-tight text-[10px] text-center mt-2"
+            className="caps-tight text-[11px] text-center mt-2"
             style={{ color: 'var(--color-text-muted)' }}
           >
             {next}
@@ -230,7 +230,7 @@ function ChooseDifferent({ onChoose }: { onChoose: () => void }) {
     <button
       type="button"
       onClick={onChoose}
-      className="w-full h-11 press flex items-center justify-center gap-2"
+      className="w-full h-12 press flex items-center justify-center gap-2"
       style={{ color: 'var(--color-volt)', fontSize: '14px', fontWeight: 600 }}
     >
       <ArrowLeftRight aria-hidden size={16} strokeWidth={ICON_STROKE} />
@@ -305,7 +305,7 @@ function Row({
         <Icon size={20} strokeWidth={ICON_STROKE} />
       </span>
       <span className="flex-1 min-w-0">
-        <span className="block caps-tight text-[10px]" style={{ color: 'var(--color-text-muted)' }}>
+        <span className="block caps-tight text-[11px]" style={{ color: 'var(--color-text-muted)' }}>
           {label}
         </span>
         <span
@@ -328,7 +328,7 @@ function Row({
       </span>
       {parts && parts.length > 0 && <MiniBodyMap parts={parts} />}
       <span
-        className="shrink-0 caps-tight text-[10px] px-3 h-9 flex items-center"
+        className="shrink-0 caps-tight text-[11px] px-3 h-9 flex items-center"
         style={{
           background: t.pill,
           color: t.pillText,

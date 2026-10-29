@@ -8,7 +8,7 @@ function format(sec: number): string {
 
 const stepBtn = {
   minWidth: '48px',
-  height: '44px',
+  height: '48px',
   borderRadius: 'var(--radius)',
   fontVariantNumeric: 'tabular-nums' as const,
 };
@@ -51,7 +51,7 @@ export default function RestTimer({ timer }: { timer: RestTimerCore }) {
         <div className="flex flex-col min-w-0 mr-auto">
           <span
             role="status"
-            className="caps-tight text-[9px]"
+            className="caps-tight text-[11px]"
             style={{ color: isGo ? 'var(--color-done-deep)' : 'var(--color-text-muted)' }}
           >
             {isGo ? 'Go' : paused ? 'Rest paused' : 'Rest'}
@@ -95,7 +95,7 @@ export default function RestTimer({ timer }: { timer: RestTimerCore }) {
               onClick={togglePause}
               aria-label={paused ? 'Resume rest' : 'Pause rest'}
               className="btn-ghost press flex items-center justify-center"
-              style={{ ...stepBtn, minWidth: '44px' }}
+              style={{ ...stepBtn, minWidth: '48px' }}
             >
               {paused ? <Play size={16} strokeWidth={1.75} /> : <Pause size={16} strokeWidth={1.75} />}
             </button>
@@ -105,7 +105,7 @@ export default function RestTimer({ timer }: { timer: RestTimerCore }) {
           type="button"
           onClick={skip}
           className="btn-volt press caps-tight text-[11px] px-4"
-          style={{ height: '44px', borderRadius: 'var(--radius)', letterSpacing: '0.12em' }}
+          style={{ height: '48px', borderRadius: 'var(--radius)', letterSpacing: '0.12em' }}
         >
           Skip
         </button>

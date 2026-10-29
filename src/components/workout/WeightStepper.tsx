@@ -36,7 +36,7 @@ export default function WeightStepper({ label, value, onChange, step, unit }: We
     <div className="flex flex-col gap-1">
       {label && (
         <span
-          className="caps-tight text-[9px]"
+          className="caps-tight text-[11px]"
           style={{ color: 'var(--color-text-muted)' }}
         >
           {label}
@@ -56,7 +56,7 @@ export default function WeightStepper({ label, value, onChange, step, unit }: We
         <div className="flex-1 min-w-0 flex items-center">
           <NumberInput value={value} onChange={onChange} placeholder="0" min={0} max={MAX_WEIGHT_KG} variant="bare" />
           <span
-            className="caps-tight text-[10px] pr-3"
+            className="caps-tight text-[11px] pr-3"
             style={{ color: 'var(--color-text-faint)' }}
           >
             {unit.toUpperCase()}

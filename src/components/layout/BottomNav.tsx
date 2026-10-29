@@ -145,7 +145,7 @@ function StartButton({ onStart, resuming }: { onStart: () => void; resuming: boo
       >
         <Play size={24} strokeWidth={2} fill="currentColor" />
       </span>
-      <span className="caps-tight text-[9px]" style={{ letterSpacing: '0.12em' }}>
+      <span className="caps-tight text-[11px]" style={{ letterSpacing: '0.02em' }}>
         {resuming ? 'Resume' : 'Start'}
       </span>
     </button>
@@ -179,8 +179,8 @@ function renderTab(tab: Tab) {
           />
           {tab.icon}
           <span
-            className="caps-tight text-[9px]"
-            style={{ letterSpacing: '0.12em' }}
+            className="caps-tight text-[11px]"
+            style={{ letterSpacing: '0.02em' }}
           >
             {tab.label}
           </span>

@@ -54,7 +54,7 @@ export default function DaySchedulePicker({
         }}
       >
         <div className="px-5 pt-4 pb-3" style={{ borderBottom: '1px solid var(--color-line)' }}>
-          <div className="caps-tight text-[9px]" style={{ color: 'var(--color-text-faint)' }}>
+          <div className="caps-tight text-[11px]" style={{ color: 'var(--color-text-faint)' }}>
             WORKOUT DAYS
           </div>
           <div
@@ -109,7 +109,7 @@ export default function DaySchedulePicker({
               )}
             </p>
             <span
-              className="caps-tight text-[9px] shrink-0"
+              className="caps-tight text-[11px] shrink-0"
               style={{ color: 'var(--color-text-faint)' }}
             >
               {sorted.length} {sorted.length === 1 ? 'DAY' : 'DAYS'}
@@ -134,7 +134,7 @@ export default function DaySchedulePicker({
             type="button"
             onClick={() => setPicked([])}
             disabled={sorted.length === 0}
-            className="w-full h-11 mt-1.5 press caps-tight text-[10px]"
+            className="w-full h-12 mt-1.5 press caps-tight text-[11px]"
             style={{
               color: sorted.length === 0 ? 'var(--color-text-faint)' : 'var(--color-text-muted)',
               letterSpacing: '0.1em',

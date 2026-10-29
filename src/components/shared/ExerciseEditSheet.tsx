@@ -85,7 +85,7 @@ export default function ExerciseEditSheet({
           overflowY: 'auto',
         }}
       >
-        <div className="caps-tight text-[9px]" style={{ color: 'var(--color-text-faint)' }}>
+        <div className="caps-tight text-[11px]" style={{ color: 'var(--color-text-faint)' }}>
           {eyebrow}
         </div>
 
@@ -95,7 +95,7 @@ export default function ExerciseEditSheet({
             type="button"
             onClick={() => fileRef.current?.click()}
             disabled={uploading || busy}
-            className="h-10 px-3 caps-tight text-[10px] press"
+            className="h-10 px-3 caps-tight text-[11px] press"
             style={{
               borderRadius: 'var(--radius)',
               border: '1px solid var(--color-volt)',
@@ -124,7 +124,7 @@ export default function ExerciseEditSheet({
         )}
 
         <div>
-          <div className="caps-tight text-[9px] mb-1.5" style={{ color: 'var(--color-text-faint)' }}>
+          <div className="caps-tight text-[11px] mb-1.5" style={{ color: 'var(--color-text-faint)' }}>
             NAME
           </div>
           <input
@@ -145,7 +145,7 @@ export default function ExerciseEditSheet({
         </div>
 
         <div>
-          <div className="caps-tight text-[9px] mb-1.5" style={{ color: 'var(--color-text-faint)' }}>
+          <div className="caps-tight text-[11px] mb-1.5" style={{ color: 'var(--color-text-faint)' }}>
             MUSCLE GROUP
           </div>
           <div className="grid grid-cols-5 gap-1.5">
@@ -154,7 +154,7 @@ export default function ExerciseEditSheet({
                 key={part}
                 type="button"
                 onClick={() => setBodyPart(part)}
-                className="h-10 caps-tight text-[9px] press"
+                className="h-10 caps-tight text-[11px] press"
                 style={{
                   borderRadius: 'var(--radius)',
                   background: bodyPart === part ? BODY_PART_ACCENT[part] : 'transparent',
@@ -196,7 +196,7 @@ export default function ExerciseEditSheet({
             type="button"
             onClick={() => setConfirmRemove(true)}
             disabled={busy}
-            className="h-11 press caps-tight text-[10px]"
+            className="h-12 press caps-tight text-[11px]"
             style={{ borderRadius: 'var(--radius)', color: 'var(--color-rust)', border: '1px solid var(--color-rust)' }}
           >
             {remove.label}

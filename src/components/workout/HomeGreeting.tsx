@@ -28,7 +28,7 @@ export default function HomeGreeting() {
   return (
     <div className="mb-4 flex items-start justify-between gap-3">
       <div className="min-w-0">
-      <div className="caps-tight text-[10px]" style={{ color: 'var(--color-text-faint)' }}>
+      <div className="caps-tight text-[11px]" style={{ color: 'var(--color-text-faint)' }}>
         WELCOME, {name.toUpperCase()}
       </div>
       <h1
@@ -48,7 +48,7 @@ export default function HomeGreeting() {
       <Link
         to="/settings"
         aria-label="Settings"
-        className="shrink-0 w-11 h-11 flex items-center justify-center press"
+        className="shrink-0 w-12 h-12 flex items-center justify-center press"
         style={{
           background: 'var(--color-surface)',
           border: '1px solid var(--color-line)',

@@ -87,9 +87,9 @@ describe('Choose a different workout', () => {
     expect(Object.keys(localStorage).sort()).toEqual(keysBefore);
   });
 
-  it('is a 44px target', () => {
+  it('is a 48px target', () => {
     seed([group('push', [3]), group('pull', [5])]);
     renderCard();
-    expect(screen.getByText(LINK).closest('button')!.className).toContain('h-11');
+    expect(screen.getByText(LINK).closest('button')!.className).toContain('h-12');
   });
 });

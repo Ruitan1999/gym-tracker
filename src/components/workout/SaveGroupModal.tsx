@@ -36,7 +36,7 @@ export default function SaveGroupModal({ defaultName = '', onSave, onClose }: Sa
           boxShadow: '0 20px 60px rgba(0,0,0,0.6)',
         }}
       >
-        <div className="caps-tight text-[9px] mb-2" style={{ color: 'var(--color-text)' }}>
+        <div className="caps-tight text-[11px] mb-2" style={{ color: 'var(--color-text)' }}>
           SAVE AS GROUP
         </div>
         <h3
@@ -53,7 +53,7 @@ export default function SaveGroupModal({ defaultName = '', onSave, onClose }: Sa
         <p className="text-[13px] mb-4" style={{ color: 'var(--color-text-muted)' }}>
           A group lets you start from it next session.
         </p>
-        <div className="caps-tight text-[9px] mb-1.5" style={{ color: 'var(--color-text-faint)' }}>
+        <div className="caps-tight text-[11px] mb-1.5" style={{ color: 'var(--color-text-faint)' }}>
           GROUP LABEL
         </div>
         <input

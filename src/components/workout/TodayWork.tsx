@@ -38,7 +38,7 @@ export default function TodayWork() {
         >
           Today's Work
         </h2>
-        <div className="caps-tight text-[9px]" style={{ color: 'var(--color-text-faint)' }}>
+        <div className="caps-tight text-[11px]" style={{ color: 'var(--color-text-faint)' }}>
           {String(todaysWorkouts.length).padStart(2, '0')}{' '}
           {todaysWorkouts.length === 1 ? 'SESSION' : 'SESSIONS'}
         </div>

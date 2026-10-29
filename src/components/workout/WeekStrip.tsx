@@ -11,7 +11,7 @@ export default function WeekStrip({ days }: { days: WeekDay[] }) {
   return (
     <div>
       <div
-        className="caps-tight text-[10px] text-center mb-2"
+        className="caps-tight text-[11px] text-center mb-2"
         style={{ color: 'var(--color-text-muted)' }}
       >
         This week
@@ -36,7 +36,7 @@ export default function WeekStrip({ days }: { days: WeekDay[] }) {
             >
               <span
                 aria-hidden
-                className="caps-tight text-[9px]"
+                className="caps-tight text-[11px]"
                 style={{ color: 'var(--color-text-faint)' }}
               >
                 {DAY_CODES[d.index].slice(0, 2)}
