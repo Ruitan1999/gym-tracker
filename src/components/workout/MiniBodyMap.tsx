@@ -1,11 +1,12 @@
 import type { BodyPart } from '../../types';
 import { BODY_PART_LABELS } from '../../utils/bodyParts';
 import BodyFigure from './BodyFigure';
-import { BACK, FRONT, VIEW_H, VIEW_W } from './bodyFigureShapes';
+import { BODY_VIEWS } from '../../data/bodyPaths';
 
 const HEIGHT = 36;
 // Same proportions as the full figure, so the two read as one drawing.
-const WIDTH = Math.round((HEIGHT * VIEW_W) / VIEW_H);
+const [, , VIEW_W, VIEW_H] = BODY_VIEWS.front.viewBox;
+const WIDTH = (HEIGHT * VIEW_W) / VIEW_H;
 
 /**
  * Front and back figure at a glance: the regions a session works are lit,
@@ -21,8 +22,8 @@ export default function MiniBodyMap({ parts }: { parts: BodyPart[] }) {
   const lit = new Set(parts);
   const paint = (part: BodyPart) =>
     lit.has(part)
-      ? { fill: 'var(--color-volt)', opacity: 0.9 }
-      : { fill: 'var(--color-line-2)', opacity: 0.55 };
+      ? { fill: 'var(--color-volt)', opacity: 1 }
+      : { fill: 'var(--color-line-3)', opacity: 0.5 };
 
   return (
     <span
@@ -31,8 +32,8 @@ export default function MiniBodyMap({ parts }: { parts: BodyPart[] }) {
       className="flex items-center shrink-0"
       style={{ gap: 3 }}
     >
-      <BodyFigure regions={FRONT} paint={paint} width={WIDTH} />
-      <BodyFigure regions={BACK} paint={paint} width={WIDTH} />
+      <BodyFigure side="front" paint={paint} width={WIDTH} />
+      <BodyFigure side="back" paint={paint} width={WIDTH} />
     </span>
   );
 }

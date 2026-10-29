@@ -1,8 +1,10 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import BodyMap from '../components/workout/BodyMap';
+import { PART_SLUGS, partOfSlug } from '../components/workout/bodyFigureShapes';
+import { BODY_VIEWS } from '../data/bodyPaths';
 import { workedBodyParts } from '../utils/bodyParts';
-import type { Exercise, WorkoutEntry } from '../types';
+import type { BodyPart, Exercise, WorkoutEntry } from '../types';
 
 const exercises: Exercise[] = [
   { id: 'a', name: 'Bench Press', bodyPart: 'chest', isCustom: false },
@@ -78,15 +80,58 @@ describe('BodyMap', () => {
     expect(screen.getByRole('img', { name: 'BACK view' })).toBeDefined();
   });
 
-  it('gives every drawn region a real size', () => {
-    // <rect> takes width/height; shorthand attributes are silently ignored and
-    // the whole figure collapses to nothing visible.
+  it('draws real outlines and lights only the worked part', () => {
     const { container } = render(<BodyMap worked={{ chest: 3 }} />);
-    const rects = [...container.querySelectorAll('rect')];
-    expect(rects.length).toBeGreaterThan(0);
-    for (const rect of rects) {
-      expect(Number(rect.getAttribute('width'))).toBeGreaterThan(0);
-      expect(Number(rect.getAttribute('height'))).toBeGreaterThan(0);
+    const paths = [...container.querySelectorAll('path[data-slug]')];
+    expect(paths.length).toBeGreaterThan(20);
+    for (const path of paths) expect((path.getAttribute('d') ?? '').length).toBeGreaterThan(20);
+    const lit = paths.filter((p) => p.getAttribute('fill') === 'var(--color-volt)');
+    expect(lit.map((p) => p.getAttribute('data-slug'))).toEqual(['chest']);
+  });
+});
+
+describe('body part to outline mapping', () => {
+  const allSlugs = new Set([
+    ...Object.keys(BODY_VIEWS.front.paths),
+    ...Object.keys(BODY_VIEWS.back.paths),
+  ]);
+
+  it('gives every body part except cardio at least one outline', () => {
+    for (const [part, slugs] of Object.entries(PART_SLUGS)) {
+      if (part === 'cardio') expect(slugs).toEqual([]);
+      else expect(slugs.length, part).toBeGreaterThan(0);
     }
+  });
+
+  it('only names outlines that exist in the data, and never shares one', () => {
+    const seen = new Set<string>();
+    for (const slugs of Object.values(PART_SLUGS)) {
+      for (const slug of slugs) {
+        expect(allSlugs.has(slug), slug).toBe(true);
+        expect(seen.has(slug), `${slug} used twice`).toBe(false);
+        seen.add(slug);
+      }
+    }
+  });
+
+  it('leaves head, hands, feet and joints as the unlit base', () => {
+    for (const slug of ['head', 'hair', 'hands', 'feet', 'knees', 'ankles']) {
+      expect(partOfSlug(slug)).toBeUndefined();
+    }
+  });
+
+  it('lights Legs on quads, hamstrings and glutes, and Chest on chest only', () => {
+    const lit = (worked: Partial<Record<BodyPart, number>>) => {
+      const { container, unmount } = render(<BodyMap worked={worked} />);
+      const slugs = [...container.querySelectorAll('path[fill="var(--color-volt)"]')].map((p) =>
+        p.getAttribute('data-slug'),
+      );
+      unmount();
+      return slugs;
+    };
+    expect(lit({ legs: 2 })).toEqual(
+      expect.arrayContaining(['quadriceps', 'hamstring', 'gluteal']),
+    );
+    expect(lit({ chest: 2 })).toEqual(['chest']);
   });
 });

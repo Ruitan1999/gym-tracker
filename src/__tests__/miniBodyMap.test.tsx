@@ -49,9 +49,9 @@ describe('MiniBodyMap', () => {
     const svgs = container.querySelectorAll('svg');
     expect(svgs).toHaveLength(2);
     const lit = (svg: Element) =>
-      svg.querySelectorAll('rect[fill="var(--color-volt)"]').length;
+      svg.querySelectorAll('path[fill="var(--color-volt)"]').length;
     const dim = (svg: Element) =>
-      svg.querySelectorAll('rect[fill="var(--color-line-2)"]').length;
+      svg.querySelectorAll('path[fill="var(--color-line-3)"]').length;
     // Chest is on the front only; the back view has nothing lit.
     expect(lit(svgs[0])).toBe(1);
     expect(lit(svgs[1])).toBe(0);
@@ -62,8 +62,13 @@ describe('MiniBodyMap', () => {
   it('lights both sides for a part drawn on both', () => {
     const { container } = render(<MiniBodyMap parts={['legs']} />);
     const svgs = container.querySelectorAll('svg');
-    expect(svgs[0].querySelectorAll('rect[fill="var(--color-volt)"]')).toHaveLength(2);
-    expect(svgs[1].querySelectorAll('rect[fill="var(--color-volt)"]')).toHaveLength(2);
+    const litSlugs = (svg: Element) =>
+      [...svg.querySelectorAll('path[fill="var(--color-volt)"]')].map((n) => n.getAttribute('data-slug'));
+    // Legs light quads, adductors and hip flexors in front; glutes, hamstrings
+    // and adductors behind.
+    expect(litSlugs(svgs[0])).toEqual(expect.arrayContaining(['quadriceps', 'adductors']));
+    expect(litSlugs(svgs[1])).toEqual(expect.arrayContaining(['gluteal', 'hamstring']));
+    expect(litSlugs(svgs[0])).not.toContain('calves');
   });
 
   it('is about 36px high, hidden from assistive tech, with a text alternative', () => {

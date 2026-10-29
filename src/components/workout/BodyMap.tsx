@@ -1,17 +1,16 @@
 import type { BodyPart } from '../../types';
 import { BODY_PART_LABELS } from '../../utils/bodyParts';
-import BodyFigure from './BodyFigure';
-import { BACK, FRONT, type Shape } from './bodyFigureShapes';
+import BodyFigure, { type BodySide } from './BodyFigure';
 
 const FIGURE_W = 84;
 
 function Figure({
-  regions,
+  side,
   label,
   worked,
   hardest,
 }: {
-  regions: Partial<Record<BodyPart, Shape[]>>;
+  side: BodySide;
   label: string;
   worked: Partial<Record<BodyPart, number>>;
   hardest: number;
@@ -19,7 +18,7 @@ function Figure({
   return (
     <div className="flex flex-col items-center gap-1.5">
       <BodyFigure
-        regions={regions}
+        side={side}
         width={FIGURE_W}
         label={`${label} view`}
         paint={(part) => {
@@ -53,8 +52,8 @@ export default function BodyMap({ worked }: { worked: Partial<Record<BodyPart, n
       </div>
       <div className="flex items-start gap-4">
         <div className="flex gap-2 shrink-0">
-          <Figure regions={FRONT} label="FRONT" worked={worked} hardest={hardest} />
-          <Figure regions={BACK} label="BACK" worked={worked} hardest={hardest} />
+          <Figure side="front" label="FRONT" worked={worked} hardest={hardest} />
+          <Figure side="back" label="BACK" worked={worked} hardest={hardest} />
         </div>
         <ul className="flex-1 min-w-0 flex flex-col gap-1.5">
           {entries.map(([part, sets]) => (
