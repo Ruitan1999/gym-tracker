@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { AppProvider } from '../context/AppContext';
 import HomeBalanceCard from '../components/workout/HomeBalanceCard';
@@ -52,15 +52,14 @@ describe('HomeBalanceCard', () => {
     expect(container.textContent).toBe('');
   });
 
-  it('shades the last 30 days, and widens to 90 on the switch', () => {
+  it('shades the last 30 days only, with no switch', () => {
     seed([
       { date: '2026-10-20', exerciseId: 'bench', n: 3 },
       { date: '2026-08-20', exerciseId: 'squat', n: 4 },
     ]);
     renderCard();
     expect(screen.getByRole('img', { name: /last 30 days: chest 3 sets$/ })).toBeTruthy();
-    fireEvent.click(screen.getByRole('radio', { name: '90d' }));
-    expect(screen.getByRole('img', { name: /last 90 days: legs 4 sets, chest 3 sets$/ })).toBeTruthy();
+    expect(screen.queryByRole('radio')).toBeNull();
   });
 
   it('lists the sets per part beside the figure, most first', () => {
@@ -69,14 +68,8 @@ describe('HomeBalanceCard', () => {
       { date: '2026-10-21', exerciseId: 'squat', n: 5 },
     ]);
     renderCard();
-    expect(screen.getByText('SETS · THE LAST 30 DAYS')).toBeTruthy();
+    expect(screen.getByText('Muscle groups · last 30 days')).toBeTruthy();
     const rows = screen.getAllByRole('listitem', { hidden: true }).map((li) => li.textContent);
     expect(rows).toEqual(['LEGS5 sets', 'CHEST3 sets']);
-  });
-
-  it('offers only 30d and 90d', () => {
-    seed([{ date: '2026-10-20', exerciseId: 'bench', n: 1 }]);
-    renderCard();
-    expect(screen.getAllByRole('radio').map((r) => r.textContent)).toEqual(['30d', '90d']);
   });
 });

@@ -139,8 +139,8 @@ function StartButton({ onStart, resuming }: { onStart: () => void; resuming: boo
           top: -START_RISE,
           marginLeft: -START_SIZE / 2,
           background: 'var(--color-volt)',
-          border: '4px solid var(--color-surface)',
-          boxShadow: '0 8px 18px -4px var(--color-volt-glow), 0 2px 6px rgba(0, 0, 0, 0.18)',
+          // One solid disc, lifted by a soft glow in its own colour.
+          boxShadow: '0 6px 20px -2px var(--color-volt-glow)',
         }}
       >
         <Play size={24} strokeWidth={2} fill="currentColor" />
