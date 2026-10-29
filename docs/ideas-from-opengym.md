@@ -21,7 +21,7 @@ Built on 2026-10-28/29 and shipped to `main`. Every item passed type check, lint
 | Part 3.3 Body map on session cards | Done | Mini figure on Next Up, template rows (Home and Manage) and the session strip. |
 | Part 3.4 Raised Start button | Done | Fifth tab, per your decision (a). Opens today's template, or the picker if none is due or one is already logged today; resumes an open session. The label reads Resume while a session is open. The Home "Start workout" bar was removed at your request. |
 | Part 3.6 Header and exercise chips | Done | Sticky strip under the title: time, sets done, volume, a progress bar and a numbered chip per exercise. It is about 113 px tall. |
-| Part 3.7 Plain-words target line | Done | Sentence version only, advice only. The workout form is kg-only today, so the sentence is in kg. |
+| Part 3.7 Plain-words target line | Built, then removed | Sentence version was built and shipped, then taken out at your request (you did not like the subtext under each exercise). The code and tests were deleted; it is in the git history (commit `6d5a77b`) if you ever want it back. |
 | Part 1.5 Rotation mode | Done | `Fixed Week | Rotation` on Manage templates. Workouts do not record their template, so the last-trained one is inferred by name, then by exercise set. Weekday labels are hidden in rotation but kept in the data. |
 | Part 1.6 Auto-fill weights | Done | Setting, off by default. Filled-in sets do not count as work or as done until touched. |
 | Part 3.8 Year heatmap | Done | On Progress, Time / Volume switch, scrolls sideways inside its card. |

@@ -169,7 +169,6 @@ describe('starting a template', () => {
     startTemplate(true);
     expect(rows()).toEqual([[10, 20], [8, 40], [6, 60], [4, 80]]);
     expect(screen.getAllByText('10 × 20 KG').length).toBeGreaterThan(0);
-    expect(screen.getByTestId('target-advice')).toBeTruthy();
   });
 
   it('opens on blanks when it is off', () => {

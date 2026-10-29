@@ -58,7 +58,9 @@ const SessionStrip = forwardRef<HTMLDivElement, SessionStripProps>(function Sess
     <div
       ref={ref}
       data-testid="session-strip"
-      className="sticky top-0 z-20 -mx-4 px-4 pt-2"
+      // -mt-5 cancels the page's top padding, so the strip starts flush under the
+      // header instead of leaving a band of background above it.
+      className="sticky top-0 z-20 -mx-4 -mt-5 px-4 pt-2"
       style={{ background: 'var(--color-bg)', borderBottom: '1px solid var(--color-line)' }}
     >
       <div className="flex items-center justify-between gap-3">
