@@ -45,7 +45,6 @@ export default function HistoryPage() {
     totalSessions,
     sessionsThisMonth,
     lifetimeKg,
-    monthKg,
     currentStreak,
     monthLabel,
     monthDays,
@@ -132,7 +131,6 @@ export default function HistoryPage() {
       totalSessions: sorted.length,
       sessionsThisMonth,
       lifetimeKg: tonnage.total,
-      monthKg: tonnage.thisMonth,
       currentStreak: streak,
       monthLabel: label,
       monthDays: days,
@@ -236,10 +234,9 @@ export default function HistoryPage() {
         />
         <StatTile
           icon={Weight}
-          label="LIFTED IN TOTAL"
+          label="LIFTED"
           value={formatTonnage(lifetimeKg, unit)}
           unit={unit.toUpperCase()}
-          sub={monthKg > 0 ? `${formatTonnage(monthKg, unit)} ${unit} this month` : undefined}
         />
       </section>
 
@@ -447,14 +444,12 @@ function StatTile({
   value,
   accent = false,
   unit,
-  sub,
 }: {
   icon: LucideIcon;
   label: string;
   value: string | number;
   accent?: boolean;
   unit?: string;
-  sub?: string;
 }) {
   const tint = accent ? 'var(--color-volt)' : 'var(--color-text-faint)';
   return (
@@ -466,7 +461,7 @@ function StatTile({
           strokeWidth={ICON_STROKE}
           style={{ width: '0.85rem', height: '0.85rem', flexShrink: 0 }}
         />
-        <div className="caps-tight text-[11px] min-w-0" style={{ color: 'var(--color-text-faint)' }}>
+        <div className="caps-tight text-[11px] min-w-0 truncate" style={{ color: 'var(--color-text-faint)' }}>
           {label}
         </div>
       </div>
@@ -492,14 +487,6 @@ function StatTile({
           </span>
         )}
       </div>
-      {sub && (
-        <div
-          className="font-mono text-[11px] mt-2"
-          style={{ color: 'var(--color-text-faint)', fontVariantNumeric: 'tabular-nums' }}
-        >
-          {sub}
-        </div>
-      )}
     </div>
   );
 }

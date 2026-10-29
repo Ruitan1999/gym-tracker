@@ -83,10 +83,10 @@ describe('Log Book stat tiles', () => {
 
   it('shows the four tiles with lifetime and monthly tonnage', () => {
     const t = renderWith([wo('2026-08-03', [[10, 100]]), wo('2026-06-03', [[10, 50]])]);
-    for (const l of ['WORKOUTS', 'THIS MONTH', 'WEEK STREAK', 'LIFTED IN TOTAL'])
+    for (const l of ['WORKOUTS', 'THIS MONTH', 'WEEK STREAK', 'LIFTED'])
       expect(t.getByText(l)).toBeTruthy();
     expect(t.getByText('1,500')).toBeTruthy();
-    expect(t.getByText('1,000 kg this month')).toBeTruthy();
+    expect(t.queryByText(/this month/)).toBeNull();
   });
 
   it('keeps a seven-digit total whole and shrinks it so it cannot clip', () => {
