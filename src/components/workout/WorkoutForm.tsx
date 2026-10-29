@@ -41,11 +41,16 @@ interface WorkoutFormProps {
 }
 
 /**
- * Ordered, because a template hands its exercises to the next session in this
- * order — moving one is a change to what the template will produce.
+ * The same exercises, in any order. Only adding or removing an exercise makes
+ * the session a different workout from its template: sets are kept per
+ * exercise anyway, so adding or removing one says nothing about the template,
+ * and moving an exercise in one session is not a reason to ask to rewrite it.
  */
 function sameExerciseIds(a: string[], b: string[]): boolean {
-  return a.length === b.length && a.every((id, i) => id === b[i]);
+  if (a.length !== b.length) return false;
+  const x = [...a].sort();
+  const y = [...b].sort();
+  return x.every((id, i) => id === y[i]);
 }
 
 export { loadDraft };

@@ -170,14 +170,32 @@ describe('Finishing a session that started from a template', () => {
     expect(screen.getByText('Update Push Day A?')).toBeDefined();
   });
 
-  it('prompts when the exercises are only reordered', () => {
+  it('does not prompt when the exercises are only reordered', () => {
     seed();
     seedDraft([BENCH, PUSH], 'g1');
     renderSession();
 
     save();
 
-    expect(screen.getByText('Update Push Day A?')).toBeDefined();
+    expect(screen.queryByText(/Update Push Day A/)).toBeNull();
+    expect(savedWorkoutCount()).toBe(1);
+    expect(savedGroups()[0].exerciseIds).toEqual([PUSH, BENCH]);
+  });
+
+  it('does not prompt when only sets were added or removed', () => {
+    seed();
+    seedDraft([PUSH, BENCH], 'g1');
+    const draft = JSON.parse(localStorage.getItem(DRAFT_KEY)!);
+    // Three sets on the first exercise, none extra on the second: still the
+    // same two exercises as the template.
+    draft.entries[0].sets = [1, 2, 3].map((n) => ({ setNumber: n, reps: 8, weightKg: 60 }));
+    localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
+    renderSession();
+
+    save();
+
+    expect(screen.queryByText(/Update Push Day A/)).toBeNull();
+    expect(savedWorkoutCount()).toBe(1);
   });
 
   it('rewrites the template in place, keeping its id and name', () => {
