@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { act, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import { AppProvider, useAppContext } from '../context/AppContext';
 import type { AppData } from '../types';
 import { DEFAULT_PREFERENCES } from '../types';
@@ -33,13 +33,24 @@ const ACCOUNT: AppData = {
   dataVersion: 1,
 };
 
-let addWorkout: ReturnType<typeof useAppContext>['addWorkout'];
-
 function Probe() {
-  const { appData, loading, addWorkout: add } = useAppContext();
-  addWorkout = add;
+  const { appData, loading, addWorkout } = useAppContext();
   return (
     <div>
+      <button
+        type="button"
+        onClick={() =>
+          addWorkout({
+            id: 'w2',
+            date: '2026-10-28',
+            createdAt: '2026-10-28T10:00:00Z',
+            name: 'Logged while loading',
+            entries: [],
+          })
+        }
+      >
+        log
+      </button>
       <span data-testid="loading">{loading ? 'loading' : 'ready'}</span>
       <span data-testid="session">{appData.workouts[0]?.name ?? 'none'}</span>
     </div>
@@ -72,15 +83,7 @@ describe('first launch on a device with nothing saved', () => {
         <Probe />
       </AppProvider>,
     );
-    act(() => {
-      addWorkout({
-        id: 'w2',
-        date: '2026-10-28',
-        createdAt: '2026-10-28T10:00:00Z',
-        name: 'Logged while loading',
-        entries: [],
-      });
-    });
+    fireEvent.click(screen.getByRole('button', { name: 'log' }));
     await act(async () => land({ data: ACCOUNT, existed: true }));
     expect(screen.getByTestId('session').textContent).toBe('Logged while loading');
   });
