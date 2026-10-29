@@ -21,23 +21,17 @@ const wo = (date: string, sets: Array<[number, number]>): Workout => ({
 
 describe('tonnageKg', () => {
   it('is zero for no history, never NaN', () => {
-    expect(tonnageKg([], '2026-08')).toEqual({ total: 0, thisMonth: 0 });
+    expect(tonnageKg([])).toBe(0);
   });
 
-  it('sums reps x weight and splits out the month', () => {
-    const r = tonnageKg(
-      [wo('2026-08-03', [[10, 100], [5, 50]]), wo('2026-07-30', [[10, 20]])],
-      '2026-08',
-    );
-    expect(r).toEqual({ total: 1450, thisMonth: 1250 });
+  it('sums reps x weight across every workout', () => {
+    const r = tonnageKg([wo('2026-08-03', [[10, 100], [5, 50]]), wo('2026-07-30', [[10, 20]])]);
+    expect(r).toBe(1450);
   });
 
   it('ignores empty sets and bad values', () => {
-    const r = tonnageKg(
-      [wo('2026-08-03', [[0, 100], [10, 0], [NaN, 50], [5, 20]])],
-      '2026-08',
-    );
-    expect(r.total).toBe(100);
+    const r = tonnageKg([wo('2026-08-03', [[0, 100], [10, 0], [NaN, 50], [5, 20]])]);
+    expect(r).toBe(100);
   });
 });
 

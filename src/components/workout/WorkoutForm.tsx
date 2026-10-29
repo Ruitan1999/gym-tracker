@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { createPortal, flushSync } from 'react-dom';
+import { flushSync } from 'react-dom';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAppContext } from '../../context/AppContext';
 import ExerciseSelect from '../shared/ExerciseSelect';
@@ -113,7 +113,7 @@ export default function WorkoutForm({
   );
 
   // Rest and screen-awake only belong to a session being lived, not to history
-  // being edited or the template picker that sits in front of one.
+  // being edited or Home, where a session is only offered.
   const sessionLive = !isEdit && isFocusedRoute;
   const rest = useRestTimerCore();
   useWakeLock(sessionLive);
@@ -606,29 +606,24 @@ export default function WorkoutForm({
         </button>
       )}
 
-      {!loading && showEmptyState && groups.length === 0 && appData.workouts.length === 0 && createPortal(
-        <div
-          className="fixed left-0 right-0 z-40 px-6 flex flex-col items-center justify-center pointer-events-none"
-          style={{
-            top: `calc(var(--safe-top) + 300px)`,
-            bottom: `calc(60px + var(--safe-bottom))`,
-          }}
-        >
+      {/* In the page's flow, under whatever Home shows above it, so it can
+          never sit on top of a card however tall those get. */}
+      {!loading && showEmptyState && groups.length === 0 && appData.workouts.length === 0 && (
+        <div className="flex flex-col items-center pt-8 pb-4 px-6">
           <img
             src={heroIllustration}
             alt=""
             aria-hidden
-            className="pointer-events-none mb-4 w-full max-w-[190px]"
+            className="mb-4 w-full max-w-[190px]"
             style={{ height: 'auto' }}
           />
           <p
             className="caps-tight text-[11px] text-center"
-            style={{ color: 'var(--color-text-muted)', letterSpacing: '0.08em' }}
+            style={{ color: 'var(--color-text-muted)' }}
           >
             LET'S GET YOU STARTED WITH YOUR WORKOUT
           </p>
-        </div>,
-        document.body,
+        </div>
       )}
 
       {showExerciseSelect && (

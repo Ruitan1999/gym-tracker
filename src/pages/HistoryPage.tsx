@@ -17,7 +17,7 @@ function getMonthLabel(dateStr: string): string {
     .toUpperCase();
 }
 
-// Matches the momentum panel's icon weight; these render even smaller.
+// Matches the icon weight used on Home; these render even smaller.
 const ICON_STROKE = 2;
 
 function isoLocal(d: Date): string {
@@ -78,7 +78,7 @@ export default function HistoryPage() {
     const thisMonthPrefix = todayIso.slice(0, 7);
     const sessionsThisMonth = sorted.filter((w) => w.date.startsWith(thisMonthPrefix)).length;
 
-    const tonnage = tonnageKg(sorted, thisMonthPrefix);
+    const tonnage = tonnageKg(sorted);
 
     // Month calendar — grid starting Monday of first week, through Sunday of last week
     const year = today.getFullYear();
@@ -130,7 +130,7 @@ export default function HistoryPage() {
       groupedWorkouts: groups,
       totalSessions: sorted.length,
       sessionsThisMonth,
-      lifetimeKg: tonnage.total,
+      lifetimeKg: tonnage,
       currentStreak: streak,
       monthLabel: label,
       monthDays: days,

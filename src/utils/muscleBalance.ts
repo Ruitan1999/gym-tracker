@@ -83,3 +83,15 @@ export function buildMuscleBalance(
     recovering: muscles.filter((p) => recent.has(p)),
   };
 }
+
+/** Body parts with sets, most-trained first. */
+export function rankedSets(sets: Partial<Record<BodyPart, number>>): [BodyPart, number][] {
+  return (Object.entries(sets) as [BodyPart, number][])
+    .filter(([, n]) => n > 0)
+    .sort((a, b) => b[1] - a[1]);
+}
+
+/** "1 set", "36 sets". */
+export function setCount(n: number): string {
+  return `${n} ${n === 1 ? 'set' : 'sets'}`;
+}

@@ -4,7 +4,7 @@ import { Dumbbell } from 'lucide-react';
 import Logo from '../components/shared/Logo';
 import SiteHeader from '../components/layout/SiteHeader';
 
-// Matches the momentum panel and the log book.
+// Matches Home and the log book.
 const ICON_STROKE = 2;
 
 function Reveal({ children, delay = 0, className = '' }: { children: ReactNode; delay?: number; className?: string }) {

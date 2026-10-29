@@ -16,22 +16,11 @@ function workoutTonnageKg(w: Workout): number {
   return total;
 }
 
-/**
- * Lifetime tonnage plus the part of it lifted in the month `monthPrefix`
- * (YYYY-MM). Always kg; convert for display with the user's unit.
- */
-export function tonnageKg(
-  workouts: Workout[],
-  monthPrefix: string,
-): { total: number; thisMonth: number } {
+/** Lifetime tonnage. Always kg; convert for display with the user's unit. */
+export function tonnageKg(workouts: Workout[]): number {
   let total = 0;
-  let thisMonth = 0;
-  for (const w of workouts) {
-    const t = workoutTonnageKg(w);
-    total += t;
-    if (w.date.startsWith(monthPrefix)) thisMonth += t;
-  }
-  return { total, thisMonth };
+  for (const w of workouts) total += workoutTonnageKg(w);
+  return total;
 }
 
 /** Whole units in the user's unit, grouped (307,450); abbreviated past 9 digits. */

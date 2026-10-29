@@ -51,7 +51,8 @@ const rightTabs = [
 
 type Tab = (typeof leftTabs)[number];
 
-const TOP_LEVEL_PATHS = ['/', '/groups', '/history', '/progress'];
+// The bar shows on its own tabs' pages only; everything else is a sub-page.
+const TOP_LEVEL_PATHS = [...leftTabs, ...rightTabs].map((t) => t.to);
 
 // How far the Start button stands above the bar.
 const START_RISE = 20;

@@ -4,12 +4,12 @@ import type { WorkoutGroup } from '../types';
  * Which weekday a template is trained on.
  *
  * Days are held Monday-first — 0 is Monday, 6 is Sunday — because that is how
- * the week reads everywhere in the app, from the momentum strip to the picker.
+ * the week reads everywhere in the app, from the week strip on Home to the picker.
  * `Date.getDay()` is Sunday-first, so it is converted at the edges rather than
  * carried around: `todayIndex()` is the only place that conversion belongs.
  */
 
-/** Monday-first, matching the momentum strip. */
+/** Monday-first, matching the week strip on Home. */
 export const DAY_LETTERS = ['M', 'T', 'W', 'T', 'F', 'S', 'S'] as const;
 export const DAY_CODES = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'] as const;
 export const DAY_NAMES = [
@@ -93,7 +93,7 @@ export function hasAnySchedule(groups: WorkoutGroup[]): boolean {
   return groups.some((g) => scheduledDays(g).length > 0);
 }
 
-/** The days ahead in this week that are spoken for, for the momentum strip. */
+/** Every weekday some template is set for, for the week strip on Home. */
 export function scheduledDaysThisWeek(groups: WorkoutGroup[]): Set<number> {
   const days = new Set<number>();
   for (const g of groups) {

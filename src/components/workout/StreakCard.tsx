@@ -5,6 +5,7 @@ import { useAppContext } from '../../context/AppContext';
 import { weeklyStreak } from '../../utils/streak';
 import { thisWeek } from '../../utils/thisWeek';
 import { trainingModeOf } from '../../utils/rotation';
+import { todayString } from '../../utils/templateSession';
 
 /**
  * The streak as one line, with this week against its plan and the running
@@ -13,17 +14,20 @@ import { trainingModeOf } from '../../utils/rotation';
  */
 export default function StreakCard() {
   const { appData } = useAppContext();
-  const { streak, trainedDays, plannedDays, total } = useMemo(() => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const week = thisWeek(appData.workouts, appData.groups ?? [], trainingModeOf(appData.preferences));
-    return {
-      streak: weeklyStreak(new Set(appData.workouts.map((w) => w.date)), today),
-      trainedDays: week.trainedDays,
-      plannedDays: week.plannedDays,
-      total: appData.workouts.length,
-    };
-  }, [appData.workouts, appData.groups, appData.preferences]);
+  const mode = trainingModeOf(appData.preferences);
+  // Part of the key so a phone left open past midnight rolls the week over.
+  const today = todayString();
+  const { trainedDays, plannedDays } = useMemo(
+    () => thisWeek(appData.workouts, appData.groups ?? [], mode),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [appData.workouts, appData.groups, mode, today],
+  );
+  const streak = useMemo(
+    () => weeklyStreak(appData.workouts.map((w) => w.date)),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [appData.workouts, today],
+  );
+  const total = appData.workouts.length;
 
   const active = streak > 0;
 
@@ -56,8 +60,7 @@ export default function StreakCard() {
           className="font-mono text-[12px] mt-0.5"
           style={{ color: 'var(--color-text-muted)', fontVariantNumeric: 'tabular-nums' }}
         >
-          {plannedDays > 0 ? `${trainedDays} / ${plannedDays}` : trainedDays} this week · {total}{' '}
-          {total === 1 ? 'workout' : 'workouts'} total
+          {plannedDays > 0 ? `${trainedDays} / ${plannedDays}` : trainedDays} this week · {total} total
         </div>
       </div>
       <Link

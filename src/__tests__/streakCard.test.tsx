@@ -53,13 +53,13 @@ describe('StreakCard', () => {
     seed(['2026-10-26', '2026-10-21', '2026-10-14'], [[0], [2], [4]]);
     renderCard();
     expect(screen.getByText('3 week streak')).toBeTruthy();
-    expect(screen.getByText(/1 \/ 3 this week · 3 workouts total/)).toBeTruthy();
+    expect(screen.getByText(/1 \/ 3 this week · 3 total/)).toBeTruthy();
   });
 
   it('leaves out the target when nothing is planned', () => {
     seed(['2026-10-26'], [[0], [2]], 'rotation');
     renderCard();
-    expect(screen.getByText(/^1 this week · 1 workout total/)).toBeTruthy();
+    expect(screen.getByText(/^1 this week · 1 total/)).toBeTruthy();
   });
 
   it('invites a start instead of showing a zero streak', () => {

@@ -52,9 +52,12 @@ export default function NextUpCard() {
     [groups, appData.workouts, mode, today],
   );
 
+  const todayIso = todayString();
   const week = useMemo(
     () => thisWeek(appData.workouts, groups, mode).days,
-    [appData.workouts, groups, mode],
+    // todayIso keys it to the date, so the strip rolls over at midnight.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [appData.workouts, groups, mode, todayIso],
   );
 
   const startOptions = { autoFill: !!appData.preferences.autoFillFromLast };
@@ -90,11 +93,7 @@ export default function NextUpCard() {
 
   // No template to suggest yet, but the week itself is still worth showing.
   if (pick.kind === 'none') {
-    return (
-      <Card week={week}>
-        {null}
-      </Card>
-    );
+    return <Card week={week} />;
   }
 
   const choose = groups.length > 1 ? <ChooseDifferent onChoose={() => navigate('/groups')} /> : null;
@@ -247,7 +246,7 @@ function Card({
 }: {
   week: WeekDay[];
   footer?: React.ReactNode;
-  children: React.ReactNode;
+  children?: React.ReactNode;
 }) {
   return (
     <section className="card mb-4 p-3">
