@@ -63,6 +63,17 @@ describe('HomeBalanceCard', () => {
     expect(screen.getByRole('img', { name: /last 90 days: legs 4 sets, chest 3 sets$/ })).toBeTruthy();
   });
 
+  it('lists the sets per part beside the figure, most first', () => {
+    seed([
+      { date: '2026-10-20', exerciseId: 'bench', n: 3 },
+      { date: '2026-10-21', exerciseId: 'squat', n: 5 },
+    ]);
+    renderCard();
+    expect(screen.getByText('SETS · THE LAST 30 DAYS')).toBeTruthy();
+    const rows = screen.getAllByRole('listitem', { hidden: true }).map((li) => li.textContent);
+    expect(rows).toEqual(['LEGS5 sets', 'CHEST3 sets']);
+  });
+
   it('offers only 30d and 90d', () => {
     seed([{ date: '2026-10-20', exerciseId: 'bench', n: 1 }]);
     renderCard();
