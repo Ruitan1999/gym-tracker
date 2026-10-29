@@ -226,8 +226,9 @@ export default function WorkoutForm({
 
   const groups = appData.groups ?? [];
 
-  // Every picture a template could ask for, fetched while its card is still
-  // sitting there — so starting one has nothing left to wait on.
+  // Every picture a template could ask for, fetched while Home is up: any
+  // template can be started from Next Up or Plan, and then nothing is left to
+  // wait on. Already-cached pictures cost nothing.
   useEffect(() => {
     if (groups.length === 0) return;
     const ids = new Set(groups.flatMap((g) => g.exerciseIds));

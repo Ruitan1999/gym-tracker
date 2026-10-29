@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { useAppContext } from '../../context/AppContext';
-import { buildMuscleBalance, rankedSets, setCount } from '../../utils/muscleBalance';
+import { buildMuscleBalance, NOT_A_MUSCLE, rankedSets, setCount } from '../../utils/muscleBalance';
 import { BODY_PART_LABELS } from '../../utils/bodyParts';
 import { todayString } from '../../utils/templateSession';
 import MuscleFigure from '../progress/MuscleFigure';
@@ -18,7 +18,8 @@ export default function HomeBalanceCard() {
 
   const view = useMemo(() => {
     const sets = buildMuscleBalance(appData.workouts, appData.exercises, '30d').sets;
-    const ranked = rankedSets(sets);
+    // Cardio has no region on the figure, so it is left out of this picture.
+    const ranked = rankedSets(sets).filter(([part]) => !NOT_A_MUSCLE.includes(part));
     return {
       paint: balancePaint(sets),
       rows: ranked.map(([part, n]) => ({ part, note: setCount(n) })),
@@ -32,8 +33,8 @@ export default function HomeBalanceCard() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [appData.workouts, appData.exercises, today]);
 
-  // Nothing logged yet means an all-grey figure, which says nothing.
-  if (appData.workouts.length === 0) return null;
+  // Nothing in the last 30 days means an all-grey figure, which says nothing.
+  if (view.rows.length === 0) return null;
 
   return (
     <section className="card mb-4 p-4" aria-label="Muscle groups">

@@ -60,7 +60,8 @@ export default function StreakCard() {
           className="font-mono text-[12px] mt-0.5"
           style={{ color: 'var(--color-text-muted)', fontVariantNumeric: 'tabular-nums' }}
         >
-          {plannedDays > 0 ? `${trainedDays} / ${plannedDays}` : trainedDays} this week · {total} total
+          {plannedDays > 0 && trainedDays <= plannedDays ? `${trainedDays} / ${plannedDays}` : trainedDays}{' '}
+          this week · {total} total
         </div>
       </div>
       <Link

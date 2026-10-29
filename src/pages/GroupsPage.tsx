@@ -14,6 +14,7 @@ import { nextInRotation, trainingModeOf } from '../utils/rotation';
 import type { TrainingMode } from '../types';
 import MiniBodyMap from '../components/workout/MiniBodyMap';
 import { bodyPartsOfTemplate } from '../utils/bodyParts';
+import { beginTemplate, replaceDraftWith } from '../utils/startSession';
 
 export default function GroupsPage() {
   const { appData, updateGroup, deleteGroup, reorderGroups, updatePreferences } =
@@ -33,6 +34,20 @@ export default function GroupsPage() {
   const [menuFor, setMenuFor] = useState<WorkoutGroup | null>(null);
   const [renaming, setRenaming] = useState<WorkoutGroup | null>(null);
   const [deleting, setDeleting] = useState<WorkoutGroup | null>(null);
+  const [pendingStart, setPendingStart] = useState<WorkoutGroup | null>(null);
+
+  const startOptions = { autoFill: !!appData.preferences.autoFillFromLast };
+
+  // Any template can be trained from here, not only the one Next Up offers.
+  // Same guard as the Next Up card: a session with real work in it is never
+  // replaced without asking.
+  function start(group: WorkoutGroup) {
+    if (beginTemplate(group, appData.workouts, startOptions) === 'confirm') {
+      setPendingStart(group);
+      return;
+    }
+    navigate('/workout/new');
+  }
 
   const {
     registerItem,
@@ -124,8 +139,8 @@ export default function GroupsPage() {
                     className="flex-1 min-w-0 text-left press flex items-center px-3.5 py-3"
                   >
                     <span className="flex-1 min-w-0">
-                      {/* Above the name, as on the home screen: the days are
-                          what decide when this one comes round. */}
+                      {/* Above the name: the days are what decide when this
+                          one comes round. */}
                       {mode === 'rotation' ? (
                         // Order is what counts in rotation; the weekdays are
                         // kept but not shown, as they are not being used.
@@ -180,7 +195,7 @@ export default function GroupsPage() {
                         </span>
                       ) : (
                         <span className="mt-2 flex items-center justify-between gap-3">
-                          <ExerciseStrip exerciseIds={g.exerciseIds} max={6} />
+                          <ExerciseStrip exerciseIds={g.exerciseIds} max={4} />
                           <span className="ml-auto">
                             <MiniBodyMap
                               parts={bodyPartsOfTemplate(g.exerciseIds, appData.exercises)}
@@ -190,6 +205,25 @@ export default function GroupsPage() {
                       )}
                     </span>
                   </button>
+
+                  {names.length > 0 && (
+                    <div className="flex items-center pr-2 shrink-0">
+                      <button
+                        type="button"
+                        onClick={() => start(g)}
+                        aria-label={`Start ${g.name}`}
+                        className="h-12 px-4 caps-tight text-[11px] press"
+                        style={{
+                          background: 'var(--color-volt)',
+                          color: '#ffffff',
+                          borderRadius: '999px',
+                          fontWeight: 700,
+                        }}
+                      >
+                        START
+                      </button>
+                    </div>
+                  )}
 
                   <button
                     type="button"
@@ -280,6 +314,22 @@ export default function GroupsPage() {
         />
       )}
 
+      {pendingStart && (
+        <ConfirmModal
+          eyebrow="WORKOUT IN PROGRESS"
+          title={`Start "${pendingStart.name}" instead?`}
+          message="Your current workout hasn't been saved yet — starting a new one will discard it."
+          confirmLabel="DISCARD & START →"
+          cancelLabel="KEEP CURRENT"
+          destructive
+          onConfirm={() => {
+            replaceDraftWith(pendingStart, appData.workouts, startOptions);
+            setPendingStart(null);
+            navigate('/workout/new');
+          }}
+          onClose={() => setPendingStart(null)}
+        />
+      )}
     </PageShell>
   );
 }

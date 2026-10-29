@@ -2,8 +2,6 @@ import { useMemo, useState } from 'react';
 import { ArrowLeftRight, CalendarDays, Check, Dumbbell } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAppContext } from '../../context/AppContext';
-import MiniBodyMap from './MiniBodyMap';
-import { bodyPartsOfTemplate } from '../../utils/bodyParts';
 import ConfirmModal from '../shared/ConfirmModal';
 import { todayString } from '../../utils/templateSession';
 import { DAY_CODES, DAY_NAMES, todayIndex } from '../../utils/schedule';
@@ -137,7 +135,6 @@ export default function NextUpCard() {
             tone="due"
             label="NEXT IN ROTATION"
             name={pick.group.name}
-            parts={bodyPartsOfTemplate(pick.group.exerciseIds, appData.exercises)}
             action="START"
             onPress={() => start(pick.group)}
           />
@@ -156,7 +153,6 @@ export default function NextUpCard() {
             tone="due"
             label={dayLabel(today, 0)}
             name={first.name}
-            parts={bodyPartsOfTemplate(first.exerciseIds, appData.exercises)}
             action="START"
             onPress={() => start(first)}
           />
@@ -167,7 +163,6 @@ export default function NextUpCard() {
                 tone="quiet"
                 label="ALSO TODAY"
                 name={g.name}
-                parts={bodyPartsOfTemplate(g.exerciseIds, appData.exercises)}
                 action="START"
                 onPress={() => start(g)}
               />
@@ -190,7 +185,6 @@ export default function NextUpCard() {
             tone="quiet"
             label={dayLabel(upcoming.day, upcoming.daysAway)}
             name={upcoming.group.name}
-            parts={bodyPartsOfTemplate(upcoming.group.exerciseIds, appData.exercises)}
             action="START EARLY"
             onPress={() => start(upcoming.group)}
           />
@@ -264,8 +258,8 @@ const TONES = {
 } as const;
 
 /**
- * One compact line: what kind of day it is, the template, the body it works
- * and the one thing to do. The whole row is the button, so the target is the
+ * One compact line: what kind of day it is, the template and the one thing
+ * to do. The whole row is the button, so the target is the
  * full width rather than the small pill alone.
  */
 function Row({
@@ -273,7 +267,6 @@ function Row({
   label,
   name,
   sub,
-  parts,
   action,
   icon = tone === 'done' ? 'check' : 'dumbbell',
   onPress,
@@ -282,7 +275,6 @@ function Row({
   label: string;
   name: string;
   sub?: string;
-  parts?: ReturnType<typeof bodyPartsOfTemplate>;
   action: string;
   icon?: 'dumbbell' | 'check' | 'calendar';
   onPress: () => void;
@@ -307,8 +299,9 @@ function Row({
         <span className="block caps-tight text-[11px]" style={{ color: 'var(--color-text-muted)' }}>
           {label}
         </span>
+        {/* Up to two lines: a long template name is the one thing to read here. */}
         <span
-          className="block font-display truncate"
+          className="block font-display line-clamp-2 break-words"
           style={{
             fontSize: '1.0625rem',
             fontWeight: 700,
@@ -325,7 +318,6 @@ function Row({
           </span>
         )}
       </span>
-      {parts && parts.length > 0 && <MiniBodyMap parts={parts} />}
       <span
         className="shrink-0 caps-tight text-[11px] px-3 h-9 flex items-center"
         style={{

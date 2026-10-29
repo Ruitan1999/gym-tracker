@@ -19,21 +19,23 @@ export default function WeekStrip({ days }: { days: WeekDay[] }) {
       <ol className="grid grid-cols-7" aria-label="This week">
         {days.map((d) => {
           const missed = !d.trained && !d.isFuture && !d.isToday;
-          const state = d.trained
-            ? 'trained'
-            : d.scheduled
-              ? 'planned'
-              : d.isToday
-                ? 'today'
-                : missed
-                  ? 'not trained'
-                  : '';
+          const states = [
+            d.isToday && 'today',
+            d.trained && 'trained',
+            !d.trained && d.scheduled && 'planned',
+            missed && 'not trained',
+          ].filter(Boolean);
           return (
             <li
               key={d.iso}
               className="flex flex-col items-center gap-1"
-              aria-label={`${DAY_NAMES[d.index]} ${d.dayOfMonth}${state ? `, ${state}` : ''}`}
+              aria-current={d.isToday ? 'date' : undefined}
             >
+              {/* Real text for screen readers; an aria-label on a list item is
+                  often not read out. */}
+              <span className="sr-only">
+                {`${DAY_NAMES[d.index]} ${d.dayOfMonth}${states.length ? `, ${states.join(', ')}` : ''}`}
+              </span>
               <span
                 aria-hidden
                 className="caps-tight text-[11px]"

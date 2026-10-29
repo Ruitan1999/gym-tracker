@@ -15,6 +15,7 @@ function seed(workouts: { date: string; exerciseId: string; n: number }[]) {
       exercises: [
         { id: 'bench', name: 'Bench', bodyPart: 'chest', isCustom: true },
         { id: 'squat', name: 'Squat', bodyPart: 'legs', isCustom: true },
+        { id: 'run', name: 'Run', bodyPart: 'cardio', isCustom: true },
       ],
       workouts: workouts.map((w, i) => ({
         id: `w${i}`,
@@ -71,5 +72,21 @@ describe('HomeBalanceCard', () => {
     expect(screen.getByText('Muscle groups · last 30 days')).toBeTruthy();
     const rows = screen.getAllByRole('listitem', { hidden: true }).map((li) => li.textContent);
     expect(rows).toEqual(['LEGS5 sets', 'CHEST3 sets']);
+  });
+
+  it('stays away when nothing was trained in the last 30 days', () => {
+    seed([{ date: '2026-08-01', exerciseId: 'bench', n: 3 }]);
+    const { container } = renderCard();
+    expect(container.textContent).toBe('');
+  });
+
+  it('leaves cardio off the list, since it has no place on the figure', () => {
+    seed([
+      { date: '2026-10-20', exerciseId: 'run', n: 40 },
+      { date: '2026-10-21', exerciseId: 'bench', n: 8 },
+    ]);
+    renderCard();
+    const rows = screen.getAllByRole('listitem', { hidden: true }).map((li) => li.textContent);
+    expect(rows).toEqual(['CHEST8 sets']);
   });
 });

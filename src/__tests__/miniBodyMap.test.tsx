@@ -111,7 +111,7 @@ describe('where the mini map is placed', () => {
   });
   afterEach(() => vi.useRealTimers());
 
-  it('sits on the Next Up card for the suggested template', () => {
+  it('is left off the Next Up row, where the name already says it', () => {
     render(
       <MemoryRouter>
         <AppProvider>
@@ -119,7 +119,7 @@ describe('where the mini map is placed', () => {
         </AppProvider>
       </MemoryRouter>,
     );
-    expect(screen.getByRole('img', { name: 'Works chest' })).toBeTruthy();
+    expect(screen.queryByRole('img', { name: /^Works / })).toBeNull();
   });
 
   it('sits on each Manage templates row', () => {

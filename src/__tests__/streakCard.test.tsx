@@ -62,6 +62,13 @@ describe('StreakCard', () => {
     expect(screen.getByText(/^1 this week · 1 total/)).toBeTruthy();
   });
 
+  it('does not show more than the plan as a fraction', () => {
+    // Planned Mon and Wed, trained Mon, Tue and Wed.
+    seed(['2026-10-26', '2026-10-27', '2026-10-28'], [[0], [2]]);
+    renderCard();
+    expect(screen.getByText(/^3 this week · 3 total/)).toBeTruthy();
+  });
+
   it('invites a start instead of showing a zero streak', () => {
     seed([]);
     renderCard();
