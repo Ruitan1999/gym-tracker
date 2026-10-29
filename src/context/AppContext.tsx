@@ -180,18 +180,25 @@ export function AppProvider({
         }
 
         if (!cancelled) {
-          skipNextSaveRef.current = true;
           setLibraryOverrides(overrides);
           setLibraryImages(applied.images);
-          // Anything touched while the fetch was in flight is newer than what
-          // came back, and this is a wholesale replace — so it stands, and the
-          // save below carries it up. Only an untouched screen is refreshed.
+          hasLoadedRemoteRef.current = true;
           if (!touchedSinceLoadRef.current) {
+            // Only an untouched screen is refreshed; putting the fetch in place
+            // is a load, not a change, so its save is skipped.
+            skipNextSaveRef.current = true;
             lastAppliedRef.current = finalData;
             setAppData(finalData);
+            saveCachedAppData(uid, finalData);
+          } else {
+            // Anything touched while the fetch was in flight is newer than what
+            // came back, and this is a wholesale replace, so it stands. The
+            // device copy already holds it and must not be overwritten with the
+            // fetch; a fresh save (now that the fetch has landed) carries it up.
+            // Before, the fetch overwrote the device copy and the next edit's
+            // save was skipped, so a relaunch in between lost the change.
+            setAppData((prev) => ({ ...prev }));
           }
-          saveCachedAppData(uid, finalData);
-          hasLoadedRemoteRef.current = true;
         }
 
         // Both before the loading screen lifts, not after it: warming that
