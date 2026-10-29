@@ -4,6 +4,7 @@ import { MemoryRouter } from 'react-router-dom';
 import { AppProvider } from '../context/AppContext';
 import WorkoutForm from '../components/workout/WorkoutForm';
 import type { WorkoutEntry, WorkoutSet } from '../types';
+import { draftHasProgress, loadDraft } from '../utils/templateSession';
 
 const DRAFT_KEY = 'liftgauge.workoutDraft.v1';
 
@@ -43,8 +44,8 @@ describe('A session only counts as in progress once something is recorded', () =
     seedDraft([entry('a', 'ex-push-001', emptySets)]);
     renderAt('/');
 
+    expect(draftHasProgress(loadDraft())).toBe(false);
     expect(screen.queryByText(/WORKOUT IN PROGRESS/)).toBeNull();
-    expect(screen.getByText(/LOG WORKOUT/)).toBeDefined();
   });
 
   it('claims a session is running once a rep is recorded', () => {
@@ -56,21 +57,24 @@ describe('A session only counts as in progress once something is recorded', () =
     ]);
     renderAt('/');
 
-    expect(screen.getByText(/WORKOUT IN PROGRESS/)).toBeDefined();
+    // The cue lives on the bottom nav's Start button now (it reads Resume).
+    expect(draftHasProgress(loadDraft())).toBe(true);
   });
 
   it('claims a session is running once a weight is recorded', () => {
     seedDraft([entry('a', 'ex-push-001', [{ setNumber: 1, reps: 0, weightKg: 60 }])]);
     renderAt('/');
 
-    expect(screen.getByText(/WORKOUT IN PROGRESS/)).toBeDefined();
+    // The cue lives on the bottom nav's Start button now (it reads Resume).
+    expect(draftHasProgress(loadDraft())).toBe(true);
   });
 
   it('counts an RPE rating as input', () => {
     seedDraft([entry('a', 'ex-push-001', emptySets)], 'Rating: 7');
     renderAt('/');
 
-    expect(screen.getByText(/WORKOUT IN PROGRESS/)).toBeDefined();
+    // The cue lives on the bottom nav's Start button now (it reads Resume).
+    expect(draftHasProgress(loadDraft())).toBe(true);
   });
 
   it('does not persist a session that has nothing recorded in it', () => {

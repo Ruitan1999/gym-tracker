@@ -23,7 +23,8 @@ describe('Page integration tests', () => {
       renderWithProviders(<LogWorkoutPage />);
       expect(screen.queryByText('Log Session')).toBeNull();
       expect(screen.getByText('MOMENTUM')).toBeDefined();
-      expect(screen.getByRole('button', { name: /LOG WORKOUT/ })).toBeDefined();
+      // Starting is the bottom nav's job; an empty home has no button of its own.
+      expect(screen.queryByRole('button', { name: /LOG WORKOUT/ })).toBeNull();
     });
 
     it('shows the session title when creating a new workout', () => {

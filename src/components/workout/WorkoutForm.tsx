@@ -82,16 +82,6 @@ export default function WorkoutForm({
   const isEdit = !!existingWorkout;
   const isFocusedRoute = location.pathname === '/workout/new';
 
-  function startExerciseSelection() {
-    if (isFocusedRoute) {
-      setShowExerciseSelect(true);
-    } else if (entries.length > 0) {
-      navigate('/workout/new');
-    } else {
-      navigate('/workout/new', { state: { autoOpenSelect: true } });
-    }
-  }
-
   const draft = !isEdit ? loadDraft() : null;
 
   const [date, setDate] = useState(existingWorkout?.date ?? draft?.date ?? todayString());
@@ -573,7 +563,6 @@ export default function WorkoutForm({
   const showActiveSession = isEdit || isFocusedRoute;
   const showEmptyState = !isEdit && !isFocusedRoute;
   const showGroupsPicker = showEmptyState && groups.length > 0;
-  const sessionInProgress = !isEdit && !isFocusedRoute && hasAnyInput;
   const todayIso = todayString();
   const hasTodaysWorkout = !isEdit && !isFocusedRoute && appData.workouts.some((w) => w.date === todayIso);
   const ratingMatch = notes.match(/^Rating: (\d+)/);
@@ -804,42 +793,11 @@ export default function WorkoutForm({
             style={{ height: 'auto' }}
           />
           <p
-            className="caps-tight text-[11px] mb-4 text-center"
+            className="caps-tight text-[11px] text-center"
             style={{ color: 'var(--color-text-muted)', letterSpacing: '0.08em' }}
           >
             LET'S GET YOU STARTED WITH YOUR WORKOUT
           </p>
-          <button
-            type="button"
-            onClick={startExerciseSelection}
-            className="pointer-events-auto w-full max-w-[420px] h-14 press caps-tight text-[11px]"
-            style={
-              sessionInProgress
-                ? {
-                    borderRadius: 'var(--radius)',
-                    letterSpacing: '0.12em',
-                    background: 'var(--color-steel)',
-                    color: '#ffffff',
-                  }
-                : {
-                    borderRadius: 'var(--radius)',
-                    letterSpacing: '0.12em',
-                    background: 'var(--color-volt)',
-                    color: '#ffffff',
-                  }
-            }
-          >
-            {sessionInProgress ? (
-              <span className="inline-flex items-center">
-                WORKOUT IN PROGRESS
-                <span className="progress-dots" aria-hidden>
-                  <span /><span /><span />
-                </span>
-              </span>
-            ) : (
-              'LOG WORKOUT →'
-            )}
-          </button>
         </div>,
         document.body,
       )}
