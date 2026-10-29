@@ -104,6 +104,13 @@ export function AppProvider({
    * which is what tells a change apart from a load.
    */
   const lastAppliedRef = useRef<AppData | null>(null);
+  /**
+   * What state started as, before anything was loaded. On a device with no
+   * saved copy the save effect first runs on this, and that is not a change by
+   * the person either: counting it as one meant the fetch was never applied
+   * and the first launch stayed empty, ready to be saved over the account.
+   */
+  const initialDataRef = useRef(appData);
   const [libraryImages, setLibraryImages] = useState<Record<string, string>>({});
   const [libraryOverrides, setLibraryOverrides] = useState<LibraryOverrides>(EMPTY_OVERRIDES);
 
@@ -225,7 +232,9 @@ export function AppProvider({
       // Only a change counts: this effect also runs for the copies put in place
       // by the launch itself, and treating those as changes would mean the
       // fetch never got to refresh a screen nobody had touched.
-      if (appData !== lastAppliedRef.current) touchedSinceLoadRef.current = true;
+      if (appData !== (lastAppliedRef.current ?? initialDataRef.current)) {
+        touchedSinceLoadRef.current = true;
+      }
       if (!hasLoadedRemoteRef.current) {
         // Written even before the fetch lands, so work done in that window is
         // on the device rather than only in memory.
