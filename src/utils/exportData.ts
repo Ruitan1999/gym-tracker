@@ -1,6 +1,7 @@
 import type { AppData } from '../types';
 import { kgToLb } from './conversions';
 import { parseRating } from './rating';
+import { localDateKey } from './dateKey';
 
 /**
  * Getting your data out. Two shapes, for two jobs: JSON is the whole backup
@@ -97,10 +98,7 @@ export function buildCsvExport(appData: AppData, range: CsvRange = {}): string {
 
 /** Local date, not UTC: an evening export shouldn't be filed under tomorrow. */
 export function exportFileName(ext: 'json' | 'csv', now: Date = new Date()): string {
-  const y = now.getFullYear();
-  const m = String(now.getMonth() + 1).padStart(2, '0');
-  const d = String(now.getDate()).padStart(2, '0');
-  return `gym-tracker-${y}-${m}-${d}.${ext}`;
+  return `gym-tracker-${localDateKey(now)}.${ext}`;
 }
 
 /** Hand a string to the browser as a file. The URL is revoked straight after. */

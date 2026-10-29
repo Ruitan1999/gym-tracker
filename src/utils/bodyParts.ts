@@ -59,11 +59,23 @@ export const BODY_PART_ACCENT: Record<BodyPart, string> = {
  * exercise left at zero reps was set up and abandoned, and shading the map for
  * it would claim work that was never done.
  */
+const byIdCache = new WeakMap<Exercise[], Map<string, Exercise>>();
+
+/** The library by id, built once per array: every template row and card asks. */
+function exercisesById(exercises: Exercise[]): Map<string, Exercise> {
+  let byId = byIdCache.get(exercises);
+  if (!byId) {
+    byId = new Map(exercises.map((e) => [e.id, e]));
+    byIdCache.set(exercises, byId);
+  }
+  return byId;
+}
+
 export function workedBodyParts(
   workout: Pick<Workout, 'entries'>,
   exercises: Exercise[],
 ): Partial<Record<BodyPart, number>> {
-  const byId = new Map(exercises.map((e) => [e.id, e]));
+  const byId = exercisesById(exercises);
   const tally: Partial<Record<BodyPart, number>> = {};
 
   for (const entry of workout.entries) {
@@ -83,7 +95,7 @@ export function workedBodyParts(
  * stored without a body part) are skipped rather than guessed at.
  */
 export function bodyPartsOfTemplate(exerciseIds: string[], exercises: Exercise[]): BodyPart[] {
-  const byId = new Map(exercises.map((e) => [e.id, e]));
+  const byId = exercisesById(exercises);
   const found = new Set<BodyPart>();
   for (const id of exerciseIds) {
     const part = byId.get(id)?.bodyPart;

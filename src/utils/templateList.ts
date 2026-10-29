@@ -1,13 +1,7 @@
+import { prefersReducedMotion } from './motion';
+
 /** The Home template list (WorkoutForm's group picker). Anchor for "Choose a different workout". */
 export const TEMPLATE_LIST_ID = 'template-list';
-
-function prefersReducedMotion(): boolean {
-  try {
-    return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  } catch {
-    return false;
-  }
-}
 
 /**
  * Bring the template list into view. Moves the scroll position and nothing

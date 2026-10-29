@@ -35,7 +35,7 @@ import {
 } from '../../utils/templateSession';
 import SessionStrip from './SessionStrip';
 import RestTimer from './RestTimer';
-import { useRestTimer } from '../../utils/useRestTimer';
+import { useRestTimerCore } from '../../utils/useRestTimer';
 import { useWakeLock } from '../../utils/useWakeLock';
 import ExerciseStrip from '../shared/ExerciseStrip';
 import MiniBodyMap from './MiniBodyMap';
@@ -130,7 +130,7 @@ export default function WorkoutForm({
   // Rest and screen-awake only belong to a session being lived, not to history
   // being edited or the template picker that sits in front of one.
   const sessionLive = !isEdit && isFocusedRoute;
-  const rest = useRestTimer();
+  const rest = useRestTimerCore();
   useWakeLock(sessionLive);
 
   // A list of expanded cards is impossible to reorder — one card fills the

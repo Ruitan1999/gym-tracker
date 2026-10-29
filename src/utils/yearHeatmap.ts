@@ -1,5 +1,6 @@
 import type { Workout } from '../types';
 import { sessionDurationMs } from './duration';
+import { localDateKey } from './dateKey';
 
 export type HeatmapMode = 'time' | 'volume';
 
@@ -31,19 +32,11 @@ export interface YearHeatmap {
 export const HEATMAP_WEEKS = 53;
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
-function pad(n: number): string {
-  return String(n).padStart(2, '0');
-}
-
 /**
  * Local calendar dates only. Adding days goes through `new Date(y, m, d + n)`,
  * which the engine normalises on the wall clock, so a daylight-saving change
  * can never skip or repeat a day the way adding 86 400 000 ms would.
  */
-function dateKey(d: Date): string {
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
-}
-
 function addDays(d: Date, n: number): Date {
   return new Date(d.getFullYear(), d.getMonth(), d.getDate() + n);
 }
@@ -93,10 +86,10 @@ export function buildYearHeatmap(
   today: Date = new Date(),
 ): YearHeatmap {
   const todayDay = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-  const todayKey = dateKey(todayDay);
+  const todayKey = localDateKey(todayDay);
   const mondayOffset = (todayDay.getDay() + 6) % 7;
   const firstDay = addDays(todayDay, -mondayOffset - (HEATMAP_WEEKS - 1) * 7);
-  const firstKey = dateKey(firstDay);
+  const firstKey = localDateKey(firstDay);
 
   const byDay = new Map<string, { value: number; sessions: number }>();
   let untimedSessions = 0;
@@ -124,7 +117,7 @@ export function buildYearHeatmap(
     const column: HeatmapCell[] = [];
     for (let r = 0; r < 7; r++) {
       const day = addDays(firstDay, c * 7 + r);
-      const key = dateKey(day);
+      const key = localDateKey(day);
       const future = key > todayKey;
       const hit = future ? undefined : byDay.get(key);
       const value = hit?.value ?? 0;

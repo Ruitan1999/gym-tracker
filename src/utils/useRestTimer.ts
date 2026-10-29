@@ -54,17 +54,21 @@ interface TimerState {
 const IDLE: TimerState = { phase: 'idle', endAt: 0, pausedMs: 0, total: 0 };
 
 /**
- * Rest countdown built on an end timestamp rather than counting ticks, so it
- * is still right after the tab was backgrounded and timers were throttled.
+ * The rest state machine, without a ticking clock.
+ *
+ * Built on an end timestamp rather than counting ticks, so it is still right
+ * after the tab was backgrounded and timers were throttled. Nothing here
+ * changes once a second: the form that owns it re-renders only when a rest
+ * starts, is adjusted, paused, finishes or is skipped. The countdown the eye
+ * sees ticks inside the bar alone (`useRemaining`).
  */
-export function useRestTimer() {
+export function useRestTimerCore() {
   const [state, setState] = useState<TimerState>(IDLE);
-  const [now, setNow] = useState(() => Date.now());
   // Adjusting ±15s retunes the default too, so the next rest starts there.
   const durationRef = useRef<number>(loadRestSeconds());
 
-  // Several ticks can land before the state flips (interval plus a
-  // visibilitychange), and the buzz must only happen once per rest.
+  // The timeout and a visibilitychange catch-up can both land before the state
+  // flips, and the buzz must only happen once per rest.
   const buzzedFor = useRef(0);
 
   const finish = useCallback((forEnd: number) => {
@@ -85,17 +89,15 @@ export function useRestTimer() {
 
   useEffect(() => {
     if (!running) return;
-    const tick = () => {
-      const t = Date.now();
-      setNow(t);
-      if (t >= endAt) finish(endAt);
+    const check = () => {
+      if (Date.now() >= endAt) finish(endAt);
     };
-    const id = setInterval(tick, 250);
+    const id = setTimeout(check, Math.max(0, endAt - Date.now()));
     // Throttled timers may not fire while hidden; catch up the moment we're back.
-    document.addEventListener('visibilitychange', tick);
+    document.addEventListener('visibilitychange', check);
     return () => {
-      clearInterval(id);
-      document.removeEventListener('visibilitychange', tick);
+      clearTimeout(id);
+      document.removeEventListener('visibilitychange', check);
     };
   }, [running, endAt, finish]);
 
@@ -107,9 +109,7 @@ export function useRestTimer() {
 
   const start = useCallback((seconds?: number) => {
     const sec = clampRest(seconds ?? durationRef.current);
-    const t = Date.now();
-    setNow(t);
-    setState({ phase: 'running', endAt: t + sec * 1000, pausedMs: 0, total: sec });
+    setState({ phase: 'running', endAt: Date.now() + sec * 1000, pausedMs: 0, total: sec });
   }, []);
 
   const skip = useCallback(() => setState(IDLE), []);
@@ -129,7 +129,6 @@ export function useRestTimer() {
         ? { ...s, endAt: t + left, total }
         : { ...s, pausedMs: left, total };
     });
-    setNow(Date.now());
   }, []);
 
   const togglePause = useCallback(() => {
@@ -143,15 +142,51 @@ export function useRestTimer() {
       }
       return s;
     });
-    setNow(Date.now());
   }, []);
 
-  const remaining =
-    state.phase === 'running'
-      ? remainingSeconds(state.endAt, now)
-      : state.phase === 'paused'
-        ? Math.ceil(state.pausedMs / 1000)
-        : 0;
+  return {
+    phase: state.phase,
+    endAt: state.endAt,
+    pausedMs: state.pausedMs,
+    total: state.total,
+    start,
+    skip,
+    adjust,
+    togglePause,
+  };
+}
 
-  return { phase: state.phase, remaining, total: state.total, start, skip, adjust, togglePause };
+export type RestTimerCore = ReturnType<typeof useRestTimerCore>;
+
+/**
+ * Whole seconds left for the countdown on screen. This is the only thing that
+ * ticks, so call it from the bar and nowhere that re-renders a whole form.
+ */
+export function useRemaining(timer: Pick<RestTimerCore, 'phase' | 'endAt' | 'pausedMs'>): number {
+  const [now, setNow] = useState(() => Date.now());
+  const running = timer.phase === 'running';
+  const { endAt } = timer;
+
+  useEffect(() => {
+    if (!running) return;
+    const tick = () => setNow(Date.now());
+    tick();
+    const id = setInterval(tick, 250);
+    // Timers are throttled while hidden; show the right number the moment we're back.
+    document.addEventListener('visibilitychange', tick);
+    return () => {
+      clearInterval(id);
+      document.removeEventListener('visibilitychange', tick);
+    };
+  }, [running, endAt]);
+
+  if (timer.phase === 'running') return remainingSeconds(endAt, now);
+  if (timer.phase === 'paused') return Math.ceil(timer.pausedMs / 1000);
+  return 0;
+}
+
+/** The state machine and its countdown in one, for callers that want both. */
+export function useRestTimer() {
+  const core = useRestTimerCore();
+  return { ...core, remaining: useRemaining(core) };
 }

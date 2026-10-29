@@ -1,15 +1,6 @@
 import { Pause, Play } from 'lucide-react';
-import { REST_STEP_SECONDS, type useRestTimer } from '../../utils/useRestTimer';
-
-type RestTimerState = ReturnType<typeof useRestTimer>;
-
-function prefersReducedMotion(): boolean {
-  try {
-    return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  } catch {
-    return false;
-  }
-}
+import { prefersReducedMotion } from '../../utils/motion';
+import { REST_STEP_SECONDS, useRemaining, type RestTimerCore } from '../../utils/useRestTimer';
 
 function format(sec: number): string {
   return `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, '0')}`;
@@ -27,8 +18,9 @@ const stepBtn = {
  * under way: it appears when a set is logged and removes itself when the rest
  * ends or is skipped, so there is never a banner left to dismiss.
  */
-export default function RestTimer({ timer }: { timer: RestTimerState }) {
-  const { phase, remaining, total, adjust, togglePause, skip } = timer;
+export default function RestTimer({ timer }: { timer: RestTimerCore }) {
+  const { phase, total, adjust, togglePause, skip } = timer;
+  const remaining = useRemaining(timer);
   if (phase === 'idle') return null;
 
   const isGo = phase === 'go';

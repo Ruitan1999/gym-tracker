@@ -3,8 +3,7 @@ import type { KeyboardEvent } from 'react';
 import type { Workout } from '../../types';
 import { buildYearHeatmap, shortDate } from '../../utils/yearHeatmap';
 import type { HeatmapCell, HeatmapMode } from '../../utils/yearHeatmap';
-import { formatVolume } from '../../utils/conversions';
-import { kgToLb } from '../../utils/conversions';
+import { formatSessionVolume } from '../../utils/sessionProgress';
 import Segmented from './Segmented';
 
 /** One day's pitch; the square inside is inset so the hit area stays larger. */
@@ -60,13 +59,8 @@ export default function YearHeatmap({
     if (el) el.scrollLeft = el.scrollWidth;
   }, []);
 
-  function volumeText(kg: number): string {
-    const v = unit === 'lb' ? kgToLb(kg) : kg;
-    return `${formatVolume(v)} ${unit}`;
-  }
-
   function valueText(v: number): string {
-    return mode === 'time' ? minutesLabel(v) : volumeText(v);
+    return mode === 'time' ? minutesLabel(v) : formatSessionVolume(v, unit);
   }
 
   function cellText(c: HeatmapCell): string {

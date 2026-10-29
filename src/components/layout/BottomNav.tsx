@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { Dumbbell, NotebookText, Play, TrendingUp, Settings } from 'lucide-react';
 import { useAppContext } from '../../context/AppContext';
@@ -50,6 +50,8 @@ const rightTabs = [
 type Tab = (typeof leftTabs)[number];
 
 // How far the Start button stands above the bar.
+const TOP_LEVEL_PATHS = ['/', '/history', '/progress', '/settings'];
+
 const START_RISE = 20;
 const START_SIZE = 56;
 
@@ -73,13 +75,13 @@ export default function BottomNav() {
     navigate('/workout/new', autoOpenSelect ? { state: { autoOpenSelect: true } } : undefined);
   }
 
-  // Read on each render, which includes every change of page: the form that
-  // writes the draft is not on screen while this nav is, so there is nothing to
-  // subscribe to. This is what tells you a session is still open now that
-  // Home no longer has a bar saying so.
-  const resuming = draftHasProgress(loadDraft());
+  // This is what tells you a session is still open now that Home no longer has
+  // a bar saying so.
+  // The draft only changes while the form is up, when this nav is hidden, so
+  // reading it on a change of page is enough and spares a parse per render.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const resuming = useMemo(() => draftHasProgress(loadDraft()), [location.pathname]);
 
-  const TOP_LEVEL_PATHS = ['/', '/history', '/progress', '/settings'];
   const hideOnRoute = !TOP_LEVEL_PATHS.includes(location.pathname);
 
   useEffect(() => {

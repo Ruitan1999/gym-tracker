@@ -1,5 +1,6 @@
 import type { BodyPart, Exercise, Workout } from '../types';
 import { BODY_PART_ORDER, workedBodyParts } from './bodyParts';
+import { localDateKey } from './dateKey';
 
 export type BalanceWindow = 'week' | '30d' | '90d' | 'all';
 
@@ -27,19 +28,11 @@ export interface MuscleBalance {
   recovering: BodyPart[];
 }
 
-function pad(n: number): string {
-  return String(n).padStart(2, '0');
-}
-
-function dateKey(d: Date): string {
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
-}
-
 /** Local YYYY-MM-DD of the first day inside the window, or null for all time. */
 export function windowStart(window: BalanceWindow, now: Date): string | null {
   if (window === 'all') return null;
   const days = WINDOW_DAYS[window];
-  return dateKey(new Date(now.getFullYear(), now.getMonth(), now.getDate() - (days - 1)));
+  return localDateKey(new Date(now.getFullYear(), now.getMonth(), now.getDate() - (days - 1)));
 }
 
 /**
@@ -52,7 +45,7 @@ function endedAt(w: Workout): number {
   const endOfDay = new Date(y, m - 1, d, 23, 59, 59).getTime();
   const saved = Date.parse(w.createdAt);
   if (Number.isNaN(saved)) return endOfDay;
-  return dateKey(new Date(saved)) === w.date ? saved : endOfDay;
+  return localDateKey(new Date(saved)) === w.date ? saved : endOfDay;
 }
 
 export function buildMuscleBalance(
@@ -62,7 +55,7 @@ export function buildMuscleBalance(
   now: Date = new Date(),
 ): MuscleBalance {
   const from = windowStart(window, now);
-  const today = dateKey(now);
+  const today = localDateKey(now);
   const cutoff = now.getTime() - RECOVERY_HOURS * 3600 * 1000;
 
   const sets: Partial<Record<BodyPart, number>> = {};
