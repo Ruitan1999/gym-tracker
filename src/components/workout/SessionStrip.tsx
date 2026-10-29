@@ -6,11 +6,14 @@ import {
   formatSessionVolume,
   sessionProgress,
 } from '../../utils/sessionProgress';
+import type { Unconfirmed } from '../../utils/templateSession';
 import SessionClock from './SessionClock';
 import MiniBodyMap from './MiniBodyMap';
 
 interface SessionStripProps {
   entries: WorkoutEntry[];
+  /** Sets still showing last time's numbers, which are not counted as done. */
+  unconfirmed?: Unconfirmed;
   startedAt: string | null;
   /** The chip last tapped; stays the current one until that exercise is done. */
   tappedId: string | null;
@@ -27,12 +30,12 @@ interface SessionStripProps {
  * room in the flow and cannot cover a card or the title.
  */
 const SessionStrip = forwardRef<HTMLDivElement, SessionStripProps>(function SessionStrip(
-  { entries, startedAt, tappedId, bodyParts, onSelect },
+  { entries, unconfirmed, startedAt, tappedId, bodyParts, onSelect },
   ref,
 ) {
   const { appData } = useAppContext();
   const unit = appData.preferences.weightUnit;
-  const progress = sessionProgress(entries);
+  const progress = sessionProgress(entries, unconfirmed);
   const currentId = currentExerciseId(progress.exercises, tappedId);
   const rowRef = useRef<HTMLDivElement>(null);
 

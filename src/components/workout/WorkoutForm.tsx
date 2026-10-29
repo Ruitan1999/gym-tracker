@@ -7,7 +7,7 @@ import DatePicker from '../shared/DatePicker';
 import ConfirmModal from '../shared/ConfirmModal';
 import ActionSheet from '../shared/ActionSheet';
 import RenameModal from '../shared/RenameModal';
-import EntryCard from './EntryCard';
+import EntryCard, { type SetsChange } from './EntryCard';
 import heroIllustration from '../../assets/healthy-habit.svg';
 import type { Workout, WorkoutEntry, WorkoutGroup, WorkoutSet } from '../../types';
 import { useDragReorder } from '../../utils/useDragReorder';
@@ -23,6 +23,14 @@ import {
   lastSetsFor,
   saveDraft,
   todayString,
+  confirmEntry,
+  confirmSet,
+  isRecorded,
+  isUnconfirmed,
+  shiftAfterRemoval,
+  startingSets,
+  unconfirmedOf,
+  type Unconfirmed,
 } from '../../utils/templateSession';
 import SessionStrip from './SessionStrip';
 import RestTimer from './RestTimer';
@@ -94,6 +102,13 @@ export default function WorkoutForm({
       [],
   );
   const [notes, setNotes] = useState(existingWorkout?.notes ?? draft?.notes ?? '');
+  // Sets filled in from last time that the owner has not touched yet. Held
+  // beside the entries rather than on them so it never reaches a saved workout.
+  const [unconfirmed, setUnconfirmed] = useState<Unconfirmed>(
+    () => (isEdit ? {} : (draft?.unconfirmed ?? {})),
+  );
+  // Only a session being lived is filled in; history being edited is left alone.
+  const autoFill = !isEdit && !!appData.preferences.autoFillFromLast;
   const [showExerciseSelect, setShowExerciseSelect] = useState(
     () => !!autoOpenSelect && !existingWorkout,
   );
@@ -157,8 +172,9 @@ export default function WorkoutForm({
 
   // Picking exercises only sets up empty sets — that's scaffolding, not work.
   // A session counts as underway once something has actually been recorded.
+  // Numbers filled in from last time and not touched since are not work either.
   const hasLoggedWork = entries.some((e) =>
-    e.sets.some((s) => s.reps > 0 || s.weightKg > 0),
+    e.sets.some((s, i) => isRecorded(s, unconfirmed, e.id, i)),
   );
   const hasAnyInput = hasLoggedWork || notes.trim().length > 0;
 
@@ -216,9 +232,21 @@ export default function WorkoutForm({
       collapsedIds: [...collapsedIds],
       ...(sourceGroupId ? { sourceGroupId } : {}),
       ...(startedAt ? { startedAt } : {}),
+      ...(Object.keys(unconfirmed).length > 0 ? { unconfirmed } : {}),
     };
     localStorage.setItem(DRAFT_KEY, JSON.stringify(payload));
-  }, [isEdit, date, name, entries, notes, collapsedIds, hasAnyInput, sourceGroupId, startedAt]);
+  }, [
+    isEdit,
+    date,
+    name,
+    entries,
+    notes,
+    collapsedIds,
+    hasAnyInput,
+    sourceGroupId,
+    startedAt,
+    unconfirmed,
+  ]);
 
   const groups = appData.groups ?? [];
 
@@ -271,6 +299,7 @@ export default function WorkoutForm({
   function discardWorkout() {
     localStorage.removeItem(DRAFT_KEY);
     setEntries([]);
+    setUnconfirmed({});
     onNameChange('');
     setNotes('');
     setCollapsedIds(new Set());
@@ -291,14 +320,13 @@ export default function WorkoutForm({
 
   function handleSelectExercise(exerciseId: string) {
     const lastSets = getLastWorkoutSets(exerciseId);
-    const sets: WorkoutSet[] = lastSets
-      ? lastSets.map((_, j) => ({ setNumber: j + 1, reps: 0, weightKg: 0 }))
-      : [{ setNumber: 1, reps: 0, weightKg: 0 }];
+    const sets: WorkoutSet[] = startingSets(lastSets, autoFill);
     const newEntry: WorkoutEntry = {
       id: crypto.randomUUID(),
       exerciseId,
       sets,
     };
+    if (autoFill) setUnconfirmed((prev) => ({ ...prev, ...unconfirmedOf([newEntry]) }));
     setCollapsedIds(new Set(entries.map((e) => e.id)));
     setEntries((prev) => [...prev, newEntry]);
     setShowExerciseSelect(false);
@@ -332,21 +360,39 @@ export default function WorkoutForm({
     setScrollToEntryId(entryId);
   }
 
-  function handleSetsChange(entryIndex: number, sets: WorkoutSet[]) {
+  function handleSetsChange(entryIndex: number, sets: WorkoutSet[], change?: SetsChange) {
     // There is no per-set tick: sets arrive pre-sized and empty, and a set
     // counts as done once its reps go from nothing to something. That is the
     // moment rest begins; fixing a number later, changing load or adding or
     // removing a set does not restart it.
+    const entryId = entries[entryIndex]?.id;
     if (sessionLive) {
       const before = entries[entryIndex]?.sets ?? [];
       if (sets.length === before.length && sets.some((s, i) => s.reps > 0 && !(before[i].reps > 0))) {
         rest.start();
+      } else if (
+        // A set filled in from last time already has reps, so nothing goes from
+        // empty to something. The first touch is when it becomes logged.
+        sets.length === before.length &&
+        change?.touched !== undefined &&
+        entryId !== undefined &&
+        isUnconfirmed(unconfirmed, entryId, change.touched) &&
+        sets[change.touched].reps > 0
+      ) {
+        rest.start();
       }
+    }
+    if (entryId !== undefined && change) {
+      const { touched, removed } = change;
+      if (removed !== undefined) setUnconfirmed((prev) => shiftAfterRemoval(prev, entryId, removed));
+      else if (touched !== undefined) setUnconfirmed((prev) => confirmSet(prev, entryId, touched));
     }
     setEntries((prev) => prev.map((e, i) => (i === entryIndex ? { ...e, sets } : e)));
   }
 
   function handleRemoveEntry(entryIndex: number) {
+    const gone = entries[entryIndex];
+    if (gone) setUnconfirmed((prev) => confirmEntry(prev, gone.id));
     setEntries((prev) => prev.filter((_, i) => i !== entryIndex));
   }
 
@@ -359,6 +405,8 @@ export default function WorkoutForm({
     // The last set already started a rest; finishing the exercise only starts
     // one when nothing is counting, so it never resets a rest part-way.
     if (sessionLive && nextDone && rest.phase === 'idle') rest.start();
+    // Calling the exercise done is the owner's say-so on every set in it.
+    if (nextDone) setUnconfirmed((prev) => confirmEntry(prev, entry.id));
     setEntries((prev) => prev.map((e, i) => (i === entryIndex ? { ...e, done: nextDone } : e)));
     setCollapsedIds((prev) => {
       const next = new Set(prev);
@@ -382,13 +430,16 @@ export default function WorkoutForm({
         navigate('/workout/new');
         return;
       }
-      saveDraft(draftFromTemplate(group, appData.workouts, new Date().toISOString()));
+      saveDraft(draftFromTemplate(group, appData.workouts, { autoFill }));
       navigate('/workout/new');
       return;
     }
 
     const begunAt = startedAt ?? new Date().toISOString();
-    const draftPayload = draftFromTemplate(group, appData.workouts, begunAt);
+    const draftPayload = draftFromTemplate(group, appData.workouts, {
+      startedAt: begunAt,
+      autoFill,
+    });
     const newEntries = draftPayload.entries;
     const collapsed = draftPayload.collapsedIds;
 
@@ -396,6 +447,7 @@ export default function WorkoutForm({
     setSourceGroupId(group.id);
     setStartedAt(begunAt);
     setEntries(newEntries);
+    setUnconfirmed(draftPayload.unconfirmed ?? {});
     setCollapsedIds(new Set(collapsed));
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
@@ -406,7 +458,7 @@ export default function WorkoutForm({
   }
 
   function confirmStartFromGroup(group: WorkoutGroup) {
-    saveDraft(draftFromTemplate(group, appData.workouts, new Date().toISOString()));
+    saveDraft(draftFromTemplate(group, appData.workouts, { autoFill }));
     setPendingTemplateStart(null);
     navigate('/workout/new');
   }
@@ -529,7 +581,9 @@ export default function WorkoutForm({
   const totalExercises = entries.length;
   const totalSets = entries.reduce((acc, e) => acc + e.sets.length, 0);
   const totalReps = entries.reduce(
-    (acc, e) => acc + e.sets.reduce((s, set) => s + (set.reps || 0), 0),
+    (acc, e) =>
+      acc +
+      e.sets.reduce((s, set, i) => (isUnconfirmed(unconfirmed, e.id, i) ? s : s + (set.reps || 0)), 0),
     0,
   );
   const doneCount = entries.filter((e) => e.done).length;
@@ -654,6 +708,7 @@ export default function WorkoutForm({
         <SessionStrip
           ref={stripRef}
           entries={entries}
+          unconfirmed={unconfirmed}
           startedAt={startedAt}
           tappedId={tappedChipId}
           bodyParts={bodyPartsOfTemplate(
@@ -686,7 +741,7 @@ export default function WorkoutForm({
                 exerciseId={entry.exerciseId}
                 sets={entry.sets}
                 previousSets={getLastWorkoutSets(entry.exerciseId) ?? undefined}
-                onSetsChange={(sets) => handleSetsChange(index, sets)}
+                onSetsChange={(sets, change) => handleSetsChange(index, sets, change)}
                 onRemove={() => handleRemoveEntry(index)}
                 collapsed={collapsedIds.has(entry.id)}
                 onToggleCollapsed={() => toggleCollapsed(entry.id)}

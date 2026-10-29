@@ -20,6 +20,61 @@ export interface Draft {
   sourceGroupId?: string;
   /** When the clock started, so it survives a reload mid-session. */
   startedAt?: string;
+  /**
+   * Sets that were filled in from last time and not touched since, as indices
+   * per entry id. They hold numbers but nothing has been recorded against them.
+   * Absent means every set is the owner's own.
+   */
+  unconfirmed?: Unconfirmed;
+}
+
+/** Entry id -> indices of the sets still showing numbers nobody has confirmed. */
+export type Unconfirmed = Record<string, number[]>;
+
+export function isUnconfirmed(unconfirmed: Unconfirmed | undefined, entryId: string, index: number): boolean {
+  return !!unconfirmed?.[entryId]?.includes(index);
+}
+
+/** Every set that arrived with numbers in it; the empty ones have nothing to confirm. */
+export function unconfirmedOf(entries: WorkoutEntry[]): Unconfirmed {
+  const out: Unconfirmed = {};
+  for (const e of entries) {
+    const idx = e.sets.flatMap((s, i) => (s.reps > 0 || s.weightKg > 0 ? [i] : []));
+    if (idx.length > 0) out[e.id] = idx;
+  }
+  return out;
+}
+
+function withEntry(unconfirmed: Unconfirmed, entryId: string, indices: number[]): Unconfirmed {
+  const rest = Object.fromEntries(Object.entries(unconfirmed).filter(([id]) => id !== entryId));
+  return indices.length > 0 ? { ...rest, [entryId]: indices } : rest;
+}
+
+/** The owner touched this set, so its numbers are theirs now. */
+export function confirmSet(unconfirmed: Unconfirmed, entryId: string, index: number): Unconfirmed {
+  const list = unconfirmed[entryId];
+  if (!list?.includes(index)) return unconfirmed;
+  const left = list.filter((i) => i !== index);
+  return withEntry(unconfirmed, entryId, left);
+}
+
+/** Everything on this exercise counts, e.g. once it is marked done. */
+export function confirmEntry(unconfirmed: Unconfirmed, entryId: string): Unconfirmed {
+  if (!(entryId in unconfirmed)) return unconfirmed;
+  return withEntry(unconfirmed, entryId, []);
+}
+
+/** Row `removed` is gone; the rows below it moved up one. */
+export function shiftAfterRemoval(unconfirmed: Unconfirmed, entryId: string, removed: number): Unconfirmed {
+  const list = unconfirmed[entryId];
+  if (!list) return unconfirmed;
+  const next = list.filter((i) => i !== removed).map((i) => (i > removed ? i - 1 : i));
+  return withEntry(unconfirmed, entryId, next);
+}
+
+/** A set counts as recorded work unless it is still just last time's numbers. */
+export function isRecorded(s: WorkoutSet, unconfirmed: Unconfirmed | undefined, entryId: string, index: number): boolean {
+  return (s.reps > 0 || s.weightKg > 0) && !isUnconfirmed(unconfirmed, entryId, index);
 }
 
 export function loadDraft(): Draft | null {
@@ -42,7 +97,9 @@ export function saveDraft(draft: Draft): void {
  */
 export function draftHasProgress(draft: Draft | null): boolean {
   if (!draft) return false;
-  const hasLoggedWork = draft.entries.some((e) => e.sets.some((s) => s.reps > 0 || s.weightKg > 0));
+  const hasLoggedWork = draft.entries.some((e) =>
+    e.sets.some((s, i) => isRecorded(s, draft.unconfirmed, e.id, i)),
+  );
   return hasLoggedWork || draft.notes.trim().length > 0;
 }
 
@@ -69,19 +126,37 @@ export function lastSetsFor(workouts: Workout[], exerciseId: string): WorkoutSet
   return null;
 }
 
-export function entriesFromTemplate(group: WorkoutGroup, workouts: Workout[]): WorkoutEntry[] {
-  return group.exerciseIds.map((exerciseId) => {
-    const lastSets = lastSetsFor(workouts, exerciseId);
-    return {
-      id: crypto.randomUUID(),
-      exerciseId,
-      // The count carries over, not the numbers: how many sets is the plan,
-      // what went on the bar is today's business.
-      sets: lastSets
-        ? lastSets.map((_, j) => ({ setNumber: j + 1, reps: 0, weightKg: 0 }))
-        : [{ setNumber: 1, reps: 0, weightKg: 0 }],
-    };
-  });
+export interface StartOptions {
+  /** Fill each set from last time instead of leaving it blank. */
+  autoFill?: boolean;
+}
+
+/**
+ * The sets a fresh exercise opens on.
+ *
+ * The count always carries over. The numbers only do when auto-fill is on:
+ * otherwise how many sets is the plan and what went on the bar is today's
+ * business.
+ */
+export function startingSets(lastSets: WorkoutSet[] | null, autoFill = false): WorkoutSet[] {
+  if (!lastSets) return [{ setNumber: 1, reps: 0, weightKg: 0 }];
+  return lastSets.map((s, j) =>
+    autoFill
+      ? { setNumber: j + 1, reps: s.reps, weightKg: s.weightKg }
+      : { setNumber: j + 1, reps: 0, weightKg: 0 },
+  );
+}
+
+export function entriesFromTemplate(
+  group: WorkoutGroup,
+  workouts: Workout[],
+  { autoFill = false }: StartOptions = {},
+): WorkoutEntry[] {
+  return group.exerciseIds.map((exerciseId) => ({
+    id: crypto.randomUUID(),
+    exerciseId,
+    sets: startingSets(lastSetsFor(workouts, exerciseId), autoFill),
+  }));
 }
 
 /**
@@ -93,9 +168,10 @@ export function entriesFromTemplate(group: WorkoutGroup, workouts: Workout[]): W
 export function draftFromTemplate(
   group: WorkoutGroup,
   workouts: Workout[],
-  startedAt: string = new Date().toISOString(),
+  { startedAt = new Date().toISOString(), autoFill = false }: StartOptions & { startedAt?: string } = {},
 ): Draft {
-  const entries = entriesFromTemplate(group, workouts);
+  const entries = entriesFromTemplate(group, workouts, { autoFill });
+  const unconfirmed = autoFill ? unconfirmedOf(entries) : {};
   return {
     date: todayString(),
     name: group.name,
@@ -104,5 +180,6 @@ export function draftFromTemplate(
     collapsedIds: entries.map((e) => e.id),
     sourceGroupId: group.id,
     startedAt,
+    ...(Object.keys(unconfirmed).length > 0 ? { unconfirmed } : {}),
   };
 }

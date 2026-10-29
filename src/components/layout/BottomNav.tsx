@@ -67,7 +67,9 @@ export default function BottomNav() {
       undefined,
       trainingModeOf(appData.preferences),
     );
-    const { autoOpenSelect } = prepareStart(due, appData.workouts);
+    const { autoOpenSelect } = prepareStart(due, appData.workouts, {
+      autoFill: !!appData.preferences.autoFillFromLast,
+    });
     navigate('/workout/new', autoOpenSelect ? { state: { autoOpenSelect: true } } : undefined);
   }
 

@@ -1,6 +1,13 @@
 import type { TrainingMode, Workout, WorkoutGroup } from '../types';
 import { selectNextUp } from './nextUp';
-import { draftFromTemplate, draftHasProgress, loadDraft, saveDraft, todayString } from './templateSession';
+import {
+  draftFromTemplate,
+  draftHasProgress,
+  loadDraft,
+  saveDraft,
+  todayString,
+  type StartOptions,
+} from './templateSession';
 
 /**
  * The template the Next Up card would be offering to start, or null.
@@ -27,20 +34,28 @@ export function templateDueToday(
  * already has real work in the draft and nothing was written, so the caller
  * asks first. Otherwise the draft is ready and the caller just opens the form.
  */
-export function beginTemplate(group: WorkoutGroup, workouts: Workout[]): 'confirm' | 'ready' {
+export function beginTemplate(
+  group: WorkoutGroup,
+  workouts: Workout[],
+  options: StartOptions = {},
+): 'confirm' | 'ready' {
   const existing = loadDraft();
   if (draftHasProgress(existing)) {
     // The same template, already underway, is reopened as it stands rather than
     // regenerated, which would reset the sets already logged.
     return existing?.sourceGroupId === group.id ? 'ready' : 'confirm';
   }
-  saveDraft(draftFromTemplate(group, workouts));
+  saveDraft(draftFromTemplate(group, workouts, options));
   return 'ready';
 }
 
 /** Replace whatever is in the draft with this template, after the owner agreed. */
-export function replaceDraftWith(group: WorkoutGroup, workouts: Workout[]): void {
-  saveDraft(draftFromTemplate(group, workouts));
+export function replaceDraftWith(
+  group: WorkoutGroup,
+  workouts: Workout[],
+  options: StartOptions = {},
+): void {
+  saveDraft(draftFromTemplate(group, workouts, options));
 }
 
 /**
@@ -54,10 +69,11 @@ export function replaceDraftWith(group: WorkoutGroup, workouts: Workout[]): void
 export function prepareStart(
   due: WorkoutGroup | null,
   workouts: Workout[],
+  options: StartOptions = {},
 ): { autoOpenSelect: boolean } {
   if (draftHasProgress(loadDraft())) return { autoOpenSelect: false };
   if (due) {
-    saveDraft(draftFromTemplate(due, workouts));
+    saveDraft(draftFromTemplate(due, workouts, options));
     return { autoOpenSelect: false };
   }
   return { autoOpenSelect: true };

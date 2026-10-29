@@ -53,8 +53,10 @@ export default function NextUpCard() {
     [groups, appData.workouts, mode, today],
   );
 
+  const startOptions = { autoFill: !!appData.preferences.autoFillFromLast };
+
   function start(group: WorkoutGroup) {
-    if (beginTemplate(group, appData.workouts) === 'confirm') {
+    if (beginTemplate(group, appData.workouts, startOptions) === 'confirm') {
       // A different template already has real work logged against it — jumping
       // straight into this one would silently wipe that out.
       setPendingStart(group);
@@ -64,7 +66,7 @@ export default function NextUpCard() {
   }
 
   function confirmStart(group: WorkoutGroup) {
-    replaceDraftWith(group, appData.workouts);
+    replaceDraftWith(group, appData.workouts, startOptions);
     setPendingStart(null);
     navigate('/workout/new');
   }

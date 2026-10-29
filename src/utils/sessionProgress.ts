@@ -1,5 +1,6 @@
 import type { WorkoutEntry } from '../types';
 import { formatVolume, kgToLb } from './conversions';
+import { isUnconfirmed, type Unconfirmed } from './templateSession';
 
 export interface ExerciseProgress {
   id: string;
@@ -24,14 +25,18 @@ function isSetDone(reps: number): boolean {
   return reps > 0;
 }
 
-export function sessionProgress(entries: WorkoutEntry[]): SessionProgress {
+/**
+ * `unconfirmed` lists sets that were filled in from last time and not touched
+ * since; they hold numbers but are not done yet, so they are left out.
+ */
+export function sessionProgress(entries: WorkoutEntry[], unconfirmed?: Unconfirmed): SessionProgress {
   let setsDone = 0;
   let totalSets = 0;
   let volumeKg = 0;
   const exercises = entries.map((entry) => {
     let done = 0;
-    for (const s of entry.sets) {
-      if (!isSetDone(s.reps)) continue;
+    for (const [i, s] of entry.sets.entries()) {
+      if (!isSetDone(s.reps) || isUnconfirmed(unconfirmed, entry.id, i)) continue;
       done += 1;
       // A blank or NaN weight must not poison the running total.
       const kg = Number(s.weightKg);

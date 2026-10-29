@@ -266,6 +266,64 @@ export default function SettingsPage() {
           </p>
         </Section>
 
+        <Section label="AUTO-FILL">
+          {(() => {
+            const on = !!preferences.autoFillFromLast;
+            return (
+              <button
+                type="button"
+                role="switch"
+                aria-checked={on}
+                onClick={() => updatePreferences({ ...preferences, autoFillFromLast: !on })}
+                className="w-full min-h-14 flex items-center justify-between gap-4 px-4 py-3 text-left press"
+                style={{
+                  background: '#ffffff',
+                  border: '1px solid var(--color-line-2)',
+                  borderRadius: 'var(--radius)',
+                }}
+              >
+                <span className="min-w-0">
+                  <span className="block caps-tight text-[11px]" style={{ color: 'var(--color-text)' }}>
+                    FILL FROM LAST SESSION
+                  </span>
+                  <span
+                    className="block mt-1"
+                    style={{ fontSize: '13px', color: 'var(--color-text-muted)', lineHeight: 1.45 }}
+                  >
+                    Fill reps and weight from your last session when you start. You can still change
+                    every set.
+                  </span>
+                </span>
+                <span
+                  aria-hidden
+                  className="shrink-0 relative"
+                  style={{
+                    width: 44,
+                    height: 26,
+                    borderRadius: 13,
+                    background: on ? 'var(--color-volt)' : 'var(--color-line-3)',
+                    transition: 'background-color 150ms ease',
+                  }}
+                >
+                  <span
+                    className="absolute"
+                    style={{
+                      top: 3,
+                      left: on ? 21 : 3,
+                      width: 20,
+                      height: 20,
+                      borderRadius: 10,
+                      background: '#ffffff',
+                      boxShadow: '0 1px 2px rgba(0, 0, 0, 0.3)',
+                      transition: 'left 150ms ease',
+                    }}
+                  />
+                </span>
+              </button>
+            );
+          })()}
+        </Section>
+
         <Section label="EXPORT">
           <div className="grid grid-cols-2 gap-2">
             {[

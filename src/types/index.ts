@@ -79,6 +79,11 @@ export interface UserPreferences {
   weightStepLb: number;
   /** Absent means 'week'. Weekdays stay on the templates either way. */
   trainingMode?: TrainingMode;
+  /**
+   * Start a session on last time's reps and weight rather than on blanks.
+   * Absent means off.
+   */
+  autoFillFromLast?: boolean;
 }
 
 export const DEFAULT_PREFERENCES: UserPreferences = {

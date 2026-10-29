@@ -12,11 +12,19 @@ import type { WorkoutSet } from '../../types';
 /** Big enough to make out at a glance without pushing the title off-centre. */
 const THUMB = 52;
 
+/** Which row the change was about, for whoever tracks rows by position. */
+export interface SetsChange {
+  /** The owner touched this row's reps or weight, even if the number came out the same. */
+  touched?: number;
+  /** This row was taken out; the ones below moved up. */
+  removed?: number;
+}
+
 interface EntryCardProps {
   exerciseId: string;
   sets: WorkoutSet[];
   previousSets?: WorkoutSet[];
-  onSetsChange: (sets: WorkoutSet[]) => void;
+  onSetsChange: (sets: WorkoutSet[], change?: SetsChange) => void;
   onRemove: () => void;
   index?: number;
   collapsed?: boolean;
@@ -203,7 +211,7 @@ export default function EntryCard({
           .filter((_, j) => j !== idx)
           .map((s, j) => ({ ...s, setNumber: j + 1 }));
         setExitingKey(null);
-        onSetsChange(updated);
+        onSetsChange(updated, { removed: idx });
         showToast('Set removed');
       }, 300);
     },
@@ -215,7 +223,7 @@ export default function EntryCard({
       const updated = sets.map((s, idx) =>
         idx === i ? { ...s, reps: value === '' ? 0 : value } : s,
       );
-      onSetsChange(updated);
+      onSetsChange(updated, { touched: i });
     },
     [sets, onSetsChange],
   );
@@ -225,7 +233,7 @@ export default function EntryCard({
       const updated = sets.map((s, idx) =>
         idx === i ? { ...s, weightKg: valueKg === '' ? 0 : valueKg } : s,
       );
-      onSetsChange(updated);
+      onSetsChange(updated, { touched: i });
     },
     [sets, onSetsChange],
   );
@@ -235,7 +243,7 @@ export default function EntryCard({
       const updated = sets.map((s, idx) =>
         idx === i ? { ...s, reps: repsValue, weightKg: weightValue } : s,
       );
-      onSetsChange(updated);
+      onSetsChange(updated, { touched: i });
     },
     [sets, onSetsChange],
   );
