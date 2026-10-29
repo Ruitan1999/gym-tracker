@@ -109,10 +109,10 @@ export default function QuickRepChips({
       {modalOpen && (
         <ModalShell onDismiss={() => setModalOpen(false)} label="Enter custom reps">
             <div className="flex items-baseline justify-between mb-4">
-              <div className="caps text-[11px]" style={{ color: 'var(--color-text-muted)' }}>
+              <div className="caps" style={{ color: 'var(--color-text-muted)' }}>
                 CUSTOM REPS
               </div>
-              <div className="caps text-[11px]" style={{ color: 'var(--color-text-faint)' }}>
+              <div className="caps" style={{ color: 'var(--color-text-faint)' }}>
                 0–99
               </div>
             </div>
@@ -154,7 +154,7 @@ export default function QuickRepChips({
               <button
                 type="button"
                 onClick={() => setModalOpen(false)}
-                className="h-12 btn-ghost press caps-tight text-[11px]"
+                className="h-12 btn-ghost press caps-tight"
                 style={{ borderRadius: 'var(--radius)' }}
               >
                 CANCEL
@@ -162,7 +162,7 @@ export default function QuickRepChips({
               <button
                 type="button"
                 onClick={confirm}
-                className="h-12 btn-volt press caps-tight text-[11px]"
+                className="h-12 btn-volt press caps-tight"
                 style={{ borderRadius: 'var(--radius)' }}
               >
                 SET REPS

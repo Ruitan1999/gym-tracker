@@ -1,15 +1,18 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { ArrowLeftRight, CalendarDays, Check, Dumbbell } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAppContext } from '../../context/AppContext';
 import ConfirmModal from '../shared/ConfirmModal';
+import { imageForExercise } from '../../utils/exerciseImage';
+import { prefetchImages } from '../../utils/prefetchImages';
 import { todayString } from '../../utils/templateSession';
 import { DAY_CODES, DAY_NAMES, todayIndex } from '../../utils/schedule';
 import { selectNextUp } from '../../utils/nextUp';
 import { trainingModeOf } from '../../utils/rotation';
 import { beginTemplate, replaceDraftWith } from '../../utils/startSession';
 import WeekStrip from './WeekStrip';
-import { thisWeek, type WeekDay } from '../../utils/thisWeek';
+import type { WeekDay } from '../../utils/thisWeek';
+import { useThisWeek } from '../../utils/useThisWeek';
 import type { Workout, WorkoutGroup } from '../../types';
 
 const ICON_STROKE = 2;
@@ -36,7 +39,7 @@ function sessionSummary(workout: Workout): string {
  * out of the way — and where there isn't one, it says that instead of guessing.
  */
 export default function NextUpCard() {
-  const { appData } = useAppContext();
+  const { appData, exerciseImages } = useAppContext();
   const navigate = useNavigate();
   const [pendingStart, setPendingStart] = useState<WorkoutGroup | null>(null);
 
@@ -50,13 +53,27 @@ export default function NextUpCard() {
     [groups, appData.workouts, mode, today],
   );
 
-  const todayIso = todayString();
-  const week = useMemo(
-    () => thisWeek(appData.workouts, groups, mode).days,
-    // todayIso keys it to the date, so the strip rolls over at midnight.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [appData.workouts, groups, mode, todayIso],
-  );
+  const week = useThisWeek().days;
+
+  // The pictures of what this card offers, fetched while it sits there, so
+  // starting it has nothing left to wait on. Only these: any other template is
+  // a deliberate choice from Plan, and fetching every template's pictures on
+  // each visit to Home cost data on a phone for little gain.
+  const offeredIds =
+    pick.kind === 'due'
+      ? [pick.first, ...pick.alsoToday].flatMap((g) => g.exerciseIds)
+      : pick.kind === 'rotation'
+        ? pick.group.exerciseIds
+        : pick.kind === 'upcoming'
+          ? pick.upcoming.group.exerciseIds
+          : [];
+  const offeredKey = [...new Set(offeredIds)].join('|');
+  useEffect(() => {
+    if (!offeredKey) return;
+    return prefetchImages(
+      offeredKey.split('|').map((id) => imageForExercise(id, exerciseImages)),
+    );
+  }, [offeredKey, exerciseImages]);
 
   const startOptions = { autoFill: !!appData.preferences.autoFillFromLast };
 
@@ -117,7 +134,7 @@ export default function NextUpCard() {
         />
         {next && (
           <p
-            className="caps-tight text-[11px] text-center mt-2"
+            className="caps-tight text-center mt-2"
             style={{ color: 'var(--color-text-muted)' }}
           >
             {next}
@@ -296,7 +313,7 @@ function Row({
         <Icon size={20} strokeWidth={ICON_STROKE} />
       </span>
       <span className="flex-1 min-w-0">
-        <span className="block caps-tight text-[11px]" style={{ color: 'var(--color-text-muted)' }}>
+        <span className="block caps-tight" style={{ color: 'var(--color-text-muted)' }}>
           {label}
         </span>
         {/* Up to two lines: a long template name is the one thing to read here. */}
@@ -319,7 +336,7 @@ function Row({
         )}
       </span>
       <span
-        className="shrink-0 caps-tight text-[11px] px-3 h-9 flex items-center"
+        className="shrink-0 caps-tight px-3 h-9 flex items-center"
         style={{
           background: t.pill,
           color: t.pillText,

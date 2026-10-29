@@ -45,7 +45,7 @@ export default function RenameModal({
 
   return (
     <ModalShell onDismiss={onClose}>
-        <div className="caps-tight text-[11px] mb-2" style={{ color: 'var(--color-text)' }}>
+        <div className="caps-tight mb-2" style={{ color: 'var(--color-text)' }}>
           {eyebrow}
         </div>
         <h3
@@ -87,7 +87,7 @@ export default function RenameModal({
           <button
             type="button"
             onClick={onClose}
-            className="h-12 btn-ghost press caps-tight text-[11px]"
+            className="h-12 btn-ghost press caps-tight"
             style={{ borderRadius: 'var(--radius)' }}
           >
             CANCEL
@@ -96,7 +96,7 @@ export default function RenameModal({
             type="button"
             onClick={submit}
             disabled={!canSave}
-            className="h-12 press caps-tight text-[11px]"
+            className="h-12 press caps-tight"
             style={{
               borderRadius: 'var(--radius)',
               background: canSave ? 'var(--color-volt)' : 'var(--color-elev-2)',

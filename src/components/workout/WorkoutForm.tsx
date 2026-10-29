@@ -9,8 +9,6 @@ import EntryCard, { type SetsChange } from './EntryCard';
 import heroIllustration from '../../assets/healthy-habit.svg';
 import type { Workout, WorkoutEntry, WorkoutSet } from '../../types';
 import { useDragReorder } from '../../utils/useDragReorder';
-import { imageForExercise } from '../../utils/exerciseImage';
-import { prefetchImages } from '../../utils/prefetchImages';
 import type { TemplateOffer } from '../../utils/templateOffer';
 import {
   DRAFT_KEY,
@@ -64,7 +62,6 @@ export default function WorkoutForm({
     addWorkout,
     updateWorkout,
     showSessionSaved,
-    exerciseImages,
   } = useAppContext();
   const navigate = useNavigate();
   const location = useLocation();
@@ -226,16 +223,6 @@ export default function WorkoutForm({
 
   const groups = appData.groups ?? [];
 
-  // Every picture a template could ask for, fetched while Home is up: any
-  // template can be started from Next Up or Plan, and then nothing is left to
-  // wait on. Already-cached pictures cost nothing.
-  useEffect(() => {
-    if (groups.length === 0) return;
-    const ids = new Set(groups.flatMap((g) => g.exerciseIds));
-    return prefetchImages([...ids].map((id) => imageForExercise(id, exerciseImages)));
-    // groups is rebuilt each render; its contents are what matter.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [appData.groups, exerciseImages]);
   // Undefined once the template has been deleted mid-session, which just falls
   // back to the ordinary save-as-template flow.
   const sourceGroup = sourceGroupId ? groups.find((g) => g.id === sourceGroupId) : undefined;
@@ -619,7 +606,7 @@ export default function WorkoutForm({
             style={{ height: 'auto' }}
           />
           <p
-            className="caps-tight text-[11px] text-center"
+            className="caps-tight text-center"
             style={{ color: 'var(--color-text-muted)' }}
           >
             LET'S GET YOU STARTED WITH YOUR WORKOUT
@@ -645,7 +632,7 @@ export default function WorkoutForm({
       <section className="relative card">
         <div className="relative p-4">
           <div className="flex items-center justify-between">
-            <div className="caps-tight text-[11px]" style={{ color: 'var(--color-text-faint)' }}>
+            <div className="caps-tight" style={{ color: 'var(--color-text-faint)' }}>
               SESSION {isEdit ? 'EDIT' : 'NEW'}
             </div>
           </div>
@@ -664,7 +651,7 @@ export default function WorkoutForm({
             className="mt-4 pt-4"
             style={{ borderTop: '1px solid var(--color-line)' }}
           >
-            <div className="caps-tight text-[11px] mb-2" style={{ color: 'var(--color-text-muted)' }}>
+            <div className="caps-tight mb-2" style={{ color: 'var(--color-text-muted)' }}>
               RPE SESSION RATING
             </div>
             <div className="grid grid-cols-10 gap-1">
@@ -695,7 +682,7 @@ const color = ratingColor(n)!;
               })}
             </div>
             <div
-              className="flex justify-between mt-1.5 caps-tight text-[11px]"
+              className="flex justify-between mt-1.5 caps-tight"
               style={{ color: 'var(--color-text-faint)' }}
             >
               <span>EASY</span>
@@ -708,7 +695,7 @@ const color = ratingColor(n)!;
       )}
 
       {validationError && (
-        <p className="caps-tight text-[11px] text-center" style={{ color: 'var(--color-rust)' }}>
+        <p className="caps-tight text-center" style={{ color: 'var(--color-rust)' }}>
           ⚠ {validationError}
         </p>
       )}
@@ -718,7 +705,7 @@ const color = ratingColor(n)!;
         {totalExercises > 0 && (
           <div
             id="save-gate-hint"
-            className="flex items-center justify-between caps-tight text-[11px]"
+            className="flex items-center justify-between caps-tight"
             style={{ color: saveGated ? 'var(--color-text-muted)' : 'var(--color-done-deep)' }}
           >
             <span>
@@ -749,7 +736,7 @@ const color = ratingColor(n)!;
           onClick={handleSave}
           disabled={saveGated}
           aria-describedby={saveGated ? 'save-gate-hint' : undefined}
-          className={`w-full h-14 caps-tight text-[11px] ${saveGated ? '' : 'btn-volt press'}`}
+          className={`w-full h-14 caps-tight ${saveGated ? '' : 'btn-volt press'}`}
           style={
             saveGated
               ? {
@@ -772,7 +759,7 @@ const color = ratingColor(n)!;
         <button
           type="button"
           onClick={handleCancel}
-          className="w-full h-12 press caps-tight text-[11px]"
+          className="w-full h-12 press caps-tight"
           style={{
             borderRadius: 'var(--radius)',
             letterSpacing: '0.12em',
@@ -810,7 +797,7 @@ function HeroStat({ label, value, divider }: { label: string; value: number; div
       className="pt-3 px-1"
       style={divider ? { borderLeft: '1px solid var(--color-line)' } : undefined}
     >
-      <div className="caps-tight text-[11px]" style={{ color: 'var(--color-text-faint)' }}>
+      <div className="caps-tight" style={{ color: 'var(--color-text-faint)' }}>
         {label}
       </div>
       <div

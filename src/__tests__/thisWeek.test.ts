@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { thisWeek } from '../utils/thisWeek';
+import { thisWeek, thisWeekFor } from '../utils/thisWeek';
 import type { Workout, WorkoutGroup } from '../types';
 
 // Wednesday 28 October 2026; the week runs Mon 26 to Sun 1 Nov.
@@ -40,5 +40,23 @@ describe('thisWeek', () => {
     expect(week.days.some((d) => d.scheduled)).toBe(false);
     expect(week.plannedDays).toBe(0);
     expect(groups[1].days).toEqual([4]);
+  });
+});
+
+describe('thisWeekFor', () => {
+  it('hands back the same week for the same data and day', () => {
+    const workouts = [w('2026-10-26')];
+    const groups = [g('push', [0])];
+    const a = thisWeekFor(workouts, groups, 'week', '2026-10-28');
+    expect(thisWeekFor(workouts, groups, 'week', '2026-10-28')).toBe(a);
+  });
+
+  it('works it out again for new data, another mode or another day', () => {
+    const workouts = [w('2026-10-26')];
+    const groups = [g('push', [0])];
+    const a = thisWeekFor(workouts, groups, 'week', '2026-10-28');
+    expect(thisWeekFor([...workouts], groups, 'week', '2026-10-28')).not.toBe(a);
+    expect(thisWeekFor(workouts, groups, 'rotation', '2026-10-28')).not.toBe(a);
+    expect(thisWeekFor(workouts, groups, 'week', '2026-10-29')).not.toBe(a);
   });
 });

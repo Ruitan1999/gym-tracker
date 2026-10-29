@@ -76,7 +76,7 @@ export default function SignInPage() {
               borderRadius: 'var(--radius)',
             }}
           >
-            <div className="caps-tight text-[11px]" style={{ color: 'var(--color-rust)' }}>
+            <div className="caps-tight" style={{ color: 'var(--color-rust)' }}>
               ERR CONFIG
             </div>
             <h1
@@ -112,7 +112,7 @@ export default function SignInPage() {
       <div className="flex items-start justify-center px-6 pt-10 sm:pt-16 pb-12">
         <div className="max-w-md w-full space-y-5">
           <div className="space-y-3">
-            <div className="caps-tight text-[11px] flex items-center gap-3" style={{ color: 'var(--color-text-faint)' }}>
+            <div className="caps-tight flex items-center gap-3" style={{ color: 'var(--color-text-faint)' }}>
               <span
                 className="inline-block w-1.5 h-1.5"
                 style={{ background: 'var(--color-volt)', borderRadius: '999px' }}
@@ -141,7 +141,7 @@ export default function SignInPage() {
           type="button"
           onClick={() => handleProvider(signInWithGoogle)}
           disabled={busy}
-          className="w-full h-12 press caps-tight text-[11px] disabled:opacity-40 flex items-center justify-center gap-2"
+          className="w-full h-12 press caps-tight disabled:opacity-40 flex items-center justify-center gap-2"
           style={{
             background: 'transparent',
             border: '1px solid var(--color-line-2)',
@@ -160,7 +160,7 @@ export default function SignInPage() {
 
         <div className="flex items-center gap-3">
           <div className="h-px flex-1" style={{ background: 'var(--color-line)' }} />
-          <span className="caps-tight text-[11px]" style={{ color: 'var(--color-text-faint)' }}>
+          <span className="caps-tight" style={{ color: 'var(--color-text-faint)' }}>
             OR EMAIL
           </span>
           <div className="h-px flex-1" style={{ background: 'var(--color-line)' }} />
@@ -189,7 +189,7 @@ export default function SignInPage() {
           <button
             type="submit"
             disabled={busy}
-            className="w-full h-12 btn-volt press caps-tight text-[11px] disabled:opacity-40"
+            className="w-full h-12 btn-volt press caps-tight disabled:opacity-40"
             style={{ borderRadius: 'var(--radius)' }}
           >
             {mode === 'signin' ? 'SIGN IN →' : 'CREATE ACCOUNT →'}
@@ -199,7 +199,7 @@ export default function SignInPage() {
               type="button"
               onClick={handleForgotPassword}
               disabled={busy}
-              className="caps-tight text-[11px] w-full text-center press disabled:opacity-40"
+              className="caps-tight w-full text-center press disabled:opacity-40"
               style={{ color: 'var(--color-text-faint)' }}
             >
               FORGOT PASSWORD?
@@ -210,7 +210,7 @@ export default function SignInPage() {
         <button
           type="button"
           onClick={() => setMode((m) => (m === 'signin' ? 'signup' : 'signin'))}
-          className="caps-tight text-[11px] w-full text-center press"
+          className="caps-tight w-full text-center press"
           style={{ color: 'var(--color-text)' }}
         >
           {mode === 'signin' ? 'NO ACCOUNT? SIGN UP' : 'HAVE ACCOUNT? SIGN IN'}
@@ -220,7 +220,7 @@ export default function SignInPage() {
           type="button"
           onClick={() => handleProvider(signInAnon)}
           disabled={busy}
-          className="caps-tight text-[11px] w-full text-center press"
+          className="caps-tight w-full text-center press"
           style={{ color: 'var(--color-text-faint)' }}
         >
           CONTINUE AS GUEST

@@ -208,7 +208,7 @@ export default function HistoryPage() {
           action={
             <Link
               to="/"
-              className="inline-flex items-center justify-center h-12 px-6 caps-tight text-[11px] btn-volt press"
+              className="inline-flex items-center justify-center h-12 px-6 caps-tight btn-volt press"
               style={{ borderRadius: 'var(--radius)' }}
             >
               Start First Session →
@@ -278,7 +278,7 @@ export default function HistoryPage() {
           {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((l, i) => (
             <div
               key={i}
-              className="caps-tight text-[11px] text-center"
+              className="caps-tight text-center"
               style={{ color: 'var(--color-text-faint)' }}
             >
               {l}
@@ -296,14 +296,14 @@ export default function HistoryPage() {
             month for the top of the card. The way back sits opposite it, out
             of the way until there is somewhere to go back from. */}
         <div className="flex items-center justify-between gap-3 mt-3 min-h-[16px]">
-          <span className="caps-tight text-[11px]" style={{ color: 'var(--color-text-faint)' }}>
+          <span className="caps-tight" style={{ color: 'var(--color-text-faint)' }}>
             {String(monthTrainedCount).padStart(2, '0')} DAY{monthTrainedCount === 1 ? '' : 'S'} TRAINED
           </span>
           {monthOffset !== 0 && (
             <button
               type="button"
               onClick={() => setMonthOffset(0)}
-              className="caps-tight text-[11px] press shrink-0"
+              className="caps-tight press shrink-0"
               style={{ color: 'var(--color-volt)', fontWeight: 700 }}
             >
               BACK TO TODAY →
@@ -316,7 +316,7 @@ export default function HistoryPage() {
         {groupedWorkouts.map((group) => (
           <section key={group.label}>
             <h2
-              className="caps text-[11px] mb-3 flex items-center gap-3"
+              className="caps mb-3 flex items-center gap-3"
               style={{ color: 'var(--color-text-muted)' }}
             >
               <span>{group.label}</span>
@@ -461,7 +461,7 @@ function StatTile({
           strokeWidth={ICON_STROKE}
           style={{ width: '0.85rem', height: '0.85rem', flexShrink: 0 }}
         />
-        <div className="caps-tight text-[11px] min-w-0 truncate" style={{ color: 'var(--color-text-faint)' }}>
+        <div className="caps-tight min-w-0 truncate" style={{ color: 'var(--color-text-faint)' }}>
           {label}
         </div>
       </div>
@@ -480,7 +480,7 @@ function StatTile({
         </div>
         {unit && (
           <span
-            className="caps-tight text-[11px] shrink-0"
+            className="caps-tight shrink-0"
             style={{ color: accent ? 'var(--color-volt)' : 'var(--color-text-faint)' }}
           >
             {unit}

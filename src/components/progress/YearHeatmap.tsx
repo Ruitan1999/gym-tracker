@@ -99,7 +99,7 @@ export default function YearHeatmap({
   return (
     <section className="card p-4" aria-label="Activity over the last 12 months">
       <div className="flex items-center justify-between gap-3 mb-3">
-        <h2 className="caps-tight text-[11px]" style={{ color: 'var(--color-text-faint)' }}>
+        <h2 className="caps-tight" style={{ color: 'var(--color-text-faint)' }}>
           LAST 12 MONTHS
         </h2>
       </div>
@@ -122,7 +122,7 @@ export default function YearHeatmap({
           {DAY_LABELS.map(([row, name]) => (
             <span
               key={name}
-              className="absolute left-0 caps-tight text-[8px]"
+              className="absolute left-0 caps-tight"
               style={{
                 top: MONTH_ROW + row * PITCH,
                 lineHeight: `${PITCH}px`,
@@ -143,7 +143,7 @@ export default function YearHeatmap({
               {map.months.map((m) => (
                 <span
                   key={`${m.col}-${m.label}`}
-                  className="absolute caps-tight text-[8px]"
+                  className="absolute caps-tight"
                   style={{ left: m.col * PITCH, top: 0, color: 'var(--color-text-faint)' }}
                 >
                   {m.label}
@@ -211,7 +211,7 @@ export default function YearHeatmap({
           {readout}
         </p>
         <div className="flex items-center gap-1 shrink-0" aria-hidden>
-          <span className="caps-tight text-[8px]" style={{ color: 'var(--color-text-faint)' }}>
+          <span className="caps-tight" style={{ color: 'var(--color-text-faint)' }}>
             LESS
           </span>
           {[0, 1, 2, 3, 4].map((l) => (
@@ -220,7 +220,7 @@ export default function YearHeatmap({
               style={{ width: 10, height: 10, borderRadius: 2, background: levelFill(l) }}
             />
           ))}
-          <span className="caps-tight text-[8px]" style={{ color: 'var(--color-text-faint)' }}>
+          <span className="caps-tight" style={{ color: 'var(--color-text-faint)' }}>
             MORE
           </span>
         </div>

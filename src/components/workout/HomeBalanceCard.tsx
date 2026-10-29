@@ -38,7 +38,7 @@ export default function HomeBalanceCard() {
 
   return (
     <section className="card mb-4 p-4" aria-label="Muscle groups">
-      <h2 className="caps-tight text-[11px] mb-3" style={{ color: 'var(--color-text-muted)' }}>
+      <h2 className="caps-tight mb-3" style={{ color: 'var(--color-text-muted)' }}>
         Muscle groups · last 30 days
       </h2>
       <div className="flex flex-wrap justify-center items-start gap-4">

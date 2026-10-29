@@ -89,7 +89,7 @@ export default function ExerciseLibraryPage() {
         <button
           type="button"
           onClick={() => setSheet({ mode: 'add', id: crypto.randomUUID() })}
-          className="h-12 btn-volt press caps-tight text-[11px]"
+          className="h-12 btn-volt press caps-tight"
           style={{ borderRadius: 'var(--radius)' }}
         >
           ＋ ADD CUSTOM EXERCISE
@@ -128,7 +128,7 @@ export default function ExerciseLibraryPage() {
                 ))}
               </ul>
             ) : (
-              <p className="caps-tight text-[11px] py-4" style={{ color: 'var(--color-text-faint)' }}>
+              <p className="caps-tight py-4" style={{ color: 'var(--color-text-faint)' }}>
                 — NOTHING OF YOUR OWN YET —
               </p>
             ))}
@@ -136,7 +136,7 @@ export default function ExerciseLibraryPage() {
 
         <div className="flex items-center gap-3">
           <span className="flex-1 h-px" style={{ background: 'var(--color-line-2)' }} />
-          <span className="caps-tight text-[11px]" style={{ color: 'var(--color-text-faint)' }}>
+          <span className="caps-tight" style={{ color: 'var(--color-text-faint)' }}>
             COMES WITH THE APP
           </span>
           <span className="flex-1 h-px" style={{ background: 'var(--color-line-2)' }} />
@@ -168,7 +168,7 @@ export default function ExerciseLibraryPage() {
               </ul>
             )}
             {!collapsed[part] && exercises.length === 0 && (
-              <p className="caps-tight text-[11px] py-4" style={{ color: 'var(--color-text-faint)' }}>
+              <p className="caps-tight py-4" style={{ color: 'var(--color-text-faint)' }}>
                 — NOTHING HERE —
               </p>
             )}
@@ -241,17 +241,17 @@ function SectionHeader({
 }) {
   return (
     <button type="button" onClick={onToggle} className="w-full flex items-center gap-3 mb-3 press">
-      <span className="caps text-[11px]" style={{ color: markerColor }}>
+      <span className="caps" style={{ color: markerColor }}>
         {marker}
       </span>
-      <span className="caps text-[11px]" style={{ color: 'var(--color-text)' }}>
+      <span className="caps" style={{ color: 'var(--color-text)' }}>
         {label}
       </span>
       <span className="flex-1 h-px" style={{ background: 'var(--color-line)' }} />
       <span className="font-mono text-[11px]" style={{ color: 'var(--color-text-faint)' }}>
         {String(count).padStart(2, '0')}
       </span>
-      <span className="caps-tight text-[11px]" style={{ color: 'var(--color-text-faint)' }}>
+      <span className="caps-tight" style={{ color: 'var(--color-text-faint)' }}>
         {open ? '▾' : '▸'}
       </span>
     </button>
@@ -283,7 +283,7 @@ function Row({
           {name}
         </span>
         {bodyPart && (
-          <span className="caps-tight text-[11px]" style={{ color: BODY_PART_ACCENT[bodyPart] }}>
+          <span className="caps-tight" style={{ color: BODY_PART_ACCENT[bodyPart] }}>
             {BODY_PART_LABELS[bodyPart]}
           </span>
         )}

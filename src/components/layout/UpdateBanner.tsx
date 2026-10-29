@@ -81,7 +81,7 @@ export default function UpdateBanner() {
         <span className="w-1.5 h-8 shrink-0" style={{ background: 'var(--color-volt)' }} />
         <div className="flex-1 min-w-0">
           <div
-            className="caps-tight text-[11px]"
+            className="caps-tight"
             style={{ color: 'var(--color-volt)', letterSpacing: '0.18em' }}
           >
             UPDATE READY
@@ -93,7 +93,7 @@ export default function UpdateBanner() {
         <button
           type="button"
           onClick={reloadFresh}
-          className="h-9 px-3 btn-volt press caps-tight text-[11px] shrink-0"
+          className="h-9 px-3 btn-volt press caps-tight shrink-0"
           style={{ borderRadius: 'var(--radius)' }}
         >
           RELOAD
@@ -102,7 +102,7 @@ export default function UpdateBanner() {
           type="button"
           onClick={() => setDismissed(true)}
           aria-label="Dismiss update notice"
-          className="h-9 px-2 press caps-tight text-[11px] shrink-0"
+          className="h-9 px-2 press caps-tight shrink-0"
           style={{ color: 'var(--color-text-muted)' }}
         >
           ✕

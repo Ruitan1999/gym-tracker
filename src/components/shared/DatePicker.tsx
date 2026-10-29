@@ -141,7 +141,7 @@ export default function DatePicker({ value, onChange }: DatePickerProps) {
           {formatDisplay(value)}
         </span>
         <span
-          className="font-mono caps-tight text-[11px] pb-2"
+          className="font-mono caps-tight pb-2"
           style={{ color: 'var(--color-text-muted)' }}
         >
           {parseDate(value).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }).toUpperCase()}
@@ -164,7 +164,7 @@ export default function DatePicker({ value, onChange }: DatePickerProps) {
                 <button
                   type="button"
                   onClick={() => handleQuickSelect(today)}
-                  className="flex-1 h-10 caps-tight text-[11px] press"
+                  className="flex-1 h-10 caps-tight press"
                   style={{
                     background: value === today ? 'var(--color-volt)' : 'transparent',
                     color: value === today ? '#ffffff' : 'var(--color-text)',
@@ -177,7 +177,7 @@ export default function DatePicker({ value, onChange }: DatePickerProps) {
                 <button
                   type="button"
                   onClick={() => handleQuickSelect(yesterday)}
-                  className="flex-1 h-10 caps-tight text-[11px] press"
+                  className="flex-1 h-10 caps-tight press"
                   style={{
                     background: value === yesterday ? 'var(--color-volt)' : 'transparent',
                     color: value === yesterday ? '#ffffff' : 'var(--color-text)',
@@ -202,7 +202,7 @@ export default function DatePicker({ value, onChange }: DatePickerProps) {
                   </svg>
                 </button>
                 <span
-                  className="caps-tight text-[11px]"
+                  className="caps-tight"
                   style={{ color: 'var(--color-text)' }}
                 >
                   {MONTHS[viewMonth]} {viewYear}
@@ -224,7 +224,7 @@ export default function DatePicker({ value, onChange }: DatePickerProps) {
                 {DAYS.map((d) => (
                   <div
                     key={d}
-                    className="text-center caps-tight text-[11px] py-1"
+                    className="text-center caps-tight py-1"
                     style={{ color: 'var(--color-text-faint)' }}
                   >
                     {d.slice(0, 1)}

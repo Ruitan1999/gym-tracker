@@ -82,7 +82,7 @@ export default function GroupsPage() {
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="square" className="w-4 h-4">
         <path d="M12 5v14M5 12h14" />
       </svg>
-      <span className="caps-tight text-[11px]" style={{ fontWeight: 700, letterSpacing: '0.12em' }}>
+      <span className="caps-tight" style={{ fontWeight: 700, letterSpacing: '0.12em' }}>
         NEW TEMPLATE
       </span>
     </button>
@@ -105,7 +105,7 @@ export default function GroupsPage() {
       <div className="flex flex-col gap-4">
         <HowYouTrain mode={mode} onChange={setMode} />
 
-        <p className="caps-tight text-[11px]" style={{ color: 'var(--color-text-faint)' }}>
+        <p className="caps-tight" style={{ color: 'var(--color-text-faint)' }}>
           {String(groups.length).padStart(2, '0')} TEMPLATE{groups.length === 1 ? '' : 'S'}
           {groups.length > 1 && ' · HOLD TO REORDER'}
         </p>
@@ -145,7 +145,7 @@ export default function GroupsPage() {
                         // Order is what counts in rotation; the weekdays are
                         // kept but not shown, as they are not being used.
                         <span
-                          className="caps-tight text-[11px] block truncate"
+                          className="caps-tight block truncate"
                           style={{
                             color:
                               g.id === rotationNextId
@@ -159,7 +159,7 @@ export default function GroupsPage() {
                       ) : (
                         dayCodeLabel(g) && (
                         <span
-                          className="caps-tight text-[11px] block truncate"
+                          className="caps-tight block truncate"
                           style={{ color: 'var(--color-volt)' }}
                         >
                           {dayCodeLabel(g)}
@@ -188,7 +188,7 @@ export default function GroupsPage() {
                       </span>
                       {names.length === 0 ? (
                         <span
-                          className="caps-tight text-[11px] block truncate mt-0.5"
+                          className="caps-tight block truncate mt-0.5"
                           style={{ color: 'var(--color-text-faint)' }}
                         >
                           EMPTY — TAP TO ADD EXERCISES
@@ -212,7 +212,7 @@ export default function GroupsPage() {
                         type="button"
                         onClick={() => start(g)}
                         aria-label={`Start ${g.name}`}
-                        className="h-12 px-4 caps-tight text-[11px] press"
+                        className="h-12 px-4 caps-tight press"
                         style={{
                           background: 'var(--color-volt)',
                           color: '#ffffff',
@@ -355,7 +355,7 @@ function HowYouTrain({
       style={{ border: '1px solid var(--color-line)' }}
       aria-label="How you train"
     >
-      <p className="caps-tight text-[11px] mb-2.5" style={{ color: 'var(--color-text-faint)' }}>
+      <p className="caps-tight mb-2.5" style={{ color: 'var(--color-text-faint)' }}>
         HOW YOU TRAIN
       </p>
       <div
@@ -377,7 +377,7 @@ function HowYouTrain({
               role="radio"
               aria-checked={selected}
               onClick={() => onChange(o.value)}
-              className="press caps-tight text-[11px]"
+              className="press caps-tight"
               style={{
                 minHeight: '48px',
                 fontWeight: 700,

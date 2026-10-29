@@ -63,3 +63,32 @@ export function thisWeek(
     plannedDays: planned.size,
   };
 }
+
+const NO_GROUPS: WorkoutGroup[] = [];
+const cache = new WeakMap<Workout[], WeakMap<WorkoutGroup[], Map<string, ThisWeek>>>();
+
+/**
+ * `thisWeek` for today, worked out once per set of data. Home asks for it from
+ * two cards; the second asks for what the first already built. Keyed on the
+ * arrays themselves (app data is replaced, never edited in place), the mode
+ * and the date, so a new day or a new save gives a fresh week.
+ */
+export function thisWeekFor(
+  workouts: Workout[],
+  groups: WorkoutGroup[] | undefined,
+  mode: TrainingMode,
+  todayIso: string,
+): ThisWeek {
+  const g = groups ?? NO_GROUPS;
+  let byGroups = cache.get(workouts);
+  if (!byGroups) cache.set(workouts, (byGroups = new WeakMap()));
+  let byKey = byGroups.get(g);
+  if (!byKey) byGroups.set(g, (byKey = new Map()));
+  const key = `${mode}|${todayIso}`;
+  let week = byKey.get(key);
+  if (!week) {
+    week = thisWeek(workouts, g, mode);
+    byKey.set(key, week);
+  }
+  return week;
+}

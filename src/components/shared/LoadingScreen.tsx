@@ -8,7 +8,7 @@ export default function LoadingScreen() {
     >
       <Logo withWordmark />
       <div
-        className="caps-tight text-[11px] mt-3 flex items-center"
+        className="caps-tight mt-3 flex items-center"
         style={{ color: 'var(--color-text-muted)', letterSpacing: '0.18em' }}
       >
         LOADING

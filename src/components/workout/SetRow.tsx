@@ -133,7 +133,7 @@ export default function SetRow({
             {String(setNumber).padStart(2, '0')}
           </span>
           <span
-            className="caps-tight text-[11px]"
+            className="caps-tight"
             style={{ color: 'var(--color-text-muted)' }}
           >
             SET
@@ -144,7 +144,7 @@ export default function SetRow({
         <div className="flex items-end gap-6">
           <div className="flex flex-col">
             <span
-              className="caps-tight text-[11px]"
+              className="caps-tight"
               style={{ color: 'var(--color-text-faint)' }}
             >
               REPS
@@ -174,7 +174,7 @@ export default function SetRow({
 
           <div className="flex flex-col">
             <span
-              className="caps-tight text-[11px]"
+              className="caps-tight"
               style={{ color: 'var(--color-text-faint)' }}
             >
               LOAD KG
@@ -200,7 +200,7 @@ export default function SetRow({
         {/* Reps chips */}
         <div>
           <div
-            className="caps-tight text-[11px] mb-1.5"
+            className="caps-tight mb-1.5"
             style={{ color: 'var(--color-text-muted)' }}
           >
             REPS
@@ -211,7 +211,7 @@ export default function SetRow({
         {/* Weight stepper */}
         <div>
           <div
-            className="caps-tight text-[11px] mb-1.5"
+            className="caps-tight mb-1.5"
             style={{ color: 'var(--color-text-muted)' }}
           >
             LOAD STEP {step} KG
@@ -236,7 +236,7 @@ export default function SetRow({
             }}
           >
             <span
-              className="caps-tight text-[11px]"
+              className="caps-tight"
               style={{ color: 'var(--color-text-faint)' }}
             >
               LAST
@@ -251,7 +251,7 @@ export default function SetRow({
               {previousLabel}
             </span>
             <span
-              className="caps-tight text-[11px] ml-auto"
+              className="caps-tight ml-auto"
               style={{ color: 'var(--color-text-faint)' }}
             >
               TAP TO USE →

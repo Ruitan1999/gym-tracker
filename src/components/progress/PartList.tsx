@@ -21,7 +21,7 @@ export default function PartList({
       {rows.map(({ part, note }) => (
         <li key={part} className="flex items-baseline gap-2">
           <span
-            className="caps-tight text-[11px] flex-1 min-w-0 truncate"
+            className="caps-tight flex-1 min-w-0 truncate"
             style={{ color: 'var(--color-text)' }}
           >
             {BODY_PART_LABELS[part]}

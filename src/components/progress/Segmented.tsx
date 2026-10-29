@@ -53,7 +53,7 @@ export default function Segmented<T extends string>({
             tabIndex={active ? 0 : -1}
             onClick={() => onChange(o.value)}
             onKeyDown={(e) => onKeyDown(e, i)}
-            className="caps-tight text-[11px] flex-1 min-h-[48px] px-3 press"
+            className="caps-tight flex-1 min-h-[48px] px-3 press"
             style={{
               background: active ? 'var(--color-surface)' : 'transparent',
               color: active ? 'var(--color-text)' : 'var(--color-text-muted)',

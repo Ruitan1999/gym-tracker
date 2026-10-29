@@ -36,7 +36,7 @@ export default function SaveGroupModal({ defaultName = '', onSave, onClose }: Sa
           boxShadow: '0 20px 60px rgba(0,0,0,0.6)',
         }}
       >
-        <div className="caps-tight text-[11px] mb-2" style={{ color: 'var(--color-text)' }}>
+        <div className="caps-tight mb-2" style={{ color: 'var(--color-text)' }}>
           SAVE AS GROUP
         </div>
         <h3
@@ -53,7 +53,7 @@ export default function SaveGroupModal({ defaultName = '', onSave, onClose }: Sa
         <p className="text-[13px] mb-4" style={{ color: 'var(--color-text-muted)' }}>
           A group lets you start from it next session.
         </p>
-        <div className="caps-tight text-[11px] mb-1.5" style={{ color: 'var(--color-text-faint)' }}>
+        <div className="caps-tight mb-1.5" style={{ color: 'var(--color-text-faint)' }}>
           GROUP LABEL
         </div>
         <input
@@ -79,7 +79,7 @@ export default function SaveGroupModal({ defaultName = '', onSave, onClose }: Sa
           <button
             type="button"
             onClick={onClose}
-            className="h-12 btn-ghost press caps-tight text-[11px]"
+            className="h-12 btn-ghost press caps-tight"
             style={{ borderRadius: 'var(--radius)' }}
           >
             CANCEL
@@ -88,7 +88,7 @@ export default function SaveGroupModal({ defaultName = '', onSave, onClose }: Sa
             type="button"
             onClick={submit}
             disabled={!name.trim()}
-            className="h-12 btn-volt press caps-tight text-[11px] disabled:opacity-40"
+            className="h-12 btn-volt press caps-tight disabled:opacity-40"
             style={{ borderRadius: 'var(--radius)' }}
           >
             COMMIT →

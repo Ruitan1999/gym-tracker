@@ -68,7 +68,7 @@ export default function WorkoutCard({ workout }: WorkoutCardProps) {
         }}
       >
         <div
-          className="caps-tight text-[11px]"
+          className="caps-tight"
           style={{ color: 'var(--color-text)' }}
         >
           {weekday}
@@ -87,7 +87,7 @@ export default function WorkoutCard({ workout }: WorkoutCardProps) {
         </div>
         {time && (
           <div
-            className="caps-tight text-[11px] mt-1"
+            className="caps-tight mt-1"
             style={{ color: 'var(--color-text-faint)' }}
           >
             {time.replace(/\s/g, '')}
@@ -150,7 +150,7 @@ function MiniStat({
 }) {
   return (
     <div>
-      <div className="caps-tight text-[8px]" style={{ color: 'var(--color-text-faint)' }}>
+      <div className="caps-tight" style={{ color: 'var(--color-text-faint)' }}>
         {label}
       </div>
       <div

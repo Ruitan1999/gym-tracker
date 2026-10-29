@@ -53,14 +53,14 @@ export default function SaveTemplatePrompt({
           <>
             {changedTemplate ? (
               <div
-                className="caps-tight text-[11px] mb-2"
+                className="caps-tight mb-2"
                 style={{ color: 'var(--color-volt)' }}
               >
                 TEMPLATE CHANGED
               </div>
             ) : (
               <div
-                className="flex items-center gap-1.5 caps-tight text-[11px] mb-2"
+                className="flex items-center gap-1.5 caps-tight mb-2"
                 style={{ color: 'var(--color-volt)' }}
               >
                 <svg
@@ -105,7 +105,7 @@ export default function SaveTemplatePrompt({
               }}
             >
               <div
-                className="caps-tight text-[11px] mb-2"
+                className="caps-tight mb-2"
                 style={{ color: 'var(--color-text-faint)' }}
               >
                 EXERCISES
@@ -122,7 +122,7 @@ export default function SaveTemplatePrompt({
                 ))}
                 {remaining > 0 && (
                   <li
-                    className="caps-tight text-[11px]"
+                    className="caps-tight"
                     style={{ color: 'var(--color-text-faint)' }}
                   >
                     +{remaining} MORE
@@ -135,7 +135,7 @@ export default function SaveTemplatePrompt({
                 <button
                   type="button"
                   onClick={onUpdateTemplate}
-                  className="h-12 btn-volt press caps-tight text-[11px]"
+                  className="h-12 btn-volt press caps-tight"
                   style={{ borderRadius: 'var(--radius)' }}
                 >
                   UPDATE TEMPLATE →
@@ -143,7 +143,7 @@ export default function SaveTemplatePrompt({
                 <button
                   type="button"
                   onClick={() => setStep('name')}
-                  className="h-12 btn-ghost press caps-tight text-[11px]"
+                  className="h-12 btn-ghost press caps-tight"
                   style={{ borderRadius: 'var(--radius)' }}
                 >
                   SAVE AS NEW TEMPLATE
@@ -151,7 +151,7 @@ export default function SaveTemplatePrompt({
                 <button
                   type="button"
                   onClick={onDismiss}
-                  className="h-12 press caps-tight text-[11px]"
+                  className="h-12 press caps-tight"
                   style={{
                     borderRadius: 'var(--radius)',
                     background: 'transparent',
@@ -166,7 +166,7 @@ export default function SaveTemplatePrompt({
                 <button
                   type="button"
                   onClick={onDismiss}
-                  className="h-12 btn-ghost press caps-tight text-[11px]"
+                  className="h-12 btn-ghost press caps-tight"
                   style={{ borderRadius: 'var(--radius)' }}
                 >
                   NOT NOW
@@ -174,7 +174,7 @@ export default function SaveTemplatePrompt({
                 <button
                   type="button"
                   onClick={() => setStep('name')}
-                  className="h-12 btn-volt press caps-tight text-[11px]"
+                  className="h-12 btn-volt press caps-tight"
                   style={{ borderRadius: 'var(--radius)' }}
                 >
                   SAVE TEMPLATE →
@@ -185,7 +185,7 @@ export default function SaveTemplatePrompt({
         ) : (
           <>
             <div
-              className="caps-tight text-[11px] mb-2"
+              className="caps-tight mb-2"
               style={{ color: 'var(--color-text)' }}
             >
               NAME TEMPLATE
@@ -208,7 +208,7 @@ export default function SaveTemplatePrompt({
               A template lets you start from it next session.
             </p>
             <div
-              className="caps-tight text-[11px] mb-1.5"
+              className="caps-tight mb-1.5"
               style={{ color: 'var(--color-text-faint)' }}
             >
               TEMPLATE LABEL
@@ -236,7 +236,7 @@ export default function SaveTemplatePrompt({
               <button
                 type="button"
                 onClick={() => setStep('ask')}
-                className="h-12 btn-ghost press caps-tight text-[11px]"
+                className="h-12 btn-ghost press caps-tight"
                 style={{ borderRadius: 'var(--radius)' }}
               >
                 ← BACK
@@ -245,7 +245,7 @@ export default function SaveTemplatePrompt({
                 type="button"
                 onClick={submit}
                 disabled={!name.trim()}
-                className="h-12 btn-volt press caps-tight text-[11px] disabled:opacity-40"
+                className="h-12 btn-volt press caps-tight disabled:opacity-40"
                 style={{ borderRadius: 'var(--radius)' }}
               >
                 SAVE →

@@ -74,7 +74,7 @@ export default function ExerciseStrip({
       </span>
       {remaining > 0 && (
         <span
-          className="caps-tight text-[11px] shrink-0 pl-0.5"
+          className="caps-tight shrink-0 pl-0.5"
           style={{ color: 'var(--color-text-faint)' }}
         >
           +{remaining}

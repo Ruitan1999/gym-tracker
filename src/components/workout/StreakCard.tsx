@@ -1,10 +1,9 @@
 import { useMemo } from 'react';
-import { Link } from 'react-router-dom';
+import IconLink from '../shared/IconLink';
 import { CalendarDays, Flame } from 'lucide-react';
 import { useAppContext } from '../../context/AppContext';
 import { weeklyStreak } from '../../utils/streak';
-import { thisWeek } from '../../utils/thisWeek';
-import { trainingModeOf } from '../../utils/rotation';
+import { useThisWeek } from '../../utils/useThisWeek';
 import { todayString } from '../../utils/templateSession';
 
 /**
@@ -14,14 +13,9 @@ import { todayString } from '../../utils/templateSession';
  */
 export default function StreakCard() {
   const { appData } = useAppContext();
-  const mode = trainingModeOf(appData.preferences);
   // Part of the key so a phone left open past midnight rolls the week over.
   const today = todayString();
-  const { trainedDays, plannedDays } = useMemo(
-    () => thisWeek(appData.workouts, appData.groups ?? [], mode),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [appData.workouts, appData.groups, mode, today],
-  );
+  const { trainedDays, plannedDays } = useThisWeek();
   const streak = useMemo(
     () => weeklyStreak(appData.workouts.map((w) => w.date)),
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -64,14 +58,7 @@ export default function StreakCard() {
           this week · {total} total
         </div>
       </div>
-      <Link
-        to="/history"
-        aria-label="Open Log Book"
-        className="shrink-0 w-12 h-12 flex items-center justify-center press"
-        style={{ color: 'var(--color-text)' }}
-      >
-        <CalendarDays size={22} strokeWidth={1.75} />
-      </Link>
+      <IconLink to="/history" label="Open Log Book" icon={<CalendarDays size={22} strokeWidth={1.75} />} />
     </section>
   );
 }

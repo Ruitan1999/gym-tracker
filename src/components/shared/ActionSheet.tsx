@@ -43,7 +43,7 @@ export default function ActionSheet({ eyebrow, title, items, onClose }: ActionSh
       >
         <div className="px-5 pt-4 pb-3" style={{ borderBottom: '1px solid var(--color-line)' }}>
           {eyebrow && (
-            <div className="caps-tight text-[11px]" style={{ color: 'var(--color-text-faint)' }}>
+            <div className="caps-tight" style={{ color: 'var(--color-text-faint)' }}>
               {eyebrow}
             </div>
           )}
@@ -66,7 +66,7 @@ export default function ActionSheet({ eyebrow, title, items, onClose }: ActionSh
             type="button"
             role="menuitem"
             onClick={item.onSelect}
-            className="w-full h-14 px-5 flex items-center gap-3 press caps-tight text-[11px]"
+            className="w-full h-14 px-5 flex items-center gap-3 press caps-tight"
             style={{
               color: item.destructive ? 'var(--color-rust)' : 'var(--color-text)',
               borderBottom: '1px solid var(--color-line)',
@@ -82,7 +82,7 @@ export default function ActionSheet({ eyebrow, title, items, onClose }: ActionSh
         <button
           type="button"
           onClick={onClose}
-          className="w-full h-14 px-5 press caps-tight text-[11px]"
+          className="w-full h-14 px-5 press caps-tight"
           style={{ color: 'var(--color-text-muted)', letterSpacing: '0.1em' }}
         >
           CANCEL

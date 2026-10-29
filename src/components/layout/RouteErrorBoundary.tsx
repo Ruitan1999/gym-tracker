@@ -33,7 +33,7 @@ export default class RouteErrorBoundary extends Component<Props, State> {
         className="min-h-[100dvh] flex flex-col items-center justify-center px-6 text-center"
         style={{ background: 'var(--color-bg)' }}
       >
-        <div className="caps-tight text-[11px]" style={{ color: 'var(--color-text-faint)' }}>
+        <div className="caps-tight" style={{ color: 'var(--color-text-faint)' }}>
           COULDN'T LOAD THIS PAGE
         </div>
         <p
@@ -61,7 +61,7 @@ export default class RouteErrorBoundary extends Component<Props, State> {
         <button
           type="button"
           onClick={reloadFresh}
-          className="h-12 px-6 btn-volt press caps-tight text-[11px]"
+          className="h-12 px-6 btn-volt press caps-tight"
           style={{ borderRadius: 'var(--radius)' }}
         >
           RELOAD →

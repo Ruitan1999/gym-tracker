@@ -278,7 +278,7 @@ export default function EntryCard({
           aria-label={collapsed ? 'Expand exercise' : 'Collapse exercise'}
         >
           <span
-            className="caps-tight text-[11px] shrink-0 flex items-center justify-center"
+            className="caps-tight shrink-0 flex items-center justify-center"
             style={{ color: 'var(--color-text)', minWidth: '1.25rem' }}
           >
             {String(index + 1).padStart(2, '0')}
@@ -329,7 +329,7 @@ export default function EntryCard({
             {exercise && (
               <div className="flex items-center gap-1.5 mt-1.5 min-w-0">
                 <span
-                  className="caps-tight text-[11px] inline-block px-1.5 py-0.5 shrink-0"
+                  className="caps-tight inline-block px-1.5 py-0.5 shrink-0"
                   style={{
                     color: BODY_PART_ACCENT[exercise.bodyPart],
                     border: `1px solid ${BODY_PART_ACCENT[exercise.bodyPart]}`,
@@ -343,7 +343,7 @@ export default function EntryCard({
                     only place the card can say it is finished. */}
                 {collapsed && done && (
                   <span
-                    className="caps-tight text-[11px] shrink-0"
+                    className="caps-tight shrink-0"
                     style={{ color: 'var(--color-done-deep)', fontWeight: 700 }}
                   >
                     DONE
@@ -417,7 +417,7 @@ export default function EntryCard({
         ref={addSetBtnRef}
         type="button"
         onClick={handleAddSet}
-        className="relative w-full h-12 caps text-[11px] press flex items-center justify-center gap-2"
+        className="relative w-full h-12 caps press flex items-center justify-center gap-2"
         style={{
           color: 'var(--color-text)',
           borderTop: '1px solid var(--color-line)',
@@ -439,7 +439,7 @@ export default function EntryCard({
         onClick={onToggleDone}
         aria-pressed={!!done}
         aria-label={done ? 'Mark exercise not complete' : 'Mark exercise complete'}
-        className={`relative w-full h-14 caps-tight text-[11px] press flex items-center gap-2.5 ${done ? 'justify-start px-4' : 'justify-center'}`}
+        className={`relative w-full h-14 caps-tight press flex items-center gap-2.5 ${done ? 'justify-start px-4' : 'justify-center'}`}
         style={{
           borderTop: `1px solid ${done ? 'var(--color-done-line)' : 'var(--color-line)'}`,
           background: done ? 'var(--color-done-tint)' : 'var(--color-volt)',
@@ -456,7 +456,7 @@ export default function EntryCard({
             </svg>
             COMPLETED
             <span
-              className="caps-tight text-[11px] ml-auto"
+              className="caps-tight ml-auto"
               style={{
                 color: 'var(--color-text-muted)',
                 borderBottom: '1px solid var(--color-line-2)',

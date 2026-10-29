@@ -33,7 +33,7 @@ export default function SiteHeader() {
               <button
                 type="button"
                 onClick={() => navigate('/')}
-                className="h-9 px-3 inline-flex items-center caps-tight text-[11px] press"
+                className="h-9 px-3 inline-flex items-center caps-tight press"
                 style={{ color: 'var(--color-text-muted)' }}
               >
                 ← BACK TO SITE
@@ -43,7 +43,7 @@ export default function SiteHeader() {
                 <button
                   type="button"
                   onClick={() => navigate('/login')}
-                  className="hidden sm:inline-flex h-9 px-3 items-center caps-tight text-[11px] press"
+                  className="hidden sm:inline-flex h-9 px-3 items-center caps-tight press"
                   style={{ color: 'var(--color-text-muted)' }}
                 >
                   SIGN IN
@@ -51,7 +51,7 @@ export default function SiteHeader() {
                 <button
                   type="button"
                   onClick={() => navigate('/login')}
-                  className="h-9 px-4 btn-volt press caps-tight text-[11px] inline-flex items-center"
+                  className="h-9 px-4 btn-volt press caps-tight inline-flex items-center"
                   style={{ borderRadius: 'var(--radius)' }}
                 >
                   GET STARTED →

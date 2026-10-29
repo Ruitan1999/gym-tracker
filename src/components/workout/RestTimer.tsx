@@ -51,7 +51,7 @@ export default function RestTimer({ timer }: { timer: RestTimerCore }) {
         <div className="flex flex-col min-w-0 mr-auto">
           <span
             role="status"
-            className="caps-tight text-[11px]"
+            className="caps-tight"
             style={{ color: isGo ? 'var(--color-done-deep)' : 'var(--color-text-muted)' }}
           >
             {isGo ? 'Go' : paused ? 'Rest paused' : 'Rest'}
@@ -104,7 +104,7 @@ export default function RestTimer({ timer }: { timer: RestTimerCore }) {
         <button
           type="button"
           onClick={skip}
-          className="btn-volt press caps-tight text-[11px] px-4"
+          className="btn-volt press caps-tight px-4"
           style={{ height: '48px', borderRadius: 'var(--radius)', letterSpacing: '0.12em' }}
         >
           Skip

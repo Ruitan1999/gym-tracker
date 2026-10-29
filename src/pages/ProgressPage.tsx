@@ -172,7 +172,7 @@ export default function ProgressPage() {
               {s.exercise.name}
             </p>
             <div
-              className="caps-tight text-[11px] mt-1"
+              className="caps-tight mt-1"
               style={{ color: 'var(--color-text-faint)' }}
             >
               BEST {display(s.bestMax)} {unit.toUpperCase()}
@@ -195,7 +195,7 @@ export default function ProgressPage() {
               </ResponsiveContainer>
             ) : (
               <div
-                className="w-full h-full flex items-center justify-center caps-tight text-[11px]"
+                className="w-full h-full flex items-center justify-center caps-tight"
                 style={{ color: 'var(--color-text-faint)' }}
               >
                 —
@@ -215,7 +215,7 @@ export default function ProgressPage() {
             >
               {display(s.latestMax)}
               <span
-                className="caps-tight text-[11px] ml-1"
+                className="caps-tight ml-1"
                 style={{ color: 'var(--color-text-faint)' }}
               >
                 {unit.toUpperCase()}
@@ -252,7 +252,7 @@ export default function ProgressPage() {
       <div className="flex flex-col gap-5">
         <YearHeatmap workouts={appData.workouts} unit={unit} />
         <MuscleBalance workouts={appData.workouts} exercises={appData.exercises} />
-        <h2 className="caps-tight text-[11px] -mb-2" style={{ color: 'var(--color-text-faint)' }}>
+        <h2 className="caps-tight -mb-2" style={{ color: 'var(--color-text-faint)' }}>
           EXERCISES
         </h2>
         {hasGroups && (
@@ -284,7 +284,7 @@ export default function ProgressPage() {
                   <button
                     type="button"
                     onClick={() => setSelectedGroupId(null)}
-                    className="caps-tight text-[11px] press h-9 px-3 flex items-center gap-1.5"
+                    className="caps-tight press h-9 px-3 flex items-center gap-1.5"
                     style={{
                       color: 'var(--color-text)',
                       border: '1px solid var(--color-line-2)',
@@ -296,13 +296,13 @@ export default function ProgressPage() {
                     <span>GROUPS</span>
                   </button>
                   <h2
-                    className="caps text-[11px] flex-1 truncate"
+                    className="caps flex-1 truncate"
                     style={{ color: 'var(--color-text-muted)' }}
                   >
                     {selectedSection.name}
                   </h2>
                   <span
-                    className="caps-tight text-[11px]"
+                    className="caps-tight"
                     style={{ color: 'var(--color-text-faint)' }}
                   >
                     {String(selectedSection.items.length).padStart(2, '0')}
@@ -337,7 +337,7 @@ export default function ProgressPage() {
                         {section.name}
                       </p>
                       <div
-                        className="caps-tight text-[11px] mt-1"
+                        className="caps-tight mt-1"
                         style={{ color: 'var(--color-text-faint)' }}
                       >
                         {String(section.items.length).padStart(2, '0')} EXERCISE
@@ -391,7 +391,7 @@ function ToggleBtn({
       onClick={onClick}
       role="tab"
       aria-selected={active}
-      className="caps-tight text-[11px] px-4 h-9 press"
+      className="caps-tight px-4 h-9 press"
       style={{
         background: active ? 'var(--color-text)' : 'var(--color-surface)',
         color: active ? '#ffffff' : 'var(--color-text-muted)',

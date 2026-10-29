@@ -145,7 +145,7 @@ export default function SettingsPage() {
               color: 'var(--color-text)',
             }}
           >
-            <span className="flex items-center gap-2 caps-tight text-[11px]">
+            <span className="flex items-center gap-2 caps-tight">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="square" className="w-4 h-4">
                 <path d="M4 6h16M4 12h16M4 18h16" />
               </svg>
@@ -163,7 +163,7 @@ export default function SettingsPage() {
             <button
               type="button"
               onClick={resetReps}
-              className="caps text-[11px] press"
+              className="caps press"
               style={{ color: 'var(--color-text)' }}
             >
               RESET
@@ -211,7 +211,7 @@ export default function SettingsPage() {
               <button
                 type="button"
                 onClick={() => setAddingRep(true)}
-                className="h-12 px-4 press caps-tight text-[11px]"
+                className="h-12 px-4 press caps-tight"
                 style={{
                   color: 'var(--color-text)',
                   border: '1px dashed var(--color-line-3)',
@@ -236,7 +236,7 @@ export default function SettingsPage() {
               <button
                 type="button"
                 onClick={commitNewRep}
-                className="h-12 px-4 btn-volt press caps-tight text-[11px]"
+                className="h-12 px-4 btn-volt press caps-tight"
                 style={{ borderRadius: 'var(--radius)' }}
               >
                 ADD
@@ -247,7 +247,7 @@ export default function SettingsPage() {
                   setAddingRep(false);
                   setNewRep('');
                 }}
-                className="h-12 px-3 btn-ghost press caps-tight text-[11px]"
+                className="h-12 px-3 btn-ghost press caps-tight"
                 style={{ borderRadius: 'var(--radius)' }}
               >
                 CANCEL
@@ -259,7 +259,7 @@ export default function SettingsPage() {
         <Section label="LOAD INCREMENT">
           <WeightStepper label="STEP KG" value={preferences.weightStepKg} onChange={setStepKg} step={0.25} unit="kg" />
           <p
-            className="caps-tight text-[11px] mt-3"
+            className="caps-tight mt-3"
             style={{ color: 'var(--color-text-faint)' }}
           >
             USED BY THE +/- STEPPER ON LOG SCREEN
@@ -283,7 +283,7 @@ export default function SettingsPage() {
                 }}
               >
                 <span className="min-w-0">
-                  <span className="block caps-tight text-[11px]" style={{ color: 'var(--color-text)' }}>
+                  <span className="block caps-tight" style={{ color: 'var(--color-text)' }}>
                     FILL FROM LAST SESSION
                   </span>
                   <span
@@ -334,7 +334,7 @@ export default function SettingsPage() {
                 key={b.label}
                 type="button"
                 onClick={b.run}
-                className="h-12 press caps-tight text-[11px]"
+                className="h-12 press caps-tight"
                 style={{
                   background: '#ffffff',
                   border: '1px solid var(--color-line-2)',
@@ -346,12 +346,12 @@ export default function SettingsPage() {
               </button>
             ))}
           </div>
-          <p className="caps-tight text-[11px] mt-3" style={{ color: 'var(--color-text-faint)' }}>
+          <p className="caps-tight mt-3" style={{ color: 'var(--color-text-faint)' }}>
             JSON IS A FULL BACKUP OF EVERYTHING. CSV IS ONE ROW PER SET.
           </p>
           <details className="mt-3 group">
             <summary
-              className="caps-tight text-[11px] press cursor-pointer h-9 flex items-center"
+              className="caps-tight press cursor-pointer h-9 flex items-center"
               style={{ color: 'var(--color-text)' }}
             >
               DATE RANGE (CSV ONLY)
@@ -361,7 +361,7 @@ export default function SettingsPage() {
             </summary>
             <div className="grid grid-cols-2 gap-2 mt-1">
               <label className="block">
-                <span className="caps-tight text-[11px]" style={{ color: 'var(--color-text-faint)' }}>
+                <span className="caps-tight" style={{ color: 'var(--color-text-faint)' }}>
                   FROM
                 </span>
                 <input
@@ -374,7 +374,7 @@ export default function SettingsPage() {
                 />
               </label>
               <label className="block">
-                <span className="caps-tight text-[11px]" style={{ color: 'var(--color-text-faint)' }}>
+                <span className="caps-tight" style={{ color: 'var(--color-text-faint)' }}>
                   TO
                 </span>
                 <input
@@ -394,7 +394,7 @@ export default function SettingsPage() {
           <>
             <Section label="ACCOUNT">
               <div
-                className="caps-tight text-[11px] mb-3 truncate"
+                className="caps-tight mb-3 truncate"
                 style={{ color: 'var(--color-text-faint)' }}
               >
                 {auth.user.isAnonymous
@@ -405,7 +405,7 @@ export default function SettingsPage() {
                 type="button"
                 onClick={handleLogout}
                 disabled={accountBusy}
-                className="w-full h-12 press caps-tight text-[11px]"
+                className="w-full h-12 press caps-tight"
                 style={{
                   background: '#ffffff',
                   border: '1px solid var(--color-line-2)',
@@ -423,7 +423,7 @@ export default function SettingsPage() {
                 type="button"
                 onClick={handleDeleteAccount}
                 disabled={accountBusy}
-                className="w-full h-12 press caps-tight text-[11px]"
+                className="w-full h-12 press caps-tight"
                 style={{
                   background: '#c0392b',
                   border: '1px solid #c0392b',
@@ -436,7 +436,7 @@ export default function SettingsPage() {
                 DELETE ACCOUNT
               </button>
               <p
-                className="caps-tight text-[11px] mt-3"
+                className="caps-tight mt-3"
                 style={{ color: 'var(--color-text-faint)' }}
               >
                 DELETING YOUR ACCOUNT REMOVES ALL WORKOUTS AND SETTINGS. THIS CANNOT BE UNDONE.
@@ -452,10 +452,10 @@ export default function SettingsPage() {
               className="w-full h-14 px-4 flex items-center justify-between card press"
               style={{ color: 'var(--color-text)' }}
             >
-              <span className="caps-tight text-[11px]" style={{ fontWeight: 700 }}>
+              <span className="caps-tight" style={{ fontWeight: 700 }}>
                 EXERCISE LIBRARY
               </span>
-              <span className="caps-tight text-[11px]" style={{ color: 'var(--color-text-faint)' }}>
+              <span className="caps-tight" style={{ color: 'var(--color-text-faint)' }}>
                 EVERYONE SEES THIS →
               </span>
             </Link>
@@ -469,14 +469,14 @@ export default function SettingsPage() {
             <button
               type="button"
               onClick={() => copyAccountId(auth.user!.uid)}
-              className="caps-tight text-[8px] press"
+              className="caps-tight press"
               style={{ color: 'var(--color-text-faint)' }}
             >
               {copiedId ? 'ACCOUNT ID COPIED' : `ACCOUNT ${auth.user.uid}`}
             </button>
             {!isAdmin(auth.user.uid) && (
               <p
-                className="caps-tight text-[8px] mt-1"
+                className="caps-tight mt-1"
                 style={{ color: 'var(--color-text-faint)' }}
               >
                 {adminConfigured() ? 'ADMIN · ANOTHER ACCOUNT' : 'ADMIN · NOT SET IN THIS BUILD'}
@@ -488,7 +488,7 @@ export default function SettingsPage() {
         {/* The exercise illustrations are licensed, not ours; the credit has to
             be carried wherever they are shown, and once here covers the app. */}
         <p
-          className="caps-tight text-[11px] pt-2 pb-6 text-center"
+          className="caps-tight pt-2 pb-6 text-center"
           style={{ color: 'var(--color-text-faint)' }}
         >
           EXERCISE ILLUSTRATIONS {MEDIA_ATTRIBUTION}
@@ -514,7 +514,7 @@ function Section({
   return (
     <section>
       <div className="flex items-center justify-between mb-3">
-        <h2 className="caps text-[11px]" style={{ color: 'var(--color-text)' }}>
+        <h2 className="caps" style={{ color: 'var(--color-text)' }}>
           {label}
         </h2>
         {action}
