@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { render, screen, fireEvent, act, within } from '@testing-library/react';
+import { render, screen, fireEvent, act, within, waitFor } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { AppProvider } from '../context/AppContext';
 import LogWorkoutPage from '../pages/LogWorkoutPage';
@@ -301,12 +301,12 @@ describe('the rest timer', () => {
     expect(screen.getByTestId('rest-timer')).toBeTruthy();
   });
 
-  it('does not start again when the same set is touched twice', () => {
+  it('does not start again when the same set is touched twice', async () => {
     seed([past(BENCH, DISTINCT)], { autoFillFromLast: true });
     startTemplate(true);
     fireEvent.click(stepUp()[0]);
     fireEvent.click(screen.getByText('Skip'));
-    expect(screen.queryByTestId('rest-timer')).toBeNull();
+    await waitFor(() => expect(screen.queryByTestId('rest-timer')).toBeNull());
 
     fireEvent.click(stepUp()[0]);
     expect(screen.queryByTestId('rest-timer')).toBeNull();

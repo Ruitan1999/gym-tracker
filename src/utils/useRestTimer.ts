@@ -1,16 +1,18 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 
-export const DEFAULT_REST_SECONDS = 90;
+export const DEFAULT_REST_SECONDS = 60;
 export const REST_STEP_SECONDS = 15;
-const MIN_REST_SECONDS = 15;
-const MAX_REST_SECONDS = 600;
+export const MIN_REST_SECONDS = 15;
+export const MAX_REST_SECONDS = 600;
 /** How long "Go" stays up before the bar tucks itself away. */
 export const GO_LINGER_MS = 1600;
 export const REST_STORAGE_KEY = 'gym-tracker-rest-seconds';
+/** The rest under way, so leaving the screen or the app does not lose it. */
+export const REST_RUNNING_KEY = 'gym-tracker-rest-running';
 
 export type RestPhase = 'idle' | 'running' | 'paused' | 'go';
 
-function clampRest(sec: number): number {
+export function clampRest(sec: number): number {
   return Math.min(MAX_REST_SECONDS, Math.max(MIN_REST_SECONDS, Math.round(sec)));
 }
 
@@ -25,7 +27,7 @@ export function loadRestSeconds(): number {
   return DEFAULT_REST_SECONDS;
 }
 
-function saveRestSeconds(sec: number) {
+export function saveRestSeconds(sec: number) {
   try {
     localStorage.setItem(REST_STORAGE_KEY, String(sec));
   } catch {
@@ -49,9 +51,39 @@ interface TimerState {
   pausedMs: number;
   /** Length of this rest, for the progress line. */
   total: number;
+  /** Ended while the screen or app was away: stays up until tapped, so it is seen. */
+  late?: boolean;
 }
 
 const IDLE: TimerState = { phase: 'idle', endAt: 0, pausedMs: 0, total: 0 };
+
+/** A rest still under way from before the screen was left; a finished one is gone. */
+function loadRunning(): TimerState {
+  try {
+    const raw = localStorage.getItem(REST_RUNNING_KEY);
+    if (!raw) return IDLE;
+    const s = JSON.parse(raw) as TimerState;
+    if (s.phase === 'paused' && s.pausedMs > 0) return s;
+    if (s.phase === 'running') {
+      return s.endAt > Date.now() ? s : { ...s, phase: 'go', late: true };
+    }
+  } catch {
+    /* unreadable or blocked: start with no rest */
+  }
+  return IDLE;
+}
+
+function saveRunning(s: TimerState) {
+  try {
+    if (s.phase === 'running' || s.phase === 'paused') {
+      localStorage.setItem(REST_RUNNING_KEY, JSON.stringify(s));
+    } else {
+      localStorage.removeItem(REST_RUNNING_KEY);
+    }
+  } catch {
+    /* remembering is a convenience, never a failure */
+  }
+}
 
 /**
  * The rest state machine, without a ticking clock.
@@ -63,7 +95,7 @@ const IDLE: TimerState = { phase: 'idle', endAt: 0, pausedMs: 0, total: 0 };
  * sees ticks inside the bar alone (`useRemaining`).
  */
 export function useRestTimerCore() {
-  const [state, setState] = useState<TimerState>(IDLE);
+  const [state, setState] = useState<TimerState>(loadRunning);
   // Adjusting ±15s retunes the default too, so the next rest starts there.
   const durationRef = useRef<number>(loadRestSeconds());
 
@@ -81,11 +113,14 @@ export function useRestTimerCore() {
     } catch {
       /* some browsers refuse without a recent gesture; the visual cue remains */
     }
-    setState((s) => (s.phase === 'running' ? { ...s, phase: 'go' } : s));
+    const late = Date.now() - forEnd > 2000;
+    setState((s) => (s.phase === 'running' ? { ...s, phase: 'go', late } : s));
   }, []);
 
   const running = state.phase === 'running';
   const endAt = state.endAt;
+
+  useEffect(() => saveRunning(state), [state]);
 
   useEffect(() => {
     if (!running) return;
@@ -107,10 +142,10 @@ export function useRestTimerCore() {
   }, [running, endAt, finish]);
 
   useEffect(() => {
-    if (state.phase !== 'go') return;
+    if (state.phase !== 'go' || state.late) return;
     const id = setTimeout(() => setState(IDLE), GO_LINGER_MS);
     return () => clearTimeout(id);
-  }, [state.phase]);
+  }, [state.phase, state.late]);
 
   const start = useCallback((seconds?: number) => {
     const sec = clampRest(seconds ?? durationRef.current);

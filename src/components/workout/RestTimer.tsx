@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from 'react';
 import { Pause, Play } from 'lucide-react';
 import { prefersReducedMotion } from '../../utils/motion';
 import { REST_STEP_SECONDS, useRemaining, type RestTimerCore } from '../../utils/useRestTimer';
@@ -5,6 +6,8 @@ import { REST_STEP_SECONDS, useRemaining, type RestTimerCore } from '../../utils
 function format(sec: number): string {
   return `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, '0')}`;
 }
+
+const FADE_MS = 250;
 
 const stepBtn = {
   minWidth: '48px',
@@ -21,9 +24,25 @@ const stepBtn = {
 export default function RestTimer({ timer }: { timer: RestTimerCore }) {
   const { phase, total, adjust, togglePause, skip } = timer;
   const remaining = useRemaining(timer);
-  if (phase === 'idle') return null;
+  // When the rest ends or is skipped the bar fades out rather than vanishing.
+  const [fading, setFading] = useState(false);
+  const wasShown = useRef(false);
+  useEffect(() => {
+    if (phase !== 'idle') {
+      wasShown.current = true;
+      setFading(false);
+      return;
+    }
+    if (!wasShown.current) return;
+    wasShown.current = false;
+    if (prefersReducedMotion()) return;
+    setFading(true);
+    const id = setTimeout(() => setFading(false), FADE_MS);
+    return () => clearTimeout(id);
+  }, [phase]);
+  if (phase === 'idle' && !fading) return null;
 
-  const isGo = phase === 'go';
+  const isGo = phase === 'go' || phase === 'idle';
   const paused = phase === 'paused';
   const progress = total > 0 && !isGo ? Math.min(1, Math.max(0, remaining / total)) : 0;
 
@@ -36,6 +55,9 @@ export default function RestTimer({ timer }: { timer: RestTimerCore }) {
         borderTop: `1px solid ${isGo ? 'var(--color-done-line)' : 'var(--color-line-2)'}`,
         paddingBottom: 'var(--safe-bottom)',
         animation: prefersReducedMotion() ? undefined : 'slideUp 0.18s ease-out',
+        opacity: phase === 'idle' ? 0 : 1,
+        transition: `opacity ${FADE_MS}ms ease-out`,
+        pointerEvents: phase === 'idle' ? 'none' : undefined,
       }}
     >
       <div aria-hidden style={{ height: '2px', background: 'var(--color-line)' }}>

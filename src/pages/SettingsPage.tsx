@@ -11,6 +11,7 @@ import { isAdmin, adminConfigured } from '../utils/admin';
 import { RUNNING_BUILD } from '../utils/buildVersion';
 import { buildCsvExport, buildJsonExport, downloadText, exportFileName } from '../utils/exportData';
 import { Link } from 'react-router-dom';
+import { clampRest, loadRestSeconds, saveRestSeconds, REST_STEP_SECONDS } from '../utils/useRestTimer';
 
 export default function SettingsPage() {
   const navigate = useNavigate();
@@ -21,6 +22,7 @@ export default function SettingsPage() {
   const [newRep, setNewRep] = useState<number | ''>('');
   const [accountBusy, setAccountBusy] = useState(false);
   const [copiedId, setCopiedId] = useState(false);
+  const [restSec, setRestSec] = useState(loadRestSeconds);
   const [exportFrom, setExportFrom] = useState('');
   const [exportTo, setExportTo] = useState('');
 
@@ -109,6 +111,12 @@ export default function SettingsPage() {
     if (value === '' || typeof value !== 'number') return;
     const clamped = Math.min(50, Math.max(0.25, value));
     updatePreferences({ ...preferences, weightStepKg: clamped });
+  }
+
+  function changeRest(delta: number) {
+    const next = clampRest(restSec + delta);
+    setRestSec(next);
+    saveRestSeconds(next);
   }
 
   function exportJson() {
@@ -263,6 +271,43 @@ export default function SettingsPage() {
             style={{ color: 'var(--color-text-faint)' }}
           >
             USED BY THE +/- STEPPER ON LOG SCREEN
+          </p>
+        </Section>
+
+        <Section label="REST TIMER">
+          <div
+            className="flex items-center justify-between px-4 h-14"
+            style={{ background: '#ffffff', border: '1px solid var(--color-line-2)', borderRadius: 'var(--radius)' }}
+          >
+            <span
+              className="font-mono"
+              style={{ fontSize: '1.25rem', fontVariantNumeric: 'tabular-nums', color: 'var(--color-text)' }}
+            >
+              {Math.floor(restSec / 60)}:{String(restSec % 60).padStart(2, '0')}
+            </span>
+            <span className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => changeRest(-REST_STEP_SECONDS)}
+                aria-label={`Shorten rest by ${REST_STEP_SECONDS} seconds`}
+                className="btn-ghost press font-mono text-[12px]"
+                style={{ minWidth: 48, height: 48, borderRadius: 'var(--radius)' }}
+              >
+                -{REST_STEP_SECONDS}
+              </button>
+              <button
+                type="button"
+                onClick={() => changeRest(REST_STEP_SECONDS)}
+                aria-label={`Extend rest by ${REST_STEP_SECONDS} seconds`}
+                className="btn-ghost press font-mono text-[12px]"
+                style={{ minWidth: 48, height: 48, borderRadius: 'var(--radius)' }}
+              >
+                +{REST_STEP_SECONDS}
+              </button>
+            </span>
+          </div>
+          <p className="caps-tight mt-3" style={{ color: 'var(--color-text-faint)' }}>
+            STARTS AFTER EACH SET. ADJUSTING IT DURING A REST CHANGES THIS TOO.
           </p>
         </Section>
 

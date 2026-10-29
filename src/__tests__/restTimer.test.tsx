@@ -27,7 +27,7 @@ describe('useRestTimer', () => {
     vi.useRealTimers();
   });
 
-  it('starts at 90s and counts down from the end timestamp', () => {
+  it('starts at 60s and counts down from the end timestamp', () => {
     const { result } = renderHook(() => useRestTimer());
     expect(result.current.phase).toBe('idle');
     act(() => result.current.start());
@@ -36,7 +36,7 @@ describe('useRestTimer', () => {
     act(() => {
       vi.advanceTimersByTime(30_000);
     });
-    expect(result.current.remaining).toBe(60);
+    expect(result.current.remaining).toBe(30);
   });
 
   it('stays right when timers were throttled (clock jumps, no ticks)', () => {
@@ -46,18 +46,18 @@ describe('useRestTimer', () => {
       vi.setSystemTime(Date.now() + 45_000);
       document.dispatchEvent(new Event('visibilitychange'));
     });
-    expect(result.current.remaining).toBe(45);
+    expect(result.current.remaining).toBe(15);
   });
 
   it('adjusts by 15s and remembers it for the next rest', () => {
     const { result } = renderHook(() => useRestTimer());
     act(() => result.current.start());
     act(() => result.current.adjust(15));
-    expect(result.current.remaining).toBe(105);
-    expect(localStorage.getItem(REST_STORAGE_KEY)).toBe('105');
+    expect(result.current.remaining).toBe(75);
+    expect(localStorage.getItem(REST_STORAGE_KEY)).toBe('75');
     act(() => result.current.skip());
     act(() => result.current.start());
-    expect(result.current.remaining).toBe(105);
+    expect(result.current.remaining).toBe(75);
   });
 
   it('pause freezes the countdown and resume continues from it', () => {
@@ -71,12 +71,12 @@ describe('useRestTimer', () => {
     act(() => {
       vi.advanceTimersByTime(60_000);
     });
-    expect(result.current.remaining).toBe(80);
+    expect(result.current.remaining).toBe(50);
     act(() => result.current.togglePause());
     act(() => {
       vi.advanceTimersByTime(5_000);
     });
-    expect(result.current.remaining).toBe(75);
+    expect(result.current.remaining).toBe(45);
   });
 
   it('skip goes straight back to idle', () => {
@@ -114,6 +114,41 @@ describe('useRestTimer', () => {
   });
 });
 
+describe('a rest in progress', () => {
+  beforeEach(() => {
+    localStorage.clear();
+    vi.useFakeTimers();
+  });
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it('is still there after leaving the screen and coming back', () => {
+    const first = renderHook(() => useRestTimer());
+    act(() => first.result.current.start());
+    first.unmount();
+    vi.setSystemTime(Date.now() + 20_000);
+    const back = renderHook(() => useRestTimer());
+    expect(back.result.current.phase).toBe('running');
+    expect(back.result.current.remaining).toBe(40);
+  });
+
+  it('shows Go and stays until dismissed if it ended while away', () => {
+    const first = renderHook(() => useRestTimer());
+    act(() => first.result.current.start());
+    first.unmount();
+    vi.setSystemTime(Date.now() + 61_000);
+    const back = renderHook(() => useRestTimer());
+    expect(back.result.current.phase).toBe('go');
+    act(() => {
+      vi.advanceTimersByTime(GO_LINGER_MS * 5);
+    });
+    expect(back.result.current.phase).toBe('go');
+    act(() => back.result.current.skip());
+    expect(back.result.current.phase).toBe('idle');
+  });
+});
+
 describe('RestTimer bar', () => {
   beforeEach(() => {
     localStorage.clear();
@@ -127,14 +162,18 @@ describe('RestTimer bar', () => {
     render(<Harness />);
     expect(screen.queryByTestId('rest-timer')).toBeNull();
     fireEvent.click(screen.getByText('begin'));
-    expect(screen.getByText('1:30')).toBeTruthy();
+    expect(screen.getByText('1:00')).toBeTruthy();
     fireEvent.click(screen.getByLabelText('Extend rest by 15 seconds'));
-    expect(screen.getByText('1:45')).toBeTruthy();
+    expect(screen.getByText('1:15')).toBeTruthy();
     fireEvent.click(screen.getByLabelText('Shorten rest by 15 seconds'));
-    expect(screen.getByText('1:30')).toBeTruthy();
+    expect(screen.getByText('1:00')).toBeTruthy();
     fireEvent.click(screen.getByLabelText('Pause rest'));
     expect(screen.getByLabelText('Resume rest')).toBeTruthy();
     fireEvent.click(screen.getByText('Skip'));
+    // It fades out rather than vanishing.
+    act(() => {
+      vi.advanceTimersByTime(300);
+    });
     expect(screen.queryByTestId('rest-timer')).toBeNull();
   });
 });
