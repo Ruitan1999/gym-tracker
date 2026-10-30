@@ -133,7 +133,7 @@ describe('a day with nothing set for it', () => {
     seed({ groups: [pull([5])] });
     renderCard();
 
-    fireEvent.click(screen.getByRole('button', { name: /START EARLY/ }));
+    fireEvent.click(screen.getByRole('button', { name: /Pull/ }));
     expect(loadDraft()?.sourceGroupId).toBe('pull');
   });
 });
@@ -239,7 +239,7 @@ describe('before any days are set', () => {
     seed({ groups: [push(), pull()] });
     renderCard();
 
-    expect(screen.getByRole('button', { name: /SET WORKOUT DAYS/ })).toBeTruthy();
+    expect(screen.getByRole('button', { name: /Give your week a shape/ })).toBeTruthy();
   });
 
   it('shows only the week when there are no templates yet', () => {

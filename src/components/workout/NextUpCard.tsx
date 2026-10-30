@@ -129,7 +129,6 @@ export default function NextUpCard() {
             tone="due"
             label="NEXT IN ROTATION"
             name={pick.group.name}
-            action="START"
             onPress={() => start(pick.group)}
           />
         </Card>
@@ -147,7 +146,6 @@ export default function NextUpCard() {
             tone="due"
             label={dayLabel(today, 0)}
             name={first.name}
-            action="START"
             onPress={() => start(first)}
           />
           {/* Two templates can share a day; the second is a row of its own. */}
@@ -157,7 +155,6 @@ export default function NextUpCard() {
                 tone="quiet"
                 label="ALSO TODAY"
                 name={g.name}
-                action="START"
                 onPress={() => start(g)}
               />
             </div>
@@ -179,7 +176,6 @@ export default function NextUpCard() {
             tone="quiet"
             label={dayLabel(upcoming.day, upcoming.daysAway)}
             name={upcoming.group.name}
-            action="START EARLY"
             onPress={() => start(upcoming.group)}
           />
         </Card>
@@ -197,7 +193,6 @@ export default function NextUpCard() {
           label="NEXT UP"
           name="Give your week a shape"
           sub="Pick the days you train a template."
-          action="SET WORKOUT DAYS"
           icon="calendar"
           onPress={() => navigate('/groups')}
         />
@@ -246,22 +241,20 @@ function Card({
 }
 
 const TONES = {
-  due: { panel: 'var(--color-volt-wash)', badge: 'var(--color-volt)', pill: 'var(--color-volt)', pillText: '#ffffff' },
-  done: { panel: 'var(--color-done-tint)', badge: 'var(--color-done)', pill: 'var(--color-surface)', pillText: 'var(--color-done-deep)' },
-  quiet: { panel: 'var(--color-elev)', badge: 'var(--color-text-muted)', pill: 'var(--color-surface)', pillText: 'var(--color-text)' },
+  due: { panel: 'var(--color-volt-wash)', badge: 'var(--color-volt)' },
+  done: { panel: 'var(--color-done-tint)', badge: 'var(--color-done)' },
+  quiet: { panel: 'var(--color-elev)', badge: 'var(--color-text-muted)' },
 } as const;
 
 /**
- * One compact line: what kind of day it is, the template and the one thing
- * to do. The whole row is the button, so the target is the
- * full width rather than the small pill alone.
+ * One compact line: what kind of day it is and the template. The whole row
+ * is the button, so there is no separate action to hunt for.
  */
 function Row({
   tone,
   label,
   name,
   sub,
-  action,
   icon = tone === 'done' ? 'check' : 'dumbbell',
   onPress,
 }: {
@@ -269,8 +262,6 @@ function Row({
   label: string;
   name: string;
   sub?: string;
-  /** Left off where the whole row is the only thing to press, as on a finished day. */
-  action?: string;
   icon?: 'dumbbell' | 'check' | 'calendar';
   onPress: () => void;
 }) {
@@ -313,20 +304,6 @@ function Row({
           </span>
         )}
       </span>
-      {action && (
-        <span
-          className="shrink-0 caps-tight px-3 h-9 flex items-center"
-          style={{
-            background: t.pill,
-            color: t.pillText,
-            borderRadius: '999px',
-            fontWeight: 700,
-            border: tone === 'due' ? 'none' : '1px solid var(--color-line-2)',
-          }}
-        >
-          {action}
-        </span>
-      )}
     </button>
   );
 }
