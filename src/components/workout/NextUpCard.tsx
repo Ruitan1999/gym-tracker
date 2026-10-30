@@ -107,12 +107,11 @@ export default function NextUpCard() {
           label="DONE TODAY"
           name={loggedToday.name || 'Session logged'}
           sub={sessionSummary(loggedToday)}
-          action="VIEW SESSION"
           onPress={() => navigate(`/history/${loggedToday.id}`)}
         />
         {next && (
           <p
-            className="caps-tight text-center mt-2"
+            className="caps-tight text-center mt-3 mb-1"
             style={{ color: 'var(--color-text-muted)' }}
           >
             {next}
@@ -270,7 +269,8 @@ function Row({
   label: string;
   name: string;
   sub?: string;
-  action: string;
+  /** Left off where the whole row is the only thing to press, as on a finished day. */
+  action?: string;
   icon?: 'dumbbell' | 'check' | 'calendar';
   onPress: () => void;
 }) {
@@ -313,18 +313,20 @@ function Row({
           </span>
         )}
       </span>
-      <span
-        className="shrink-0 caps-tight px-3 h-9 flex items-center"
-        style={{
-          background: t.pill,
-          color: t.pillText,
-          borderRadius: '999px',
-          fontWeight: 700,
-          border: tone === 'due' ? 'none' : '1px solid var(--color-line-2)',
-        }}
-      >
-        {action}
-      </span>
+      {action && (
+        <span
+          className="shrink-0 caps-tight px-3 h-9 flex items-center"
+          style={{
+            background: t.pill,
+            color: t.pillText,
+            borderRadius: '999px',
+            fontWeight: 700,
+            border: tone === 'due' ? 'none' : '1px solid var(--color-line-2)',
+          }}
+        >
+          {action}
+        </span>
+      )}
     </button>
   );
 }

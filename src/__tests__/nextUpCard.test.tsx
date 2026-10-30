@@ -203,7 +203,7 @@ describe('a session already logged today', () => {
 
     expect(screen.getByText('DONE TODAY')).toBeTruthy();
     expect(screen.queryByRole('button', { name: /START WORKOUT/ })).toBeNull();
-    expect(screen.getByRole('button', { name: /VIEW SESSION/ })).toBeTruthy();
+    expect(screen.getByRole('button', { name: /DONE TODAY/ })).toBeTruthy();
   });
 
   it('counts what was done', () => {
