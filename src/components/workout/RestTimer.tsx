@@ -51,7 +51,7 @@ export default function RestTimer({ timer }: { timer: RestTimerCore }) {
       data-testid="rest-timer"
       className="fixed inset-x-0 bottom-0 z-40"
       style={{
-        background: 'var(--color-surface)',
+        background: 'var(--color-bg)',
         borderTop: `1px solid ${isGo ? 'var(--color-done-line)' : 'var(--color-line-2)'}`,
         paddingBottom: 'var(--safe-bottom)',
         animation: prefersReducedMotion() ? undefined : 'slideUp 0.18s ease-out',

@@ -109,7 +109,7 @@ export default function BottomNav() {
       className="fixed bottom-0 left-0 right-0 z-50"
       style={{
         paddingBottom: 'var(--safe-bottom)',
-        background: 'var(--color-surface)',
+        background: 'var(--color-bg)',
         borderTop: '1px solid var(--color-line-2)',
       }}
       aria-label="Primary"

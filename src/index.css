@@ -147,7 +147,10 @@ body {
   background-repeat: no-repeat;
   background-position: top;
   background-size: 100% 340px;
+  /* Fades up from the paper colour, so it does not start with a hard edge
+     under the phone's own status bar. */
   background-image:
+    linear-gradient(to bottom, var(--color-bg) 0, rgba(245, 245, 244, 0) 56px),
     radial-gradient(42% 55% at 12% -5%, rgba(255, 182, 213, 0.22) 0%, rgba(255, 182, 213, 0) 70%),
     radial-gradient(48% 60% at 42% -12%, rgba(255, 244, 163, 0.22) 0%, rgba(255, 244, 163, 0) 70%),
     radial-gradient(48% 60% at 74% 5%, rgba(178, 255, 214, 0.22) 0%, rgba(178, 255, 214, 0) 70%),
