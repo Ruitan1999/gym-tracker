@@ -2,6 +2,19 @@ import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAppContext } from '../../context/AppContext';
 
+/** The colour the phone paints its status bar, to match the top of this page. */
+function useStatusBarColor(color: string) {
+  useEffect(() => {
+    const meta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
+    if (!meta) return;
+    const before = meta.content;
+    meta.content = color;
+    return () => {
+      meta.content = before;
+    };
+  }, [color]);
+}
+
 interface PageShellProps {
   title: string;
   /** Makes the title itself the rename target rather than a separate field. */
@@ -94,6 +107,9 @@ export default function PageShell({ title, onTitlePress, titlePressLabel, eyebro
       setPull(0);
     }
   }
+
+  // A page with a white header gets a white status bar; the rest sit on the paper colour.
+  useStatusBarColor(showBack ? '#ffffff' : '#f5f5f4');
 
   const indicatorOpacity = Math.min(1, pull / PULL_THRESHOLD);
   const ready = pull >= PULL_THRESHOLD;
