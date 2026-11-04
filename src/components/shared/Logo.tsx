@@ -3,18 +3,19 @@ interface LogoProps {
   withWordmark?: boolean;
 }
 
-/* The mark: a lifter pressing a loaded barbell overhead, with a sharp
-   inverted-triangle torso. Accent fill, same
-   drawing as public/logo.svg. */
+/* The mark: a lifter pressing a loaded barbell overhead, all hard edges:
+   square-cut bar and plates, arms cut flush into the bar and a sharp
+   inverted-triangle torso. Only the head is round. Accent fill, same drawing
+   as public/logo.svg. */
 export function LogoMark({ size = 28, color = 'var(--color-volt)' }: { size?: number; color?: string }) {
   return (
     <svg width={size} height={size} viewBox="0 0 256 256" aria-hidden focusable="false" style={{ display: 'block' }}>
-      <rect x="12" y="52" width="232" height="20" rx="10" fill={color} />
-      <rect x="24" y="20" width="26" height="84" rx="12" fill={color} />
-      <rect x="206" y="20" width="26" height="84" rx="12" fill={color} />
-      <path d="M70 66L98 150M186 66L158 150" fill="none" stroke={color} strokeWidth="22" strokeLinecap="round" />
+      <rect x="12" y="52" width="232" height="20" fill={color} />
+      <rect x="24" y="20" width="26" height="84" fill={color} />
+      <rect x="206" y="20" width="26" height="84" fill={color} />
+      <path d="M60.4 72H83.6L106.9 142H83.7Z M195.6 72H172.4L149.1 142H172.3Z" fill={color} />
       <circle cx="128" cy="110" r="21" fill={color} />
-      <path d="M87 142H169L128 240Z" fill={color} />
+      <path d="M82 142H174L128 240Z" fill={color} />
     </svg>
   );
 }
