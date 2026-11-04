@@ -459,16 +459,3 @@ describe('the setting', () => {
     expect(loadAppData().preferences.autoFillFromLast).toBeUndefined();
   });
 });
-
-describe('the reps stepper', () => {
-  it('nudges a set one rep up or down', () => {
-    seed([past(BENCH, DISTINCT)], { autoFillFromLast: true });
-    startTemplate(true);
-    const before = rows()[0][0];
-    fireEvent.click(screen.getAllByRole('button', { name: 'Increase reps by 1 reps' })[0]);
-    expect(rows()[0][0]).toBe(before + 1);
-    fireEvent.click(screen.getAllByRole('button', { name: 'Decrease reps by 1 reps' })[0]);
-    fireEvent.click(screen.getAllByRole('button', { name: 'Decrease reps by 1 reps' })[0]);
-    expect(rows()[0][0]).toBe(before - 1);
-  });
-});

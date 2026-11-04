@@ -6,9 +6,6 @@ interface WeightStepperProps {
   onChange: (value: number | '') => void;
   step: number;
   unit: string;
-  /** What the buttons change, for their labels. Defaults to weight. */
-  noun?: string;
-  max?: number;
 }
 
 const MAX_WEIGHT_KG = 999.99;
@@ -18,18 +15,10 @@ function roundToStep(value: number, step: number): number {
   return Number(value.toFixed(Math.max(precision, 2)));
 }
 
-export default function WeightStepper({
-  label,
-  value,
-  onChange,
-  step,
-  unit,
-  noun = 'weight',
-  max = MAX_WEIGHT_KG,
-}: WeightStepperProps) {
+export default function WeightStepper({ label, value, onChange, step, unit }: WeightStepperProps) {
   const numeric = typeof value === 'number' ? value : 0;
   const decrementDisabled = typeof value === 'number' && value <= 0;
-  const incrementDisabled = typeof value === 'number' && value >= max;
+  const incrementDisabled = typeof value === 'number' && value >= MAX_WEIGHT_KG;
 
   function handleDecrement() {
     if (value === '' || typeof value !== 'number') return;
@@ -39,7 +28,7 @@ export default function WeightStepper({
 
   function handleIncrement() {
     const base = value === '' ? 0 : numeric;
-    const next = Math.min(max, base + step);
+    const next = Math.min(MAX_WEIGHT_KG, base + step);
     onChange(roundToStep(next, step));
   }
 
@@ -65,7 +54,7 @@ export default function WeightStepper({
         }}
       >
         <div className="flex-1 min-w-0 flex items-center">
-          <NumberInput value={value} onChange={onChange} placeholder="0" min={0} max={max} variant="bare" />
+          <NumberInput value={value} onChange={onChange} placeholder="0" min={0} max={MAX_WEIGHT_KG} variant="bare" />
           <span
             className="caps-tight pr-3"
             style={{ color: 'var(--color-text-faint)' }}
@@ -77,7 +66,7 @@ export default function WeightStepper({
           type="button"
           onClick={handleDecrement}
           disabled={decrementDisabled}
-          aria-label={`Decrease ${noun} by ${step} ${unit}`}
+          aria-label={`Decrease weight by ${step} ${unit}`}
           className="w-12 h-12 flex items-center justify-center press disabled:opacity-30"
           style={{
             borderLeft: '1px solid var(--color-line-2)',
@@ -92,7 +81,7 @@ export default function WeightStepper({
           type="button"
           onClick={handleIncrement}
           disabled={incrementDisabled}
-          aria-label={`Increase ${noun} by ${step} ${unit}`}
+          aria-label={`Increase weight by ${step} ${unit}`}
           className="w-12 h-12 flex items-center justify-center press disabled:opacity-30"
           style={{
             borderLeft: '1px solid var(--color-line-2)',
