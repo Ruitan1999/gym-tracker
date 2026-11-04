@@ -4,6 +4,7 @@ import { ArrowRight, Check, Minus, Plus } from 'lucide-react';
 import MuscleFigure from '../components/progress/MuscleFigure';
 import { balancePaint } from '../components/progress/balancePaint';
 import { exerciseImageUrl } from '../utils/exerciseImage';
+import { LogoMark } from '../components/shared/Logo';
 import type { BodyPart } from '../types';
 import './landing.css';
 
@@ -436,8 +437,13 @@ export default function LandingPage() {
     <div ref={root} className={`lp min-h-[100dvh] ${motion ? 'lp-motion' : ''}`}>
       <header className="lp-nav">
         <div className="lp-wrap lp-nav__row">
-          <Link to="/" className="text-[1.6rem] font-extrabold tracking-[-0.045em] mr-auto" aria-label="LiftGauge home">
-            liftgauge<span style={{ color: 'var(--lp-accent)' }}>.</span>
+          <Link
+            to="/"
+            className="flex items-center gap-2 text-[1.6rem] font-extrabold tracking-[-0.045em] mr-auto"
+            aria-label="LiftGauge home"
+          >
+            <LogoMark size={32} color="var(--lp-accent)" />
+            liftgauge
           </Link>
           <nav className="lp-nav__links" aria-label="Sections">
             <a className="lp-link" href="#plan">Plan</a>
@@ -723,7 +729,10 @@ export default function LandingPage() {
             </Link>
           </div>
           <p className="lp-wordmark" aria-hidden data-r style={at(2)}>
-            liftgauge<span>.</span>
+            <span className="lp-wordmark__mark">
+              <LogoMark color="var(--lp-accent)" />
+            </span>
+            liftgauge
           </p>
           <div className="mt-10 flex flex-wrap justify-between gap-3 text-[0.9rem]" style={{ color: '#b5b5b3' }}>
             <span>© 2026 LiftGauge. Built by Ruitan Experience Design.</span>

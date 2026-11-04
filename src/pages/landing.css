@@ -518,7 +518,10 @@
   overflow: clip;
 }
 .lp-wordmark {
-  font-size: min(28.5vw, 27.5rem);
+  display: flex;
+  align-items: flex-end;
+  gap: 0.06em;
+  font-size: min(23vw, 22.5rem);
   font-weight: 800;
   letter-spacing: -0.06em;
   line-height: 0.8;
@@ -526,7 +529,9 @@
   margin-top: clamp(64px, 10vw, 140px);
   white-space: nowrap;
 }
-.lp-wordmark span { color: var(--lp-accent); }
+/* The lifter mark at the size of the letters, standing on their baseline. */
+.lp-wordmark__mark { flex: none; padding-bottom: 0.02em; }
+.lp-wordmark__mark svg { width: 0.74em; height: 0.74em; }
 
 /* ---------- motion ---------- */
 
