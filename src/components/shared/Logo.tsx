@@ -3,7 +3,8 @@ interface LogoProps {
   withWordmark?: boolean;
 }
 
-/* The mark: a lifter pressing a loaded barbell overhead. Accent fill, same
+/* The mark: a lifter pressing a loaded barbell overhead, with a sharp
+   inverted-triangle torso. Accent fill, same
    drawing as public/logo.svg. */
 export function LogoMark({ size = 28, color = 'var(--color-volt)' }: { size?: number; color?: string }) {
   return (
@@ -13,7 +14,7 @@ export function LogoMark({ size = 28, color = 'var(--color-volt)' }: { size?: nu
       <rect x="206" y="20" width="26" height="84" rx="12" fill={color} />
       <path d="M70 66L98 150M186 66L158 150" fill="none" stroke={color} strokeWidth="22" strokeLinecap="round" />
       <circle cx="128" cy="110" r="21" fill={color} />
-      <path d="M98 150H158L146 236H110Z" fill={color} stroke={color} strokeWidth="16" strokeLinejoin="round" />
+      <path d="M87 142H169L128 240Z" fill={color} />
     </svg>
   );
 }
