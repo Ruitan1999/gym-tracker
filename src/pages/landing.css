@@ -205,9 +205,9 @@
   background: var(--lp-raised);
   border-radius: var(--lp-r-panel);
   padding: clamp(18px, 2.4vw, 28px);
-  transition: background-color var(--t-ui) ease;
 }
-.lp-set.is-done { background: #eef6f0; }
+/* Done is shown by the badge and the green button; the card itself stays
+   white so it keeps its contrast with the page. */
 .lp-set__done {
   display: inline-flex;
   align-items: center;

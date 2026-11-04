@@ -133,7 +133,7 @@ function LiveSet() {
     }`;
 
   return (
-    <div className={`lp-set lp-load ${done ? 'is-done' : ''}`} style={{ ['--i' as string]: 3 }} data-ui>
+    <div className="lp-set lp-load" style={{ ['--i' as string]: 3 }} data-ui>
       <div className="flex items-center gap-3">
         <img src={exerciseImageUrl('ex-legs-001') ?? undefined} alt="" className="w-12 h-12 object-contain shrink-0" />
         <div className="min-w-0 mr-auto">
