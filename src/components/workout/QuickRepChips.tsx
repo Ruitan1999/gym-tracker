@@ -116,12 +116,13 @@ export default function QuickRepChips({
               setEditing(false);
             }
           }}
-          placeholder="reps"
-          className={`${chipBase} w-[72px] text-center outline-none`}
+          // Same size and type as the chips beside it; the blue edge (as on a
+          // chosen chip) shows where the typing goes.
+          className={`${chipBase} w-[46px] px-0 text-center outline-none`}
           style={{
-            background: 'var(--color-surface)',
+            background: 'transparent',
             color: 'var(--color-text)',
-            border: '2px solid var(--color-volt)',
+            border: '1px solid var(--color-volt)',
             borderRadius: 'var(--radius)',
             fontVariantNumeric: 'tabular-nums',
           }}
