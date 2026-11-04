@@ -109,6 +109,9 @@ self.addEventListener('fetch', (event) => {
   // The staleness check has to be able to trust this answer, and the worker
   // script itself is how a bad worker gets replaced.
   if (url.pathname === '/version.json' || url.pathname === '/sw.js') return;
+  // Firebase's sign-in pages, served from here so the sign-in stays on this
+  // site rather than a third party's: they go straight through, untouched.
+  if (url.pathname.startsWith('/__/')) return;
 
   if (request.mode === 'navigate') {
     event.respondWith(freshDocument(request));
