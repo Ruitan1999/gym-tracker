@@ -282,8 +282,15 @@ describe('removing a set with auto-fill on', () => {
 });
 
 describe('the rest timer', () => {
-  it('starts on the first touch of a filled-in set, even to the same value', () => {
+  it('stays off unless it is turned on in Settings', () => {
     seed([past(BENCH, DISTINCT)], { autoFillFromLast: true });
+    startTemplate(true);
+    fireEvent.click(screen.getAllByText('TAP TO USE →')[0]);
+    expect(screen.queryByTestId('rest-timer')).toBeNull();
+  });
+
+  it('starts on the first touch of a filled-in set, even to the same value', () => {
+    seed([past(BENCH, DISTINCT)], { autoFillFromLast: true, restTimer: true });
     startTemplate(true);
     expect(screen.queryByTestId('rest-timer')).toBeNull();
 
@@ -295,14 +302,14 @@ describe('the rest timer', () => {
   });
 
   it('starts on a weight change too', () => {
-    seed([past(BENCH, DISTINCT)], { autoFillFromLast: true });
+    seed([past(BENCH, DISTINCT)], { autoFillFromLast: true, restTimer: true });
     startTemplate(true);
     fireEvent.click(stepUp()[0]);
     expect(screen.getByTestId('rest-timer')).toBeTruthy();
   });
 
   it('does not start again when the same set is touched twice', async () => {
-    seed([past(BENCH, DISTINCT)], { autoFillFromLast: true });
+    seed([past(BENCH, DISTINCT)], { autoFillFromLast: true, restTimer: true });
     startTemplate(true);
     fireEvent.click(stepUp()[0]);
     fireEvent.click(screen.getByText('Skip'));
@@ -313,7 +320,7 @@ describe('the rest timer', () => {
   });
 
   it('starts on reps going from nothing to something, as before, with auto-fill off', () => {
-    seed([past(BENCH, DISTINCT)]);
+    seed([past(BENCH, DISTINCT)], { restTimer: true });
     startTemplate(false);
     // A weight change alone is not a logged set.
     fireEvent.click(stepUp()[0]);
@@ -346,14 +353,14 @@ describe('what counts as work', () => {
   });
 
   it('does not write a draft for an untouched filled-in session, so Start does not say Resume', () => {
-    seed([past(BENCH, DISTINCT)], { autoFillFromLast: true });
+    seed([past(BENCH, DISTINCT)], { autoFillFromLast: true, restTimer: true });
     startTemplate(true);
     expect(savedDraft()).toBeNull();
     expect(draftHasProgress(loadDraft())).toBe(false);
   });
 
   it('writes the draft once a set is touched, remembering which are still unconfirmed', () => {
-    seed([past(BENCH, DISTINCT)], { autoFillFromLast: true });
+    seed([past(BENCH, DISTINCT)], { autoFillFromLast: true, restTimer: true });
     startTemplate(true);
     fireEvent.click(stepUp()[1]);
 
@@ -363,7 +370,7 @@ describe('what counts as work', () => {
   });
 
   it('never puts the marker on the saved workout', () => {
-    seed([past(BENCH, DISTINCT)], { autoFillFromLast: true });
+    seed([past(BENCH, DISTINCT)], { autoFillFromLast: true, restTimer: true });
     startTemplate(true);
     fireEvent.click(screen.getByRole('button', { name: 'Mark exercise complete' }));
     fireEvent.click(screen.getByRole('button', { name: /Save Session/ }));
@@ -375,7 +382,7 @@ describe('what counts as work', () => {
   });
 
   it('counts every set once the exercise is marked done', () => {
-    seed([past(BENCH, DISTINCT)], { autoFillFromLast: true });
+    seed([past(BENCH, DISTINCT)], { autoFillFromLast: true, restTimer: true });
     startTemplate(true);
     expect(strip().getByText(/0\/4 sets/)).toBeTruthy();
     fireEvent.click(screen.getByRole('button', { name: 'Mark exercise complete' }));
@@ -385,7 +392,7 @@ describe('what counts as work', () => {
 
 describe('the session strip count', () => {
   it('leaves out sets that are still last time’s numbers', () => {
-    seed([past(BENCH, DISTINCT)], { autoFillFromLast: true });
+    seed([past(BENCH, DISTINCT)], { autoFillFromLast: true, restTimer: true });
     startTemplate(true);
     expect(strip().getByText(/0\/4 sets/)).toBeTruthy();
     fireEvent.click(screen.getAllByText('TAP TO USE →')[0]);

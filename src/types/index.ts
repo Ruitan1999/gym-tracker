@@ -84,6 +84,13 @@ export interface UserPreferences {
    * Absent means off.
    */
   autoFillFromLast?: boolean;
+  /** Count down a rest after each logged set. Absent means off. */
+  restTimer?: boolean;
+  /**
+   * The new-user guide: true once finished or skipped, false to show it again.
+   * Absent shows it only to an account with nothing in it yet.
+   */
+  guideSeen?: boolean;
 }
 
 export const DEFAULT_PREFERENCES: UserPreferences = {

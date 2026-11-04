@@ -119,6 +119,8 @@ export default function WorkoutForm({
   // Rest and screen-awake only belong to a session being lived, not to history
   // being edited or Home, where a session is only offered.
   const sessionLive = !isEdit && isFocusedRoute;
+  // The rest timer is opt-in, from Settings.
+  const restOn = sessionLive && !!appData.preferences.restTimer;
   const rest = useRestTimerCore();
   useWakeLock(sessionLive);
 
@@ -337,7 +339,7 @@ export default function WorkoutForm({
     // moment rest begins; fixing a number later, changing load or adding or
     // removing a set does not restart it.
     const entryId = entries[entryIndex]?.id;
-    if (sessionLive) {
+    if (restOn) {
       const before = entries[entryIndex]?.sets ?? [];
       if (sets.length === before.length && sets.some((s, i) => s.reps > 0 && !(before[i].reps > 0))) {
         rest.start();
@@ -375,7 +377,7 @@ export default function WorkoutForm({
     const nextDone = !entry.done;
     // The last set already started a rest; finishing the exercise only starts
     // one when nothing is counting, so it never resets a rest part-way.
-    if (sessionLive && nextDone && rest.phase === 'idle') rest.start();
+    if (restOn && nextDone && rest.phase === 'idle') rest.start();
     // Calling the exercise done is the owner's say-so on every set in it.
     if (nextDone) setUnconfirmed((prev) => confirmEntry(prev, entry.id));
     setEntries((prev) => prev.map((e, i) => (i === entryIndex ? { ...e, done: nextDone } : e)));
@@ -509,7 +511,7 @@ export default function WorkoutForm({
 
   return (
     <div
-      className={`flex flex-col gap-5 ${sessionLive && rest.phase !== 'idle' ? 'pb-32' : 'pb-8'}`}
+      className={`flex flex-col gap-5 ${restOn && rest.phase !== 'idle' ? 'pb-32' : 'pb-8'}`}
     >
 
       {/* Time, sets, volume and a chip per exercise, pinned while the cards
@@ -774,7 +776,7 @@ const color = ratingColor(n)!;
         </button>
       )}
 
-      {sessionLive && <RestTimer timer={rest} />}
+      {restOn && <RestTimer timer={rest} />}
 
       {showCancelConfirm && (
         <ConfirmModal

@@ -9,6 +9,8 @@ import RouteErrorBoundary from './components/layout/RouteErrorBoundary';
 import UpdateBanner from './components/layout/UpdateBanner';
 import { lazyWithRetry, tidyReloadMarker } from './utils/lazyWithRetry';
 import BottomNav from './components/layout/BottomNav';
+import AppGuide from './components/guide/AppGuide';
+import { shouldShowGuide } from './utils/guide';
 import Toast from './components/shared/Toast';
 import LoadingScreen from './components/shared/LoadingScreen';
 import SessionSavedBanner, { type SessionSavedStats } from './components/shared/SessionSavedBanner';
@@ -41,7 +43,7 @@ function prefetchAllPages() {
 }
 
 function AppRoutes() {
-  const { loading: appLoading, appData, exerciseImages } = useAppContext();
+  const { loading: appLoading, appData, exerciseImages, updatePreferences } = useAppContext();
 
   // Once the data is in, store the exercise pictures on the phone in the
   // background, so lists and workouts read them locally. Once per launch: the
@@ -80,6 +82,9 @@ function AppRoutes() {
       </Suspense>
       </RouteErrorBoundary>
       <BottomNav />
+      {shouldShowGuide(appData) && (
+        <AppGuide onDone={() => updatePreferences({ ...appData.preferences, guideSeen: true })} />
+      )}
     </>
   );
 }

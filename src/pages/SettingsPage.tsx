@@ -275,98 +275,78 @@ export default function SettingsPage() {
         </Section>
 
         <Section label="REST TIMER">
-          <div
-            className="flex items-center justify-between px-4 h-14"
-            style={{ background: '#ffffff', border: '1px solid var(--color-line-2)', borderRadius: 'var(--radius)' }}
-          >
-            <span
-              className="font-mono"
-              style={{ fontSize: '1.25rem', fontVariantNumeric: 'tabular-nums', color: 'var(--color-text)' }}
-            >
-              {Math.floor(restSec / 60)}:{String(restSec % 60).padStart(2, '0')}
-            </span>
-            <span className="flex gap-2">
-              <button
-                type="button"
-                onClick={() => changeRest(-REST_STEP_SECONDS)}
-                aria-label={`Shorten rest by ${REST_STEP_SECONDS} seconds`}
-                className="btn-ghost press font-mono text-[12px]"
-                style={{ minWidth: 48, height: 48, borderRadius: 'var(--radius)' }}
+          <ToggleRow
+            title="COUNT DOWN BETWEEN SETS"
+            body="A countdown starts each time you log a set."
+            on={!!preferences.restTimer}
+            onToggle={(on) => updatePreferences({ ...preferences, restTimer: on })}
+          />
+          {preferences.restTimer && (
+            <>
+              <div
+                className="flex items-center justify-between px-4 h-14 mt-2"
+                style={{ background: '#ffffff', border: '1px solid var(--color-line-2)', borderRadius: 'var(--radius)' }}
               >
-                -{REST_STEP_SECONDS}
-              </button>
-              <button
-                type="button"
-                onClick={() => changeRest(REST_STEP_SECONDS)}
-                aria-label={`Extend rest by ${REST_STEP_SECONDS} seconds`}
-                className="btn-ghost press font-mono text-[12px]"
-                style={{ minWidth: 48, height: 48, borderRadius: 'var(--radius)' }}
-              >
-                +{REST_STEP_SECONDS}
-              </button>
-            </span>
-          </div>
-          <p className="caps-tight mt-3" style={{ color: 'var(--color-text-faint)' }}>
-            STARTS AFTER EACH SET. ADJUSTING IT DURING A REST CHANGES THIS TOO.
-          </p>
+                <span
+                  className="font-mono"
+                  style={{ fontSize: '1.25rem', fontVariantNumeric: 'tabular-nums', color: 'var(--color-text)' }}
+                >
+                  {Math.floor(restSec / 60)}:{String(restSec % 60).padStart(2, '0')}
+                </span>
+                <span className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => changeRest(-REST_STEP_SECONDS)}
+                    aria-label={`Shorten rest by ${REST_STEP_SECONDS} seconds`}
+                    className="btn-ghost press font-mono text-[12px]"
+                    style={{ minWidth: 48, height: 48, borderRadius: 'var(--radius)' }}
+                  >
+                    -{REST_STEP_SECONDS}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => changeRest(REST_STEP_SECONDS)}
+                    aria-label={`Extend rest by ${REST_STEP_SECONDS} seconds`}
+                    className="btn-ghost press font-mono text-[12px]"
+                    style={{ minWidth: 48, height: 48, borderRadius: 'var(--radius)' }}
+                  >
+                    +{REST_STEP_SECONDS}
+                  </button>
+                </span>
+              </div>
+              <p className="caps-tight mt-3" style={{ color: 'var(--color-text-faint)' }}>
+                REST LENGTH. ADJUSTING IT DURING A REST CHANGES THIS TOO.
+              </p>
+            </>
+          )}
         </Section>
 
         <Section label="AUTO-FILL">
-          {(() => {
-            const on = !!preferences.autoFillFromLast;
-            return (
-              <button
-                type="button"
-                role="switch"
-                aria-checked={on}
-                onClick={() => updatePreferences({ ...preferences, autoFillFromLast: !on })}
-                className="w-full min-h-14 flex items-center justify-between gap-4 px-4 py-3 text-left press"
-                style={{
-                  background: '#ffffff',
-                  border: '1px solid var(--color-line-2)',
-                  borderRadius: 'var(--radius)',
-                }}
-              >
-                <span className="min-w-0">
-                  <span className="block caps-tight" style={{ color: 'var(--color-text)' }}>
-                    FILL FROM LAST SESSION
-                  </span>
-                  <span
-                    className="block mt-1"
-                    style={{ fontSize: '13px', color: 'var(--color-text-muted)', lineHeight: 1.45 }}
-                  >
-                    Fill reps and weight from your last session when you start. You can still change
-                    every set.
-                  </span>
-                </span>
-                <span
-                  aria-hidden
-                  className="shrink-0 relative"
-                  style={{
-                    width: 44,
-                    height: 26,
-                    borderRadius: 13,
-                    background: on ? 'var(--color-volt)' : 'var(--color-line-3)',
-                    transition: 'background-color 150ms ease',
-                  }}
-                >
-                  <span
-                    className="absolute"
-                    style={{
-                      top: 3,
-                      left: on ? 21 : 3,
-                      width: 20,
-                      height: 20,
-                      borderRadius: 10,
-                      background: '#ffffff',
-                      boxShadow: '0 1px 2px rgba(0, 0, 0, 0.3)',
-                      transition: 'left 150ms ease',
-                    }}
-                  />
-                </span>
-              </button>
-            );
-          })()}
+          <ToggleRow
+            title="FILL FROM LAST SESSION"
+            body="Fill reps and weight from your last session when you start. You can still change every set."
+            on={!!preferences.autoFillFromLast}
+            onToggle={(on) => updatePreferences({ ...preferences, autoFillFromLast: on })}
+          />
+        </Section>
+
+        <Section label="APP GUIDE">
+          <button
+            type="button"
+            onClick={() => {
+              updatePreferences({ ...preferences, guideSeen: false });
+              navigate('/');
+            }}
+            className="w-full h-12 press caps-tight"
+            style={{
+              background: '#ffffff',
+              border: '1px solid var(--color-line-2)',
+              borderRadius: 'var(--radius)',
+              color: 'var(--color-text)',
+            }}
+          >
+            SHOW HOW THE APP WORKS
+          </button>
         </Section>
 
         <Section label="EXPORT">
@@ -566,5 +546,70 @@ function Section({
       </div>
       {children}
     </section>
+  );
+}
+
+/** A full-width on/off row: what it does in caps, a sentence under it. */
+function ToggleRow({
+  title,
+  body,
+  on,
+  onToggle,
+}: {
+  title: string;
+  body: string;
+  on: boolean;
+  onToggle: (on: boolean) => void;
+}) {
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={on}
+      onClick={() => onToggle(!on)}
+      className="w-full min-h-14 flex items-center justify-between gap-4 px-4 py-3 text-left press"
+      style={{
+        background: '#ffffff',
+        border: '1px solid var(--color-line-2)',
+        borderRadius: 'var(--radius)',
+      }}
+    >
+      <span className="min-w-0">
+        <span className="block caps-tight" style={{ color: 'var(--color-text)' }}>
+          {title}
+        </span>
+        <span
+          className="block mt-1"
+          style={{ fontSize: '13px', color: 'var(--color-text-muted)', lineHeight: 1.45 }}
+        >
+          {body}
+        </span>
+      </span>
+      <span
+        aria-hidden
+        className="shrink-0 relative"
+        style={{
+          width: 44,
+          height: 26,
+          borderRadius: 13,
+          background: on ? 'var(--color-volt)' : 'var(--color-line-3)',
+          transition: 'background-color 150ms ease',
+        }}
+      >
+        <span
+          className="absolute"
+          style={{
+            top: 3,
+            left: on ? 21 : 3,
+            width: 20,
+            height: 20,
+            borderRadius: 10,
+            background: '#ffffff',
+            boxShadow: '0 1px 2px rgba(0, 0, 0, 0.3)',
+            transition: 'left 150ms ease',
+          }}
+        />
+      </span>
+    </button>
   );
 }
