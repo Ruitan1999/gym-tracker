@@ -46,14 +46,20 @@ function Roll({ value }: { value: string }) {
   return (
     <span className="lp-roll" aria-hidden>
       {[...value].map((ch, i) => {
-        if (!/\d/.test(ch)) return <span key={`c${i}`}>{ch}</span>;
+        // Points and commas sit in a cell like a digit's, so they share its baseline.
+        if (!/\d/.test(ch))
+          return (
+            <span key={`c${i}`} className="lp-roll__d">
+              {ch}
+            </span>
+          );
         const n = Number(ch);
         const order = digit++;
         return (
           <span key={`d${i}`} className="lp-roll__d">
             <span
               className="lp-roll__col"
-              style={{ transform: `translateY(${-n}em)`, ['--i' as string]: order }}
+              style={{ transform: `translateY(calc(${-n} * var(--lp-cell)))`, ['--i' as string]: order }}
             >
               {Array.from({ length: 10 }, (_, k) => (
                 <span key={k}>{k}</span>
@@ -72,85 +78,219 @@ function kgText(kg: number) {
 
 const REP_CHOICES = [6, 8, 10, 12];
 const LAST = { reps: 10, kg: 92.5 };
+const STEP = 2.5;
 
-/** The live thing: the app's set controls, working, driving the big numbers. */
+interface DemoSet {
+  reps: number;
+  kg: number;
+}
+
+/**
+ * The live thing: the app's exercise card in small, working. Sets are listed;
+ * the chosen one shows its numbers large, set with the rep buttons, the
+ * weight field and its − / +, or last time's numbers. Sets can be added and
+ * the exercise completed, as in the app.
+ */
 function LiveSet() {
-  // Opens on zeros and rolls up to the set, once, as the page arrives.
-  const [reps, setReps] = useState(0);
-  const [kg, setKg] = useState(0);
+  const [sets, setSets] = useState<DemoSet[]>([
+    { reps: 10, kg: 92.5 },
+    { reps: 0, kg: 0 },
+    { reps: 0, kg: 0 },
+  ]);
+  const [active, setActive] = useState(1);
+  const [done, setDone] = useState(false);
+  const [typing, setTyping] = useState(false);
+  const [draft, setDraft] = useState('');
+  const [kgDraft, setKgDraft] = useState<string | null>(null);
+
+  // Set 2 rolls up from zero to its numbers as the page arrives.
   useEffect(() => {
-    const id = setTimeout(() => {
-      setReps(8);
-      setKg(90);
-    }, 450);
+    const id = setTimeout(() => setSets((s) => s.map((x, i) => (i === 1 ? { reps: 8, kg: 90 } : x))), 450);
     return () => clearTimeout(id);
   }, []);
 
-  const pill = (active: boolean) =>
-    `h-12 min-w-12 px-4 rounded-full font-bold text-[1.05rem] transition-colors duration-150 active:scale-95 ${
-      active ? 'bg-[#1458cc] text-white' : 'bg-[#ebebe9] text-[#0a0a0a] hover:bg-[#dedfdc]'
+  const cur = sets[active];
+  const update = (patch: Partial<DemoSet>) => {
+    setDone(false);
+    setSets((s) => s.map((x, i) => (i === active ? { ...x, ...patch } : x)));
+  };
+  const commitTyped = () => {
+    const n = parseInt(draft, 10);
+    if (n > 0) update({ reps: Math.min(99, n) });
+    setTyping(false);
+  };
+  const commitKg = () => {
+    if (kgDraft === null) return;
+    const n = Number(kgDraft.replace(',', '.'));
+    if (Number.isFinite(n) && n >= 0) update({ kg: Math.min(500, Math.round(n * 4) / 4) });
+    setKgDraft(null);
+  };
+  const logged = sets.filter((x) => x.reps > 0).length;
+
+  const chip = (on: boolean) =>
+    `h-11 min-w-11 px-3.5 rounded-full font-bold text-[1rem] transition-colors duration-150 active:scale-95 ${
+      on ? 'bg-[#1458cc] text-white' : 'bg-[#ebebe9] text-[#0a0a0a] hover:bg-[#dedfdc]'
     }`;
 
   return (
-    <div className="lp-set lp-load" style={{ ['--i' as string]: 3 }} data-ui>
-      <p className="font-bold text-[1.05rem]">Squat, set 2</p>
-      <p className="lp-set__figure mt-3" aria-live="polite">
+    <div className={`lp-set lp-load ${done ? 'is-done' : ''}`} style={{ ['--i' as string]: 3 }} data-ui>
+      <div className="flex items-center gap-3">
+        <img src={exerciseImageUrl('ex-legs-001') ?? undefined} alt="" className="w-12 h-12 object-contain shrink-0" />
+        <div className="min-w-0 mr-auto">
+          <p className="font-extrabold text-[1.15rem] tracking-[-0.02em] leading-tight">Squat</p>
+          <p className="text-[0.9rem] text-[#3d3d3d]">
+            Legs · {logged} of {sets.length} sets
+          </p>
+        </div>
+        {done && (
+          <span className="lp-set__done">
+            <Check size={16} strokeWidth={3} aria-hidden /> Done
+          </span>
+        )}
+      </div>
+
+      {/* The sets, each one tappable; the chosen one is open below. */}
+      <ol className="lp-set__list" aria-label="Sets">
+        {sets.map((x, i) => (
+          <li key={i}>
+            <button
+              type="button"
+              aria-current={i === active ? 'true' : undefined}
+              onClick={() => {
+                setActive(i);
+                setTyping(false);
+                setKgDraft(null);
+              }}
+              className={`lp-set__row ${i === active ? 'is-active' : ''} ${x.reps > 0 ? 'is-logged' : ''}`}
+            >
+              <span>Set {i + 1}</span>
+              <span>{x.reps > 0 ? `${x.reps} × ${kgText(x.kg)} kg` : 'Not logged'}</span>
+            </button>
+          </li>
+        ))}
+      </ol>
+
+      <p className="lp-set__figure" aria-live="polite">
         <span className="sr-only">
-          {reps} reps at {kgText(kg)} kilograms
+          Set {active + 1}: {cur.reps} reps at {kgText(cur.kg)} kilograms
         </span>
-        <Roll value={String(reps)} />
-        <span className="lp-set__x" aria-hidden>
-          ×
+        <Roll value={String(cur.reps)} />
+        <span className="lp-roll__d" aria-hidden>
+          <span className="lp-set__x">×</span>
         </span>
         <span className="lp-set__kg" aria-hidden>
-          <Roll value={kgText(kg)} />
+          <Roll value={kgText(cur.kg)} />
         </span>
-        <span className="lp-set__unit" aria-hidden>
-          kg
+        <span className="lp-roll__d" aria-hidden>
+          <span className="lp-set__unit">kg</span>
         </span>
       </p>
 
-      <div className="mt-6 flex flex-wrap gap-2" role="group" aria-label="Reps">
+      <div className="mt-4 flex flex-wrap gap-2" role="group" aria-label="Reps">
         {REP_CHOICES.map((n) => (
           <button
             key={n}
             type="button"
-            aria-pressed={reps === n}
+            aria-pressed={cur.reps === n}
             aria-label={`${n} reps`}
-            onClick={() => setReps(n)}
-            className={pill(reps === n)}
+            onClick={() => update({ reps: n })}
+            className={chip(cur.reps === n)}
           >
             {n}
           </button>
         ))}
+        {typing ? (
+          <input
+            autoFocus
+            inputMode="numeric"
+            enterKeyHint="done"
+            aria-label="Type the reps"
+            value={draft}
+            onChange={(e) => setDraft(e.target.value.replace(/\D/g, '').slice(0, 2))}
+            onBlur={commitTyped}
+            onKeyDown={(e) => e.key === 'Enter' && e.currentTarget.blur()}
+            className="h-11 w-14 rounded-full text-center font-bold bg-white outline-none ring-2 ring-[#1458cc]"
+          />
+        ) : (
+          <button
+            type="button"
+            aria-label="Type the reps"
+            onClick={() => {
+              setDraft(REP_CHOICES.includes(cur.reps) || !cur.reps ? '' : String(cur.reps));
+              setTyping(true);
+            }}
+            className={chip(cur.reps > 0 && !REP_CHOICES.includes(cur.reps))}
+          >
+            {cur.reps > 0 && !REP_CHOICES.includes(cur.reps) ? cur.reps : <Plus size={18} strokeWidth={2.5} />}
+          </button>
+        )}
       </div>
 
-      <div className="mt-3 flex items-center gap-2 flex-wrap">
+      {/* Weight: type it, or step it by 2.5 kg. */}
+      <div className="lp-set__weight mt-3">
         <button
           type="button"
           aria-label="2.5 kilograms less"
-          onClick={() => setKg((k) => Math.max(0, k - 2.5))}
-          className={`${pill(false)} w-12 px-0 flex items-center justify-center`}
+          onClick={() => update({ kg: Math.max(0, cur.kg - STEP) })}
         >
           <Minus size={20} strokeWidth={2.5} />
         </button>
+        <label className="flex-1 flex items-baseline justify-center gap-1">
+          <span className="sr-only">Weight in kilograms</span>
+          <input
+            inputMode="decimal"
+            value={kgDraft ?? kgText(cur.kg)}
+            onFocus={(e) => {
+              setKgDraft(kgText(cur.kg));
+              e.currentTarget.select();
+            }}
+            onChange={(e) => setKgDraft(e.target.value.replace(/[^\d.,]/g, '').slice(0, 5))}
+            onBlur={commitKg}
+            onKeyDown={(e) => e.key === 'Enter' && e.currentTarget.blur()}
+          />
+          <span aria-hidden>kg</span>
+        </label>
         <button
           type="button"
           aria-label="2.5 kilograms more"
-          onClick={() => setKg((k) => Math.min(500, k + 2.5))}
-          className={`${pill(true)} w-12 px-0 flex items-center justify-center`}
+          className="is-plus"
+          onClick={() => update({ kg: Math.min(500, cur.kg + STEP) })}
         >
           <Plus size={20} strokeWidth={2.5} />
         </button>
+      </div>
+
+      <button type="button" onClick={() => update({ reps: LAST.reps, kg: LAST.kg })} className="lp-set__last">
+        <span>Last time</span>
+        <b>
+          {LAST.reps} × {LAST.kg} kg
+        </b>
+        <span aria-hidden>Use →</span>
+      </button>
+
+      <div className="mt-4 grid grid-cols-[auto_1fr] gap-2">
         <button
           type="button"
           onClick={() => {
-            setReps(LAST.reps);
-            setKg(LAST.kg);
+            if (sets.length >= 6) return;
+            setSets((s) => [...s, { reps: 0, kg: s[s.length - 1].kg || cur.kg }]);
+            setActive(sets.length);
+            setDone(false);
           }}
-          className="ml-auto h-12 px-4 rounded-full text-[0.95rem] font-semibold bg-[#e4ebf8] text-[#0f449e] hover:bg-[#d6e1f5] transition-colors duration-150 active:scale-95"
+          disabled={sets.length >= 6}
+          className="h-12 px-4 rounded-full font-bold whitespace-nowrap bg-[#ebebe9] hover:bg-[#dedfdc] transition-colors duration-150 active:scale-95 disabled:opacity-40 flex items-center justify-center gap-1.5"
         >
-          Last time: {LAST.reps} × {LAST.kg} kg
+          <Plus size={18} strokeWidth={2.5} aria-hidden /> Add set
+        </button>
+        <button
+          type="button"
+          aria-pressed={done}
+          onClick={() => setDone((d) => !d)}
+          className={`h-12 px-4 rounded-full font-bold whitespace-nowrap transition-colors duration-150 active:scale-95 ${
+            done ? 'bg-[#3f8a57] text-white' : 'bg-[#1458cc] text-white hover:bg-[#0f449e]'
+          }`}
+        >
+          {done ? 'Completed' : 'Complete exercise'}
         </button>
       </div>
     </div>
