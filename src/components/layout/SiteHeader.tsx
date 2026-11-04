@@ -8,11 +8,8 @@ export default function SiteHeader() {
 
   return (
     <>
-      {/* top ticker strip */}
-      <div className="fixed top-0 inset-x-0 h-[3px] z-50" style={{ background: 'var(--color-volt)' }} />
-
       <header
-        className="sticky top-[3px] z-40"
+        className="sticky top-0 z-40"
         style={{
           background: 'var(--color-bg)',
           borderBottom: '1px solid var(--color-line)',
