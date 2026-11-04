@@ -6,10 +6,13 @@ LiftGauge is a free, web-based gym tracking app (PWA) built for lifters who want
 
 ## What it does
 
-- **Log Session** — Tap, type, done. Last session's numbers prefill so you only enter what changed. Designed for one-thumb logging mid-set.
-- **Log Book** — Every workout, every set, searchable. Edit history without breaking streaks.
-- **Progress** — Per-exercise charts for total volume, top set, and estimated 1RM. Actual signal, not vanity metrics.
-- **Library & Groups** — Build a personal exercise library. Group movements into routines you actually run.
+- **Plan** — A template per workout, on fixed weekdays or taking turns in a rotation.
+- **Home** — This week at a glance, the next workout one tap away, a weekly streak, and a body map of the muscles trained in the last 30 days.
+- **Log a session** — Quick rep buttons (or type your own), a weight stepper, last session's numbers one tap away or filled in for you. Optional rest timer.
+- **Exercise library** — 1,400+ illustrated exercises, stored on the phone so they show instantly; add your own.
+- **Log Book** — Every saved session, set by set, editable.
+- **Stats** — Per-exercise charts for total volume, top set and estimated 1RM, plus a year of training.
+- **New here** — A one-minute guided tour on first open.
 
 ## Principles
 

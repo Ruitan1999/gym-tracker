@@ -1,12 +1,15 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Dumbbell, Flame } from 'lucide-react';
+import { CalendarDays, Dumbbell, Flame, Play, Repeat } from 'lucide-react';
 import Logo from '../components/shared/Logo';
 import SiteHeader from '../components/layout/SiteHeader';
 import MuscleFigure from '../components/progress/MuscleFigure';
 import PartList from '../components/progress/PartList';
 import { balancePaint } from '../components/progress/balancePaint';
 import type { BodyPart } from '../types';
+import QuickRepChips from '../components/workout/QuickRepChips';
+import WeightStepper from '../components/workout/WeightStepper';
+import { exerciseImageUrl, MEDIA_ATTRIBUTION } from '../utils/exerciseImage';
 
 // Matches Home and the log book.
 const ICON_STROKE = 2;
@@ -115,6 +118,37 @@ export default function LandingPage() {
           </div>
         </section>
 
+        {/* HOW IT WORKS */}
+        <section className="pt-16 sm:pt-24">
+          <SectionHead eyebrow="HOW IT WORKS" title="Three steps," accent=" then it's habit." />
+          <div className="grid sm:grid-cols-3 gap-3">
+            {STEPS.map((st, i) => (
+              <Reveal key={st.title} delay={i * 80}>
+                <div
+                  className="p-5 h-full"
+                  style={{ background: 'var(--color-surface)', border: '1px solid var(--color-line)', borderRadius: '16px' }}
+                >
+                  <span
+                    className="flex items-center justify-center mb-5"
+                    style={{ width: 44, height: 44, borderRadius: 12, background: 'var(--color-volt)', color: '#ffffff' }}
+                  >
+                    {st.icon}
+                  </span>
+                  <div className="caps-tight mb-1" style={{ color: 'var(--color-volt-ink)' }}>
+                    STEP {i + 1}
+                  </div>
+                  <h3 className="font-display mb-2" style={{ fontSize: '1.25rem', fontWeight: 700, letterSpacing: '-0.025em' }}>
+                    {st.title}
+                  </h3>
+                  <p className="text-[14px]" style={{ color: 'var(--color-text-muted)', lineHeight: 1.5 }}>
+                    {st.desc}
+                  </p>
+                </div>
+              </Reveal>
+            ))}
+          </div>
+        </section>
+
         {/* FEATURES */}
         <section className="pt-16 sm:pt-24 pb-12">
           <div className="mb-10">
@@ -143,6 +177,59 @@ export default function LandingPage() {
               </Reveal>
             ))}
           </div>
+        </section>
+
+        {/* TRY IT — the real rep chips and weight stepper */}
+        <section className="py-12 sm:py-20 grid sm:grid-cols-12 gap-8 sm:gap-10 items-center">
+          <div className="sm:col-span-5">
+            <SectionHead eyebrow="TRY IT" title="Logging a set," accent=" mid-set, one thumb." />
+            <p className="text-[15px]" style={{ color: 'var(--color-text-muted)', lineHeight: 1.5, maxWidth: '44ch' }}>
+              These are the real controls from the app. Tap a rep number, or + to type your own. Nudge the
+              weight with − and +, or tap it and type. Last session's numbers sit underneath, one tap away.
+            </p>
+          </div>
+          <div className="sm:col-span-7">
+            <Reveal>
+              <TryLogging />
+            </Reveal>
+          </div>
+        </section>
+
+        {/* LIBRARY — real pictures from the app */}
+        <section className="py-12 sm:py-20">
+          <SectionHead eyebrow="EXERCISE LIBRARY" title="1,400+ exercises," accent=" every one illustrated." />
+          <p className="text-[15px] mb-6" style={{ color: 'var(--color-text-muted)', lineHeight: 1.5, maxWidth: '56ch' }}>
+            Search by name or muscle and add it to a workout. The pictures are saved on your phone, so they
+            show instantly, even with no signal in the gym basement. Add your own exercises too.
+          </p>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {LIBRARY_SAMPLE.map((ex, i) => (
+              <Reveal key={ex.id} delay={(i % 4) * 60}>
+                <div
+                  className="p-3 h-full flex flex-col"
+                  style={{ background: 'var(--color-surface)', border: '1px solid var(--color-line)', borderRadius: '16px' }}
+                >
+                  <img
+                    src={exerciseImageUrl(ex.id) ?? undefined}
+                    alt={ex.name}
+                    loading="lazy"
+                    className="w-full object-contain"
+                    style={{ aspectRatio: '1 / 1' }}
+                  />
+                  <span className="font-display mt-2" style={{ fontSize: '0.95rem', fontWeight: 700, letterSpacing: '-0.02em' }}>
+                    {ex.name}
+                  </span>
+                  <span className="caps-tight" style={{ color: 'var(--color-text-faint)' }}>
+                    {ex.part}
+                  </span>
+                </div>
+              </Reveal>
+            ))}
+          </div>
+          {/* The illustrations are licensed; the credit goes wherever they are shown. */}
+          <p className="caps-tight mt-3" style={{ color: 'var(--color-text-faint)' }}>
+            EXERCISE ILLUSTRATIONS {MEDIA_ATTRIBUTION}
+          </p>
         </section>
 
         {/* MUSCLES — the real body map, with made-up numbers */}
@@ -189,6 +276,53 @@ export default function LandingPage() {
           </div>
         </section>
 
+        {/* PLAN YOUR WAY */}
+        <section className="py-12 sm:py-20">
+          <SectionHead eyebrow="PLAN YOUR WAY" title="Fixed days or a rotation," accent=" both work." />
+          <div className="grid sm:grid-cols-2 gap-3">
+            <Reveal>
+              <PlanCard
+                icon={<CalendarDays size={20} strokeWidth={ICON_STROKE} />}
+                title="Fixed week"
+                desc="Push on Monday and Thursday, pull on Tuesday and Friday. Each template has its days, and Home shows the one that's due today."
+                rows={[
+                  ['MON · THU', 'Push day'],
+                  ['TUE · FRI', 'Pull day'],
+                  ['SAT', 'Legs'],
+                ]}
+              />
+            </Reveal>
+            <Reveal delay={80}>
+              <PlanCard
+                icon={<Repeat size={20} strokeWidth={ICON_STROKE} />}
+                title="Rotation"
+                desc="Train when you can. Templates take turns in order: whatever you trained last, the next one is lined up."
+                rows={[
+                  ['NEXT', 'Upper A'],
+                  ['THEN', 'Lower A'],
+                  ['THEN', 'Upper B'],
+                ]}
+              />
+            </Reveal>
+          </div>
+        </section>
+
+        {/* PROGRESS */}
+        <section className="py-12 sm:py-20 grid sm:grid-cols-12 gap-8 sm:gap-10 items-center">
+          <div className="sm:col-span-5">
+            <SectionHead eyebrow="STATS" title="Watch the line" accent=" go up." />
+            <p className="text-[15px]" style={{ color: 'var(--color-text-muted)', lineHeight: 1.5, maxWidth: '44ch' }}>
+              Every exercise gets its own chart: total volume, your top set and an estimated one-rep max. A
+              year-long calendar shows every day you trained.
+            </p>
+          </div>
+          <div className="sm:col-span-7">
+            <Reveal>
+              <ProgressChart />
+            </Reveal>
+          </div>
+        </section>
+
         {/* SPLIT — why */}
         <section className="py-16 sm:py-24 grid sm:grid-cols-12 gap-10 items-start">
           <div className="sm:col-span-5">
@@ -217,6 +351,58 @@ export default function LandingPage() {
               <Reveal key={k} delay={i * 70}>
                 <Row k={k} v={v} />
               </Reveal>
+            ))}
+          </div>
+        </section>
+
+        {/* INSTALL */}
+        <section className="py-12 sm:py-20">
+          <SectionHead eyebrow="INSTALL" title="On your home screen," accent=" no app store." />
+          <div className="grid sm:grid-cols-2 gap-3">
+            {INSTALL.map((it) => (
+              <Reveal key={it.platform}>
+                <div
+                  className="p-5 h-full"
+                  style={{ background: 'var(--color-surface)', border: '1px solid var(--color-line)', borderRadius: '16px' }}
+                >
+                  <h3 className="font-display mb-3" style={{ fontSize: '1.125rem', fontWeight: 700, letterSpacing: '-0.025em' }}>
+                    {it.platform}
+                  </h3>
+                  <ol className="flex flex-col gap-2">
+                    {it.steps.map((stp, i) => (
+                      <li key={stp} className="flex gap-3 text-[14px]" style={{ color: 'var(--color-text-muted)', lineHeight: 1.45 }}>
+                        <span className="font-mono shrink-0" style={{ color: 'var(--color-volt-ink)' }}>
+                          {i + 1}
+                        </span>
+                        {stp}
+                      </li>
+                    ))}
+                  </ol>
+                </div>
+              </Reveal>
+            ))}
+          </div>
+        </section>
+
+        {/* FAQ */}
+        <section className="py-12 sm:py-20">
+          <SectionHead eyebrow="QUESTIONS" title="Asked" accent=" and answered." />
+          <div>
+            {FAQ.map(([q, a]) => (
+              <details key={q} className="group" style={{ borderTop: '1px solid var(--color-line)' }}>
+                <summary
+                  className="flex items-center justify-between gap-4 py-4 cursor-pointer press list-none"
+                  style={{ fontSize: '16px', fontWeight: 600 }}
+                >
+                  {q}
+                  <span aria-hidden className="shrink-0 transition-transform group-open:rotate-45" style={{ color: 'var(--color-volt)', fontSize: '1.25rem' }}>
+                    +
+                  </span>
+                </summary>
+                <p className="pb-4 text-[15px]" style={{ color: 'var(--color-text-muted)', lineHeight: 1.55, maxWidth: '64ch' }}>
+                  {a}
+                </p>
+              </details>
             ))}
           </div>
         </section>
@@ -341,6 +527,249 @@ export default function LandingPage() {
         </div>
         <div style={{ paddingBottom: 'var(--safe-bottom)' }} />
       </footer>
+    </div>
+  );
+}
+
+const STEPS = [
+  {
+    icon: <CalendarDays size={22} strokeWidth={ICON_STROKE} />,
+    title: 'Plan',
+    desc: 'Make a template for each workout: its exercises and the days you train it.',
+  },
+  {
+    icon: <Play size={22} strokeWidth={ICON_STROKE} />,
+    title: 'Start',
+    desc: "Open the app and today's workout is waiting. One tap and you're logging.",
+  },
+  {
+    icon: <Flame size={22} strokeWidth={ICON_STROKE} />,
+    title: 'Progress',
+    desc: 'Every set feeds your charts, your streak and the body map. Next time, beat last time.',
+  },
+];
+
+const LIBRARY_SAMPLE = [
+  { id: 'ex-push-001', name: 'Bench Press', part: 'CHEST' },
+  { id: 'ex-legs-001', name: 'Squat', part: 'LEGS' },
+  { id: 'ex-legs-002', name: 'Deadlift', part: 'BACK · LEGS' },
+  { id: 'ex-pull-002', name: 'Pull-up', part: 'BACK' },
+  { id: 'ex-push-011', name: 'Lateral Raise', part: 'SHOULDERS' },
+  { id: 'ex-pull-001', name: 'Barbell Row', part: 'BACK' },
+  { id: 'ex-pull-016', name: 'Dumbbell Curl', part: 'ARMS' },
+  { id: 'ex-push-002', name: 'Overhead Press', part: 'SHOULDERS' },
+];
+
+const INSTALL = [
+  {
+    platform: 'Android',
+    steps: ['Open liftgauge.fit in Chrome.', 'Tap the ⋮ menu, then Install app.', 'Open it from your home screen.'],
+  },
+  {
+    platform: 'iPhone',
+    steps: ['Open liftgauge.fit in Safari.', 'Tap Share, then Add to Home Screen.', 'Open it from your home screen.'],
+  },
+];
+
+const FAQ: [string, string][] = [
+  ['Is it really free?', 'Yes. No ads, no paid tier, no card. Everything on this page is in the free app.'],
+  [
+    'Do I need an account?',
+    'You can start as a guest. Sign in with Google or email when you want your log on more than one device.',
+  ],
+  [
+    'Does it work without signal?',
+    'Yes. Log a whole session offline; it saves to your account when you are back online.',
+  ],
+  [
+    'Can I get my data out?',
+    'Any time, from Settings: a full JSON backup, or a CSV with one row per set for a spreadsheet.',
+  ],
+  [
+    'Is there a rest timer?',
+    'If you want one. Turn it on in Settings and pick its length; a countdown starts after each set.',
+  ],
+  [
+    'I am new. Where do I start?',
+    'The app shows a one-minute tour the first time you open it, then takes you to make your first template.',
+  ],
+  ['Can I delete my account?', 'Yes, from Settings. It removes your workouts, exercises and settings for good.'],
+];
+
+/** An eyebrow and a two-tone heading, as every section here opens. */
+function SectionHead({ eyebrow, title, accent }: { eyebrow: string; title: string; accent: string }) {
+  return (
+    <div className="mb-6">
+      <div className="caps-tight text-[13px] mb-3" style={{ color: 'var(--color-text-faint)', fontWeight: 600, letterSpacing: '0.08em' }}>
+        {eyebrow}
+      </div>
+      <h2
+        className="font-display"
+        style={{
+          fontSize: 'clamp(1.75rem, 3.5vw, 2.5rem)',
+          fontWeight: 700,
+          letterSpacing: '-0.035em',
+          lineHeight: 1.05,
+          fontVariationSettings: '"wdth" 90',
+        }}
+      >
+        {title}
+        <span style={{ fontFamily: 'var(--font-serif)', fontWeight: 400, fontStyle: 'italic' }}>{accent}</span>
+      </h2>
+    </div>
+  );
+}
+
+function TryLogging() {
+  const [reps, setReps] = useState<number | ''>('');
+  const [kg, setKg] = useState<number | ''>(60);
+  return (
+    <div
+      className="p-5 sm:p-6"
+      style={{ background: 'var(--color-surface)', border: '1px solid var(--color-line)', borderRadius: '16px' }}
+    >
+      <div className="flex items-center gap-3 mb-4">
+        <img src={exerciseImageUrl('ex-push-001') ?? undefined} alt="" className="w-14 h-14 object-contain" />
+        <span>
+          <span className="block font-display" style={{ fontSize: '1.125rem', fontWeight: 700, letterSpacing: '-0.02em' }}>
+            Bench Press
+          </span>
+          <span className="caps-tight" style={{ color: 'var(--color-text-faint)' }}>
+            SET 01
+          </span>
+        </span>
+      </div>
+      <div className="flex items-end gap-6 mb-4">
+        <span>
+          <span className="block caps-tight" style={{ color: 'var(--color-text-faint)' }}>
+            REPS
+          </span>
+          <span className="block font-mono leading-none mt-1" style={{ fontSize: '2.25rem' }}>
+            {reps === '' ? '—' : reps}
+          </span>
+        </span>
+        <span>
+          <span className="block caps-tight" style={{ color: 'var(--color-text-faint)' }}>
+            LOAD KG
+          </span>
+          <span className="block font-mono leading-none mt-1" style={{ fontSize: '2.25rem', color: 'var(--color-volt)' }}>
+            {kg === '' ? '—' : kg}
+          </span>
+        </span>
+      </div>
+      <QuickRepChips values={[6, 8, 10, 12]} current={reps} onPick={setReps} />
+      <div className="mt-3">
+        <WeightStepper value={kg} onChange={setKg} step={2.5} unit="kg" />
+      </div>
+      <button
+        type="button"
+        onClick={() => {
+          setReps(8);
+          setKg(62.5);
+        }}
+        className="press w-full flex items-center gap-3 py-2 px-3 mt-3"
+        style={{ border: '1px solid var(--color-line)', borderRadius: 'var(--radius)' }}
+      >
+        <span className="caps-tight" style={{ color: 'var(--color-text-faint)' }}>
+          LAST
+        </span>
+        <span className="font-mono text-[13px]" style={{ color: 'var(--color-text-muted)' }}>
+          8 × 62.5 KG
+        </span>
+        <span className="caps-tight ml-auto" style={{ color: 'var(--color-text-faint)' }}>
+          TAP TO USE →
+        </span>
+      </button>
+    </div>
+  );
+}
+
+function PlanCard({
+  icon,
+  title,
+  desc,
+  rows,
+}: {
+  icon: ReactNode;
+  title: string;
+  desc: string;
+  rows: [string, string][];
+}) {
+  return (
+    <div
+      className="p-5 h-full"
+      style={{ background: 'var(--color-surface)', border: '1px solid var(--color-line)', borderRadius: '16px' }}
+    >
+      <div className="flex items-center gap-3 mb-3">
+        <span
+          className="flex items-center justify-center"
+          style={{ width: 40, height: 40, borderRadius: 10, background: 'var(--color-volt)', color: '#ffffff' }}
+        >
+          {icon}
+        </span>
+        <h3 className="font-display" style={{ fontSize: '1.25rem', fontWeight: 700, letterSpacing: '-0.025em' }}>
+          {title}
+        </h3>
+      </div>
+      <p className="text-[14px] mb-4" style={{ color: 'var(--color-text-muted)', lineHeight: 1.5 }}>
+        {desc}
+      </p>
+      {rows.map(([k, v]) => (
+        <div
+          key={k + v}
+          className="flex items-center justify-between py-2.5"
+          style={{ borderTop: '1px solid var(--color-line)' }}
+        >
+          <span className="caps-tight" style={{ color: 'var(--color-text-faint)' }}>
+            {k}
+          </span>
+          <span className="font-display" style={{ fontWeight: 700, letterSpacing: '-0.02em' }}>
+            {v}
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// Example numbers only: twelve weeks of a bench press estimate.
+const CHART_POINTS = [80, 81, 82.5, 82, 84, 85, 86.5, 86, 88, 89.5, 90, 92];
+
+function ProgressChart() {
+  const w = 320;
+  const h = 140;
+  const min = 78;
+  const max = 94;
+  const x = (i: number) => 8 + (i / (CHART_POINTS.length - 1)) * (w - 16);
+  const y = (v: number) => h - 8 - ((v - min) / (max - min)) * (h - 16);
+  const line = CHART_POINTS.map((v, i) => `${i ? 'L' : 'M'}${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(' ');
+  const area = `${line} L${x(CHART_POINTS.length - 1)},${h} L${x(0)},${h} Z`;
+  const last = CHART_POINTS[CHART_POINTS.length - 1];
+  return (
+    <div
+      className="p-5 sm:p-6"
+      style={{ background: 'var(--color-surface)', border: '1px solid var(--color-line)', borderRadius: '16px' }}
+    >
+      <div className="flex items-baseline justify-between mb-1">
+        <span className="caps-tight" style={{ color: 'var(--color-text-muted)' }}>
+          BENCH PRESS · EST. 1RM
+        </span>
+        <span className="caps-tight" style={{ color: 'var(--color-done-deep)' }}>
+          +{(last - CHART_POINTS[0]).toFixed(0)} KG IN 12 WEEKS
+        </span>
+      </div>
+      <div className="font-mono mb-3" style={{ fontSize: '2rem', color: 'var(--color-text)' }}>
+        {last} <span className="text-[14px]" style={{ color: 'var(--color-text-faint)' }}>KG</span>
+      </div>
+      <svg viewBox={`0 0 ${w} ${h}`} className="w-full h-auto" role="img" aria-label="Example chart of a bench press estimate rising over twelve weeks">
+        <path d={area} fill="var(--color-volt-wash)" />
+        <path d={line} fill="none" stroke="var(--color-volt)" strokeWidth={2.5} strokeLinejoin="round" strokeLinecap="round" />
+        <circle cx={x(CHART_POINTS.length - 1)} cy={y(last)} r={4.5} fill="var(--color-volt)" />
+      </svg>
+      <div className="flex justify-between caps-tight mt-1" style={{ color: 'var(--color-text-faint)' }}>
+        <span>12 WEEKS AGO</span>
+        <span>THIS WEEK</span>
+      </div>
     </div>
   );
 }
