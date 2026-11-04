@@ -533,6 +533,49 @@
 .lp-wordmark__mark { flex: none; padding-bottom: 0.02em; }
 .lp-wordmark__mark svg { width: 0.74em; height: 0.74em; }
 
+/* ---------- background: soft glows and weight-plate outlines ---------- */
+
+.lp-has-deco { position: relative; isolation: isolate; }
+.lp-glow,
+.lp-plate {
+  position: absolute;
+  z-index: -1;
+  pointer-events: none;
+}
+.lp-glow {
+  width: clamp(420px, 60vw, 900px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(20, 88, 204, 0.2), rgba(20, 88, 204, 0.08) 45%, rgba(20, 88, 204, 0));
+}
+.lp-glow--green { background: radial-gradient(closest-side, rgba(63, 138, 87, 0.18), rgba(63, 138, 87, 0.06) 45%, rgba(63, 138, 87, 0)); }
+.lp-glow--hero-a { right: -18%; top: -12%; }
+.lp-glow--hero-b {
+  left: -22%;
+  bottom: -30%;
+  width: clamp(360px, 46vw, 700px);
+  background: radial-gradient(closest-side, rgba(112, 160, 255, 0.22), rgba(112, 160, 255, 0));
+}
+.lp-glow--right { right: -20%; top: 10%; }
+.lp-glow--left { left: -24%; top: 0; }
+.lp-glow--q { left: -20%; top: 0; width: clamp(360px, 46vw, 700px); }
+.lp-glow--close {
+  right: -15%;
+  top: -25%;
+  background: radial-gradient(closest-side, rgba(32, 106, 233, 0.45), rgba(32, 106, 233, 0.12) 50%, rgba(32, 106, 233, 0));
+}
+
+.lp-plate { color: var(--lp-ink); opacity: 0.07; }
+.lp-plate--hero { width: clamp(320px, 42vw, 620px); right: -14%; top: -6%; }
+.lp-plate--hero-small { width: clamp(140px, 16vw, 240px); left: 36%; bottom: -4%; opacity: 0.06; }
+.lp-plate--right { width: clamp(260px, 30vw, 460px); right: -10%; bottom: -12%; }
+.lp-plate--left { width: clamp(260px, 30vw, 460px); left: -12%; bottom: -10%; }
+.lp-plate--close { width: clamp(300px, 44vw, 680px); right: -12%; top: 6%; color: var(--lp-ground); opacity: 0.08; }
+@media (max-width: 640px) {
+  .lp-plate--hero-small { display: none; }
+  .lp-plate--hero { right: -40%; top: 0; }
+}
+
 /* ---------- motion ---------- */
 
 @media (prefers-reduced-motion: no-preference) {
@@ -573,6 +616,12 @@
     transform: none;
   }
 
+  /* The glows breathe and drift; the plates turn, very slowly. */
+  .lp-glow { animation: lp-float 16s ease-in-out infinite alternate; }
+  .lp-glow--hero-b, .lp-glow--left { animation-duration: 21s; animation-direction: alternate-reverse; }
+  .lp-plate { animation: lp-turn 90s linear infinite; }
+  .lp-plate--hero-small, .lp-plate--left { animation-direction: reverse; animation-duration: 70s; }
+
   /* The phones drift against the scroll, a little, where the browser can tie it to the scrollbar. */
   @supports (animation-timeline: view()) {
     .lp-drift {
@@ -598,6 +647,8 @@
 }
 
 @keyframes lp-pop { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: none; } }
+@keyframes lp-float { from { transform: translate(0, 0) scale(1); } to { transform: translate(-6%, 5%) scale(1.12); } }
+@keyframes lp-turn { to { transform: rotate(360deg); } }
 @keyframes lp-rise { from { transform: translateY(105%); } to { transform: none; } }
 @keyframes lp-up { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: none; } }
 @keyframes lp-drift { from { transform: translateY(6%); } to { transform: translateY(-6%); } }

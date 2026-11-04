@@ -417,9 +417,36 @@ function Phone({
   );
 }
 
-function Section({ id, children }: { id?: string; children: ReactNode }) {
+/** A soft glow of colour behind a section; placed and coloured by its class. */
+function Glow({ className }: { className: string }) {
+  return <span aria-hidden className={`lp-glow ${className}`} />;
+}
+
+/** The outline of a weight plate, the page's one drawn motif. */
+function Plate({ className }: { className: string }) {
   return (
-    <section id={id} className="lp-section" data-reveal>
+    <svg aria-hidden viewBox="0 0 200 200" className={`lp-plate ${className}`} fill="none" stroke="currentColor">
+      <circle cx="100" cy="100" r="96" strokeWidth="3" />
+      <circle cx="100" cy="100" r="84" strokeWidth="1.5" />
+      <circle cx="100" cy="100" r="34" strokeWidth="3" />
+      <circle cx="100" cy="100" r="13" strokeWidth="3" />
+      {/* the three grip cut-outs of a bumper plate */}
+      {[0, 120, 240].map((a) => (
+        <path
+          key={a}
+          d="M100 30 a10 10 0 0 1 10 10 v8 a10 10 0 0 1 -20 0 v-8 a10 10 0 0 1 10 -10z"
+          strokeWidth="2.5"
+          transform={`rotate(${a} 100 100)`}
+        />
+      ))}
+    </svg>
+  );
+}
+
+function Section({ id, children, deco }: { id?: string; children: ReactNode; deco?: ReactNode }) {
+  return (
+    <section id={id} className="lp-section lp-has-deco" data-reveal>
+      {deco}
       {children}
     </section>
   );
@@ -463,7 +490,11 @@ export default function LandingPage() {
 
       <main>
         {/* Hero: what it is, one action, and the set you can change. */}
-        <div className="lp-wrap lp-hero">
+        <div className="lp-wrap lp-hero lp-has-deco">
+          <Glow className="lp-glow--hero-a" />
+          <Glow className="lp-glow--hero-b" />
+          <Plate className="lp-plate--hero" />
+          <Plate className="lp-plate--hero-small" />
           <div>
             <h1 className="lp-h1">
               <span className="lp-line">
@@ -516,7 +547,7 @@ export default function LandingPage() {
           </div>
         </div>
 
-        <Section id="plan">
+        <Section id="plan" deco={<Glow className="lp-glow--right" />}>
           <div className="lp-wrap lp-split">
             <div>
               <h2 className="lp-h2" data-r style={at(0)}>
@@ -542,7 +573,7 @@ export default function LandingPage() {
           </div>
         </Section>
 
-        <Section id="log">
+        <Section id="log" deco={<><Glow className="lp-glow--left" /><Plate className="lp-plate--right" /></>}>
           <div className="lp-wrap lp-split lp-split--flip">
             <div>
               <h2 className="lp-h2" data-r style={at(0)}>
@@ -575,7 +606,7 @@ export default function LandingPage() {
           </div>
         </div>
 
-        <section id="exercises" className="lp-section" data-reveal style={{ paddingTop: 'clamp(48px, 6vw, 96px)' }}>
+        <section id="exercises" className="lp-section lp-has-deco" data-reveal style={{ paddingTop: 'clamp(48px, 6vw, 96px)' }}>
           <div className="lp-wrap">
             <h2 className="lp-h2" data-r>
               1,400 exercises, every one drawn.
@@ -637,7 +668,7 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <Section id="stats">
+        <Section id="stats" deco={<><Glow className="lp-glow--left lp-glow--green" /><Plate className="lp-plate--left" /></>}>
           <div className="lp-wrap lp-split lp-split--flip">
             <div>
               <h2 className="lp-h2" data-r>
@@ -692,7 +723,7 @@ export default function LandingPage() {
           </div>
         </Section>
 
-        <Section id="questions">
+        <Section id="questions" deco={<Glow className="lp-glow--q" />}>
           <div className="lp-wrap lp-qa">
             <h2 className="lp-h2" data-r>
               Questions, answered.
@@ -715,7 +746,9 @@ export default function LandingPage() {
       </main>
 
       {/* The close: one last action, then the name at full width. */}
-      <footer className="lp-close" data-reveal>
+      <footer className="lp-close lp-has-deco" data-reveal>
+        <Glow className="lp-glow--close" />
+        <Plate className="lp-plate--close" />
         <div className="lp-wrap">
           <h2 className="lp-h2" style={{ maxWidth: '14ch' }} data-r>
             Your next set starts here.
