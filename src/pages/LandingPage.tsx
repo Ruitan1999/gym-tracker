@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Minus, Plus } from 'lucide-react';
+import { ArrowRight, Check, Minus, Plus } from 'lucide-react';
 import MuscleFigure from '../components/progress/MuscleFigure';
 import { balancePaint } from '../components/progress/balancePaint';
 import { exerciseImageUrl } from '../utils/exerciseImage';
@@ -247,20 +247,31 @@ function RollIn({ value, prefix = '', suffix = '' }: { value: string; prefix?: s
 /** Stagger position for a [data-r] part, as a style. */
 const at = (i: number) => ({ ['--i' as string]: i }) as React.CSSProperties;
 
-function Phone({ src, alt, className = '', i = 0 }: { src: string; alt: string; className?: string; i?: number }) {
+/** An app screenshot in a phone, with a status bar in the colour of the screen's top. */
+function Phone({
+  src,
+  alt,
+  top,
+  className = '',
+  i = 0,
+}: {
+  src: string;
+  alt: string;
+  top: string;
+  className?: string;
+  i?: number;
+}) {
   return (
     <div className={`lp-phone ${className}`}>
-      <img
-        data-open
-        style={at(i)}
-        className="lp-shot"
-        src={src}
-        alt={alt}
-        width={780}
-        height={1688}
-        loading="lazy"
-        decoding="async"
-      />
+      <div className="lp-device" data-open style={at(i)}>
+        <div className="lp-device__screen" style={{ background: top }}>
+          <div className="lp-device__bar" aria-hidden>
+            9:41
+            <i />
+          </div>
+          <img className="lp-shot" src={src} alt={alt} width={780} height={1688} loading="lazy" decoding="async" />
+        </div>
+      </div>
     </div>
   );
 }
@@ -327,8 +338,36 @@ export default function LandingPage() {
                 I have an account
               </Link>
             </div>
+            <ul className="lp-facts lp-load" style={at(2)}>
+              {['Works offline', '1,400 illustrated exercises', 'Android and iPhone'].map((f) => (
+                <li key={f}>
+                  <Check size={18} strokeWidth={3} aria-hidden />
+                  {f}
+                </li>
+              ))}
+            </ul>
           </div>
-          <LiveSet />
+          <div className="lp-hero__media">
+            <div className="lp-phone lp-load" style={at(2)}>
+              <div className="lp-device">
+                <div className="lp-device__screen" style={{ background: '#f5f5f4' }}>
+                  <div className="lp-device__bar" aria-hidden>
+                    9:41
+                    <i />
+                  </div>
+                  <img
+                    className="lp-shot"
+                    src="/assets/site/app-home-v1.webp"
+                    alt="LiftGauge home: this week, the next workout, a 25 week streak and the muscles trained"
+                    width={780}
+                    height={1688}
+                    fetchPriority="high"
+                  />
+                </div>
+              </div>
+            </div>
+            <LiveSet />
+          </div>
         </div>
 
         <Section id="plan">
@@ -348,15 +387,10 @@ export default function LandingPage() {
             </div>
             <div className="lp-stage">
               <Phone
-                src="/assets/site/app-home-v1.webp"
-                alt="LiftGauge home: this week, the next workout, a 25 week streak and the muscles trained"
-                className="lp-drift"
-              />
-              <Phone
                 src="/assets/site/app-plan-v1.webp"
+                top="#f5f5f4"
                 alt="The Plan screen: three workouts taking turns in a rotation"
-                className="lp-phone--low lp-drift lp-drift--slow"
-                i={1}
+                className="lp-drift"
               />
             </div>
           </div>
@@ -376,9 +410,10 @@ export default function LandingPage() {
                 ))}
               </ul>
             </div>
-            <div className="lp-stage lp-stage--one">
+            <div className="lp-stage">
               <Phone
                 src="/assets/site/app-workout-v1.webp"
+                top="#ffffff"
                 alt="A workout in progress: squat, 10 reps at 92.5 kg, with the last session's numbers under the set"
                 className="lp-drift"
               />
@@ -480,9 +515,10 @@ export default function LandingPage() {
                 From an example account.
               </p>
             </div>
-            <div className="lp-stage lp-stage--one">
+            <div className="lp-stage">
               <Phone
                 src="/assets/site/app-stats-v1.webp"
+                top="#ffffff"
                 alt="Bench press stats: best weight rising from 60 to 80 kg over six months"
                 className="lp-drift"
               />

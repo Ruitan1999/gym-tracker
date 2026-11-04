@@ -20,6 +20,8 @@
   --lp-margin: clamp(20px, 4vw, 48px);
   --lp-gap: clamp(96px, 14vw, 200px);
   --lp-r-panel: 28px;
+  --lp-r-device: clamp(28px, 3.6vw, 46px);
+  --lp-bezel: clamp(5px, 0.7vw, 9px);
 
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
@@ -165,6 +167,33 @@
   .lp-hero { grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 4rem; min-height: calc(100svh - 72px); }
 }
 
+/* The phone on the right, with the live set overlapping its lower left. */
+.lp-hero__media {
+  position: relative;
+  display: flex;
+  justify-content: flex-end;
+  padding-bottom: clamp(24px, 4vw, 48px);
+}
+.lp-hero__media .lp-phone { width: min(60%, 330px); }
+.lp-hero__media .lp-set {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: min(88%, 460px);
+  /* A ring of the page's own colour cuts the card out of the phone behind. */
+  box-shadow: 0 0 0 10px var(--lp-ground);
+}
+.lp-facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.5rem;
+  margin-top: 2.25rem;
+  font-weight: 600;
+  font-size: 1rem;
+}
+.lp-facts li { display: flex; align-items: center; gap: 0.5rem; }
+.lp-facts svg { color: var(--lp-accent); flex: none; }
+
 /* the live set */
 .lp-set {
   background: var(--lp-raised);
@@ -175,7 +204,7 @@
   display: flex;
   align-items: baseline;
   gap: 0.2em;
-  font-size: clamp(3.5rem, 9vw, 7rem);
+  font-size: clamp(3rem, 8vw, 5.5rem);
   font-weight: 800;
   line-height: 1;
   letter-spacing: -0.04em;
@@ -204,12 +233,41 @@
 
 /* ---------- pictures ---------- */
 
+/* A phone: a dark body, the screen inset with matching corners, a status
+   bar with the camera cut-out, and the app's screenshot below it, whole. */
+.lp-device {
+  background: var(--lp-ink);
+  border-radius: var(--lp-r-device);
+  padding: var(--lp-bezel);
+}
+.lp-device__screen {
+  border-radius: calc(var(--lp-r-device) - var(--lp-bezel));
+  overflow: hidden;
+}
+.lp-device__bar {
+  position: relative;
+  height: clamp(20px, 2.6vw, 34px);
+  display: flex;
+  align-items: center;
+  padding: 0 9%;
+  font-size: clamp(8px, 0.9vw, 12px);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+.lp-device__bar i {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 30%;
+  height: 62%;
+  transform: translate(-50%, -50%);
+  border-radius: 999px;
+  background: var(--lp-ink);
+}
 .lp-shot {
   display: block;
   width: 100%;
   height: auto;
-  border-radius: var(--lp-r-panel);
-  background: var(--lp-step);
 }
 .lp-stage {
   background: #e4ebf8;
@@ -220,9 +278,7 @@
   gap: clamp(12px, 3vw, 32px);
   overflow: clip;
 }
-.lp-stage .lp-phone { width: min(46%, 300px); }
-.lp-stage--one .lp-phone { width: min(78%, 340px); }
-.lp-phone--low { margin-top: clamp(32px, 8vw, 96px); }
+.lp-stage .lp-phone { width: min(78%, 340px); }
 
 /* ---------- sections ---------- */
 
@@ -402,7 +458,7 @@
 
   /* Pictures open from a smaller window and settle from a slight scale. */
   .lp-motion [data-reveal] [data-open] {
-    clip-path: inset(10% 8% 10% 8% round var(--lp-r-panel));
+    clip-path: inset(10% 8% 10% 8% round var(--lp-r-device));
     transform: scale(1.06);
     transition:
       clip-path var(--t-open) var(--ease-expo),
@@ -410,7 +466,7 @@
     transition-delay: calc(var(--i, 0) * 120ms + 120ms);
   }
   .lp-motion [data-reveal].is-in [data-open] {
-    clip-path: inset(0 0 0 0 round var(--lp-r-panel));
+    clip-path: inset(0 0 0 0 round var(--lp-r-device));
     transform: none;
   }
 
@@ -421,7 +477,6 @@
       animation-timeline: view();
       animation-range: entry 0% exit 100%;
     }
-    .lp-drift--slow { animation-name: lp-drift-slow; }
     .lp-band__track--scroll {
       animation: lp-pan linear both;
       animation-timeline: view();
@@ -442,6 +497,5 @@
 @keyframes lp-rise { from { transform: translateY(105%); } to { transform: none; } }
 @keyframes lp-up { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: none; } }
 @keyframes lp-drift { from { transform: translateY(6%); } to { transform: translateY(-6%); } }
-@keyframes lp-drift-slow { from { transform: translateY(-3%); } to { transform: translateY(3%); } }
 @keyframes lp-pan { from { transform: translateX(0); } to { transform: translateX(-40%); } }
 @keyframes lp-pan-loop { from { transform: translateX(0); } to { transform: translateX(-50%); } }
