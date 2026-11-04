@@ -206,6 +206,17 @@ export default function SetRow({
             REPS
           </div>
           <QuickRepChips values={preferences.quickReps} current={reps} onPick={onRepsChange} />
+          {/* One more or one fewer than a chip, without typing. */}
+          <div className="mt-2">
+            <WeightStepper
+              value={reps}
+              onChange={(v) => onRepsChange(v === '' ? '' : Math.round(v))}
+              step={1}
+              unit="reps"
+              noun="reps"
+              max={99}
+            />
+          </div>
         </div>
 
         {/* Weight stepper */}
