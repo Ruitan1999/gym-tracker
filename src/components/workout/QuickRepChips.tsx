@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from 'react';
-import ModalShell from '../shared/ModalShell';
 
 interface QuickRepChipsProps {
   values: number[];
@@ -8,91 +7,129 @@ interface QuickRepChipsProps {
   ariaLabelPrefix?: string;
 }
 
+const MAX_REPS = 99;
+
+/**
+ * The quick rep values, plus a "+" that turns into a number field right where
+ * it is. No pop-up: the keyboard comes up, the number is typed, and Done (or
+ * tapping anywhere else) sets it.
+ */
 export default function QuickRepChips({
   values,
   current,
   onPick,
   ariaLabelPrefix = 'Set reps to',
 }: QuickRepChipsProps) {
-  const [modalOpen, setModalOpen] = useState(false);
+  const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
+  // Escape closes without setting; the blur that follows must not set it either.
+  const cancelled = useRef(false);
 
   const currentInList = typeof current === 'number' && values.includes(current);
   const showCustom = typeof current === 'number' && !currentInList && current > 0;
 
   useEffect(() => {
-    if (modalOpen) {
-      setDraft(typeof current === 'number' ? String(current) : '');
-      requestAnimationFrame(() => {
-        const el = inputRef.current;
-        if (!el) return;
-        el.focus();
-        el.select();
-      });
-    }
-  }, [modalOpen, current]);
+    if (!editing) return;
+    const el = inputRef.current;
+    if (!el) return;
+    el.focus();
+    el.select();
+  }, [editing]);
 
-  function confirm() {
+  function startEditing() {
+    cancelled.current = false;
+    setDraft(showCustom ? String(current) : '');
+    setEditing(true);
+  }
+
+  function commit() {
+    if (cancelled.current) return;
     const n = parseInt(draft, 10);
-    if (Number.isFinite(n) && n >= 0) {
-      onPick(Math.min(99, n));
-      setModalOpen(false);
-    }
+    if (Number.isFinite(n) && n > 0) onPick(Math.min(MAX_REPS, n));
+    setEditing(false);
   }
 
   const chipBase =
     'shrink-0 min-w-[46px] h-[48px] px-3 font-mono text-sm font-medium press flex items-center justify-center';
 
   return (
-    <>
-      <div
-        className="flex flex-wrap gap-1.5"
-        role="group"
-        aria-label="Quick rep values"
-      >
-        {showCustom && (
+    <div
+      className="flex flex-wrap gap-1.5"
+      role="group"
+      aria-label="Quick rep values"
+    >
+      {values.map((n) => {
+        const active = current === n;
+        return (
           <button
+            key={n}
             type="button"
-            onClick={() => setModalOpen(true)}
-            aria-label={`Current reps ${current}. Edit`}
-            aria-pressed
+            onClick={() => onPick(n)}
+            aria-label={`${ariaLabelPrefix} ${n}`}
+            aria-pressed={active}
             className={chipBase}
             style={{
-              background: 'var(--color-volt)',
-              color: '#ffffff',
-              border: '1px solid var(--color-volt)',
+              background: active ? 'var(--color-volt)' : 'transparent',
+              color: active ? '#ffffff' : 'var(--color-text)',
+              border: `1px solid ${active ? 'var(--color-volt)' : 'var(--color-line-2)'}`,
               borderRadius: 'var(--radius)',
+              fontVariantNumeric: 'tabular-nums',
             }}
           >
-            {current}
+            {n}
           </button>
-        )}
-        {values.map((n) => {
-          const active = current === n;
-          return (
-            <button
-              key={n}
-              type="button"
-              onClick={() => onPick(n)}
-              aria-label={`${ariaLabelPrefix} ${n}`}
-              aria-pressed={active}
-              className={chipBase}
-              style={{
-                background: active ? 'var(--color-volt)' : 'transparent',
-                color: active ? '#ffffff' : 'var(--color-text)',
-                border: `1px solid ${active ? 'var(--color-volt)' : 'var(--color-line-2)'}`,
-                borderRadius: 'var(--radius)',
-                fontVariantNumeric: 'tabular-nums',
-              }}
-            >
-              {n}
-            </button>
-          );
-        })}
+        );
+      })}
+      {showCustom && !editing && (
         <button
           type="button"
-          onClick={() => setModalOpen(true)}
+          onClick={startEditing}
+          aria-label={`Current reps ${current}. Edit`}
+          aria-pressed
+          className={chipBase}
+          style={{
+            background: 'var(--color-volt)',
+            color: '#ffffff',
+            border: '1px solid var(--color-volt)',
+            borderRadius: 'var(--radius)',
+          }}
+        >
+          {current}
+        </button>
+      )}
+      {editing ? (
+        <input
+          ref={inputRef}
+          type="text"
+          inputMode="numeric"
+          pattern="[0-9]*"
+          enterKeyHint="done"
+          aria-label="Custom reps"
+          value={draft}
+          onChange={(e) => setDraft(e.target.value.replace(/\D/g, '').slice(0, 2))}
+          onBlur={commit}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') e.currentTarget.blur();
+            if (e.key === 'Escape') {
+              cancelled.current = true;
+              setEditing(false);
+            }
+          }}
+          placeholder="reps"
+          className={`${chipBase} w-[72px] text-center outline-none`}
+          style={{
+            background: 'var(--color-surface)',
+            color: 'var(--color-text)',
+            border: '2px solid var(--color-volt)',
+            borderRadius: 'var(--radius)',
+            fontVariantNumeric: 'tabular-nums',
+          }}
+        />
+      ) : (
+        <button
+          type="button"
+          onClick={startEditing}
           aria-label="Enter custom reps"
           className={chipBase}
           style={{
@@ -104,72 +141,7 @@ export default function QuickRepChips({
         >
           +
         </button>
-      </div>
-
-      {modalOpen && (
-        <ModalShell onDismiss={() => setModalOpen(false)} label="Enter custom reps">
-            <div className="flex items-baseline justify-between mb-4">
-              <div className="caps" style={{ color: 'var(--color-text-muted)' }}>
-                CUSTOM REPS
-              </div>
-              <div className="caps" style={{ color: 'var(--color-text-faint)' }}>
-                0–99
-              </div>
-            </div>
-            <div className="mb-4">
-              <input
-                ref={inputRef}
-                type="number"
-                inputMode="numeric"
-                min={0}
-                max={99}
-                value={draft}
-                onChange={(e) => {
-                  const raw = e.target.value;
-                  if (raw === '') { setDraft(''); return; }
-                  const n = parseInt(raw, 10);
-                  setDraft(Number.isFinite(n) ? String(Math.min(99, Math.max(0, n))) : '');
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') confirm();
-                  if (e.key === 'Escape') setModalOpen(false);
-                }}
-                placeholder="0"
-                className="font-mono w-full text-center outline-none"
-                style={{
-                  background: 'var(--color-ink)',
-                  color: 'var(--color-text)',
-                  border: '1px solid var(--color-line-2)',
-                  borderRadius: 'var(--radius)',
-                  fontSize: '2rem',
-                  fontWeight: 500,
-                  padding: '0.5rem 0',
-                  height: '3.5rem',
-                  fontVariantNumeric: 'tabular-nums',
-                  letterSpacing: '-0.02em',
-                }}
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-2">
-              <button
-                type="button"
-                onClick={() => setModalOpen(false)}
-                className="h-12 btn-ghost press caps-tight"
-                style={{ borderRadius: 'var(--radius)' }}
-              >
-                CANCEL
-              </button>
-              <button
-                type="button"
-                onClick={confirm}
-                className="h-12 btn-volt press caps-tight"
-                style={{ borderRadius: 'var(--radius)' }}
-              >
-                SET REPS
-              </button>
-            </div>
-        </ModalShell>
       )}
-    </>
+    </div>
   );
 }

@@ -30,4 +30,39 @@ describe('QuickRepChips', () => {
     expect(screen.getByRole('button', { name: 'Enter custom reps' })).toBeTruthy();
     expect(screen.queryByRole('button', { name: /Set reps to/ })).toBeNull();
   });
+
+  it('types custom reps in place, without a pop-up', () => {
+    const onPick = vi.fn();
+    render(<QuickRepChips values={[5, 8]} current="" onPick={onPick} />);
+    fireEvent.click(screen.getByRole('button', { name: 'Enter custom reps' }));
+    expect(screen.queryByRole('dialog')).toBeNull();
+    const field = screen.getByRole('textbox', { name: 'Custom reps' });
+    fireEvent.change(field, { target: { value: '15' } });
+    fireEvent.keyDown(field, { key: 'Enter' });
+    fireEvent.blur(field);
+    expect(onPick).toHaveBeenCalledWith(15);
+    expect(screen.queryByRole('textbox', { name: 'Custom reps' })).toBeNull();
+  });
+
+  it('Escape closes the field without setting anything', () => {
+    const onPick = vi.fn();
+    render(<QuickRepChips values={[5, 8]} current="" onPick={onPick} />);
+    fireEvent.click(screen.getByRole('button', { name: 'Enter custom reps' }));
+    const field = screen.getByRole('textbox', { name: 'Custom reps' });
+    fireEvent.change(field, { target: { value: '15' } });
+    fireEvent.keyDown(field, { key: 'Escape' });
+    fireEvent.blur(field);
+    expect(onPick).not.toHaveBeenCalled();
+  });
+
+  it('edits a custom value in place', () => {
+    const onPick = vi.fn();
+    render(<QuickRepChips values={[5, 8]} current={15} onPick={onPick} />);
+    fireEvent.click(screen.getByRole('button', { name: 'Current reps 15. Edit' }));
+    const field = screen.getByRole('textbox', { name: 'Custom reps' }) as HTMLInputElement;
+    expect(field.value).toBe('15');
+    fireEvent.change(field, { target: { value: '20' } });
+    fireEvent.blur(field);
+    expect(onPick).toHaveBeenCalledWith(20);
+  });
 });
