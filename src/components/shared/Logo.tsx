@@ -3,24 +3,17 @@ interface LogoProps {
   withWordmark?: boolean;
 }
 
-/* The mark: a lifter pressing a loaded barbell overhead, kept to three parts
-   (bar, head, a V for arms and body) so it holds at favicon size. Accent fill,
-   same drawing as public/logo.svg. */
+/* The mark: a lifter pressing a loaded barbell overhead. Accent fill, same
+   drawing as public/logo.svg. */
 export function LogoMark({ size = 28, color = 'var(--color-volt)' }: { size?: number; color?: string }) {
   return (
     <svg width={size} height={size} viewBox="0 0 256 256" aria-hidden focusable="false" style={{ display: 'block' }}>
-      <rect x="16" y="56" width="224" height="22" rx="11" fill={color} />
-      <rect x="28" y="28" width="28" height="78" rx="14" fill={color} />
-      <rect x="200" y="28" width="28" height="78" rx="14" fill={color} />
-      <path
-        d="M80 67L128 214L176 67"
-        fill="none"
-        stroke={color}
-        strokeWidth="26"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <circle cx="128" cy="112" r="18" fill={color} />
+      <rect x="12" y="52" width="232" height="20" rx="10" fill={color} />
+      <rect x="24" y="20" width="26" height="84" rx="12" fill={color} />
+      <rect x="206" y="20" width="26" height="84" rx="12" fill={color} />
+      <path d="M70 66L98 150M186 66L158 150" fill="none" stroke={color} strokeWidth="22" strokeLinecap="round" />
+      <circle cx="128" cy="110" r="21" fill={color} />
+      <path d="M98 150H158L146 236H110Z" fill={color} stroke={color} strokeWidth="16" strokeLinejoin="round" />
     </svg>
   );
 }
