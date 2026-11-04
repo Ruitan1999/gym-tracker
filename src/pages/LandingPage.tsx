@@ -1,8 +1,12 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Dumbbell } from 'lucide-react';
+import { Dumbbell, Flame } from 'lucide-react';
 import Logo from '../components/shared/Logo';
 import SiteHeader from '../components/layout/SiteHeader';
+import MuscleFigure from '../components/progress/MuscleFigure';
+import PartList from '../components/progress/PartList';
+import { balancePaint } from '../components/progress/balancePaint';
+import type { BodyPart } from '../types';
 
 // Matches Home and the log book.
 const ICON_STROKE = 2;
@@ -68,8 +72,8 @@ export default function LandingPage() {
               className="max-w-[44ch] text-[15px] sm:text-[17px]"
               style={{ color: 'var(--color-text-muted)', lineHeight: 1.45 }}
             >
-              The honest training log for lifters who care about the numbers. Log sets in seconds, watch the
-              graph climb, never wonder what you did last Tuesday again.
+              Plan your week, log every set with a tap, and see which muscles you have actually trained. The
+              honest training log for lifters who care about the numbers.
             </p>
             <div className="flex items-center gap-3 flex-wrap pt-2">
               <button
@@ -94,53 +98,9 @@ export default function LandingPage() {
             </div>
           </div>
 
-          {/* hero stat panel */}
+          {/* A small copy of Home: the week, what's next, the streak. */}
           <div className="sm:col-span-5">
-            <div
-              className="p-5 sm:p-6 space-y-4"
-              style={{ background: 'var(--color-surface)', border: '1px solid var(--color-line)', borderRadius: 'var(--radius)' }}
-            >
-              <div className="flex items-center justify-between">
-                <span className="caps-tight" style={{ color: 'var(--color-text-faint)' }}>
-                  THIS MONTH
-                </span>
-                <span className="caps-tight" style={{ color: 'var(--color-volt-ink)' }}>
-                  +12.4%
-                </span>
-              </div>
-              <div className="grid grid-cols-3 gap-3">
-                <Metric value="14" label="SETS" />
-                <Metric value="100" label="TOP KG" />
-                <Metric value="4" label="DAYS" accent />
-              </div>
-              <div className="h-px" style={{ background: 'var(--color-line)' }} />
-              <div className="space-y-1.5">
-                <div className="grid grid-cols-7 gap-1">
-                  {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((l, i) => (
-                    <div
-                      key={i}
-                      className="caps-tight text-center"
-                      style={{ color: 'var(--color-text-faint)' }}
-                    >
-                      {l}
-                    </div>
-                  ))}
-                </div>
-                <div className="grid grid-cols-7 gap-1">
-                  {LANDING_CALENDAR.map((cell, i) => (
-                    <LandingCalendarCell key={i} {...cell} />
-                  ))}
-                </div>
-              </div>
-              <div className="flex items-center justify-between pt-1">
-                <span className="caps-tight" style={{ color: 'var(--color-text-faint)' }}>
-                  STREAK
-                </span>
-                <span className="font-mono text-[12px]" style={{ color: 'var(--color-text)' }}>
-                  6 WEEKS
-                </span>
-              </div>
-            </div>
+            <HomePreview />
           </div>
         </section>
 
@@ -177,33 +137,54 @@ export default function LandingPage() {
           </div>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
-            <Reveal delay={0}>
-              <Feature
-                code="01"
-                title="Log Session"
-                desc="Tap, type, done. Last session's numbers prefilled so you only enter what changed."
-              />
-            </Reveal>
-            <Reveal delay={80}>
-              <Feature
-                code="02"
-                title="Log Book"
-                desc="Every workout, every set, searchable. Edit history without breaking streaks."
-              />
-            </Reveal>
-            <Reveal delay={160}>
-              <Feature
-                code="03"
-                title="Stats"
-                desc="Per-exercise charts. Volume, top set, estimated 1RM — actual signal, not vanity."
-              />
-            </Reveal>
-            <Reveal delay={240}>
-              <Feature
-                code="04"
-                title="Library & Groups"
-                desc="Build your exercise library. Group movements into routines you actually run."
-              />
+            {FEATURES.map((f, i) => (
+              <Reveal key={f.title} delay={(i % 4) * 80}>
+                <Feature code={String(i + 1).padStart(2, '0')} title={f.title} desc={f.desc} />
+              </Reveal>
+            ))}
+          </div>
+        </section>
+
+        {/* MUSCLES — the real body map, with made-up numbers */}
+        <section className="py-12 sm:py-20 grid sm:grid-cols-12 gap-8 sm:gap-10 items-center">
+          <div className="sm:col-span-5">
+            <div className="caps-tight text-[13px] mb-3" style={{ color: 'var(--color-text-faint)', fontWeight: 600, letterSpacing: '0.08em' }}>
+              MUSCLE BALANCE
+            </div>
+            <h2
+              className="font-display"
+              style={{
+                fontSize: 'clamp(1.75rem, 3.5vw, 2.5rem)',
+                fontWeight: 700,
+                letterSpacing: '-0.035em',
+                lineHeight: 1.05,
+                fontVariationSettings: '"wdth" 90',
+              }}
+            >
+              See what you trained,
+              <span style={{ fontFamily: 'var(--font-serif)', fontWeight: 400, fontStyle: 'italic' }}> and what you skipped.</span>
+            </h2>
+            <p className="mt-4 text-[15px]" style={{ color: 'var(--color-text-muted)', lineHeight: 1.5, maxWidth: '44ch' }}>
+              Every set lands on a body map. Home shows the last 30 days at a glance; Stats lets you
+              look back further.
+            </p>
+          </div>
+          <div className="sm:col-span-7">
+            <Reveal>
+              <div
+                className="p-5 sm:p-6"
+                style={{ background: 'var(--color-surface)', border: '1px solid var(--color-line)', borderRadius: '16px' }}
+              >
+                <div className="caps-tight mb-4" style={{ color: 'var(--color-text-muted)' }}>
+                  MUSCLE GROUPS · LAST 30 DAYS
+                </div>
+                <div className="flex flex-wrap justify-center items-start gap-5">
+                  <MuscleFigure paint={balancePaint(SAMPLE_SETS)} description={SAMPLE_DESCRIPTION} />
+                  <div className="flex-1 min-w-[136px]" aria-hidden>
+                    <PartList rows={SAMPLE_ROWS} empty="" />
+                  </div>
+                </div>
+              </div>
             </Reveal>
           </div>
         </section>
@@ -232,11 +213,11 @@ export default function LandingPage() {
             </h2>
           </div>
           <div className="sm:col-span-7 space-y-0">
-            <Reveal delay={0}><Row k="NO ADS, NO STREAKS-AS-RANSOM" v="EVER" /></Reveal>
-            <Reveal delay={70}><Row k="DATA SYNCS, DATA STAYS YOURS" v="EXPORT ANYTIME" /></Reveal>
-            <Reveal delay={140}><Row k="WORKS OFFLINE, SAVES ON RECONNECT" v="PWA" /></Reveal>
-            <Reveal delay={210}><Row k="DESIGNED FOR ONE-HANDED LOGGING" v="MID-SET" /></Reveal>
-            <Reveal delay={280}><Row k="OPEN PRICING" v="FREE" /></Reveal>
+            {WHY_ROWS.map(([k, v], i) => (
+              <Reveal key={k} delay={i * 70}>
+                <Row k={k} v={v} />
+              </Reveal>
+            ))}
           </div>
         </section>
 
@@ -314,7 +295,7 @@ export default function LandingPage() {
             className="mt-3 mx-auto text-[13px] sm:text-[14px]"
             style={{ color: '#d4d4d4', maxWidth: '52ch', lineHeight: 1.5 }}
           >
-            Free to start. Sync across devices. Export your data whenever you want it.
+            Free. Syncs across your devices. A one-minute tour shows you around on day one.
           </p>
           <div className="mt-5 flex items-center justify-center gap-3 flex-wrap">
             <button
@@ -364,83 +345,155 @@ export default function LandingPage() {
   );
 }
 
-function Metric({ value, label, accent }: { value: string; label: string; accent?: boolean }) {
-  return (
-    <div>
-      <div className="flex items-baseline gap-1">
-        <div
-          className="font-mono"
-          style={{ fontSize: '1.5rem', fontWeight: 600, color: 'var(--color-volt)', letterSpacing: '-0.02em' }}
-        >
-          {value}
-        </div>
-        {accent && (
-          <Dumbbell
-            color="var(--color-volt)"
-            strokeWidth={ICON_STROKE}
-            style={{ width: '0.85rem', height: '0.85rem', flexShrink: 0 }}
-            aria-hidden
-          />
-        )}
-      </div>
-      <div className="caps-tight" style={{ color: 'var(--color-text-faint)' }}>
-        {label}
-      </div>
-    </div>
-  );
-}
-
-interface LandingCell {
-  day: number | null;
-  trained?: boolean;
-  today?: boolean;
-  past?: boolean;
-}
-
-const LANDING_CALENDAR: LandingCell[] = [
-  { day: null }, { day: null },
-  { day: 1, past: true }, { day: 2, past: true }, { day: 3, past: true }, { day: 4, past: true }, { day: 5, past: true },
-  { day: 6, past: true }, { day: 7, past: true }, { day: 8, past: true }, { day: 9, past: true }, { day: 10, past: true }, { day: 11, past: true }, { day: 12, past: true },
-  { day: 13, past: true }, { day: 14, past: true }, { day: 15, past: true }, { day: 16, trained: true }, { day: 17, trained: true }, { day: 18, trained: true }, { day: 19, trained: true, today: true },
-  { day: 20 }, { day: 21 }, { day: 22 }, { day: 23 }, { day: 24 }, { day: 25 }, { day: 26 },
-  { day: 27 }, { day: 28 }, { day: 29 }, { day: 30 }, { day: null }, { day: null }, { day: null },
+const FEATURES = [
+  {
+    title: 'Plan your week',
+    desc: 'Make a template for each workout and pick its days, or let them take turns in a rotation.',
+  },
+  {
+    title: 'Next up, one tap',
+    desc: "Home shows this week and today's workout. Tap it, or the Start button, and you're in.",
+  },
+  {
+    title: 'Log in seconds',
+    desc: 'Tap a rep number or type your own, nudge the weight with − and +. Last time is one tap away.',
+  },
+  {
+    title: '1,400+ exercises',
+    desc: 'Every one illustrated, and the pictures are kept on your phone so they show instantly.',
+  },
+  {
+    title: 'Muscle balance',
+    desc: 'A body map of every set from the last 30 days, so nothing gets skipped for long.',
+  },
+  {
+    title: 'Streaks that are fair',
+    desc: 'Counted in weeks you trained, not days. A rest day never breaks it.',
+  },
+  {
+    title: 'Log Book',
+    desc: 'Every session you saved, set by set. Open one to see it or change it.',
+  },
+  {
+    title: 'Stats',
+    desc: 'Per-exercise charts for volume, top set and estimated 1RM, plus a year of training at a glance.',
+  },
 ];
 
-function LandingCalendarCell({ day, trained, today, past }: LandingCell) {
-  if (day === null) {
-    return <div style={{ aspectRatio: '1 / 1' }} />;
-  }
+const WHY_ROWS: [string, string][] = [
+  ['NO ADS', 'EVER'],
+  ['YOUR DATA SYNCS AND STAYS YOURS', 'EXPORT JSON / CSV'],
+  ['WORKS OFFLINE, SAVES ON RECONNECT', 'INSTALLABLE'],
+  ['REST TIMER ONLY IF YOU WANT ONE', 'OPTIONAL'],
+  ['A SHORT TOUR ON YOUR FIRST DAY', 'GUIDED'],
+  ['OPEN PRICING', 'FREE'],
+];
+
+// Made-up numbers for the body map; nothing here is anyone's real training.
+const SAMPLE_SETS: Partial<Record<BodyPart, number>> = {
+  chest: 32,
+  back: 38,
+  legs: 44,
+  shoulders: 18,
+  arms: 22,
+  core: 10,
+};
+const SAMPLE_ROWS = (Object.entries(SAMPLE_SETS) as [BodyPart, number][])
+  .sort((a, b) => b[1] - a[1])
+  .map(([part, n]) => ({ part, note: `${n} sets` }));
+const SAMPLE_DESCRIPTION = `Example: sets in the last 30 days, ${SAMPLE_ROWS.map((r) => `${r.part} ${r.note}`).join(', ')}`;
+
+const PREVIEW_WEEK = [
+  { d: 'MO', n: 3, trained: true },
+  { d: 'TU', n: 4, trained: true },
+  { d: 'WE', n: 5 },
+  { d: 'TH', n: 6, today: true },
+  { d: 'FR', n: 7 },
+  { d: 'SA', n: 8 },
+  { d: 'SU', n: 9 },
+];
+
+/** Home in miniature, drawn the way the app draws it. */
+function HomePreview() {
   return (
-    <div
-      className="flex items-center justify-center"
-      style={{
-        aspectRatio: '1 / 1',
-        background: trained ? 'var(--color-volt)' : '#ffffff',
-        border: `1px solid ${
-          trained
-            ? 'var(--color-volt)'
-            : today
-              ? 'var(--color-text)'
-              : 'var(--color-line-2)'
-        }`,
-        borderRadius: 'var(--radius)',
-        opacity: past ? 0.55 : 1,
-      }}
-    >
-      {trained ? (
-        <Dumbbell className="w-4 h-4" color="#ffffff" strokeWidth={ICON_STROKE} aria-hidden />
-      ) : (
-        <span
-          className="font-mono text-[11px] leading-none"
-          style={{
-            color: past ? 'var(--color-text-faint)' : 'var(--color-text)',
-            fontWeight: today ? 700 : 500,
-            fontVariantNumeric: 'tabular-nums',
-          }}
+    <div className="flex flex-col gap-3" aria-label="Example of the home screen" role="img">
+      <div
+        className="p-4"
+        style={{ background: 'var(--color-surface)', border: '1px solid var(--color-line)', borderRadius: '16px' }}
+      >
+        <div className="caps-tight text-center mb-3" style={{ color: 'var(--color-text-muted)' }}>
+          THIS WEEK
+        </div>
+        <div className="grid grid-cols-7 text-center">
+          {PREVIEW_WEEK.map((day) => (
+            <span key={day.d} className="flex flex-col items-center gap-1.5">
+              <span className="caps-tight" style={{ color: 'var(--color-text-faint)' }}>
+                {day.d}
+              </span>
+              <span
+                className="font-mono flex items-center justify-center"
+                style={{
+                  width: 32,
+                  height: 32,
+                  borderRadius: 16,
+                  fontSize: 15,
+                  background: day.today ? 'var(--color-volt)' : 'transparent',
+                  color: day.today ? '#ffffff' : 'var(--color-text)',
+                }}
+              >
+                {day.n}
+              </span>
+              <span
+                style={{
+                  width: 6,
+                  height: 6,
+                  borderRadius: 3,
+                  background: day.trained ? 'var(--color-done)' : 'transparent',
+                }}
+              />
+            </span>
+          ))}
+        </div>
+        <div
+          className="flex items-center gap-3 mt-3 p-3"
+          style={{ background: 'var(--color-volt-wash)', borderRadius: 'var(--radius)' }}
         >
-          {day}
+          <span
+            className="shrink-0 flex items-center justify-center"
+            style={{ width: 40, height: 40, borderRadius: 10, background: 'var(--color-volt)', color: '#ffffff' }}
+          >
+            <Dumbbell size={20} strokeWidth={ICON_STROKE} />
+          </span>
+          <span className="min-w-0">
+            <span className="block caps-tight" style={{ color: 'var(--color-text-muted)' }}>
+              NEXT IN ROTATION
+            </span>
+            <span
+              className="block font-display"
+              style={{ fontSize: '1.0625rem', fontWeight: 700, letterSpacing: '-0.02em', color: 'var(--color-text)' }}
+            >
+              Push day
+            </span>
+          </span>
+        </div>
+      </div>
+      <div
+        className="flex items-center gap-3 p-4"
+        style={{ background: 'var(--color-surface)', border: '1px solid var(--color-line)', borderRadius: '16px' }}
+      >
+        <Flame size={24} strokeWidth={ICON_STROKE} color="#b8860b" />
+        <span className="min-w-0">
+          <span
+            className="block font-display"
+            style={{ fontSize: '1.25rem', fontWeight: 700, letterSpacing: '-0.02em', color: 'var(--color-text)' }}
+          >
+            6 week streak
+          </span>
+          <span className="block font-mono text-[13px]" style={{ color: 'var(--color-text-muted)' }}>
+            2 this week · 58 total
+          </span>
         </span>
-      )}
+      </div>
     </div>
   );
 }

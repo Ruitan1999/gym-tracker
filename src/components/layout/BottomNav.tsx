@@ -169,19 +169,11 @@ function renderTab(tab: Tab) {
     >
       {({ isActive }) => (
         <>
-          {/* top tick indicator */}
-          <span
-            aria-hidden
-            className="absolute top-0 left-1/2 -translate-x-1/2 h-[2px] transition-all duration-300"
-            style={{
-              width: isActive ? '38%' : '0%',
-              background: 'var(--color-volt)',
-            }}
-          />
           {tab.icon}
           <span
             className="caps-tight"
-            style={{ letterSpacing: '0.02em' }}
+            // The current tab reads darker and heavier; no separate marker.
+            style={{ letterSpacing: '0.02em', fontWeight: isActive ? 700 : undefined }}
           >
             {tab.label}
           </span>
