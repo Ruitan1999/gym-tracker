@@ -533,7 +533,7 @@
 .lp-wordmark__mark { flex: none; padding-bottom: 0.02em; }
 .lp-wordmark__mark svg { width: 0.74em; height: 0.74em; }
 
-/* ---------- background: big mixed gradients and line patterns ---------- */
+/* ---------- background: big mixed gradients ---------- */
 
 .lp { position: relative; isolation: isolate; }
 
@@ -555,15 +555,11 @@
 }
 
 .lp-has-deco { position: relative; isolation: isolate; }
-.lp-blob,
-.lp-shape {
+/* Large blobs that overlap and mix behind the hero and the close, drifting slowly. */
+.lp-blob {
   position: absolute;
   z-index: -1;
   pointer-events: none;
-}
-
-/* Three large blobs that overlap and mix behind the hero, drifting slowly. */
-.lp-blob {
   aspect-ratio: 1;
   border-radius: 50%;
 }
@@ -596,17 +592,6 @@
   left: -20%;
   bottom: -50%;
   background: radial-gradient(closest-side, rgba(70, 190, 150, 0.35), rgba(70, 190, 150, 0.08) 55%, rgba(70, 190, 150, 0));
-}
-
-/* Line patterns from bookofshapes.com, faint, behind each section. */
-.lp-shape { opacity: 0.35; }
-.lp-shape--hero { width: clamp(360px, 46vw, 680px); right: -12%; top: -8%; opacity: 0.4; }
-.lp-shape--plan { width: clamp(300px, 34vw, 520px); left: -10%; bottom: -14%; }
-.lp-shape--log { width: clamp(360px, 44vw, 640px); right: -14%; bottom: -16%; }
-.lp-shape--stats { width: clamp(320px, 40vw, 600px); left: -10%; bottom: -10%; }
-.lp-shape--close { width: clamp(360px, 50vw, 760px); right: -10%; top: 4%; opacity: 0.14; }
-@media (max-width: 640px) {
-  .lp-shape--hero { right: -45%; top: 2%; }
 }
 
 /* ---------- motion ---------- */
@@ -653,8 +638,6 @@
   .lp-blob { animation: lp-float 18s ease-in-out infinite alternate; }
   .lp-blob--sky, .lp-blob--close-b { animation-duration: 23s; animation-direction: alternate-reverse; }
   .lp-blob--mint { animation-duration: 27s; }
-  /* The line patterns turn, very slowly. */
-  .lp-shape--hero, .lp-shape--close, .lp-shape--plan { animation: lp-turn 120s linear infinite; }
 
   /* The phones drift against the scroll, a little, where the browser can tie it to the scrollbar. */
   @supports (animation-timeline: view()) {
@@ -682,7 +665,6 @@
 
 @keyframes lp-pop { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: none; } }
 @keyframes lp-float { from { transform: translate(0, 0) scale(1); } to { transform: translate(-6%, 5%) scale(1.12); } }
-@keyframes lp-turn { to { transform: rotate(360deg); } }
 @keyframes lp-rise { from { transform: translateY(105%); } to { transform: none; } }
 @keyframes lp-up { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: none; } }
 @keyframes lp-drift { from { transform: translateY(6%); } to { transform: translateY(-6%); } }

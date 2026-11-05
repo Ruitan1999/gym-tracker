@@ -425,24 +425,9 @@ function Blob({ className }: { className: string }) {
   return <span aria-hidden className={`lp-blob ${className}`} />;
 }
 
-/** A line pattern from Book of Shapes, faint behind a section. */
-function Shape({ name, className }: { name: string; className: string }) {
+function Section({ id, children }: { id?: string; children: ReactNode }) {
   return (
-    <img
-      aria-hidden
-      alt=""
-      src={`/assets/site/shapes/${name}-v1.svg`}
-      className={`lp-shape ${className}`}
-      loading="lazy"
-      decoding="async"
-    />
-  );
-}
-
-function Section({ id, children, deco }: { id?: string; children: ReactNode; deco?: ReactNode }) {
-  return (
-    <section id={id} className="lp-section lp-has-deco" data-reveal>
-      {deco}
+    <section id={id} className="lp-section" data-reveal>
       {children}
     </section>
   );
@@ -492,7 +477,6 @@ export default function LandingPage() {
           <Blob className="lp-blob--blue" />
           <Blob className="lp-blob--sky" />
           <Blob className="lp-blob--mint" />
-          <Shape name="concentric-noise-rings" className="lp-shape--hero" />
           <div>
             <h1 className="lp-h1">
               <span className="lp-line">
@@ -545,7 +529,7 @@ export default function LandingPage() {
           </div>
         </div>
 
-        <Section id="plan" deco={<Shape name="spiral-morph" className="lp-shape--plan" />}>
+        <Section id="plan">
           <div className="lp-wrap lp-split">
             <div>
               <h2 className="lp-h2" data-r style={at(0)}>
@@ -571,7 +555,7 @@ export default function LandingPage() {
           </div>
         </Section>
 
-        <Section id="log" deco={<Shape name="wavy-lines-converging" className="lp-shape--log" />}>
+        <Section id="log">
           <div className="lp-wrap lp-split lp-split--flip">
             <div>
               <h2 className="lp-h2" data-r style={at(0)}>
@@ -666,7 +650,7 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <Section id="stats" deco={<Shape name="noise-landscape-1" className="lp-shape--stats" />}>
+        <Section id="stats">
           <div className="lp-wrap lp-split lp-split--flip">
             <div>
               <h2 className="lp-h2" data-r>
@@ -747,7 +731,6 @@ export default function LandingPage() {
       <footer className="lp-close lp-has-deco" data-reveal>
         <Blob className="lp-blob--close-a" />
         <Blob className="lp-blob--close-b" />
-        <Shape name="polar-mesh" className="lp-shape--close" />
         <div className="lp-wrap">
           <h2 className="lp-h2" style={{ maxWidth: '14ch' }} data-r>
             Your next set starts here.
@@ -768,7 +751,7 @@ export default function LandingPage() {
           </p>
           <div className="mt-10 flex flex-wrap justify-between gap-3 text-[0.9rem]" style={{ color: '#b5b5b3' }}>
             <span>© 2026 LiftGauge. Built by Ruitan Experience Design.</span>
-            <span>Exercise illustrations © Gym visual, gymvisual.com. Background patterns from bookofshapes.com.</span>
+            <span>Exercise illustrations © Gym visual, gymvisual.com.</span>
           </div>
         </div>
       </footer>
