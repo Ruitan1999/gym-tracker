@@ -511,8 +511,8 @@
 
 /* the close */
 .lp-close {
-  background: var(--lp-ink);
-  color: var(--lp-ground);
+  background: var(--lp-accent);
+  color: #ffffff;
   margin-top: var(--lp-gap);
   padding: clamp(72px, 10vw, 140px) 0 calc(28px + var(--safe-bottom, 0px));
   overflow: clip;
@@ -521,7 +521,7 @@
   display: flex;
   align-items: flex-end;
   gap: 0.06em;
-  font-size: min(23vw, 22.5rem);
+  font-size: min(15vw, 10rem);
   font-weight: 800;
   letter-spacing: -0.06em;
   line-height: 0.8;
@@ -530,69 +530,10 @@
   white-space: nowrap;
 }
 /* The lifter mark at the size of the letters, standing on their baseline. */
+/* Focus rings are white on the blue footer, where the usual blue would vanish. */
+.lp-close *:focus-visible { outline-color: #ffffff; }
 .lp-wordmark__mark { flex: none; padding-bottom: 0.02em; }
 .lp-wordmark__mark svg { width: 0.74em; height: 0.74em; }
-
-/* ---------- background: big mixed gradients ---------- */
-
-.lp { position: relative; isolation: isolate; }
-
-/* Down the whole page: very wide, gradual washes that alternate sides and
-   colours, so no stretch of paper is flat. */
-.lp-aura {
-  position: absolute;
-  inset: 0;
-  z-index: -2;
-  pointer-events: none;
-  background:
-    radial-gradient(70vw 900px at 100% 4%, rgba(20, 88, 204, 0.16), transparent 70%),
-    radial-gradient(60vw 800px at 0% 12%, rgba(120, 214, 176, 0.18), transparent 70%),
-    radial-gradient(75vw 1000px at 0% 30%, rgba(111, 168, 255, 0.2), transparent 70%),
-    radial-gradient(60vw 900px at 100% 40%, rgba(120, 214, 176, 0.16), transparent 70%),
-    radial-gradient(80vw 1100px at 100% 62%, rgba(20, 88, 204, 0.14), transparent 70%),
-    radial-gradient(70vw 1000px at 0% 76%, rgba(111, 168, 255, 0.2), transparent 70%),
-    radial-gradient(60vw 800px at 60% 90%, rgba(120, 214, 176, 0.16), transparent 70%);
-}
-
-.lp-has-deco { position: relative; isolation: isolate; }
-/* Large blobs that overlap and mix behind the hero and the close, drifting slowly. */
-.lp-blob {
-  position: absolute;
-  z-index: -1;
-  pointer-events: none;
-  aspect-ratio: 1;
-  border-radius: 50%;
-}
-.lp-blob--blue {
-  width: clamp(560px, 70vw, 1100px);
-  right: -25%;
-  top: -30%;
-  background: radial-gradient(closest-side, rgba(20, 88, 204, 0.34), rgba(20, 88, 204, 0.12) 50%, rgba(20, 88, 204, 0));
-}
-.lp-blob--sky {
-  width: clamp(520px, 62vw, 980px);
-  left: -28%;
-  top: -10%;
-  background: radial-gradient(closest-side, rgba(111, 168, 255, 0.34), rgba(111, 168, 255, 0.1) 55%, rgba(111, 168, 255, 0));
-}
-.lp-blob--mint {
-  width: clamp(480px, 56vw, 900px);
-  left: 22%;
-  bottom: -45%;
-  background: radial-gradient(closest-side, rgba(120, 214, 176, 0.32), rgba(120, 214, 176, 0.1) 55%, rgba(120, 214, 176, 0));
-}
-.lp-blob--close-a {
-  width: clamp(560px, 70vw, 1100px);
-  right: -20%;
-  top: -40%;
-  background: radial-gradient(closest-side, rgba(32, 106, 233, 0.55), rgba(32, 106, 233, 0.15) 55%, rgba(32, 106, 233, 0));
-}
-.lp-blob--close-b {
-  width: clamp(480px, 56vw, 900px);
-  left: -20%;
-  bottom: -50%;
-  background: radial-gradient(closest-side, rgba(70, 190, 150, 0.35), rgba(70, 190, 150, 0.08) 55%, rgba(70, 190, 150, 0));
-}
 
 /* ---------- motion ---------- */
 
@@ -634,11 +575,6 @@
     transform: none;
   }
 
-  /* The blobs drift and swell, each on its own beat, so the mix keeps changing. */
-  .lp-blob { animation: lp-float 18s ease-in-out infinite alternate; }
-  .lp-blob--sky, .lp-blob--close-b { animation-duration: 23s; animation-direction: alternate-reverse; }
-  .lp-blob--mint { animation-duration: 27s; }
-
   /* The phones drift against the scroll, a little, where the browser can tie it to the scrollbar. */
   @supports (animation-timeline: view()) {
     .lp-drift {
@@ -664,7 +600,6 @@
 }
 
 @keyframes lp-pop { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: none; } }
-@keyframes lp-float { from { transform: translate(0, 0) scale(1); } to { transform: translate(-6%, 5%) scale(1.12); } }
 @keyframes lp-rise { from { transform: translateY(105%); } to { transform: none; } }
 @keyframes lp-up { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: none; } }
 @keyframes lp-drift { from { transform: translateY(6%); } to { transform: translateY(-6%); } }

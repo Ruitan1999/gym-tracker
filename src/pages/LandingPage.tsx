@@ -420,11 +420,6 @@ function Phone({
   );
 }
 
-/** A large, soft blob of colour; several overlap to mix. Placed and coloured by its class. */
-function Blob({ className }: { className: string }) {
-  return <span aria-hidden className={`lp-blob ${className}`} />;
-}
-
 function Section({ id, children }: { id?: string; children: ReactNode }) {
   return (
     <section id={id} className="lp-section" data-reveal>
@@ -443,8 +438,6 @@ export default function LandingPage() {
 
   return (
     <div ref={root} className={`lp min-h-[100dvh] ${motion ? 'lp-motion' : ''}`}>
-      {/* A wash of colour down the whole page, behind everything. */}
-      <div className="lp-aura" aria-hidden />
       <header className="lp-nav">
         <div className="lp-wrap lp-nav__row">
           <Link
@@ -473,10 +466,7 @@ export default function LandingPage() {
 
       <main>
         {/* Hero: what it is, one action, and the set you can change. */}
-        <div className="lp-wrap lp-hero lp-has-deco">
-          <Blob className="lp-blob--blue" />
-          <Blob className="lp-blob--sky" />
-          <Blob className="lp-blob--mint" />
+        <div className="lp-wrap lp-hero">
           <div>
             <h1 className="lp-h1">
               <span className="lp-line">
@@ -728,15 +718,13 @@ export default function LandingPage() {
       </main>
 
       {/* The close: one last action, then the name at full width. */}
-      <footer className="lp-close lp-has-deco" data-reveal>
-        <Blob className="lp-blob--close-a" />
-        <Blob className="lp-blob--close-b" />
+      <footer className="lp-close" data-reveal>
         <div className="lp-wrap">
           <h2 className="lp-h2" style={{ maxWidth: '14ch' }} data-r>
             Your next set starts here.
           </h2>
           <div className="mt-8 flex items-center gap-6 flex-wrap" data-r style={at(1)}>
-            <Link to="/login" className="lp-btn">
+            <Link to="/login" className="lp-btn lp-btn--light">
               Start logging free <ArrowRight size={20} strokeWidth={2.5} aria-hidden />
             </Link>
             <Link to="/login" className="lp-link" style={{ color: 'inherit' }}>
@@ -745,11 +733,11 @@ export default function LandingPage() {
           </div>
           <p className="lp-wordmark" aria-hidden data-r style={at(2)}>
             <span className="lp-wordmark__mark">
-              <LogoMark color="var(--lp-accent)" />
+              <LogoMark color="#ffffff" />
             </span>
             liftgauge
           </p>
-          <div className="mt-10 flex flex-wrap justify-between gap-3 text-[0.9rem]" style={{ color: '#b5b5b3' }}>
+          <div className="mt-10 flex flex-wrap justify-between gap-3 text-[0.9rem]" style={{ color: 'rgba(255, 255, 255, 0.82)' }}>
             <span>© 2026 LiftGauge. Built by Ruitan Experience Design.</span>
             <span>Exercise illustrations © Gym visual, gymvisual.com.</span>
           </div>
