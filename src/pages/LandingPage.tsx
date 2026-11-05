@@ -5,6 +5,7 @@ import MuscleFigure from '../components/progress/MuscleFigure';
 import { balancePaint } from '../components/progress/balancePaint';
 import { exerciseImageUrl } from '../utils/exerciseImage';
 import { LogoMark } from '../components/shared/Logo';
+import { prefersReducedMotion } from '../utils/motion';
 import type { BodyPart } from '../types';
 import './landing.css';
 
@@ -350,9 +351,11 @@ const LOGGING: [string, string][] = [
 /** A figure that rolls up from zero the first time it scrolls into view. */
 function RollIn({ value, prefix = '', suffix = '' }: { value: string; prefix?: string; suffix?: string }) {
   const ref = useRef<HTMLElement | null>(null);
-  const [shown, setShown] = useState(false);
+  // With reduced motion there is nothing to roll; the figure is simply there.
+  const [shown, setShown] = useState(prefersReducedMotion);
   useEffect(() => {
     const el = ref.current;
+    if (shown) return;
     if (!el || typeof IntersectionObserver === 'undefined') {
       setShown(true);
       return;
@@ -368,7 +371,7 @@ function RollIn({ value, prefix = '', suffix = '' }: { value: string; prefix?: s
     );
     io.observe(el);
     return () => io.disconnect();
-  }, []);
+  }, [shown]);
   return (
     <b ref={ref}>
       <span className="sr-only">
@@ -417,29 +420,22 @@ function Phone({
   );
 }
 
-/** A soft glow of colour behind a section; placed and coloured by its class. */
-function Glow({ className }: { className: string }) {
-  return <span aria-hidden className={`lp-glow ${className}`} />;
+/** A large, soft blob of colour; several overlap to mix. Placed and coloured by its class. */
+function Blob({ className }: { className: string }) {
+  return <span aria-hidden className={`lp-blob ${className}`} />;
 }
 
-/** The outline of a weight plate, the page's one drawn motif. */
-function Plate({ className }: { className: string }) {
+/** A line pattern from Book of Shapes, faint behind a section. */
+function Shape({ name, className }: { name: string; className: string }) {
   return (
-    <svg aria-hidden viewBox="0 0 200 200" className={`lp-plate ${className}`} fill="none" stroke="currentColor">
-      <circle cx="100" cy="100" r="96" strokeWidth="3" />
-      <circle cx="100" cy="100" r="84" strokeWidth="1.5" />
-      <circle cx="100" cy="100" r="34" strokeWidth="3" />
-      <circle cx="100" cy="100" r="13" strokeWidth="3" />
-      {/* the three grip cut-outs of a bumper plate */}
-      {[0, 120, 240].map((a) => (
-        <path
-          key={a}
-          d="M100 30 a10 10 0 0 1 10 10 v8 a10 10 0 0 1 -20 0 v-8 a10 10 0 0 1 10 -10z"
-          strokeWidth="2.5"
-          transform={`rotate(${a} 100 100)`}
-        />
-      ))}
-    </svg>
+    <img
+      aria-hidden
+      alt=""
+      src={`/assets/site/shapes/${name}-v1.svg`}
+      className={`lp-shape ${className}`}
+      loading="lazy"
+      decoding="async"
+    />
   );
 }
 
@@ -462,6 +458,8 @@ export default function LandingPage() {
 
   return (
     <div ref={root} className={`lp min-h-[100dvh] ${motion ? 'lp-motion' : ''}`}>
+      {/* A wash of colour down the whole page, behind everything. */}
+      <div className="lp-aura" aria-hidden />
       <header className="lp-nav">
         <div className="lp-wrap lp-nav__row">
           <Link
@@ -491,10 +489,10 @@ export default function LandingPage() {
       <main>
         {/* Hero: what it is, one action, and the set you can change. */}
         <div className="lp-wrap lp-hero lp-has-deco">
-          <Glow className="lp-glow--hero-a" />
-          <Glow className="lp-glow--hero-b" />
-          <Plate className="lp-plate--hero" />
-          <Plate className="lp-plate--hero-small" />
+          <Blob className="lp-blob--blue" />
+          <Blob className="lp-blob--sky" />
+          <Blob className="lp-blob--mint" />
+          <Shape name="concentric-noise-rings" className="lp-shape--hero" />
           <div>
             <h1 className="lp-h1">
               <span className="lp-line">
@@ -547,7 +545,7 @@ export default function LandingPage() {
           </div>
         </div>
 
-        <Section id="plan" deco={<Glow className="lp-glow--right" />}>
+        <Section id="plan" deco={<Shape name="spiral-morph" className="lp-shape--plan" />}>
           <div className="lp-wrap lp-split">
             <div>
               <h2 className="lp-h2" data-r style={at(0)}>
@@ -573,7 +571,7 @@ export default function LandingPage() {
           </div>
         </Section>
 
-        <Section id="log" deco={<><Glow className="lp-glow--left" /><Plate className="lp-plate--right" /></>}>
+        <Section id="log" deco={<Shape name="wavy-lines-converging" className="lp-shape--log" />}>
           <div className="lp-wrap lp-split lp-split--flip">
             <div>
               <h2 className="lp-h2" data-r style={at(0)}>
@@ -606,7 +604,7 @@ export default function LandingPage() {
           </div>
         </div>
 
-        <section id="exercises" className="lp-section lp-has-deco" data-reveal style={{ paddingTop: 'clamp(48px, 6vw, 96px)' }}>
+        <section id="exercises" className="lp-section" data-reveal style={{ paddingTop: 'clamp(48px, 6vw, 96px)' }}>
           <div className="lp-wrap">
             <h2 className="lp-h2" data-r>
               1,400 exercises, every one drawn.
@@ -668,7 +666,7 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <Section id="stats" deco={<><Glow className="lp-glow--left lp-glow--green" /><Plate className="lp-plate--left" /></>}>
+        <Section id="stats" deco={<Shape name="noise-landscape-1" className="lp-shape--stats" />}>
           <div className="lp-wrap lp-split lp-split--flip">
             <div>
               <h2 className="lp-h2" data-r>
@@ -723,7 +721,7 @@ export default function LandingPage() {
           </div>
         </Section>
 
-        <Section id="questions" deco={<Glow className="lp-glow--q" />}>
+        <Section id="questions">
           <div className="lp-wrap lp-qa">
             <h2 className="lp-h2" data-r>
               Questions, answered.
@@ -747,8 +745,9 @@ export default function LandingPage() {
 
       {/* The close: one last action, then the name at full width. */}
       <footer className="lp-close lp-has-deco" data-reveal>
-        <Glow className="lp-glow--close" />
-        <Plate className="lp-plate--close" />
+        <Blob className="lp-blob--close-a" />
+        <Blob className="lp-blob--close-b" />
+        <Shape name="polar-mesh" className="lp-shape--close" />
         <div className="lp-wrap">
           <h2 className="lp-h2" style={{ maxWidth: '14ch' }} data-r>
             Your next set starts here.
@@ -769,7 +768,7 @@ export default function LandingPage() {
           </p>
           <div className="mt-10 flex flex-wrap justify-between gap-3 text-[0.9rem]" style={{ color: '#b5b5b3' }}>
             <span>© 2026 LiftGauge. Built by Ruitan Experience Design.</span>
-            <span>Exercise illustrations © Gym visual, gymvisual.com</span>
+            <span>Exercise illustrations © Gym visual, gymvisual.com. Background patterns from bookofshapes.com.</span>
           </div>
         </div>
       </footer>

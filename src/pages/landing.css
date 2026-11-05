@@ -533,47 +533,80 @@
 .lp-wordmark__mark { flex: none; padding-bottom: 0.02em; }
 .lp-wordmark__mark svg { width: 0.74em; height: 0.74em; }
 
-/* ---------- background: soft glows and weight-plate outlines ---------- */
+/* ---------- background: big mixed gradients and line patterns ---------- */
+
+.lp { position: relative; isolation: isolate; }
+
+/* Down the whole page: very wide, gradual washes that alternate sides and
+   colours, so no stretch of paper is flat. */
+.lp-aura {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  pointer-events: none;
+  background:
+    radial-gradient(70vw 900px at 100% 4%, rgba(20, 88, 204, 0.16), transparent 70%),
+    radial-gradient(60vw 800px at 0% 12%, rgba(120, 214, 176, 0.18), transparent 70%),
+    radial-gradient(75vw 1000px at 0% 30%, rgba(111, 168, 255, 0.2), transparent 70%),
+    radial-gradient(60vw 900px at 100% 40%, rgba(120, 214, 176, 0.16), transparent 70%),
+    radial-gradient(80vw 1100px at 100% 62%, rgba(20, 88, 204, 0.14), transparent 70%),
+    radial-gradient(70vw 1000px at 0% 76%, rgba(111, 168, 255, 0.2), transparent 70%),
+    radial-gradient(60vw 800px at 60% 90%, rgba(120, 214, 176, 0.16), transparent 70%);
+}
 
 .lp-has-deco { position: relative; isolation: isolate; }
-.lp-glow,
-.lp-plate {
+.lp-blob,
+.lp-shape {
   position: absolute;
   z-index: -1;
   pointer-events: none;
 }
-.lp-glow {
-  width: clamp(420px, 60vw, 900px);
+
+/* Three large blobs that overlap and mix behind the hero, drifting slowly. */
+.lp-blob {
   aspect-ratio: 1;
   border-radius: 50%;
-  background: radial-gradient(closest-side, rgba(20, 88, 204, 0.2), rgba(20, 88, 204, 0.08) 45%, rgba(20, 88, 204, 0));
 }
-.lp-glow--green { background: radial-gradient(closest-side, rgba(63, 138, 87, 0.18), rgba(63, 138, 87, 0.06) 45%, rgba(63, 138, 87, 0)); }
-.lp-glow--hero-a { right: -18%; top: -12%; }
-.lp-glow--hero-b {
-  left: -22%;
-  bottom: -30%;
-  width: clamp(360px, 46vw, 700px);
-  background: radial-gradient(closest-side, rgba(112, 160, 255, 0.22), rgba(112, 160, 255, 0));
+.lp-blob--blue {
+  width: clamp(560px, 70vw, 1100px);
+  right: -25%;
+  top: -30%;
+  background: radial-gradient(closest-side, rgba(20, 88, 204, 0.34), rgba(20, 88, 204, 0.12) 50%, rgba(20, 88, 204, 0));
 }
-.lp-glow--right { right: -20%; top: 10%; }
-.lp-glow--left { left: -24%; top: 0; }
-.lp-glow--q { left: -20%; top: 0; width: clamp(360px, 46vw, 700px); }
-.lp-glow--close {
-  right: -15%;
-  top: -25%;
-  background: radial-gradient(closest-side, rgba(32, 106, 233, 0.45), rgba(32, 106, 233, 0.12) 50%, rgba(32, 106, 233, 0));
+.lp-blob--sky {
+  width: clamp(520px, 62vw, 980px);
+  left: -28%;
+  top: -10%;
+  background: radial-gradient(closest-side, rgba(111, 168, 255, 0.34), rgba(111, 168, 255, 0.1) 55%, rgba(111, 168, 255, 0));
+}
+.lp-blob--mint {
+  width: clamp(480px, 56vw, 900px);
+  left: 22%;
+  bottom: -45%;
+  background: radial-gradient(closest-side, rgba(120, 214, 176, 0.32), rgba(120, 214, 176, 0.1) 55%, rgba(120, 214, 176, 0));
+}
+.lp-blob--close-a {
+  width: clamp(560px, 70vw, 1100px);
+  right: -20%;
+  top: -40%;
+  background: radial-gradient(closest-side, rgba(32, 106, 233, 0.55), rgba(32, 106, 233, 0.15) 55%, rgba(32, 106, 233, 0));
+}
+.lp-blob--close-b {
+  width: clamp(480px, 56vw, 900px);
+  left: -20%;
+  bottom: -50%;
+  background: radial-gradient(closest-side, rgba(70, 190, 150, 0.35), rgba(70, 190, 150, 0.08) 55%, rgba(70, 190, 150, 0));
 }
 
-.lp-plate { color: var(--lp-ink); opacity: 0.07; }
-.lp-plate--hero { width: clamp(320px, 42vw, 620px); right: -14%; top: -6%; }
-.lp-plate--hero-small { width: clamp(140px, 16vw, 240px); left: 36%; bottom: -4%; opacity: 0.06; }
-.lp-plate--right { width: clamp(260px, 30vw, 460px); right: -10%; bottom: -12%; }
-.lp-plate--left { width: clamp(260px, 30vw, 460px); left: -12%; bottom: -10%; }
-.lp-plate--close { width: clamp(300px, 44vw, 680px); right: -12%; top: 6%; color: var(--lp-ground); opacity: 0.08; }
+/* Line patterns from bookofshapes.com, faint, behind each section. */
+.lp-shape { opacity: 0.35; }
+.lp-shape--hero { width: clamp(360px, 46vw, 680px); right: -12%; top: -8%; opacity: 0.4; }
+.lp-shape--plan { width: clamp(300px, 34vw, 520px); left: -10%; bottom: -14%; }
+.lp-shape--log { width: clamp(360px, 44vw, 640px); right: -14%; bottom: -16%; }
+.lp-shape--stats { width: clamp(320px, 40vw, 600px); left: -10%; bottom: -10%; }
+.lp-shape--close { width: clamp(360px, 50vw, 760px); right: -10%; top: 4%; opacity: 0.14; }
 @media (max-width: 640px) {
-  .lp-plate--hero-small { display: none; }
-  .lp-plate--hero { right: -40%; top: 0; }
+  .lp-shape--hero { right: -45%; top: 2%; }
 }
 
 /* ---------- motion ---------- */
@@ -616,11 +649,12 @@
     transform: none;
   }
 
-  /* The glows breathe and drift; the plates turn, very slowly. */
-  .lp-glow { animation: lp-float 16s ease-in-out infinite alternate; }
-  .lp-glow--hero-b, .lp-glow--left { animation-duration: 21s; animation-direction: alternate-reverse; }
-  .lp-plate { animation: lp-turn 90s linear infinite; }
-  .lp-plate--hero-small, .lp-plate--left { animation-direction: reverse; animation-duration: 70s; }
+  /* The blobs drift and swell, each on its own beat, so the mix keeps changing. */
+  .lp-blob { animation: lp-float 18s ease-in-out infinite alternate; }
+  .lp-blob--sky, .lp-blob--close-b { animation-duration: 23s; animation-direction: alternate-reverse; }
+  .lp-blob--mint { animation-duration: 27s; }
+  /* The line patterns turn, very slowly. */
+  .lp-shape--hero, .lp-shape--close, .lp-shape--plan { animation: lp-turn 120s linear infinite; }
 
   /* The phones drift against the scroll, a little, where the browser can tie it to the scrollbar. */
   @supports (animation-timeline: view()) {
